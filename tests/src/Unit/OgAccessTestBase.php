@@ -111,6 +111,12 @@ class OgAccessTestBase extends UnitTestCase {
    * @var \Drupal\og\OgMembershipInterface|\Prophecy\Prophecy\ObjectProphecy
    */
   protected $membership;
+
+  /**
+   * The OG role.
+   *
+   * @var \Drupal\og\OgRoleInterface|\Prophecy\Prophecy\ObjectProphecy
+   */
   protected $ogRole;
 
   /**

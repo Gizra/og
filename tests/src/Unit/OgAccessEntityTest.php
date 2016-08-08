@@ -19,8 +19,7 @@ class OgAccessEntityTest extends OgAccessEntityTestBase {
    * @dataProvider permissionsProvider
    */
   public function testAccessByOperation($operation) {
-    $group_entity = $this->groupEntity();
-    $this->membershipManager->getGroups($this->groupContentEntity->reveal())->willReturn([$group_entity->reveal()]);
+    $this->membershipManager->getGroups($this->groupContentEntity->reveal())->willReturn([$this->entityTypeId => [$this->group]]);
 
     $user_access = $this->ogAccess->userAccessEntity($operation, $this->groupContentEntity->reveal(), $this->user->reveal());
 
@@ -37,8 +36,7 @@ class OgAccessEntityTest extends OgAccessEntityTestBase {
    * @dataProvider permissionsProvider
    */
   public function testAccessByOperationAdmin($operation) {
-    $group_entity = $this->groupEntity();
-    $this->membershipManager->getGroups($this->groupContentEntity->reveal())->willReturn([$group_entity->reveal()]);
+    $this->membershipManager->getGroups($this->groupContentEntity->reveal())->willReturn([$this->entityTypeId => [$this->group]]);
 
     $this->user->hasPermission(OgAccess::ADMINISTER_GROUP_PERMISSION)->willReturn(TRUE);
     $user_entity_access = $this->ogAccess->userAccessEntity($operation, $this->groupContentEntity->reveal(), $this->user->reveal());

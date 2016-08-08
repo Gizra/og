@@ -252,7 +252,6 @@ class OgAccess implements OgAccessInterface {
       }
     }
 
-    // @TODO: add caching on Og::isGroupContent.
     $is_group_content = Og::isGroupContent($entity_type_id, $bundle);
     $cache_tags = $entity_type->getListCacheTags();
 
@@ -266,6 +265,7 @@ class OgAccess implements OgAccessInterface {
           // Check if the operation matches a group content entity operation
           // such as 'create article content'.
           $operation_access = $this->userAccessGroupContentEntityOperation($operation, $group, $entity, $user);
+
           if ($operation_access->isAllowed()) {
             return $operation_access->addCacheTags($cache_tags);
           }
