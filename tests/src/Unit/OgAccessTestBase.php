@@ -7,16 +7,20 @@ use Drupal\Core\Config\Config;
 use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\DependencyInjection\ContainerBuilder;
 use Drupal\Core\Entity\EntityInterface;
+use Drupal\Core\Entity\EntityManagerInterface;
 use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Extension\ModuleHandlerInterface;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\Core\Session\AccountProxyInterface;
 use Drupal\og\GroupMembershipManagerInterface;
+use Drupal\og\OgMembershipInterface;
+use Drupal\og\OgRoleInterface;
 use Drupal\Tests\UnitTestCase;
 use Drupal\og\GroupManager;
 use Drupal\og\OgAccess;
 use Drupal\og\PermissionManager;
 use Drupal\user\EntityOwnerInterface;
+use Drupal\user\RoleInterface;
 use Prophecy\Argument;
 
 /**
@@ -95,6 +99,21 @@ class OgAccessTestBase extends UnitTestCase {
   protected $membershipManager;
 
   /**
+   * The entity manager service.
+   *
+   * @var \Drupal\Core\Entity\EntityManagerInterface|\Prophecy\Prophecy\ObjectProphecy
+   */
+  protected $entityManager;
+
+  /**
+   * The membership entity.
+   *
+   * @var \Drupal\og\OgMembershipInterface|\Prophecy\Prophecy\ObjectProphecy
+   */
+  protected $membership;
+  protected $ogRole;
+
+  /**
    * {@inheritdoc}
    */
   public function setUp() {
@@ -102,10 +121,12 @@ class OgAccessTestBase extends UnitTestCase {
     $this->entityTypeId = $this->randomMachineName();
     $this->bundle = $this->randomMachineName();
 
+    $this->entityManager = $this->prophesize(EntityManagerInterface::class);
+    $this->membership = $this->prophesize(OgMembershipInterface::class);
+    $this->ogRole = $this->prophesize(RoleInterface::class);
+
     $this->groupManager = $this->prophesize(GroupManager::class);
     $this->groupManager->isGroup($this->entityTypeId, $this->bundle)->willReturn(TRUE);
-
-    $this->membershipManager = $this->prophesize(GroupMembershipManagerInterface::class);
 
     $cache_contexts_manager = $this->prophesize(CacheContextsManager::class);
     $cache_contexts_manager->assertValidTokens(Argument::any())->willReturn(TRUE);
@@ -136,9 +157,27 @@ class OgAccessTestBase extends UnitTestCase {
     $this->user->hasPermission(OgAccess::ADMINISTER_GROUP_PERMISSION)->willReturn(FALSE);
 
     $this->group = $this->groupEntity()->reveal();
-    $group_type_id = $this->group->getEntityTypeId();
 
-    $entity_id = 20;
+    $states = [
+      OgMembershipInterface::STATE_ACTIVE,
+      OgMembershipInterface::STATE_PENDING,
+      OgMembershipInterface::STATE_BLOCKED,
+    ];
+
+    $this->membershipManager = $this->prophesize(GroupMembershipManagerInterface::class);
+    $this
+      ->membershipManager
+      ->getMembership($this->group, $this->user->reveal(), $states)
+      ->willReturn($this->membership->reveal());
+
+    // Return active. @todo: Test also blocked.
+    $this->membership->getState()->willReturn(OgMembershipInterface::STATE_ACTIVE);
+
+    $this->membership->getRoles()->willReturn([$this->ogRole->reveal()]);
+
+    // @todo: Move to test.
+    $this->ogRole->isAdmin()->willReturn(FALSE);
+    $this->ogRole->getPermissions()->willReturn(['update group']);
 
     // Mock all dependencies for the system under test.
     $account_proxy = $this->prophesize(AccountProxyInterface::class);
@@ -158,6 +197,7 @@ class OgAccessTestBase extends UnitTestCase {
     $container = new ContainerBuilder();
     $container->set('cache_contexts_manager', $cache_contexts_manager->reveal());
     $container->set('config.factory', $config_factory->reveal());
+    $container->set('entity.manager', $this->entityManager->reveal());
     $container->set('module_handler', $this->prophesize(ModuleHandlerInterface::class)->reveal());
     $container->set('og.group.manager', $this->groupManager->reveal());
     $container->set('og.membership_manager', $this->membershipManager->reveal());
