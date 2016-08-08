@@ -158,21 +158,8 @@ class OgAccessTestBase extends UnitTestCase {
 
     $this->group = $this->groupEntity()->reveal();
 
-    $states = [
-      OgMembershipInterface::STATE_ACTIVE,
-      OgMembershipInterface::STATE_PENDING,
-      OgMembershipInterface::STATE_BLOCKED,
-    ];
-
     $this->membershipManager = $this->prophesize(GroupMembershipManagerInterface::class);
-    $this
-      ->membershipManager
-      ->getMembership($this->group, $this->user->reveal(), $states)
-      ->willReturn($this->membership->reveal());
-
-    // Return active. @todo: Test also blocked.
-    $this->membership->getState()->willReturn(OgMembershipInterface::STATE_ACTIVE);
-
+    $this->membershipManager->getMembership($this->group, $this->user->reveal(), [OgMembershipInterface::STATE_ACTIVE])->willReturn($this->membership->reveal());
     $this->membership->getRoles()->willReturn([$this->ogRole->reveal()]);
 
     // @todo: Move to test.

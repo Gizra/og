@@ -175,30 +175,20 @@ class OgAccess implements OgAccessInterface {
     if (!$pre_alter_cache) {
       $permissions = [];
       $user_is_group_admin = FALSE;
-
-      $states = [
-        OgMembershipInterface::STATE_ACTIVE,
-        OgMembershipInterface::STATE_PENDING,
-        OgMembershipInterface::STATE_BLOCKED,
-      ];
-
-      if ($membership = Og::getMembership($group, $user, $states)) {
-        // Blocked users don't have any permissions.
-        if ($membership->getState() !== OgMembershipInterface::STATE_BLOCKED) {
-          foreach ($membership->getRoles() as $role) {
-            // Check for the is_admin flag.
-            /** @var \Drupal\og\Entity\OgRole $role */
-            if ($role->isAdmin()) {
-              $user_is_group_admin = TRUE;
-              break;
-            }
-
-            $permissions = array_merge($permissions, $role->getPermissions());
+      if ($membership = Og::getMembership($group, $user)) {
+        foreach ($membership->getRoles() as $role) {
+          // Check for the is_admin flag.
+          /** @var \Drupal\og\Entity\OgRole $role */
+          if ($role->isAdmin()) {
+            $user_is_group_admin = TRUE;
+            break;
           }
+
+          $permissions = array_merge($permissions, $role->getPermissions());
         }
       }
-      else {
-        // User is a non-member.
+      elseif (!Og::isMemberBlocked($group, $user)) {
+        // User is a non-member or has a pending membership.
         /** @var \Drupal\og\Entity\OgRole $role */
         $role = OgRole::loadByGroupAndName($group, OgRoleInterface::ANONYMOUS);
         $permissions = $role->getPermissions();
