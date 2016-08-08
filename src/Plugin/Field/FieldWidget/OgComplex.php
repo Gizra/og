@@ -70,7 +70,7 @@ class OgComplex extends EntityReferenceAutocompleteWidget {
 
     $target_type = $this->fieldDefinition->getFieldStorageDefinition()->getSetting('target_type');
 
-    /** @var \Drupal\og\GroupMembershipManagerInterface $membership_manager */
+    /** @var \Drupal\og\MembershipManagerInterface $membership_manager */
     $membership_manager = \Drupal::service('og.membership_manager');
     $user_groups = $membership_manager->getUserGroups(User::load(\Drupal::currentUser()->id()));
     $user_groups_target_type = isset($user_groups[$target_type]) ? $user_groups[$target_type] : [];
@@ -233,7 +233,7 @@ class OgComplex extends EntityReferenceAutocompleteWidget {
 
     $target_type = $this->fieldDefinition->getFieldStorageDefinition()->getSetting('target_type');
 
-    /** @var \Drupal\og\GroupMembershipManagerInterface $membership_manager */
+    /** @var \Drupal\og\MembershipManagerInterface $membership_manager */
     $membership_manager = \Drupal::service('og.membership_manager');
     $user_groups = $membership_manager->getUserGroups(User::load(\Drupal::currentUser()->id()));
     $user_groups_target_type = isset($user_groups[$target_type]) ? $user_groups[$target_type] : [];

@@ -82,7 +82,7 @@ class OgAccess implements OgAccessInterface {
   /**
    * The group membership manager.
    *
-   * @var \Drupal\og\GroupMembershipManagerInterface
+   * @var \Drupal\og\MembershipManagerInterface
    */
   protected $membershipManager;
 
@@ -99,10 +99,10 @@ class OgAccess implements OgAccessInterface {
    *   The group manager.
    * @param \Drupal\og\PermissionManagerInterface $permission_manager
    *   The permission manager.
-   * @param \Drupal\og\GroupMembershipManagerInterface $membership_manager
+   * @param \Drupal\og\MembershipManagerInterface $membership_manager
    *   The group membership manager.
    */
-  public function __construct(ConfigFactoryInterface $config_factory, AccountProxyInterface $account_proxy, ModuleHandlerInterface $module_handler, GroupManager $group_manager, PermissionManagerInterface $permission_manager, GroupMembershipManagerInterface $membership_manager) {
+  public function __construct(ConfigFactoryInterface $config_factory, AccountProxyInterface $account_proxy, ModuleHandlerInterface $module_handler, GroupManager $group_manager, PermissionManagerInterface $permission_manager, MembershipManagerInterface $membership_manager) {
     $this->configFactory = $config_factory;
     $this->accountProxy = $account_proxy;
     $this->moduleHandler = $module_handler;

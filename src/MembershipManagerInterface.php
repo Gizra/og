@@ -6,14 +6,14 @@ use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Session\AccountInterface;
 
 /**
- * Group membership manager interface.
+ * Membership manager interface.
  */
-interface GroupMembershipManagerInterface {
+interface MembershipManagerInterface {
 
   /**
    * Returns all group IDs associated with the given user.
    *
-   * This is similar to \Drupal\og\GroupMembershipManager::getGroupIds() but
+   * This is similar to \Drupal\og\MembershipManager::getGroupIds() but
    * for users. The reason there is a separate method for user entities is
    * because the storage is handled differently. For group content the relation
    * to the group is stored on a field attached to the content entity, while
@@ -28,7 +28,7 @@ interface GroupMembershipManagerInterface {
    *   An associative array, keyed by group entity type, each item an array of
    *   group entity IDs.
    *
-   * @see \Drupal\og\GroupMembershipManager::getGroupIds()
+   * @see \Drupal\og\MembershipManager::getGroupIds()
    */
   public function getUserGroupIds(AccountInterface $user, array $states = [OgMembershipInterface::STATE_ACTIVE]);
 
@@ -50,8 +50,8 @@ interface GroupMembershipManagerInterface {
    *   An associative array, keyed by group entity type, each item an array of
    *   group entities.
    *
-   * @see \Drupal\og\GroupMembershipManager::getGroups()
-   * @see \Drupal\og\GroupMembershipManager::getMemberships()
+   * @see \Drupal\og\MembershipManager::getGroups()
+   * @see \Drupal\og\MembershipManager::getMemberships()
    */
   public function getUserGroups(AccountInterface $user, array $states = [OgMembershipInterface::STATE_ACTIVE]);
 
@@ -103,7 +103,7 @@ interface GroupMembershipManagerInterface {
    * Returns all group IDs associated with the given group content entity.
    *
    * Do not use this to retrieve group IDs associated with a user entity. Use
-   * GroupMembershipManager::getUserGroups() instead.
+   * MembershipManager::getUserGroups() instead.
    *
    * @param \Drupal\Core\Entity\EntityInterface $entity
    *   The group content entity for which to return the associated groups.

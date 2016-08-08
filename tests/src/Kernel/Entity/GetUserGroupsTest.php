@@ -125,7 +125,7 @@ class GetUserGroupsTest extends KernelTestBase {
    * Tests group owners have the correct groups.
    */
   public function testOwnerGroupsOnly() {
-    /** @var \Drupal\og\GroupMembershipManagerInterface $membership_manager */
+    /** @var \Drupal\og\MembershipManagerInterface $membership_manager */
     $membership_manager = \Drupal::service('og.membership_manager');
 
     $actual = $membership_manager->getUserGroups($this->user1);
@@ -151,7 +151,7 @@ class GetUserGroupsTest extends KernelTestBase {
    * Tests other groups users are added to.
    */
   public function testOtherGroups() {
-    /** @var \Drupal\og\GroupMembershipManagerInterface $membership_manager */
+    /** @var \Drupal\og\MembershipManagerInterface $membership_manager */
     $membership_manager = \Drupal::service('og.membership_manager');
 
     // Should not be a part of any groups.

@@ -10,9 +10,9 @@ use Drupal\field\FieldStorageConfigInterface;
 use Drupal\og\Entity\OgMembership;
 
 /**
- * Group membership manager.
+ * Membership manager.
  */
-class GroupMembershipManager implements GroupMembershipManagerInterface {
+class MembershipManager implements MembershipManagerInterface {
 
   /**
    * Static cache of the memberships and group association.

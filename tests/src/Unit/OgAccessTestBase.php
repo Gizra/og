@@ -12,7 +12,7 @@ use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Extension\ModuleHandlerInterface;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\Core\Session\AccountProxyInterface;
-use Drupal\og\GroupMembershipManagerInterface;
+use Drupal\og\MembershipManagerInterface;
 use Drupal\og\OgMembershipInterface;
 use Drupal\Tests\UnitTestCase;
 use Drupal\og\GroupManager;
@@ -93,7 +93,7 @@ class OgAccessTestBase extends UnitTestCase {
   /**
    * The group membership manager service.
    *
-   * @var \Drupal\og\GroupMembershipManagerInterface|\Prophecy\Prophecy\ObjectProphecy
+   * @var \Drupal\og\MembershipManagerInterface|\Prophecy\Prophecy\ObjectProphecy
    */
   protected $membershipManager;
 
@@ -163,7 +163,7 @@ class OgAccessTestBase extends UnitTestCase {
 
     $this->group = $this->groupEntity()->reveal();
 
-    $this->membershipManager = $this->prophesize(GroupMembershipManagerInterface::class);
+    $this->membershipManager = $this->prophesize(MembershipManagerInterface::class);
     $this->membershipManager->getMembership($this->group, $this->user->reveal(), [OgMembershipInterface::STATE_ACTIVE])->willReturn($this->membership->reveal());
     $this->membership->getRoles()->willReturn([$this->ogRole->reveal()]);
 
