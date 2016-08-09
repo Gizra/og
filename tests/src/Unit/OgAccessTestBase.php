@@ -7,16 +7,19 @@ use Drupal\Core\Config\Config;
 use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\DependencyInjection\ContainerBuilder;
 use Drupal\Core\Entity\EntityInterface;
+use Drupal\Core\Entity\EntityManagerInterface;
 use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Extension\ModuleHandlerInterface;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\Core\Session\AccountProxyInterface;
+use Drupal\og\MembershipManagerInterface;
+use Drupal\og\OgMembershipInterface;
 use Drupal\Tests\UnitTestCase;
 use Drupal\og\GroupManager;
 use Drupal\og\OgAccess;
-use Drupal\og\OgMembershipInterface;
 use Drupal\og\PermissionManager;
 use Drupal\user\EntityOwnerInterface;
+use Drupal\user\RoleInterface;
 use Prophecy\Argument;
 
 /**
@@ -83,9 +86,37 @@ class OgAccessTestBase extends UnitTestCase {
   /**
    * The OgAccess class, this is the system under test.
    *
-   * @var \Drupal\og\OgAccessInterface
+   * @var \Drupal\og\OgAccessInterface|\Prophecy\Prophecy\ObjectProphecy
    */
   protected $ogAccess;
+
+  /**
+   * The group membership manager service.
+   *
+   * @var \Drupal\og\MembershipManagerInterface|\Prophecy\Prophecy\ObjectProphecy
+   */
+  protected $membershipManager;
+
+  /**
+   * The entity manager service.
+   *
+   * @var \Drupal\Core\Entity\EntityManagerInterface|\Prophecy\Prophecy\ObjectProphecy
+   */
+  protected $entityManager;
+
+  /**
+   * The membership entity.
+   *
+   * @var \Drupal\og\OgMembershipInterface|\Prophecy\Prophecy\ObjectProphecy
+   */
+  protected $membership;
+
+  /**
+   * The OG role.
+   *
+   * @var \Drupal\og\OgRoleInterface|\Prophecy\Prophecy\ObjectProphecy
+   */
+  protected $ogRole;
 
   /**
    * {@inheritdoc}
@@ -94,6 +125,10 @@ class OgAccessTestBase extends UnitTestCase {
     $this->groupId = $this->randomMachineName();
     $this->entityTypeId = $this->randomMachineName();
     $this->bundle = $this->randomMachineName();
+
+    $this->entityManager = $this->prophesize(EntityManagerInterface::class);
+    $this->membership = $this->prophesize(OgMembershipInterface::class);
+    $this->ogRole = $this->prophesize(RoleInterface::class);
 
     $this->groupManager = $this->prophesize(GroupManager::class);
     $this->groupManager->isGroup($this->entityTypeId, $this->bundle)->willReturn(TRUE);
@@ -126,19 +161,15 @@ class OgAccessTestBase extends UnitTestCase {
     $this->user->id()->willReturn(2);
     $this->user->hasPermission(OgAccess::ADMINISTER_GROUP_PERMISSION)->willReturn(FALSE);
 
-    $container = new ContainerBuilder();
-    $container->set('og.group.manager', $this->groupManager->reveal());
-    $container->set('cache_contexts_manager', $cache_contexts_manager->reveal());
-    $container->set('config.factory', $config_factory->reveal());
-    $container->set('module_handler', $this->prophesize(ModuleHandlerInterface::class)->reveal());
-    // This is for caching purposes only.
-    $container->set('current_user', $this->user->reveal());
-    \Drupal::setContainer($container);
-
     $this->group = $this->groupEntity()->reveal();
-    $group_type_id = $this->group->getEntityTypeId();
 
-    $entity_id = 20;
+    $this->membershipManager = $this->prophesize(MembershipManagerInterface::class);
+    $this->membershipManager->getMembership($this->group, $this->user->reveal(), [OgMembershipInterface::STATE_ACTIVE])->willReturn($this->membership->reveal());
+    $this->membership->getRoles()->willReturn([$this->ogRole->reveal()]);
+
+    // @todo: Move to test.
+    $this->ogRole->isAdmin()->willReturn(FALSE);
+    $this->ogRole->getPermissions()->willReturn(['update group']);
 
     // Mock all dependencies for the system under test.
     $account_proxy = $this->prophesize(AccountProxyInterface::class);
@@ -146,57 +177,26 @@ class OgAccessTestBase extends UnitTestCase {
     $this->permissionManager = $this->prophesize(PermissionManager::class);
 
     // Instantiate the system under test.
-    $this->ogAccess = new OgAccess($config_factory->reveal(), $account_proxy->reveal(), $module_handler->reveal(), $this->groupManager->reveal(), $this->permissionManager->reveal());
+    $this->ogAccess = new OgAccess(
+      $config_factory->reveal(),
+      $account_proxy->reveal(),
+      $module_handler->reveal(),
+      $this->groupManager->reveal(),
+      $this->permissionManager->reveal(),
+      $this->membershipManager->reveal()
+    );
 
-    // Set the Og::cache property values, to skip calculations.
-    $values = [];
+    $container = new ContainerBuilder();
+    $container->set('cache_contexts_manager', $cache_contexts_manager->reveal());
+    $container->set('config.factory', $config_factory->reveal());
+    $container->set('entity.manager', $this->entityManager->reveal());
+    $container->set('module_handler', $this->prophesize(ModuleHandlerInterface::class)->reveal());
+    $container->set('og.group.manager', $this->groupManager->reveal());
+    $container->set('og.membership_manager', $this->membershipManager->reveal());
 
-    $r = new \ReflectionClass('Drupal\og\Og');
-    $reflection_property = $r->getProperty('cache');
-    $reflection_property->setAccessible(TRUE);
-
-    // Mock the results of Og::getGroupIds().
-    $identifier = [
-      'Drupal\og\Og::getGroupIds',
-      $entity_id,
-      NULL,
-      NULL,
-    ];
-
-    $identifier = implode(':', $identifier);
-
-    $group_ids = [$group_type_id => [$this->group->id()]];
-    $values[$identifier] = $group_ids;
-
-    // Mock the results of Og::getMemberships().
-    $identifier = [
-      'Drupal\og\Og::getMemberships',
-      2,
-      OgMembershipInterface::STATE_ACTIVE,
-      // The field name.
-      NULL,
-    ];
-    $identifier = implode(':', $identifier);
-
-    // The cache is supposed to be holding the OG memberships, however it is not
-    // used in the tests, so we just set an empty array.
-    $values[$identifier] = [];
-
-    $reflection_property->setValue($values);
-
-    // Set the allowed permissions cache. This simulates that the access results
-    // have been retrieved from the database in an earlier pass. This saves us
-    // from having to mock all the database interaction.
-    $r = new \ReflectionClass('Drupal\og\OgAccess');
-    $reflection_property = $r->getProperty('permissionsCache');
-    $reflection_property->setAccessible(TRUE);
-
-    $values = [];
-    foreach (['pre_alter', 'post_alter'] as $key) {
-      $values[$group_type_id][$this->group->id()][2][$key] = ['permissions' => ['update group'], 'is_admin' => FALSE];
-    }
-
-    $reflection_property->setValue($this->ogAccess, $values);
+    // This is for caching purposes only.
+    $container->set('current_user', $this->user->reveal());
+    \Drupal::setContainer($container);
   }
 
   /**

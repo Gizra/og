@@ -15,7 +15,7 @@ use Drupal\user\Entity\User;
  * Tests retrieving groups associated with a given group content.
  *
  * @group og
- * @coversDefaultClass \Drupal\og\Og
+ * @coversDefaultClass \Drupal\og\MembershipManager
  */
 class GetGroupsTest extends KernelTestBase {
 
@@ -152,7 +152,10 @@ class GetGroupsTest extends KernelTestBase {
    * @dataProvider groupContentProvider
    */
   public function testGetGroupIds($group_type_id, $group_bundle, array $expected) {
-    $result = Og::getGroupIds($this->groupContent, $group_type_id, $group_bundle);
+    /** @var \Drupal\og\MembershipManagerInterface $membership_manager */
+    $membership_manager = \Drupal::service('og.membership_manager');
+
+    $result = $membership_manager->getGroupIds($this->groupContent, $group_type_id, $group_bundle);
 
     // Check that the correct number of results is returned.
     $this->assertEquals(count($expected, COUNT_RECURSIVE), count($result, COUNT_RECURSIVE));
@@ -181,7 +184,10 @@ class GetGroupsTest extends KernelTestBase {
    * @dataProvider groupContentProvider
    */
   public function testGetGroups($group_type_id, $group_bundle, array $expected) {
-    $result = Og::getGroups($this->groupContent, $group_type_id, $group_bundle);
+    /** @var \Drupal\og\MembershipManagerInterface $membership_manager */
+    $membership_manager = \Drupal::service('og.membership_manager');
+
+    $result = $membership_manager->getGroups($this->groupContent, $group_type_id, $group_bundle);
 
     // Check that the correct number of results is returned.
     $this->assertEquals(count($expected, COUNT_RECURSIVE), count($result, COUNT_RECURSIVE));
@@ -220,7 +226,10 @@ class GetGroupsTest extends KernelTestBase {
    * @dataProvider groupContentProvider
    */
   public function testGetGroupCount($group_type_id, $group_bundle, array $expected) {
-    $result = Og::getGroupCount($this->groupContent, $group_type_id, $group_bundle);
+    /** @var \Drupal\og\MembershipManagerInterface $membership_manager */
+    $membership_manager = \Drupal::service('og.membership_manager');
+
+    $result = $membership_manager->getGroupCount($this->groupContent, $group_type_id, $group_bundle);
 
     // Check that the correct results is returned.
     $this->assertEquals(count($expected, COUNT_RECURSIVE) - count($expected), $result);
