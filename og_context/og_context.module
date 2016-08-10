@@ -657,15 +657,14 @@ function _group_context_handler_entity($entity_type = 'node', $entity = NULL, $p
  *   The group type.
  * @param $perm
  *   The group permission to search for.
- * @param $group_id_arg
- *   Optional; The position in arg() where the group ID can be found.
+ * @param $gid
+ *   The group id from the path.
  *
  * @return
  *   TRUE if user is allowed access to the page.
  */
-function _og_context_views_page_access($group_type, $perm, $group_id_arg = FALSE) {
-  if ($group_id_arg !== '') {
-    $gid = arg($group_id_arg);
+function _og_context_views_page_access($group_type, $perm, $gid) {
+  if ($gid) {
     if (is_numeric($gid)) {
       return og_user_access($group_type, $gid, $perm);
     }
