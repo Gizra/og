@@ -295,7 +295,7 @@ class OgRole extends Role implements OgRoleInterface {
   public function delete() {
     // The default roles are required. Prevent them from being deleted for as
     // long as the group still exists.
-    if (in_array($this->id(), [self::ANONYMOUS, self::AUTHENTICATED]) && $this->groupManager()->isGroup($this->getGroupType(), $this->getGroupBundle())) {
+    if (in_array($this->id(), [self::ANONYMOUS, self::AUTHENTICATED]) && $this->groupTypeManager()->isGroup($this->getGroupType(), $this->getGroupBundle())) {
       throw new OgRoleException('The default roles "non-member" and "member" cannot be deleted.');
     }
 
@@ -327,17 +327,17 @@ class OgRole extends Role implements OgRoleInterface {
   /**
    * Gets the group manager.
    *
-   * @return \Drupal\og\GroupManager
+   * @return \Drupal\og\GroupTypeManager
    *   The group manager.
    */
-  protected function groupManager() {
+  protected function groupTypeManager() {
     // Returning the group manager by calling the global factory method might
     // seem less than ideal, but Entity classes are not designed to work with
     // proper dependency injection. The ::create() method only accepts a $values
     // array, which is not compatible with ContainerInjectionInterface.
     // See for example Entity::uuidGenerator() in the base Entity class, it
     // also uses this pattern.
-    return \Drupal::service('og.group.manager');
+    return \Drupal::service('group_type_manager');
   }
 
   /**

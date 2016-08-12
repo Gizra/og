@@ -58,10 +58,10 @@ function og_ui_entity_type_save(EntityInterface $entity) {
   $is_group = Og::isGroup($entity_type_id, $bundle);
   if ($entity->og_is_group != $is_group) {
     if ($entity->og_is_group) {
-      Og::groupManager()->addGroup($entity_type_id, $bundle);
+      Og::groupTypeManager()->addGroup($entity_type_id, $bundle);
     }
     else {
-      Og::groupManager()->removeGroup($entity_type_id, $bundle);
+      Og::groupTypeManager()->removeGroup($entity_type_id, $bundle);
     }
   }
 

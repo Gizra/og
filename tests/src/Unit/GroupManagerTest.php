@@ -12,7 +12,7 @@ use Drupal\og\Event\DefaultRoleEvent;
 use Drupal\og\Event\DefaultRoleEventInterface;
 use Drupal\og\Event\GroupCreationEvent;
 use Drupal\og\Event\GroupCreationEventInterface;
-use Drupal\og\GroupManager;
+use Drupal\og\GroupTypeManager;
 use Drupal\og\PermissionManagerInterface;
 use Drupal\Tests\UnitTestCase;
 use Drupal\og\Entity\OgRole;
@@ -25,7 +25,7 @@ use Symfony\Component\EventDispatcher\EventDispatcherInterface;
  * Tests the group manager.
  *
  * @group og
- * @coversDefaultClass \Drupal\og\GroupManager
+ * @coversDefaultClass \Drupal\og\GroupTypeManager
  */
 class GroupManagerTest extends UnitTestCase {
 
@@ -124,7 +124,7 @@ class GroupManagerTest extends UnitTestCase {
     // Just creating an instance should be lightweight, no methods should be
     // called.
     $group_manager = $this->createGroupManager();
-    $this->assertInstanceOf(GroupManager::class, $group_manager);
+    $this->assertInstanceOf(GroupTypeManager::class, $group_manager);
   }
 
   /**
@@ -299,7 +299,7 @@ class GroupManagerTest extends UnitTestCase {
   /**
    * Creates a group manager instance with a mock config factory.
    *
-   * @return \Drupal\og\GroupManager
+   * @return \Drupal\og\GroupTypeManager
    *   Returns the group manager.
    */
   protected function createGroupManager() {
@@ -308,7 +308,7 @@ class GroupManagerTest extends UnitTestCase {
       ->willReturn($this->entityStorage->reveal())
       ->shouldBeCalled();
 
-    return new GroupManager(
+    return new GroupTypeManager(
       $this->configFactory->reveal(),
       $this->entityTypeManager->reveal(),
       $this->entityTypeBundleInfo->reveal(),

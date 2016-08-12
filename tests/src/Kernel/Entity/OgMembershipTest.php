@@ -75,7 +75,7 @@ class OgMembershipTest extends KernelTestBase {
     $this->group = $group;
 
     // Add that as a group.
-    Og::groupManager()->addGroup('entity_test', $group->bundle());
+    Og::groupTypeManager()->addGroup('entity_test', $group->bundle());
 
     // Create test user.
     $user = User::create(['name' => $this->randomString()]);

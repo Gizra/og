@@ -107,8 +107,8 @@ class BundleFormAlterTest extends BrowserTestBase {
   public function testGroupContentAjax() {
     // Create two group bundles of different entity types.
     NodeType::create(['name' => 'group node', 'type' => 'group'])->save();
-    Og::groupManager()->addGroup('node', 'group');
-    Og::groupManager()->addGroup('entity_test', 'entity_test');
+    Og::groupTypeManager()->addGroup('node', 'group');
+    Og::groupTypeManager()->addGroup('entity_test', 'entity_test');
 
     // BrowserTestBase doesn't support JavaScript yet. Replace the following
     // unit test with a functional test once JavaScript support is added.

@@ -12,7 +12,7 @@ use Drupal\og\OgGroupAudienceHelper;
  * Tests retrieving group content bundles by group bundles and vice versa.
  *
  * @group og
- * @coversDefaultClass \Drupal\og\GroupManager
+ * @coversDefaultClass \Drupal\og\GroupTypeManager
  */
 class GetBundleByBundleTest extends KernelTestBase {
 
@@ -45,9 +45,9 @@ class GetBundleByBundleTest extends KernelTestBase {
   /**
    * The group manager.
    *
-   * @var \Drupal\og\GroupManager
+   * @var \Drupal\og\GroupTypeManager
    */
-  protected $groupManager;
+  protected $groupTypeManager;
 
   /**
    * {@inheritdoc}
@@ -62,7 +62,7 @@ class GetBundleByBundleTest extends KernelTestBase {
     $this->installEntitySchema('user');
     $this->installSchema('system', 'sequences');
 
-    $this->groupManager = $this->container->get('og.group.manager');
+    $this->groupTypeManager = $this->container->get('group_type_manager');
 
     // Create four groups of two different entity types.
     for ($i = 0; $i < 2; $i++) {
@@ -71,10 +71,10 @@ class GetBundleByBundleTest extends KernelTestBase {
         'name' => $this->randomString(),
         'type' => $bundle,
       ])->save();
-      Og::groupManager()->addGroup('node', $bundle);
+      Og::groupTypeManager()->addGroup('node', $bundle);
 
       BlockContentType::create(['id' => $bundle])->save();
-      Og::groupManager()->addGroup('block_content', $bundle);
+      Og::groupTypeManager()->addGroup('block_content', $bundle);
     }
   }
 
@@ -83,8 +83,8 @@ class GetBundleByBundleTest extends KernelTestBase {
    *
    * This tests the retrieval of the relations between groups and group content
    * and vice versa. The retrieval of groups that are referenced by group
-   * content is done by GroupManager::getGroupBundleIdsByGroupContenBundle()
-   * while GroupManager::getGroupContentBundleIdsByGroupBundle() handles the
+   * content is done by GroupTypeManager::getGroupBundleIdsByGroupContenBundle()
+   * while GroupTypeManager::getGroupContentBundleIdsByGroupBundle() handles the
    * opposite case.
    *
    * Both methods are tested here in a single test since they are very similar,
@@ -151,7 +151,7 @@ class GetBundleByBundleTest extends KernelTestBase {
     // Test ::getGroupBundleIdsByGroupContentBundle().
     foreach ($expected_group_by_group_content as $group_content_entity_type_id => $group_content_bundle_ids) {
       foreach ($group_content_bundle_ids as $group_content_bundle_id => $expected_result) {
-        $this->assertEquals($expected_result, $this->groupManager->getGroupBundleIdsByGroupContentBundle($group_content_entity_type_id, $group_content_bundle_id));
+        $this->assertEquals($expected_result, $this->groupTypeManager->getGroupBundleIdsByGroupContentBundle($group_content_entity_type_id, $group_content_bundle_id));
       }
     }
 
@@ -163,7 +163,7 @@ class GetBundleByBundleTest extends KernelTestBase {
         // If the expected value is omitted, we expect an empty array.
         $expected_result = !empty($expected_group_content_by_group[$group_entity_type_id][$group_bundle_id]) ? $expected_group_content_by_group[$group_entity_type_id][$group_bundle_id] : [];
 
-        $this->assertEquals($expected_result, $this->groupManager->getGroupContentBundleIdsByGroupBundle($group_entity_type_id, $group_bundle_id));
+        $this->assertEquals($expected_result, $this->groupTypeManager->getGroupContentBundleIdsByGroupBundle($group_entity_type_id, $group_bundle_id));
       }
     }
   }

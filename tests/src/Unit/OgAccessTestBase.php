@@ -15,7 +15,7 @@ use Drupal\Core\Session\AccountProxyInterface;
 use Drupal\og\MembershipManagerInterface;
 use Drupal\og\OgMembershipInterface;
 use Drupal\Tests\UnitTestCase;
-use Drupal\og\GroupManager;
+use Drupal\og\GroupTypeManager;
 use Drupal\og\OgAccess;
 use Drupal\og\PermissionManager;
 use Drupal\user\EntityOwnerInterface;
@@ -72,9 +72,9 @@ class OgAccessTestBase extends UnitTestCase {
   /**
    * The mocked group manager.
    *
-   * @var \Drupal\og\GroupManager|\Prophecy\Prophecy\ObjectProphecy
+   * @var \Drupal\og\GroupTypeManager|\Prophecy\Prophecy\ObjectProphecy
    */
-  protected $groupManager;
+  protected $groupTypeManager;
 
   /**
    * The mocked permission manager.
@@ -130,8 +130,8 @@ class OgAccessTestBase extends UnitTestCase {
     $this->membership = $this->prophesize(OgMembershipInterface::class);
     $this->ogRole = $this->prophesize(RoleInterface::class);
 
-    $this->groupManager = $this->prophesize(GroupManager::class);
-    $this->groupManager->isGroup($this->entityTypeId, $this->bundle)->willReturn(TRUE);
+    $this->groupTypeManager = $this->prophesize(GroupTypeManager::class);
+    $this->groupTypeManager->isGroup($this->entityTypeId, $this->bundle)->willReturn(TRUE);
 
     $cache_contexts_manager = $this->prophesize(CacheContextsManager::class);
     $cache_contexts_manager->assertValidTokens(Argument::any())->willReturn(TRUE);
@@ -181,7 +181,7 @@ class OgAccessTestBase extends UnitTestCase {
       $config_factory->reveal(),
       $account_proxy->reveal(),
       $module_handler->reveal(),
-      $this->groupManager->reveal(),
+      $this->groupTypeManager->reveal(),
       $this->permissionManager->reveal(),
       $this->membershipManager->reveal()
     );
@@ -191,7 +191,7 @@ class OgAccessTestBase extends UnitTestCase {
     $container->set('config.factory', $config_factory->reveal());
     $container->set('entity.manager', $this->entityManager->reveal());
     $container->set('module_handler', $this->prophesize(ModuleHandlerInterface::class)->reveal());
-    $container->set('og.group.manager', $this->groupManager->reveal());
+    $container->set('group_type_manager', $this->groupTypeManager->reveal());
     $container->set('og.membership_manager', $this->membershipManager->reveal());
 
     // This is for caching purposes only.

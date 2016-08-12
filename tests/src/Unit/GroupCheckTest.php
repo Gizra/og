@@ -9,7 +9,7 @@ use Drupal\Core\Entity\EntityStorageInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\og\Access\GroupCheck;
-use Drupal\og\GroupManager;
+use Drupal\og\GroupTypeManager;
 use Drupal\og\OgAccessInterface;
 use Drupal\Tests\UnitTestCase;
 use Symfony\Component\Routing\Route;
@@ -95,9 +95,9 @@ class GroupCheckTest extends UnitTestCase {
   /**
    * The group manager used in the test.
    *
-   * @var \Drupal\og\GroupManager|\Prophecy\Prophecy\ObjectProphecy
+   * @var \Drupal\og\GroupTypeManager|\Prophecy\Prophecy\ObjectProphecy
    */
-  protected $groupManager;
+  protected $groupTypeManager;
 
   /**
    * The access result used in the test.
@@ -119,13 +119,13 @@ class GroupCheckTest extends UnitTestCase {
     $this->entityTypeId = $this->randomMachineName();
     $this->bundle = $this->randomMachineName();
     $this->entityId = rand(10, 50);
-    $this->groupManager = $this->prophesize(GroupManager::class);
+    $this->groupTypeManager = $this->prophesize(GroupTypeManager::class);
     $this->user = $this->prophesize(AccountInterface::class);
     $this->group = $this->prophesize(EntityInterface::class);
     $this->accessResult = $this->prophesize(AccessResultInterface::class);
 
     $container = new ContainerBuilder();
-    $container->set('og.group.manager', $this->groupManager->reveal());
+    $container->set('group_type_manager', $this->groupTypeManager->reveal());
     \Drupal::setContainer($container);
   }
 
@@ -195,7 +195,7 @@ class GroupCheckTest extends UnitTestCase {
       ->bundle()
       ->willReturn($this->bundle);
 
-    $this->groupManager
+    $this->groupTypeManager
       ->isGroup($this->entityTypeId, $this->bundle)
       ->willReturn(FALSE);
 
@@ -230,7 +230,7 @@ class GroupCheckTest extends UnitTestCase {
       ->bundle()
       ->willReturn($this->bundle);
 
-    $this->groupManager
+    $this->groupTypeManager
       ->isGroup($this->entityTypeId, $this->bundle)
       ->willReturn(TRUE);
 
