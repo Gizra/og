@@ -17,7 +17,7 @@ class MembershipManager implements MembershipManagerInterface {
   /**
    * Static cache of the memberships and group association.
    *
-   * @var []
+   * @var array
    */
   protected $cache;
 
