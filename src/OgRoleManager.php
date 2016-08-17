@@ -50,7 +50,7 @@ class OgRoleManager implements OgRoleManagerInterface {
   }
 
   /**
-   * @inheritdoc
+   * {@inheritdoc}
    */
   public function createPerBundleRoles($entity_type_id, $bundle_id) {
     foreach ($this->getDefaultRoles() as $role) {
@@ -68,7 +68,7 @@ class OgRoleManager implements OgRoleManagerInterface {
   }
 
   /**
-   * @inheritdoc
+   * {@inheritdoc}
    */
   public function getDefaultRoles() {
     // Provide the required default roles: 'member' and 'non-member'.
@@ -85,7 +85,7 @@ class OgRoleManager implements OgRoleManagerInterface {
   }
 
   /**
-   * @inheritdoc
+   * {@inheritdoc}
    */
   public function getRequiredDefaultRoles() {
     $roles = [];
@@ -111,7 +111,7 @@ class OgRoleManager implements OgRoleManagerInterface {
   }
 
   /**
-   * @inheritdoc
+   * {@inheritdoc}
    */
   public function removeRoles($entity_type_id, $bundle_id) {
     $properties = [
