@@ -7,8 +7,6 @@ services:
   og.access:
     class: Drupal\og\OgAccess
     arguments: ['@config.factory', '@current_user', '@module_handler', '@og.group.manager', '@og.permission_manager', '@og.membership_manager']
-  og.membership_manager:
-    class: Drupal\og\MembershipManager
   og.event_subscriber:
     class: Drupal\og\EventSubscriber\OgEventSubscriber
     arguments: ['@og.permission_manager', '@entity_type.manager', '@entity_type.bundle.info']
@@ -17,6 +15,9 @@ services:
   og.group.manager:
     class: Drupal\og\GroupManager
     arguments: ['@config.factory', '@entity_type.manager', '@entity_type.bundle.info', '@event_dispatcher', '@state', '@og.permission_manager']
+  og.membership_manager:
+    class: Drupal\og\MembershipManager
+    arguments: ['@entity_type.manager']
   og.permissions:
     class: Drupal\og\OgPermissionHandler
     arguments: ['@module_handler', '@string_translation', '@controller_resolver']
