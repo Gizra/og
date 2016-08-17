@@ -4,6 +4,7 @@ namespace Drupal\Tests\og\Functional;
 
 use Drupal\Component\Utility\Unicode;
 use Drupal\node\Entity\Node;
+use Drupal\node\Entity\NodeType;
 use Drupal\og\Og;
 use Drupal\og\OgRoleInterface;
 use Drupal\Tests\BrowserTestBase;
@@ -54,8 +55,12 @@ class GroupSubscribeFormatterTest extends BrowserTestBase {
   protected function setUp() {
     parent::setUp();
 
-    // Create bundles.
+    // Create bundle.
     $this->groupBundle = Unicode::strtolower($this->randomMachineName());
+
+    // Create a node type.
+    $node_type = NodeType::create(['type' => $this->groupBundle, 'name' => $this->groupBundle]);
+    $node_type->save();
 
     // Define the bundles as groups.
     Og::groupManager()->addGroup('node', $this->groupBundle);
