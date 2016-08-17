@@ -206,6 +206,7 @@ function og_entity_bundle_field_info_alter(&$fields, EntityTypeInterface $entity
   }
 
   $fields['og_group']->setDisplayOptions('view', [
+    'weight' => 0,
     'type' => 'og_group_subscribe',
   ])->setDisplayConfigurable('view', TRUE);
 }
