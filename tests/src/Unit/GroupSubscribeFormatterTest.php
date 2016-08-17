@@ -351,8 +351,6 @@ class GroupSubscribeFormatterTest extends UnitTestCase {
     $formatter = new GroupSubscribeFormatter('', [], $this->fieldDefinitionInterface->reveal(), [], '', [], []);
     $elements = $formatter->viewElements($this->fieldItemList->reveal(), $this->randomMachineName());
 
-
-
     $this->assertEquals('Unsubscribe from group', $elements[0]['#title']);
   }
 
