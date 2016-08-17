@@ -25,28 +25,14 @@ class GroupSubscribeFormatterTest extends BrowserTestBase {
    *
    * @var \Drupal\node\NodeInterface
    */
-  protected $group1;
-
-  /**
-   * Test entity group.
-   *
-   * @var \Drupal\node\NodeInterface
-   */
-  protected $group2;
+  protected $group;
 
   /**
    * A group bundle name.
    *
    * @var string
    */
-  protected $groupBundle1;
-
-  /**
-   * A group bundle name.
-   *
-   * @var string
-   */
-  protected $groupBundle2;
+  protected $groupBundle;
 
   /**
    * A non-author user.
@@ -55,13 +41,12 @@ class GroupSubscribeFormatterTest extends BrowserTestBase {
    */
   protected $user1;
 
-
   /**
-   * The node author (and group manager) user.
+   * A non-author user.
    *
    * @var \Drupal\user\UserInterface
    */
-  protected $authorUser;
+  protected $user2;
 
   /**
    * {@inheritdoc}
@@ -70,33 +55,24 @@ class GroupSubscribeFormatterTest extends BrowserTestBase {
     parent::setUp();
 
     // Create bundles.
-    $this->groupBundle1 = Unicode::strtolower($this->randomMachineName());
-    $this->groupBundle2 = Unicode::strtolower($this->randomMachineName());
+    $this->groupBundle = Unicode::strtolower($this->randomMachineName());
 
     // Define the bundles as groups.
-    Og::groupManager()->addGroup('node', $this->groupBundle1);
-    Og::groupManager()->addGroup('node', $this->groupBundle2);
+    Og::groupManager()->addGroup('node', $this->groupBundle);
 
     // Create node author user.
     $user = $this->createUser();
 
     // Create groups.
-    $this->group1 = Node::create([
-      'type' => $this->groupBundle1,
+    $this->group = Node::create([
+      'type' => $this->groupBundle,
       'title' => $this->randomString(),
       'uid' => $user->id(),
     ]);
-    $this->group1->save();
-
-    $this->group2 = Node::create([
-      'type' => $this->groupBundle2,
-      'title' => $this->randomString(),
-      'uid' => $user->id(),
-    ]);
-    $this->group2->save();
+    $this->group->save();
 
     /** @var \Drupal\og\Entity\OgRole $role */
-    $role = Og::getRole('node', $this->groupBundle1, OgRoleInterface::ANONYMOUS);
+    $role = Og::getRole('node', $this->groupBundle, OgRoleInterface::ANONYMOUS);
     $role
       ->grantPermission('subscribe without approval')
       ->save();
@@ -112,16 +88,16 @@ class GroupSubscribeFormatterTest extends BrowserTestBase {
     $this->drupalLogin($this->user1);
 
     // Subscribe to group.
-    $this->drupalGet('node/' . $this->group1->id());
+    $this->drupalGet('node/' . $this->group->id());
     $this->clickLink('Subscribe to group');
     $this->click('#edit-submit');
 
-    $this->drupalGet('node/' . $this->group1->id());
+    $this->drupalGet('node/' . $this->group->id());
     $this->assertSession()->linkExists('Unsubscribe from group');
 
     // Validate another user sees the correct formatter link.
     $this->drupalLogin($this->user2);
-    $this->drupalGet('node/' . $this->group1->id());
+    $this->drupalGet('node/' . $this->group->id());
     $this->clickLink('Subscribe to group');
 
   }
