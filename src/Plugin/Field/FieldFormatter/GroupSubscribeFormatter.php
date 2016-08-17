@@ -74,7 +74,7 @@ class GroupSubscribeFormatter extends FormatterBase {
         return [];
       }
 
-      // If hte user is authenticated, set up the subscribe link.
+      // If the user is authenticated, set up the subscribe link.
       if ($user->isAuthenticated()) {
         $parameters = [
           'entity_type_id' => $group->getEntityTypeId(),

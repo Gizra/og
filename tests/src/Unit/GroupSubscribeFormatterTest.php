@@ -167,6 +167,11 @@ class GroupSubscribeFormatterTest extends UnitTestCase {
 
     $this
       ->user
+      ->isAuthenticated()
+      ->willReturn(TRUE);
+
+    $this
+      ->user
       ->id()
       ->willReturn($this->userId);
 
