@@ -250,7 +250,6 @@ class GroupSubscribeFormatterTest extends UnitTestCase {
     $this->assertEquals('Subscribe to group', $elements[0]['#title']);
   }
 
-
   /**
    * Tests the formatter for subscribe without approval.
    */

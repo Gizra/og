@@ -101,7 +101,6 @@ class GroupSubscribeFormatterTest extends BrowserTestBase {
       ->grantPermission('subscribe without approval')
       ->save();
 
-
     $this->user1 = $this->drupalCreateUser();
     $this->user2 = $this->drupalCreateUser();
   }
