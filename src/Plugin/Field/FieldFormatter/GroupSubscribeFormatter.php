@@ -67,11 +67,9 @@ class GroupSubscribeFormatter extends FormatterBase {
     }
 
     if (Og::isMember($group, $user, [OgMembershipInterface::STATE_ACTIVE, OgMembershipInterface::STATE_PENDING])) {
-      if ($og_access->userAccess($group, 'unsubscribe', $user)) {
-        $link['title'] = $this->t('Unsubscribe from group');
-        $link['url'] = Url::fromRoute('og.unsubscribe', ['entity_type_id' => $entity_type_id, 'entity_id' => $group->id()]);
-        $link['class'] = ['unsubscribe'];
-      }
+      $link['title'] = $this->t('Unsubscribe from group');
+      $link['url'] = Url::fromRoute('og.unsubscribe', ['entity_type_id' => $entity_type_id, 'entity_id' => $group->id()]);
+      $link['class'] = ['unsubscribe'];
     }
     else {
       // If the user is authenticated, set up the subscribe link.

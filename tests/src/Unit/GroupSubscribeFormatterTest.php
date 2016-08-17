@@ -332,4 +332,28 @@ class GroupSubscribeFormatterTest extends UnitTestCase {
     $this->assertTrue(empty($elements[0]));
   }
 
+  /**
+   * Tests the formatter for an active or pending member.
+   */
+  public function testMember() {
+    $this->group->getOwnerId()->willReturn(rand(100, 200));
+
+    $this
+      ->membershipManager
+      ->isMember($this->group->reveal(), $this->user->reveal(), [OgMembershipInterface::STATE_BLOCKED])
+      ->willReturn(FALSE);
+
+    $this
+      ->membershipManager
+      ->isMember($this->group->reveal(), $this->user->reveal(), [OgMembershipInterface::STATE_ACTIVE, OgMembershipInterface::STATE_PENDING])
+      ->willReturn(TRUE);
+
+    $formatter = new GroupSubscribeFormatter('', [], $this->fieldDefinitionInterface->reveal(), [], '', [], []);
+    $elements = $formatter->viewElements($this->fieldItemList->reveal(), $this->randomMachineName());
+
+
+
+    $this->assertEquals('Unsubscribe from group', $elements[0]['#title']);
+  }
+
 }
