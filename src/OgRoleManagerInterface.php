@@ -2,58 +2,54 @@
 
   namespace Drupal\og;
 
+/**
+ * Defines an interface for OG role manager.
+ */
+interface OgRoleManagerInterface {
+
   /**
-   * Defines an interface for OG role manager.
+   * Creates the roles for the given group type, based on the default roles.
+   *
+   * This is intended to be called after a new group type has been created.
+   *
+   * @param string $entity_type_id
+   *   The entity type ID of the group for which to create default roles.
+   * @param string $bundle_id
+   *   The bundle ID of the group for which to create default roles.
    */
-  interface OgRoleManagerInterface {
+  public function createPerBundleRoles($entity_type_id, $bundle_id);
 
-    /**
-     * Creates the roles for the given group type, based on the default roles.
-     *
-     * This is intended to be called after a new group type has been created.
-     *
-     * @param string $entity_type_id
-     *   The entity type ID of the group for which to create default roles.
-     * @param string $bundle_id
-     *   The bundle ID of the group for which to create default roles.
-     *
-     */
-    public function createPerBundleRoles($entity_type_id, $bundle_id);
+  /**
+   * Returns the default roles.
+   *
+   * @return \Drupal\og\Entity\OgRole[]
+   *   An associative array of (unsaved) OgRole entities, keyed by role name.
+   *   These are populated with the basic properties: name, label, role_type and
+   *   is_admin.
+   */
+  public function getDefaultRoles();
 
-    /**
-     * Returns the default roles.
-     *
-     * @return \Drupal\og\Entity\OgRole[]
-     *   An associative array of (unsaved) OgRole entities, keyed by role name.
-     *   These are populated with the basic properties: name, label, role_type and
-     *   is_admin.
-     *
-     */
-    public function getDefaultRoles();
+  /**
+   * Returns the roles which every group type requires.
+   *
+   * This provides the 'member' and 'non-member' roles. These are hard coded
+   * because they are strictly required and should not be altered.
+   *
+   * @return \Drupal\og\Entity\OgRole[]
+   *   An associative array of (unsaved) required OgRole entities, keyed by role
+   *   name. These are populated with the basic properties: name, label and
+   *   role_type.
+   */
+  public function getRequiredDefaultRoles();
 
-    /**
-     * Returns the roles which every group type requires.
-     *
-     * This provides the 'member' and 'non-member' roles. These are hard coded
-     * because they are strictly required and should not be altered.
-     *
-     * @return \Drupal\og\Entity\OgRole[]
-     *   An associative array of (unsaved) required OgRole entities, keyed by role
-     *   name. These are populated with the basic properties: name, label and
-     *   role_type.
-     *
-     */
-    public function getRequiredDefaultRoles();
+  /**
+   * Deletes the roles associated with a group type.
+   *
+   * @param string $entity_type_id
+   *   The entity type ID of the group for which to delete the roles.
+   * @param string $bundle_id
+   *   The bundle ID of the group for which to delete the roles.
+   */
+  public function removeRoles($entity_type_id, $bundle_id);
 
-    /**
-     * Deletes the roles associated with a group type.
-     *
-     * @param string $entity_type_id
-     *   The entity type ID of the group for which to delete the roles.
-     * @param string $bundle_id
-     *   The bundle ID of the group for which to delete the roles.
-     *
-     */
-    public function removeRoles($entity_type_id, $bundle_id);
-
-  }
+}
