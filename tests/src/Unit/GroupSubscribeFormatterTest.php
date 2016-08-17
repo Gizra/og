@@ -2,6 +2,7 @@
 
 namespace Drupal\Tests\og\Unit;
 
+use Drupal\Core\Access\AccessResultInterface;
 use Drupal\Core\DependencyInjection\ContainerBuilder;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Entity\EntityManagerInterface;
@@ -110,17 +111,46 @@ class GroupSubscribeFormatterTest extends UnitTestCase {
   protected $membershipManager;
 
   /**
+   * The account proxy service.
+   *
+   * @var \Drupal\Core\Session\AccountProxyInterface|\Prophecy\Prophecy\ObjectProphecy
+   */
+  protected $accountProxy;
+
+  /**
+   * A random group ID.
+   *
+   * @var int
+   */
+  protected $entityId;
+
+  /**
+   * A random user ID.
+   *
+   * @var int
+   */
+  protected $userId;
+
+  /**
+   * An access result object.
+   *
+   * @var \Drupal\Core\Access\AccessResult|\Prophecy\Prophecy\ObjectProphecy
+   */
+  protected $accessResult;
+
+  /**
    * {@inheritdoc}
    */
   public function setUp() {
     parent::setUp();
 
+    $this->accessResult = $this->prophesize(AccessResultInterface::class);
     $this->accountProxy = $this->prophesize(AccountProxyInterface::class);
+    $this->bundle = $this->randomMachineName();
     $this->entityId = rand(10, 50);
     $this->entityManager = $this->prophesize(EntityManagerInterface::class);
     $this->entityStorage = $this->prophesize(EntityStorageInterface::class);
     $this->entityTypeId = $this->randomMachineName();
-    $this->bundle = $this->randomMachineName();
     $this->fieldDefinitionInterface = $this->prophesize(FieldDefinitionInterface::class);
     $this->fieldItemList = $this->prophesize(FieldItemListInterface::class);
     $this->group = $this->prophesize(EntityInterface::class);
@@ -149,6 +179,11 @@ class GroupSubscribeFormatterTest extends UnitTestCase {
       ->bundle()
       ->willReturn($this->bundle);
 
+    $this
+      ->group
+      ->id()
+      ->willReturn($this->entityId);
+
     $this->groupManager->isGroup($this->entityTypeId, $this->bundle)->willReturn(TRUE);
     $this->entityManager->getStorage('user')
       ->willReturn($this->entityStorage->reveal());
@@ -156,13 +191,13 @@ class GroupSubscribeFormatterTest extends UnitTestCase {
     $this
       ->accountProxy
       ->id()
-      ->willReturn($this->entityId);
+      ->willReturn($this->userId);
 
     $this->entityManager->getEntityTypeFromClass('Drupal\user\Entity\User')
       ->willReturn('user');
 
     $this->entityStorage
-      ->load($this->entityId)
+      ->load($this->userId)
       ->willReturn($this->user->reveal());
 
     $this
@@ -205,10 +240,20 @@ class GroupSubscribeFormatterTest extends UnitTestCase {
   public function testGroupMemberActive() {
     $this->group->getOwnerId()->willReturn(rand(100, 200));
 
+    $this
+      ->ogAccess
+      ->userAccess($this->group->reveal(), 'subscribe without approval', $this->user->reveal())
+      ->willReturn($this->accessResult->reveal());
+
+    $this
+      ->accessResult
+      ->isAllowed()
+      ->willReturn(TRUE);
+
     $formatter = new GroupSubscribeFormatter('', [], $this->fieldDefinitionInterface->reveal(), [], '', [], []);
     $elements = $formatter->viewElements($this->fieldItemList->reveal(), $this->randomMachineName());
 
-    $this->assertEquals('You are the group manager', $elements[0]['#value']);
+    $this->assertEquals('Subscribe to group', $elements[0]['#title']);
   }
 
 }

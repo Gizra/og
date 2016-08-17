@@ -88,12 +88,13 @@ class GroupSubscribeFormatter extends FormatterBase {
         $url = Url::fromRoute('user.login', [], ['query' => $this->getDestinationArray()]);
       }
 
-      if ($og_access->userAccess($group, 'subscribe without approval', $user)) {
+      /** @var \Drupal\Core\Access\AccessResult $access */
+      if (($access = $og_access->userAccess($group, 'subscribe without approval', $user)) && $access->isAllowed()) {
         $link['title'] = $this->t('Subscribe to group');
         $link['class'] = ['subscribe'];
         $link['url'] = $url;
       }
-      elseif ($og_access->userAccess($group, 'subscribe')) {
+      elseif (($access = $og_access->userAccess($group, 'subscribe')) && $access->isAllowed()) {
         $link['title'] = $this->t('Request group membership');
         $link['class'] = ['subscribe', 'request'];
         $link['url'] = $url;
