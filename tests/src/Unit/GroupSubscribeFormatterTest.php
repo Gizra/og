@@ -253,7 +253,7 @@ class GroupSubscribeFormatterTest extends UnitTestCase {
   /**
    * Tests the formatter for subscribe without approval.
    */
-  public function testSubscribeWithoutApproval() {
+  public function testSubscribeWithoutApprovalPermission() {
     $this->group->getOwnerId()->willReturn(rand(100, 200));
 
     $this->ogAccess->userAccess($this->group->reveal(), 'subscribe without approval', $this->user->reveal())->willReturn($this->accessResult->reveal());
@@ -268,7 +268,7 @@ class GroupSubscribeFormatterTest extends UnitTestCase {
   /**
    * Tests the formatter for subscribe with approval.
    */
-  public function testSubscribeWithApproval() {
+  public function testSubscribeWithApprovalPermission() {
     $this->group->getOwnerId()->willReturn(rand(100, 200));
 
     $this
@@ -291,6 +291,27 @@ class GroupSubscribeFormatterTest extends UnitTestCase {
     $elements = $formatter->viewElements($this->fieldItemList->reveal(), $this->randomMachineName());
 
     $this->assertEquals('Request group membership', $elements[0]['#title']);
+  }
+
+  /**
+   * Tests the formatter for no subscribe permission.
+   */
+  public function testNoSubscribePermission() {
+    $this->group->getOwnerId()->willReturn(rand(100, 200));
+
+    foreach (['subscribe without approval', 'subscribe'] as $perm) {
+      $this
+        ->ogAccess
+        ->userAccess($this->group->reveal(), $perm, $this->user->reveal())
+        ->willReturn($this->accessResult->reveal());
+    }
+
+    $this->accessResult->isAllowed()->willReturn(FALSE);
+
+    $formatter = new GroupSubscribeFormatter('', [], $this->fieldDefinitionInterface->reveal(), [], '', [], []);
+    $elements = $formatter->viewElements($this->fieldItemList->reveal(), $this->randomMachineName());
+
+    $this->assertTrue(strpos($elements[0]['#value'], 'This is a closed group.') === 0);
   }
 
 }
