@@ -3,16 +3,19 @@
 namespace Drupal\Tests\og\Unit;
 
 use Drupal\Core\DependencyInjection\ContainerBuilder;
+use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Entity\EntityManagerInterface;
 use Drupal\Core\Entity\EntityStorageInterface;
 use Drupal\Core\Field\FieldDefinitionInterface;
 use Drupal\Core\Field\FieldItemListInterface;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\Core\Session\AccountProxyInterface;
-use Drupal\entity_test\Entity\EntityTest;
 use Drupal\og\GroupManager;
+use Drupal\og\MembershipManagerInterface;
+use Drupal\og\OgAccessInterface;
 use Drupal\og\Plugin\Field\FieldFormatter\GroupSubscribeFormatter;
 use Drupal\Tests\UnitTestCase;
+use Drupal\user\EntityOwnerInterface;
 
 /**
  * Tests the OG group formatter.
@@ -88,9 +91,23 @@ class GroupSubscribeFormatterTest extends UnitTestCase {
   /**
    * The field definition.
    *
-   * @var \Drupal\Core\Field\FieldDefinitionInterface
+   * @var \Drupal\Core\Field\FieldDefinitionInterface|\Prophecy\Prophecy\ObjectProphecy
    */
   protected $fieldDefinitionInterface;
+
+  /**
+   * The OG access service.
+   *
+   * @var \Drupal\og\OgAccessInterface|\Prophecy\Prophecy\ObjectProphecy
+   */
+  protected $ogAccess;
+
+  /**
+   * The membership manager service.
+   *
+   * @var \Drupal\og\MembershipManagerInterface|\Prophecy\Prophecy\ObjectProphecy
+   */
+  protected $membershipManager;
 
   /**
    * {@inheritdoc}
@@ -106,9 +123,10 @@ class GroupSubscribeFormatterTest extends UnitTestCase {
     $this->bundle = $this->randomMachineName();
     $this->fieldDefinitionInterface = $this->prophesize(FieldDefinitionInterface::class);
     $this->fieldItemList = $this->prophesize(FieldItemListInterface::class);
-    // We use EntityTest as it implements EntityOwnerInterface.
-    $this->group = $this->prophesize(EntityTest::class);
+    $this->group = $this->prophesize(EntityInterface::class);
     $this->groupManager = $this->prophesize(GroupManager::class);
+    $this->membershipManager = $this->prophesize(MembershipManagerInterface::class);
+    $this->ogAccess = $this->prophesize(OgAccessInterface::class);
     $this->user = $this->prophesize(AccountInterface::class);
     $this->userId = rand(10, 50);
 
@@ -116,6 +134,10 @@ class GroupSubscribeFormatterTest extends UnitTestCase {
       ->fieldItemList
       ->getEntity()
       ->willReturn($this->group);
+
+    $this
+      ->group
+      ->willImplement(EntityOwnerInterface::class);
 
     $this
       ->group
@@ -151,7 +173,9 @@ class GroupSubscribeFormatterTest extends UnitTestCase {
     $container = new ContainerBuilder();
     $container->set('current_user', $this->accountProxy->reveal());
     $container->set('entity.manager', $this->entityManager->reveal());
+    $container->set('og.access', $this->ogAccess->reveal());
     $container->set('og.group.manager', $this->groupManager->reveal());
+    $container->set('og.membership_manager', $this->membershipManager->reveal());
     $container->set('string_translation', $this->getStringTranslationStub());
 
     \Drupal::setContainer($container);
