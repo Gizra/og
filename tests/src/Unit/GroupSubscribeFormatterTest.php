@@ -14,6 +14,7 @@ use Drupal\Core\Session\AccountProxyInterface;
 use Drupal\og\GroupManager;
 use Drupal\og\MembershipManagerInterface;
 use Drupal\og\OgAccessInterface;
+use Drupal\og\OgMembershipInterface;
 use Drupal\og\Plugin\Field\FieldFormatter\GroupSubscribeFormatter;
 use Drupal\Tests\UnitTestCase;
 use Drupal\user\EntityOwnerInterface;
@@ -312,6 +313,23 @@ class GroupSubscribeFormatterTest extends UnitTestCase {
     $elements = $formatter->viewElements($this->fieldItemList->reveal(), $this->randomMachineName());
 
     $this->assertTrue(strpos($elements[0]['#value'], 'This is a closed group.') === 0);
+  }
+
+  /**
+   * Tests the formatter for a blocked member.
+   */
+  public function testBlockedMember() {
+    $this->group->getOwnerId()->willReturn(rand(100, 200));
+
+    $this
+      ->membershipManager
+      ->isMember($this->group->reveal(), $this->user->reveal(), [OgMembershipInterface::STATE_BLOCKED])
+      ->willReturn(TRUE);
+
+    $formatter = new GroupSubscribeFormatter('', [], $this->fieldDefinitionInterface->reveal(), [], '', [], []);
+    $elements = $formatter->viewElements($this->fieldItemList->reveal(), $this->randomMachineName());
+
+    $this->assertTrue(empty($elements[0]));
   }
 
 }

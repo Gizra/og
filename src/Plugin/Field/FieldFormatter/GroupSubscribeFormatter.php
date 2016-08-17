@@ -60,6 +60,12 @@ class GroupSubscribeFormatter extends FormatterBase {
     /** @var \Drupal\og\OgAccessInterface $og_access */
     $og_access = \Drupal::service('og.access');
 
+    if (Og::isMemberBlocked($group, $user)) {
+      // If user is blocked, they should not be able to apply for
+      // membership.
+      return $elements;
+    }
+
     if (Og::isMember($group, $user, [OgMembershipInterface::STATE_ACTIVE, OgMembershipInterface::STATE_PENDING])) {
       if ($og_access->userAccess($group, 'unsubscribe', $user)) {
         $link['title'] = $this->t('Unsubscribe from group');
@@ -68,12 +74,6 @@ class GroupSubscribeFormatter extends FormatterBase {
       }
     }
     else {
-      if (Og::isMemberBlocked($group, $user)) {
-        // If user is blocked, they should not be able to apply for
-        // membership.
-        return [];
-      }
-
       // If the user is authenticated, set up the subscribe link.
       if ($user->isAuthenticated()) {
         $parameters = [

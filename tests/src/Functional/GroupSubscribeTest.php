@@ -97,7 +97,7 @@ class GroupSubscribeTest extends BrowserTestBase {
     $this->nonGroupBundle = Unicode::strtolower($this->randomMachineName());
     $this->membershipTypeBundle = Unicode::strtolower($this->randomMachineName());
 
-    // Define the entities as groups.
+    // Define the bundles as groups.
     Og::groupManager()->addGroup('node', $this->groupBundle1);
     Og::groupManager()->addGroup('node', $this->groupBundle2);
 
