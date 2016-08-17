@@ -16,8 +16,6 @@ og.subscribe:
       membership_type:
         type: entity:og_membership_type
 
-
-
 og.unsubscribe:
   path: 'group/{entity_type_id}/{entity_id}/unsubscribe'
   defaults:
@@ -25,4 +23,3 @@ og.unsubscribe:
     _title: 'Leave Group'
   requirements:
     _user_is_logged_in: 'TRUE'
-    _og_user_access_group: 'unsubscribe'
