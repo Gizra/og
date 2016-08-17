@@ -240,20 +240,57 @@ class GroupSubscribeFormatterTest extends UnitTestCase {
   public function testGroupMemberActive() {
     $this->group->getOwnerId()->willReturn(rand(100, 200));
 
-    $this
-      ->ogAccess
-      ->userAccess($this->group->reveal(), 'subscribe without approval', $this->user->reveal())
-      ->willReturn($this->accessResult->reveal());
-
-    $this
-      ->accessResult
-      ->isAllowed()
-      ->willReturn(TRUE);
+    $this->ogAccess->userAccess($this->group->reveal(), 'subscribe without approval', $this->user->reveal())->willReturn($this->accessResult->reveal());
+    $this->accessResult->isAllowed()->willReturn(TRUE);
 
     $formatter = new GroupSubscribeFormatter('', [], $this->fieldDefinitionInterface->reveal(), [], '', [], []);
     $elements = $formatter->viewElements($this->fieldItemList->reveal(), $this->randomMachineName());
 
     $this->assertEquals('Subscribe to group', $elements[0]['#title']);
+  }
+
+
+  /**
+   * Tests the formatter for subscribe without approval.
+   */
+  public function testSubscribeWithoutApproval() {
+    $this->group->getOwnerId()->willReturn(rand(100, 200));
+
+    $this->ogAccess->userAccess($this->group->reveal(), 'subscribe without approval', $this->user->reveal())->willReturn($this->accessResult->reveal());
+    $this->accessResult->isAllowed()->willReturn(TRUE);
+
+    $formatter = new GroupSubscribeFormatter('', [], $this->fieldDefinitionInterface->reveal(), [], '', [], []);
+    $elements = $formatter->viewElements($this->fieldItemList->reveal(), $this->randomMachineName());
+
+    $this->assertEquals('Subscribe to group', $elements[0]['#title']);
+  }
+
+  /**
+   * Tests the formatter for subscribe with approval.
+   */
+  public function testSubscribeWithApproval() {
+    $this->group->getOwnerId()->willReturn(rand(100, 200));
+
+    $this
+      ->ogAccess
+      ->userAccess($this->group->reveal(), 'subscribe without approval', $this->user->reveal())
+      ->willReturn($this->accessResult->reveal());
+
+    $this->accessResult->isAllowed()->willReturn(FALSE);
+
+    /** @var \Drupal\Core\Access\AccessResult $access_result */
+    $access_result = $this->prophesize(AccessResultInterface::class);
+    $this
+      ->ogAccess
+      ->userAccess($this->group->reveal(), 'subscribe', $this->user->reveal())
+      ->willReturn($access_result->reveal());
+
+    $access_result->isAllowed()->willReturn(TRUE);
+
+    $formatter = new GroupSubscribeFormatter('', [], $this->fieldDefinitionInterface->reveal(), [], '', [], []);
+    $elements = $formatter->viewElements($this->fieldItemList->reveal(), $this->randomMachineName());
+
+    $this->assertEquals('Request group membership', $elements[0]['#title']);
   }
 
 }

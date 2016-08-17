@@ -94,7 +94,7 @@ class GroupSubscribeFormatter extends FormatterBase {
         $link['class'] = ['subscribe'];
         $link['url'] = $url;
       }
-      elseif (($access = $og_access->userAccess($group, 'subscribe')) && $access->isAllowed()) {
+      elseif (($access = $og_access->userAccess($group, 'subscribe', $user)) && $access->isAllowed()) {
         $link['title'] = $this->t('Request group membership');
         $link['class'] = ['subscribe', 'request'];
         $link['url'] = $url;
