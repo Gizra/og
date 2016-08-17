@@ -10,6 +10,7 @@ use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Extension\ModuleHandlerInterface;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\Core\Session\AccountProxyInterface;
+use Drupal\og\Entity\OgRole;
 use Drupal\user\EntityOwnerInterface;
 
 /**
@@ -63,6 +64,29 @@ class OgAccess implements OgAccessInterface {
   protected $moduleHandler;
 
   /**
+   * The group manager.
+   *
+   * @var \Drupal\og\GroupManager
+   *
+   * @todo This should be GroupManagerInterface.
+   */
+  protected $groupManager;
+
+  /**
+   * The OG permission manager.
+   *
+   * @var \Drupal\og\PermissionManagerInterface
+   */
+  protected $permissionManager;
+
+  /**
+   * The group membership manager.
+   *
+   * @var \Drupal\og\MembershipManagerInterface
+   */
+  protected $membershipManager;
+
+  /**
    * Constructs an OgManager service.
    *
    * @param \Drupal\Core\Config\ConfigFactoryInterface $config_factory
@@ -71,11 +95,20 @@ class OgAccess implements OgAccessInterface {
    *   The service that contains the current active user.
    * @param \Drupal\Core\Extension\ModuleHandlerInterface $module_handler
    *   The module handler.
+   * @param \Drupal\og\GroupManager $group_manager
+   *   The group manager.
+   * @param \Drupal\og\PermissionManagerInterface $permission_manager
+   *   The permission manager.
+   * @param \Drupal\og\MembershipManagerInterface $membership_manager
+   *   The group membership manager.
    */
-  public function __construct(ConfigFactoryInterface $config_factory, AccountProxyInterface $account_proxy, ModuleHandlerInterface $module_handler) {
+  public function __construct(ConfigFactoryInterface $config_factory, AccountProxyInterface $account_proxy, ModuleHandlerInterface $module_handler, GroupManager $group_manager, PermissionManagerInterface $permission_manager, MembershipManagerInterface $membership_manager) {
     $this->configFactory = $config_factory;
     $this->accountProxy = $account_proxy;
     $this->moduleHandler = $module_handler;
+    $this->groupManager = $group_manager;
+    $this->permissionManager = $permission_manager;
+    $this->membershipManager = $membership_manager;
   }
 
   /**
@@ -89,7 +122,7 @@ class OgAccess implements OgAccessInterface {
     $config = $this->configFactory->get('og.settings');
     $cacheable_metadata = (new CacheableMetadata)
         ->addCacheableDependency($config);
-    if (!Og::isGroup($group_type_id, $bundle)) {
+    if (!$this->groupManager->isGroup($group_type_id, $bundle)) {
       // Not a group.
       return AccessResult::neutral()->addCacheableDependency($cacheable_metadata);
     }
@@ -100,6 +133,9 @@ class OgAccess implements OgAccessInterface {
 
     // From this point on, every result also depends on the user so check
     // whether it is the current. See https://www.drupal.org/node/2628870
+    // @todo This doesn't really vary by user but by the user's roles inside of
+    //   the group. We should create a cache context for OgRole entities.
+    // @see https://github.com/amitaibu/og/issues/219
     if ($user->id() == $this->accountProxy->id()) {
       $cacheable_metadata->addCacheContexts(['user']);
     }
@@ -139,7 +175,6 @@ class OgAccess implements OgAccessInterface {
     if (!$pre_alter_cache) {
       $permissions = [];
       $user_is_group_admin = FALSE;
-
       if ($membership = Og::getMembership($group, $user)) {
         foreach ($membership->getRoles() as $role) {
           // Check for the is_admin flag.
@@ -152,10 +187,10 @@ class OgAccess implements OgAccessInterface {
           $permissions = array_merge($permissions, $role->getPermissions());
         }
       }
-      else {
-        // User is a non-member.
+      elseif (!Og::isMemberBlocked($group, $user)) {
+        // User is a non-member or has a pending membership.
         /** @var \Drupal\og\Entity\OgRole $role */
-        $role = Og::getRole($group_type_id, $bundle, OgRoleInterface::ANONYMOUS);
+        $role = OgRole::loadByGroupAndName($group, OgRoleInterface::ANONYMOUS);
         $permissions = $role->getPermissions();
       }
 
@@ -198,16 +233,11 @@ class OgAccess implements OgAccessInterface {
   public function userAccessEntity($operation, EntityInterface $entity, AccountInterface $user = NULL) {
     $result = AccessResult::neutral();
 
-    // Entity isn't saved yet.
-    if ($entity->isNew()) {
-      return $result->addCacheableDependency($entity);
-    }
-
     $entity_type = $entity->getEntityType();
     $entity_type_id = $entity_type->id();
     $bundle = $entity->bundle();
 
-    if (Og::isGroup($entity_type_id, $bundle)) {
+    if ($this->groupManager->isGroup($entity_type_id, $bundle)) {
       $user_access = $this->userAccess($entity, $operation, $user);
       if ($user_access->isAllowed()) {
         return $user_access;
@@ -222,17 +252,26 @@ class OgAccess implements OgAccessInterface {
       }
     }
 
-    // @TODO: add caching on Og::isGroupContent.
     $is_group_content = Og::isGroupContent($entity_type_id, $bundle);
     $cache_tags = $entity_type->getListCacheTags();
 
     // The entity might be a user or a non-user entity.
-    $groups = $entity->getEntityTypeId() == 'user' ? Og::getUserGroups($entity) : Og::getGroups($entity);
+    $groups = $entity->getEntityTypeId() == 'user' ? $this->membershipManager->getUserGroups($entity) : $this->membershipManager->getGroups($entity);
 
     if ($is_group_content && $groups) {
       $forbidden = AccessResult::forbidden()->addCacheTags($cache_tags);
       foreach ($groups as $entity_groups) {
         foreach ($entity_groups as $group) {
+          // Check if the operation matches a group content entity operation
+          // such as 'create article content'.
+          $operation_access = $this->userAccessGroupContentEntityOperation($operation, $group, $entity, $user);
+
+          if ($operation_access->isAllowed()) {
+            return $operation_access->addCacheTags($cache_tags);
+          }
+
+          // Check if the operation matches a group level operation such as
+          // 'subscribe without approval'.
           $user_access = $this->userAccess($group, $operation, $user);
           if ($user_access->isAllowed()) {
             return $user_access->addCacheTags($cache_tags);
@@ -250,6 +289,77 @@ class OgAccess implements OgAccessInterface {
     // Either the user didn't have permission, or the entity might be an
     // orphaned group content.
     return $result;
+  }
+
+  /**
+   * Checks access for entity operations on group content entities.
+   *
+   * This checks if the user has permission to perform the requested operation
+   * on the given group content entity according to the user's membership status
+   * in the given group. There is no formal support for access control on entity
+   * operations in core, so the mapping of permissions to operations is provided
+   * by PermissionManager::getEntityOperationPermissions().
+   *
+   * @param string $operation
+   *   The entity operation.
+   * @param \Drupal\Core\Entity\EntityInterface $group_entity
+   *   The group entity, to retrieve the permissions from.
+   * @param \Drupal\Core\Entity\EntityInterface $group_content_entity
+   *   The group content entity for which access to the entity operation is
+   *   requested.
+   * @param \Drupal\Core\Session\AccountInterface $user
+   *   Optional user for which to check access. If omitted, the currently logged
+   *   in user will be used.
+   *
+   * @return \Drupal\Core\Access\AccessResult
+   *   The access result object.
+   *
+   * @see \Drupal\og\PermissionManager::getEntityOperationPermissions()
+   */
+  public function userAccessGroupContentEntityOperation($operation, EntityInterface $group_entity, EntityInterface $group_content_entity, AccountInterface $user = NULL) {
+    // Default to the current user.
+    $user = $user ?: $this->accountProxy->getAccount();
+
+    // Check if the user owns the entity which is being operated on.
+    $is_owner = $group_content_entity instanceof EntityOwnerInterface && $group_content_entity->getOwnerId() == $user->id();
+
+    // Retrieve the group content entity operation permissions.
+    $group_entity_type_id = $group_entity->getEntityTypeId();
+    $group_bundle_id = $group_entity->bundle();
+    $group_content_bundle_ids = [$group_content_entity->getEntityTypeId() => [$group_content_entity->bundle()]];
+
+    $permissions = $this->permissionManager->getDefaultEntityOperationPermissions($group_entity_type_id, $group_bundle_id, $group_content_bundle_ids);
+
+    // Filter the permissions by operation and ownership.
+    // If the user does not own the group content, only the non-owner permission
+    // is relevant (for example 'edit any article node'). However when the user
+    // _is_ the owner, then both permissions are relevant: an owner will have
+    // access if they either have the 'edit any article node' or the 'edit own
+    // article node' permission.
+    $ownerships = $is_owner ? [FALSE, TRUE] : [FALSE];
+    $permissions = array_filter($permissions, function (GroupContentOperationPermission $permission) use ($operation, $ownerships) {
+      return $permission->getOperation() === $operation && in_array($permission->getOwner(), $ownerships);
+    });
+
+    if ($permissions) {
+      foreach ($permissions as $permission) {
+        $user_access = $this->userAccess($group_entity, $permission->getName(), $user);
+        if ($user_access->isAllowed()) {
+          return $user_access;
+        }
+      }
+    }
+
+    // @todo This doesn't really vary by user but by the user's roles inside of
+    //   the group. We should create a cache context for OgRole entities.
+    // @see https://github.com/amitaibu/og/issues/219
+    $cacheable_metadata = new CacheableMetadata();
+    $cacheable_metadata->addCacheableDependency($group_content_entity);
+    if ($user->id() == $this->accountProxy->id()) {
+      $cacheable_metadata->addCacheContexts(['user']);
+    }
+
+    return AccessResult::neutral()->addCacheableDependency($cacheable_metadata);
   }
 
   /**

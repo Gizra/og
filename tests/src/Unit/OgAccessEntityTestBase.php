@@ -11,7 +11,6 @@ use Drupal\Core\Entity\FieldableEntityInterface;
 use Drupal\Core\Field\FieldDefinitionInterface;
 use Drupal\Core\Field\FieldStorageDefinitionInterface;
 use Drupal\og\OgGroupAudienceHelper;
-use Prophecy\Argument;
 
 /**
  * OG access entity base class.
@@ -49,6 +48,14 @@ class OgAccessEntityTestBase extends OgAccessTestBase {
     $this->groupContentEntity->isNew()->willReturn(FALSE);
     $this->groupContentEntity->getEntityType()->willReturn($entity_type->reveal());
     $this->groupContentEntity->getEntityTypeId()->willReturn($entity_type_id);
+    $this->addCache($this->groupContentEntity);
+
+    // It is expected that a list of entity operation permissions is retrieved
+    // from the permission manager so that the passed in permission can be
+    // checked against this list. Our permissions are not in the list, so it is
+    // of no importance what we return here, an empty array is sufficient.
+    $this->permissionManager->getDefaultEntityOperationPermissions($this->entityTypeId, $this->bundle, [$entity_type_id => [$bundle]])
+      ->willReturn([]);
 
     // The group manager is expected to declare that this is not a group.
     $this->groupManager->isGroup($entity_type_id, $bundle)->willReturn(FALSE);
@@ -75,9 +82,6 @@ class OgAccessEntityTestBase extends OgAccessTestBase {
     $container = \Drupal::getContainer();
     $container->set('entity_type.manager', $entity_type_manager->reveal());
     $container->set('entity_field.manager', $entity_field_manager->reveal());
-
-    // Mock the results of Og::getGroups().
-    $storage->loadMultiple(Argument::type('array'))->willReturn([$this->group]);
   }
 
 }

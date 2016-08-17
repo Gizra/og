@@ -538,7 +538,7 @@ class DefaultRoleEventTest extends UnitTestCase {
    */
   protected function expectOgRoleCreation(array &$roles) {
     foreach ($roles as &$properties) {
-      $role = new OgRole($properties, 'og_role');
+      $role = new OgRole($properties);
       $properties = $role;
     }
   }

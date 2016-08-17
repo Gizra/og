@@ -160,7 +160,7 @@ class OgEntityAccessTest extends KernelTestBase {
     $this->adminUser = User::create(['name' => $this->randomString()]);
     $this->adminUser->save();
 
-    // Define the group content as group.
+    // Declare the test entity as being a group.
     Og::groupManager()->addGroup('entity_test', $this->groupBundle);
 
     // Create a group and associate with user 1.
@@ -280,7 +280,7 @@ class OgEntityAccessTest extends KernelTestBase {
 
     // Allow the permission to a non-member user.
     /** @var OgRole $role */
-    $role = Og::getRole('entity_test', $this->groupBundle, OgRoleInterface::ANONYMOUS);
+    $role = OgRole::loadByGroupAndName($this->group1, OgRoleInterface::ANONYMOUS);
     $role
       ->grantPermission('some_perm')
       ->save();

@@ -200,7 +200,7 @@ class OgMembership extends ContentEntityBase implements OgMembershipInterface {
   /**
    * {@inheritdoc}
    */
-  public function setRoles(array $roles = array()) {
+  public function setRoles(array $roles = []) {
     $role_ids = array_map(function (OgRole $role) {
       return $role->id();
     }, $roles);
@@ -223,6 +223,11 @@ class OgMembership extends ContentEntityBase implements OgMembershipInterface {
    * {@inheritdoc}
    */
   public function hasPermission($permission) {
+    // Blocked users do not have any permissions.
+    if ($this->getState() === OgMembershipInterface::STATE_BLOCKED) {
+      return FALSE;
+    }
+
     return array_filter($this->getRoles(), function (OgRole $role) use ($permission) {
       return $role->hasPermission($permission);
     });
@@ -263,9 +268,9 @@ class OgMembership extends ContentEntityBase implements OgMembershipInterface {
       ->setLabel(t('Group entity id.'))
       ->setDescription(t("The entity ID of the group."));
 
-    $fields['state'] = BaseFieldDefinition::create('integer')
+    $fields['state'] = BaseFieldDefinition::create('string')
       ->setLabel(t('State'))
-      ->setDescription(t("The state of the group content."))
+      ->setDescription(t('The user membership state: active, pending, or blocked.'))
       ->setDefaultValue(OgMembershipInterface::STATE_ACTIVE);
 
     $fields['roles'] = BaseFieldDefinition::create('entity_reference')

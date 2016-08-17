@@ -7,7 +7,7 @@ use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Entity\EntityManagerInterface;
 use Drupal\Core\Entity\EntityStorageInterface;
 use Drupal\Core\Session\AccountInterface;
-use Drupal\og\Og;
+use Drupal\og\MembershipManager;
 use Drupal\og\OgMembershipInterface;
 use Drupal\Tests\UnitTestCase;
 use Prophecy\Argument;
@@ -119,7 +119,8 @@ class CreateMembershipTest extends UnitTestCase {
    * @covers ::createMembership
    */
   public function testNewGroup() {
-    $membership = Og::createMembership($this->group->reveal(), $this->user->reveal());
+    $membership_manager = new MembershipManager();
+    $membership = $membership_manager->createMembership($this->group->reveal(), $this->user->reveal());
     $this->assertInstanceOf(OgMembershipInterface::class, $membership);
   }
 
