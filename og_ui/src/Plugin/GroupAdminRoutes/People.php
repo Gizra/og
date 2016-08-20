@@ -2,12 +2,12 @@
 
 namespace Drupal\og_ui\Plugin\GroupAdminRoutes;
 
-use Drupal\Core\Access\AccessResultAllowed;
-use Drupal\Core\StringTranslation\StringTranslationTrait;
 use Drupal\og_ui\OgUiAdminRouteAbstract;
 use Drupal\og_ui\OgUiAdminRouteInterface;
 
 /**
+ * Manage people in the group.
+ *
  * @GroupAdminRoutes(
  *   id = "people",
  *   path = "people",

@@ -23,13 +23,15 @@ class OgUiLocalTask extends DeriverBase implements ContainerDeriverInterface {
   use StringTranslationTrait;
 
   /**
-   * The entity manager
+   * The entity manager.
    *
    * @var \Drupal\Core\Entity\EntityManagerInterface
    */
   protected $entityManager;
 
   /**
+   * Route provider object.
+   *
    * @var RouteProvider
    */
   protected $routProvider;
@@ -77,7 +79,7 @@ class OgUiLocalTask extends DeriverBase implements ContainerDeriverInterface {
       $this->derivatives[$entity_type_id . '.group_admin_pages'] = array(
         'route_name' => $route_name,
         'title' => $this->t('Group'),
-        'base_route' => 'entity.'. $entity_type_id . '.canonical',
+        'base_route' => 'entity.' . $entity_type_id . '.canonical',
         'weight' => 100,
       );
     }

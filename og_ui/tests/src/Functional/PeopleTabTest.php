@@ -38,6 +38,8 @@ class PeopleTabTest extends BrowserTestBase {
   protected $adminUser;
 
   /**
+   * A non-admin user object.
+   *
    * @var \Drupal\user\Entity\User
    */
   protected $standardUser;
@@ -50,11 +52,15 @@ class PeopleTabTest extends BrowserTestBase {
   protected $entityTypeManager;
 
   /**
+   * OgRole object.
+   *
    * @var OgRole
    */
   protected $ogRole;
 
   /**
+   * A group object.
+   *
    * @var \Drupal\node\Entity\Node
    */
   protected $group;

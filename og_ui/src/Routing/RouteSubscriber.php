@@ -7,14 +7,11 @@
 
 namespace Drupal\og_ui\Routing;
 
-use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Entity\EntityTypeManager;
 use Drupal\Core\Routing\RouteProvider;
 use Drupal\Core\Routing\RouteSubscriberBase;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
-use Drupal\Core\Url;
 use Drupal\og_ui\OgUi;
-use Drupal\og_ui\OgUiAdminRouteInterface;
 use Symfony\Component\Routing\Route;
 use Symfony\Component\Routing\RouteCollection;
 
@@ -74,6 +71,12 @@ class RouteSubscriber extends RouteSubscriberBase {
     $this->createRoutesFromAdminRoutesPlugins($collection);
   }
 
+  /**
+   * Creating from OG tasks plugins.
+   *
+   * @param RouteCollection $collection
+   *   The route collection object.
+   */
   protected function createRoutesFromAdminRoutesPlugins(RouteCollection $collection) {
     /** @var RouteProvider $route_provider */
     $route_provider = \Drupal::getContainer()->get('router.route_provider');

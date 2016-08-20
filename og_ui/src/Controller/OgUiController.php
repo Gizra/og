@@ -123,13 +123,14 @@ class OgUiController extends ControllerBase {
    * Show all the available admin pages.
    *
    * @return mixed
+   *   List of avialable task for the current group.
    */
   public function ogTasks() {
     $entity = OgUi::getEntity();
     $plugins = OgUi::getGroupAdminPlugins();
     $list = [];
     foreach ($plugins as $plugin) {
-      
+
       $plugin = $plugin->setGroup($entity);
 
       if (!$plugin->access()) {

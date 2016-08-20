@@ -2,12 +2,16 @@
 
 namespace Drupal\og_ui;
 
+/**
+ * Class OgUi.
+ */
 class OgUi {
 
   /**
    * Get all the admin routes plugins.
    *
    * @return OgUiAdminRouteInterface[]
+   *   Get all the OG tasks plugins.
    */
   public static function getGroupAdminPlugins() {
     /** @var OgUiAdminRoutesPluginManager $plugins */
@@ -25,6 +29,7 @@ class OgUi {
    * Get the current entity from the route.
    *
    * @return \Drupal\Core\Entity\ContentEntityBase
+   *   Get the current group form the route.
    */
   public static function getEntity() {
     // Un used for unit testing due to the fact that in unit testing the route

@@ -32,6 +32,8 @@ class DeleteMembership extends ActionBase implements ContainerFactoryPluginInter
   protected $currentUser;
 
   /**
+   * The entity storage object.
+   *
    * @var \Drupal\Core\Entity\EntityStorageInterface
    */
   protected $storage;

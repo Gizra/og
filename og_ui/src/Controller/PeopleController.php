@@ -2,25 +2,20 @@
 
 namespace Drupal\og_ui\Controller;
 
-use Drupal\Core\Controller\ControllerBase;
-use Drupal\Core\Form\FormState;
-use Drupal\Core\Link;
-use Drupal\Core\Render\Element\Dropbutton;
-use Drupal\Core\Session\SessionManager;
-use Drupal\Core\Url;
-use Drupal\og_ui\Form\OgUiAddPeopleForm;
 use Drupal\og_ui\OgUi;
-use Drupal\og_ui\OgUiAdminRouteInterface;
 use Drupal\og_ui\OgUiRoutesBase;
 use Drupal\user\PrivateTempStoreFactory;
 use Drupal\views\Views;
 
+/**
+ * PeopleController class.
+ */
 class PeopleController extends OgUiRoutesBase {
 
   /**
    * Display list of people which belong to the group.
    */
-  public function PeopleList() {
+  public function peopleList() {
     /** @var PrivateTempStoreFactory $session_storage */
     $session_storage = \Drupal::service('user.private_tempstore');
     $temp_storage = $session_storage->get('og_ui');

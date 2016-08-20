@@ -13,24 +13,35 @@ use Drupal\user\UserInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpFoundation\Request;
 
+/**
+ * Class OgUiAdminRouteAbstract.
+ */
 abstract class OgUiAdminRouteAbstract extends PluginBase implements OgUiAdminRouteInterface, ContainerFactoryPluginInterface {
 
   /**
+   * The OG access service.
+   *
    * @var OgAccessInterface
    */
   protected $ogAccess;
 
   /**
+   * The current user service.
+   *
    * @var AccountProxyInterface
    */
   protected $currentUser;
 
   /**
+   * The account object.
+   *
    * @var UserInterface
    */
   protected $account;
 
   /**
+   * The group the plugin handle.
+   *
    * @var ContentEntityBase
    */
   protected $group;
@@ -47,6 +58,7 @@ abstract class OgUiAdminRouteAbstract extends PluginBase implements OgUiAdminRou
    * @param OgAccessInterface $og_access
    *   The OgAccess service.
    * @param AccountProxyInterface $current_user
+   *   The current user object.
    */
   public function __construct(array $configuration, $plugin_id, $plugin_definition, OgAccessInterface $og_access, AccountProxyInterface $current_user) {
     parent::__construct($configuration, $plugin_id, $plugin_definition);
@@ -71,6 +83,7 @@ abstract class OgUiAdminRouteAbstract extends PluginBase implements OgUiAdminRou
    * Return the current user object.
    *
    * @return AccountInterface
+   *   The user object.
    */
   public function getAccount() {
     if (!$this->account) {
@@ -87,6 +100,7 @@ abstract class OgUiAdminRouteAbstract extends PluginBase implements OgUiAdminRou
    *   The user object.
    *
    * @return OgUiAdminRouteAbstract
+   *   The current object.
    */
   public function setAccount(AccountInterface $account) {
     $this->account = $account;
@@ -95,7 +109,7 @@ abstract class OgUiAdminRouteAbstract extends PluginBase implements OgUiAdminRou
   }
 
   /**
-   * @inheritDoc
+   * {@inheritDoc}
    */
   public function getGroup() {
     return $this->group;
@@ -110,14 +124,14 @@ abstract class OgUiAdminRouteAbstract extends PluginBase implements OgUiAdminRou
   }
 
   /**
-   * @inheritDoc
+   * {@inheritDoc}
    */
   public function getPath() {
     return $this->pluginDefinition['path'];
   }
 
   /**
-   * @inheritDoc
+   * {@inheritDoc}
    */
   public function getRoutes() {
     return [];
@@ -133,7 +147,7 @@ abstract class OgUiAdminRouteAbstract extends PluginBase implements OgUiAdminRou
   }
 
   /**
-   * @inheritDoc
+   * {@inheritDoc}
    */
   public function getUrlFromRoute($route_key, Request $request) {
     $route = $this->getRoute($route_key);
@@ -141,7 +155,7 @@ abstract class OgUiAdminRouteAbstract extends PluginBase implements OgUiAdminRou
     $route_info = [
       '/' . Url::createFromRequest($request)->toString(),
       $this->pluginDefinition['path'],
-      $route['sub_path']
+      $route['sub_path'],
     ];
 
     return Url::fromUserInput(implode('/', $route_info));

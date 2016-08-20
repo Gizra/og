@@ -6,6 +6,11 @@ use Drupal\Core\Cache\CacheBackendInterface;
 use Drupal\Core\Extension\ModuleHandlerInterface;
 use Drupal\Core\Plugin\DefaultPluginManager;
 
+/**
+ * Manager for the OG tasks plugins.
+ *
+ * @package Drupal\og_ui
+ */
 class OgUiAdminRoutesPluginManager extends DefaultPluginManager {
 
   /**

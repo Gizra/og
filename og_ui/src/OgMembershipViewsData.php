@@ -14,7 +14,7 @@ class OgMembershipViewsData extends EntityViewsData {
    */
   public function getViewsData() {
     $data = parent::getViewsData();
-    
+
     return $data;
   }
 
