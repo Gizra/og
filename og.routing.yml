@@ -1,7 +1,7 @@
 # Routes for Organic groups.
 
 og.subscribe:
-  path: 'group/{entity_type_id}/{entity_id}/subscribe/{membership_type}'
+  path: 'group/{entity_type_id}/{group}/subscribe/{membership_type}'
   defaults:
     _controller: '\Drupal\og\Controller\SubscriptionController::subscribe'
     _title: 'Join Group'
@@ -13,13 +13,19 @@ og.subscribe:
     _access: 'TRUE'
   options:
     parameters:
+      group:
+        type: entity:{entity_type_id}
       membership_type:
         type: entity:og_membership_type
 
 og.unsubscribe:
-  path: 'group/{entity_type_id}/{entity_id}/unsubscribe'
+  path: 'group/{entity_type_id}/{group}/unsubscribe'
   defaults:
     _controller: '\Drupal\og\Controller\SubscriptionController::unsubscribe'
     _title: 'Leave Group'
   requirements:
     _user_is_logged_in: 'TRUE'
+  options:
+    parameters:
+      group:
+        type: entity:{entity_type_id}

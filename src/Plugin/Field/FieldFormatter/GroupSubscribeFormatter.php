@@ -118,7 +118,7 @@ class GroupSubscribeFormatter extends FormatterBase implements ContainerFactoryP
 
     if (Og::isMember($group, $user, [OgMembershipInterface::STATE_ACTIVE, OgMembershipInterface::STATE_PENDING])) {
       $link['title'] = $this->t('Unsubscribe from group');
-      $link['url'] = Url::fromRoute('og.unsubscribe', ['entity_type_id' => $entity_type_id, 'entity_id' => $group->id()]);
+      $link['url'] = Url::fromRoute('og.unsubscribe', ['entity_type_id' => $entity_type_id, 'group' => $group->id()]);
       $link['class'] = ['unsubscribe'];
     }
     else {
@@ -126,7 +126,7 @@ class GroupSubscribeFormatter extends FormatterBase implements ContainerFactoryP
       if ($user->isAuthenticated()) {
         $parameters = [
           'entity_type_id' => $group->getEntityTypeId(),
-          'entity_id' => $group->id(),
+          'group' => $group->id(),
         ];
 
         $url = Url::fromRoute('og.subscribe', $parameters);
