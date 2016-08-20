@@ -4,12 +4,16 @@ namespace Drupal\og\Plugin\Field\FieldFormatter;
 
 use Drupal\Core\Field\FieldItemListInterface;
 use Drupal\Core\Field\FormatterBase;
+use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
 use Drupal\Core\Routing\RedirectDestinationTrait;
+use Drupal\Core\Session\AccountInterface;
 use Drupal\Core\Url;
 use Drupal\og\Og;
+use Drupal\og\OgAccessInterface;
 use Drupal\og\OgMembershipInterface;
 use Drupal\user\Entity\User;
 use Drupal\user\EntityOwnerInterface;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Plugin implementation for the OG subscribe formatter.
@@ -23,9 +27,58 @@ use Drupal\user\EntityOwnerInterface;
  *   }
  * )
  */
-class GroupSubscribeFormatter extends FormatterBase {
+class GroupSubscribeFormatter extends FormatterBase implements ContainerFactoryPluginInterface {
 
   use RedirectDestinationTrait;
+
+  /**
+   * The current user.
+   *
+   * @var \Drupal\Core\Session\AccountInterface
+   */
+  protected $currentUser;
+
+  /**
+   * The OG access service.
+   *
+   * @var \Drupal\og\OgAccessInterface
+   */
+  protected $ogAccess;
+
+  /**
+   * Constructs a new GroupSubscribeFormatter object.
+   *
+   * @param array $configuration
+   *   A configuration array containing information about the plugin instance.
+   * @param string $plugin_id
+   *   The plugin_id for the plugin instance.
+   * @param mixed $plugin_definition
+   *   The plugin implementation definition.
+   * @param \Drupal\Core\Session\AccountInterface $current_user
+   *   The current user.
+   * @param \Drupal\og\OgAccessInterface $og_access
+   *   The OG access service.
+   */
+  public function __construct(array $configuration, $plugin_id, $plugin_definition, AccountInterface $current_user, OgAccessInterface $og_access) {
+    parent::__construct($configuration, $plugin_id, $plugin_definition);
+
+    $this->currentUser = $current_user;
+    $this->ogAccess = $og_access;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public static function create(ContainerInterface $container, array $configuration, $plugin_id, $plugin_definition) {
+    return new static(
+      $configuration,
+      $plugin_id,
+      $plugin_definition,
+      $container->get('current_user'),
+      $container->get('og.access')
+    );
+  }
+
 
   /**
    * {@inheritdoc}
@@ -41,7 +94,7 @@ class GroupSubscribeFormatter extends FormatterBase {
     $group = $items->getEntity();
     $entity_type_id = $group->getEntityTypeId();
 
-    $user = User::load(\Drupal::currentUser()->id());
+    $user = User::load($this->currentUser->id());
     if (($group instanceof EntityOwnerInterface) && ($group->getOwnerId() == $user->id())) {
       // User is the group manager.
       $elements[0] = [
@@ -56,9 +109,6 @@ class GroupSubscribeFormatter extends FormatterBase {
 
       return $elements;
     }
-
-    /** @var \Drupal\og\OgAccessInterface $og_access */
-    $og_access = \Drupal::service('og.access');
 
     if (Og::isMemberBlocked($group, $user)) {
       // If user is blocked, they should not be able to apply for
@@ -87,12 +137,12 @@ class GroupSubscribeFormatter extends FormatterBase {
       }
 
       /** @var \Drupal\Core\Access\AccessResult $access */
-      if (($access = $og_access->userAccess($group, 'subscribe without approval', $user)) && $access->isAllowed()) {
+      if (($access = $this->ogAccess->userAccess($group, 'subscribe without approval', $user)) && $access->isAllowed()) {
         $link['title'] = $this->t('Subscribe to group');
         $link['class'] = ['subscribe'];
         $link['url'] = $url;
       }
-      elseif (($access = $og_access->userAccess($group, 'subscribe', $user)) && $access->isAllowed()) {
+      elseif (($access = $this->ogAccess->userAccess($group, 'subscribe', $user)) && $access->isAllowed()) {
         $link['title'] = $this->t('Request group membership');
         $link['class'] = ['subscribe', 'request'];
         $link['url'] = $url;
