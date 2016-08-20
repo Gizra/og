@@ -123,6 +123,9 @@ class PeopleTabTest extends BrowserTestBase {
 
     $this->drupalGet($base_url . '/group/people/manage');
     $this->assertSession()->statusCodeEquals(200);
+
+    // Verify the admin is listed in the group members.
+    $this->assertLink($this->adminUser->label());
   }
 
 }

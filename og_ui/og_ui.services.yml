@@ -4,10 +4,6 @@ services:
     arguments: ['@entity_type.manager']
     tags:
       - { name: event_subscriber }
-  og_ui.event_subscriber:
-    class: Drupal\og_ui\EventSubscriber\OgUiEventSubscriber
-    tags:
-      - { name: event_subscriber }
   plugin.manager.og_ui.group_admin_route:
     class: Drupal\og_ui\OgUiAdminRoutesPluginManager
     parent: default_plugin_manager
