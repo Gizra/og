@@ -103,13 +103,10 @@ class PeopleTabTest extends BrowserTestBase {
       ->save();
 
     /** @var OgMembership $membership */
-    $membership = OgMembership::create(['type' => OgMembershipInterface::TYPE_DEFAULT]);
-    $membership
-      ->setUser($this->adminUser->id())
-      ->setEntityId($this->adminUser->id())
-      ->setGroupEntityType($this->group->getEntityTypeId())
-      ->addRole($this->ogRole->id())
-      ->save();
+    $membership = Og::createMembership($this->group, $this->adminUser)
+      ->addRole($this->ogRole);
+
+    $membership->save();
   }
 
   /**
