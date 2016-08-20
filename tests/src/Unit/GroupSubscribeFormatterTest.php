@@ -212,10 +212,7 @@ class GroupSubscribeFormatterTest extends UnitTestCase {
       ->willReturn($this->userId);
 
     $container = new ContainerBuilder();
-    $container->set('current_user', $this->accountProxy->reveal());
     $container->set('entity.manager', $this->entityManager->reveal());
-    $container->set('og.access', $this->ogAccess->reveal());
-    $container->set('og.group.manager', $this->groupManager->reveal());
     $container->set('og.membership_manager', $this->membershipManager->reveal());
     $container->set('string_translation', $this->getStringTranslationStub());
 
@@ -229,9 +226,7 @@ class GroupSubscribeFormatterTest extends UnitTestCase {
     // Return the same ID as the user.
     $this->group->getOwnerId()->willReturn($this->userId);
 
-    $formatter = new GroupSubscribeFormatter('', [], $this->fieldDefinitionInterface->reveal(), [], '', [], []);
-    $elements = $formatter->viewElements($this->fieldItemList->reveal(), $this->randomMachineName());
-
+    $elements = $this->getElements();
     $this->assertEquals('You are the group manager', $elements[0]['#value']);
   }
 
@@ -244,9 +239,7 @@ class GroupSubscribeFormatterTest extends UnitTestCase {
     $this->ogAccess->userAccess($this->group->reveal(), 'subscribe without approval', $this->user->reveal())->willReturn($this->accessResult->reveal());
     $this->accessResult->isAllowed()->willReturn(TRUE);
 
-    $formatter = new GroupSubscribeFormatter('', [], $this->fieldDefinitionInterface->reveal(), [], '', [], []);
-    $elements = $formatter->viewElements($this->fieldItemList->reveal(), $this->randomMachineName());
-
+    $elements = $this->getElements();
     $this->assertEquals('Subscribe to group', $elements[0]['#title']);
   }
 
@@ -259,9 +252,7 @@ class GroupSubscribeFormatterTest extends UnitTestCase {
     $this->ogAccess->userAccess($this->group->reveal(), 'subscribe without approval', $this->user->reveal())->willReturn($this->accessResult->reveal());
     $this->accessResult->isAllowed()->willReturn(TRUE);
 
-    $formatter = new GroupSubscribeFormatter('', [], $this->fieldDefinitionInterface->reveal(), [], '', [], []);
-    $elements = $formatter->viewElements($this->fieldItemList->reveal(), $this->randomMachineName());
-
+    $elements = $this->getElements();
     $this->assertEquals('Subscribe to group', $elements[0]['#title']);
   }
 
@@ -287,9 +278,7 @@ class GroupSubscribeFormatterTest extends UnitTestCase {
 
     $access_result->isAllowed()->willReturn(TRUE);
 
-    $formatter = new GroupSubscribeFormatter('', [], $this->fieldDefinitionInterface->reveal(), [], '', [], []);
-    $elements = $formatter->viewElements($this->fieldItemList->reveal(), $this->randomMachineName());
-
+    $elements = $this->getElements();
     $this->assertEquals('Request group membership', $elements[0]['#title']);
   }
 
@@ -308,9 +297,7 @@ class GroupSubscribeFormatterTest extends UnitTestCase {
 
     $this->accessResult->isAllowed()->willReturn(FALSE);
 
-    $formatter = new GroupSubscribeFormatter('', [], $this->fieldDefinitionInterface->reveal(), [], '', [], []);
-    $elements = $formatter->viewElements($this->fieldItemList->reveal(), $this->randomMachineName());
-
+    $elements = $this->getElements();
     $this->assertTrue(strpos($elements[0]['#value'], 'This is a closed group.') === 0);
   }
 
@@ -325,9 +312,7 @@ class GroupSubscribeFormatterTest extends UnitTestCase {
       ->isMember($this->group->reveal(), $this->user->reveal(), [OgMembershipInterface::STATE_BLOCKED])
       ->willReturn(TRUE);
 
-    $formatter = new GroupSubscribeFormatter('', [], $this->fieldDefinitionInterface->reveal(), [], '', [], []);
-    $elements = $formatter->viewElements($this->fieldItemList->reveal(), $this->randomMachineName());
-
+    $elements = $this->getElements();
     $this->assertTrue(empty($elements[0]));
   }
 
@@ -347,10 +332,30 @@ class GroupSubscribeFormatterTest extends UnitTestCase {
       ->isMember($this->group->reveal(), $this->user->reveal(), [OgMembershipInterface::STATE_ACTIVE, OgMembershipInterface::STATE_PENDING])
       ->willReturn(TRUE);
 
-    $formatter = new GroupSubscribeFormatter('', [], $this->fieldDefinitionInterface->reveal(), [], '', [], []);
-    $elements = $formatter->viewElements($this->fieldItemList->reveal(), $this->randomMachineName());
-
+    $elements = $this->getElements();
     $this->assertEquals('Unsubscribe from group', $elements[0]['#title']);
+  }
+
+  /**
+   * Helper method; Return the renderable elements from the formatter.
+   *
+   * @return array
+   *   The renderable array.
+   */
+  protected function getElements() {
+    $formatter = new GroupSubscribeFormatter(
+      '',
+      [],
+      $this->fieldDefinitionInterface->reveal(),
+      [],
+      '',
+      '',
+      [],
+      $this->entityManager->reveal(),
+      $this->accountProxy->reveal(),
+      $this->ogAccess->reveal()
+    );
+    return $formatter->viewElements($this->fieldItemList->reveal(), $this->randomMachineName());
   }
 
 }
