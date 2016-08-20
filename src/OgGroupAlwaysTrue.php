@@ -7,7 +7,7 @@ use Drupal\Core\TypedData\Plugin\DataType\BooleanData;
 /**
  * Overridden boolean data type to hardcode TRUE.
  */
-class OgGroupBoolean extends BooleanData {
+class OgGroupAlwaysTrue extends BooleanData {
 
   /**
    * {@inheritdoc}
