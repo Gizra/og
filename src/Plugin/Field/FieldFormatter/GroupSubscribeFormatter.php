@@ -79,7 +79,6 @@ class GroupSubscribeFormatter extends FormatterBase implements ContainerFactoryP
     );
   }
 
-
   /**
    * {@inheritdoc}
    */
