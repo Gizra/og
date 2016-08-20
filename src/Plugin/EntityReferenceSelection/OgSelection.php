@@ -1,13 +1,7 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\og\Plugin\EntityReferenceSelection\OgSelection.
- */
-
 namespace Drupal\og\Plugin\EntityReferenceSelection;
 
-use Drupal\Core\Entity\ContentEntityInterface;
 use Drupal\Core\Entity\Plugin\EntityReferenceSelection\DefaultSelection;
 use Drupal\user\Entity\User;
 use Drupal\og\Og;
@@ -35,6 +29,7 @@ class OgSelection extends DefaultSelection {
    * Get the selection handler of the field.
    *
    * @return DefaultSelection
+   *   Returns the selection handler.
    */
   public function getSelectionHandler() {
     $options = [
@@ -48,8 +43,9 @@ class OgSelection extends DefaultSelection {
   }
 
   /**
-   * Overrides the basic entity query object. Return only group in the matching
-   * results.
+   * Overrides ::buildEntityQuery.
+   *
+   * Return only group in the matching results.
    *
    * @param string|null $match
    *   (Optional) Text to match the label against. Defaults to NULL.
@@ -67,7 +63,6 @@ class OgSelection extends DefaultSelection {
     // the default selection handler of the entity, which the field reference
     // to, and add another logic to the query object i.e. check if the entities
     // bundle defined as group.
-
     $query = $this->getSelectionHandler()->buildEntityQuery($match, $match_operator);
     $target_type = $this->configuration['target_type'];
     $entityDefinition = \Drupal::entityTypeManager()->getDefinition($target_type);
@@ -114,11 +109,16 @@ class OgSelection extends DefaultSelection {
   }
 
   /**
+   * Return all the user's groups.
    *
    * @return ContentEntityInterface[]
+   *   Array with the user's group, or an empty array if none found.
    */
   protected function getUserGroups() {
-    $other_groups = Og::getUserGroups(User::load($this->currentUser->id()));
+    $user = User::load($this->currentUser->id());
+    /** @var \Drupal\og\MembershipManagerInterface $membership_manager */
+    $membership_manager = \Drupal::service('og.membership_manager');
+    $other_groups = $membership_manager->getUserGroups($user);
     return isset($other_groups[$this->configuration['target_type']]) ? $other_groups[$this->configuration['target_type']] : [];
   }
 

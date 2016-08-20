@@ -2,6 +2,8 @@
 
 namespace Drupal\og\Event;
 
+use Drupal\og\PermissionInterface;
+
 /**
  * Interface for PermissionEvent classes.
  *
@@ -21,25 +23,8 @@ interface PermissionEventInterface extends \ArrayAccess, \IteratorAggregate {
    * @param string $name
    *   The name of the permission to return.
    *
-   * @return array
-   *   An associative array, keyed by permission name, with the following keys:
-   *   - 'title': The human readable permission title. Make sure this is
-   *     translated with t().
-   *   - 'description': Optional longer description to show alongside the
-   *     permission. Make sure this is translated with t().
-   *   - 'roles': Optional array of default role names to which the permission
-   *     is limited. For example the 'subscribe' permission can only be assigned
-   *     to non-members, as a member doesn't need it. Values can be one or more
-   *     of OgRoleInterface::ANONYMOUS, OgRoleInterface::AUTHENTICATED, or
-   *     OgRoleInterface::ADMINISTRATOR.
-   *   - 'default roles': Optional array of default role names for which the
-   *     permission will be enabled by default. Values can be one or more of
-   *     OgRoleInterface::ANONYMOUS, OgRoleInterface::AUTHENTICATED, or
-   *     OgRoleInterface::ADMINISTRATOR.
-   *   - 'restrict access': Optional boolean indicating whether or not this is a
-   *     permission that requires elevated privileges. Use this for permissions
-   *     that are mainly intended for the group administrator or similar roles.
-   *     Defaults to FALSE.
+   * @return \Drupal\og\PermissionInterface
+   *   The permission.
    *
    * @throws \InvalidArgumentException
    *   Thrown when the permission with the given name does not exist.
@@ -47,31 +32,49 @@ interface PermissionEventInterface extends \ArrayAccess, \IteratorAggregate {
   public function getPermission($name);
 
   /**
+   * Returns a group content operation permission by its identifying properties.
+   *
+   * @param string $entity_type_id
+   *   The group content entity type ID to which this permission applies.
+   * @param string $bundle_id
+   *    The group content bundle ID to which this permission applies.
+   * @param string $operation
+   *   The entity operation to which this permission applies.
+   * @param bool $owner
+   *   Set to FALSE if this permission applies to all entities, or to TRUE if it
+   *   only applies to the ones owned by the user. Defaults to FALSE.
+   *
+   * @return \Drupal\og\GroupContentOperationPermission
+   *   The permission.
+   *
+   * @throws \InvalidArgumentException
+   *   Thrown if the permission with the given properties does not exist.
+   */
+  public function getGroupContentOperationPermission($entity_type_id, $bundle_id, $operation, $owner = FALSE);
+
+  /**
    * Returns all the permissions.
    *
-   * @return array
-   *   An associative array of permission arrays, keyed by permission name.
+   * @return \Drupal\og\PermissionInterface[]
+   *   An associative array of permissions, keyed by permission name.
    */
   public function getPermissions();
 
   /**
    * Sets the permission with the given data.
    *
-   * @param string $name
-   *   The name of the permission to set.
-   * @param array $permission
-   *   The permission array to set.
+   * @param \Drupal\og\PermissionInterface $permission
+   *   The permission to set.
    *
    * @throws \InvalidArgumentException
-   *   Thrown when no name is given, or when the permission array does not have
-   *   a title key.
+   *   Thrown when the permission has no name or title.
    */
-  public function setPermission($name, array $permission);
+  public function setPermission(PermissionInterface $permission);
 
   /**
    * Sets multiple permissions.
    *
-   * @param array $permissions
+   * @param \Drupal\og\PermissionInterface[] $permissions
    *   The permissions to set, keyed by permission name.
    */
   public function setPermissions(array $permissions);
@@ -85,6 +88,21 @@ interface PermissionEventInterface extends \ArrayAccess, \IteratorAggregate {
   public function deletePermission($name);
 
   /**
+   * Deletes a group content operation permission by its identifying properties.
+   *
+   * @param string $entity_type_id
+   *   The group content entity type ID to which this permission applies.
+   * @param string $bundle_id
+   *    The group content bundle ID to which this permission applies.
+   * @param string $operation
+   *   The entity operation to which this permission applies.
+   * @param bool $owner
+   *   Set to FALSE if this permission applies to all entities, or to TRUE if it
+   *   only applies to the ones owned by the user. Defaults to FALSE.
+   */
+  public function deleteGroupContentOperationPermission($entity_type_id, $bundle_id, $operation, $owner = FALSE);
+
+  /**
    * Returns whether or not the given permission exists.
    *
    * @param string $name
@@ -96,12 +114,30 @@ interface PermissionEventInterface extends \ArrayAccess, \IteratorAggregate {
   public function hasPermission($name);
 
   /**
+   * Returns if a group content operation permission matches given properties.
+   *
+   * @param string $entity_type_id
+   *   The group content entity type ID to which this permission applies.
+   * @param string $bundle_id
+   *    The group content bundle ID to which this permission applies.
+   * @param string $operation
+   *   The entity operation to which this permission applies.
+   * @param bool $owner
+   *   Set to FALSE if this permission applies to all entities, or to TRUE if it
+   *   only applies to the ones owned by the user. Defaults to FALSE.
+   *
+   * @return bool
+   *   Whether or not the permission exists.
+   */
+  public function hasGroupContentOperationPermission($entity_type_id, $bundle_id, $operation, $owner = FALSE);
+
+  /**
    * Returns the entity type ID of the group to which the permissions apply.
    *
    * @return string
    *   The entity type ID.
    */
-  public function getEntityTypeId();
+  public function getGroupEntityTypeId();
 
   /**
    * Returns the bundle ID of the group to which the permissions apply.
@@ -109,18 +145,15 @@ interface PermissionEventInterface extends \ArrayAccess, \IteratorAggregate {
    * @return string
    *   The bundle ID.
    */
-  public function getBundleId();
+  public function getGroupBundleId();
 
   /**
-   * Returns permissions that are enabled by default for the given role.
-   *
-   * @param string $role_name
-   *   A default role name. One of OgRoleInterface::ANONYMOUS,
-   *   OgRoleInterface::AUTHENTICATED, or OgRoleInterface::ADMINISTRATOR.
+   * Returns the IDs of group content bundles to which the permissions apply.
    *
    * @return array
-   *   An array of permissions that are enabled by default for the given role.
+   *   An array of group content bundle IDs, keyed by group content entity type
+   *   ID.
    */
-  public function filterByDefaultRole($role_name);
+  public function getGroupContentBundleIds();
 
 }

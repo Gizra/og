@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\og_ui\Form\AdminSettingsForm.
- */
-
 namespace Drupal\og_ui\Form;
 
 use Drupal\Component\Plugin\PluginManagerInterface;

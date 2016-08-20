@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains Drupal\og\Annotation\OgFields.
- */
-
 namespace Drupal\og\Annotation;
 
 use Drupal\Component\Annotation\Plugin;

@@ -1,17 +1,13 @@
 <?php
 
-/**
- * @file
- * Contains Drupal\Tests\og\Kernel\Entity\OgMembershipRoleReference.
- */
-
 namespace Drupal\Tests\og\Kernel\Entity;
 
+use Drupal\Component\Utility\Unicode;
 use Drupal\KernelTests\KernelTestBase;
 use Drupal\node\Entity\Node;
-use Drupal\og\Entity\OgMembership;
+use Drupal\node\Entity\NodeType;
 use Drupal\og\Entity\OgRole;
-use Drupal\og\OgMembershipInterface;
+use Drupal\og\Og;
 use Drupal\user\Entity\User;
 
 /**
@@ -24,21 +20,31 @@ class OgMembershipRoleReferenceTest extends KernelTestBase {
   /**
    * {@inheritdoc}
    */
-  public static $modules = ['og', 'node', 'user', 'system'];
+  public static $modules = [
+    'og',
+    'field',
+    'node',
+    'user',
+    'system',
+  ];
 
   /**
-   * @var string
-   *
    * The machine name of the group node type.
+   *
+   * @var string
    */
   protected $groupBundle;
 
   /**
+   * The group entity, of type node.
+   *
    * @var Node
    */
   protected $group;
 
   /**
+   * The user object.
+   *
    * @var User
    */
   protected $user;
@@ -56,7 +62,14 @@ class OgMembershipRoleReferenceTest extends KernelTestBase {
     $this->installEntitySchema('node');
     $this->installSchema('system', 'sequences');
 
-    $this->groupBundle = $this->randomMachineName();
+    // Create a "group" node type and turn it into a group type.
+    $group_bundle = Unicode::strtolower($this->randomMachineName());
+    NodeType::create([
+      'type' => $group_bundle,
+      'name' => $this->randomString(),
+    ])->save();
+
+    Og::groupManager()->addGroup('node', $group_bundle);
 
     $this->user = User::create(['name' => $this->randomString()]);
     $this->user->save();
@@ -64,8 +77,9 @@ class OgMembershipRoleReferenceTest extends KernelTestBase {
     $this->group = Node::create([
       'title' => $this->randomString(),
       'uid' => $this->user->id(),
-      'type' => $this->groupBundle,
+      'type' => $group_bundle,
     ]);
+    $this->group->save();
   }
 
   /**
@@ -92,27 +106,24 @@ class OgMembershipRoleReferenceTest extends KernelTestBase {
     $group_member->save();
 
     /** @var OgMembership $membership */
-    $membership = OgMembership::create(['type' => OgMembershipInterface::TYPE_DEFAULT]);
+    $membership = Og::createMembership($this->group, $this->user);
     $membership
-      ->setGroupEntityType('node')
-      ->setEntityId($this->group->id())
-      ->setUser($this->user)
       // Assign only the content editor role for now.
-      ->setRoles([$content_editor->id()])
+      ->setRoles([$content_editor])
       ->save();
 
     $roles_ids = $membership->getRolesIds();
     $this->assertTrue(in_array($content_editor->id(), $roles_ids), 'The membership has the content editor role.');
 
     // Adding another role to the membership.
-    $membership->addRole($group_member->id());
+    $membership->addRole($group_member);
     $roles_ids = $membership->getRolesIds();
 
     $this->assertTrue(in_array($content_editor->id(), $roles_ids), 'The membership has the content editor role.');
     $this->assertTrue(in_array($group_member->id(), $roles_ids), 'The membership has the group member role.');
 
     // Remove a role.
-    $membership->revokeRole($content_editor->id());
+    $membership->revokeRole($content_editor);
 
     $roles_ids = $membership->getRolesIds();
     $this->assertFalse(in_array($content_editor->id(), $roles_ids), 'The membership does not have the content editor role after is has been revoked.');
@@ -120,7 +131,7 @@ class OgMembershipRoleReferenceTest extends KernelTestBase {
 
     // Check if the role has permission from the membership.
     $this->assertFalse($membership->hasPermission('administer group'), 'The user has permission to administer groups.');
-    $membership->addRole($content_editor->id());
+    $membership->addRole($content_editor);
     $this->assertTrue($membership->hasPermission('administer group'), 'The user has permission to administer groups.');
   }
 

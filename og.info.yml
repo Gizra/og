@@ -8,4 +8,5 @@ type: module
 dependencies:
   - options
   - text
+  - field
   - user

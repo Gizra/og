@@ -58,8 +58,9 @@ class GetGroupContentTest extends KernelTestBase {
     $this->installEntitySchema('user');
     $this->installSchema('system', 'sequences');
 
-    /** @var \Drupal\Core\Entity\EntityTypeManagerInterface entityTypeManager */
-    $this->entityTypeManager = $this->container->get('entity_type.manager');
+    /** @var \Drupal\Core\Entity\EntityTypeManagerInterface $entity_type_manager */
+    $entity_type_manager = $this->container->get('entity_type.manager');
+    $this->entityTypeManager = $entity_type_manager;
 
     // Create group admin user.
     $this->groupAdmin = User::create(['name' => $this->randomString()]);
@@ -126,7 +127,7 @@ class GetGroupContentTest extends KernelTestBase {
           'field_config' => [
             'settings' => [
               'handler_settings' => [
-                'target_bundles' => [$groups[$target_group_type]->bundle()  => $groups[$target_group_type]->bundle()],
+                'target_bundles' => [$groups[$target_group_type]->bundle() => $groups[$target_group_type]->bundle()],
               ],
             ],
           ],
@@ -146,17 +147,20 @@ class GetGroupContentTest extends KernelTestBase {
       }
     }
 
+    /** @var \Drupal\og\MembershipManagerInterface $membership_manager */
+    $membership_manager = \Drupal::service('og.membership_manager');
+
     // Check that Og::getGroupContent() returns the correct group content for
     // each group.
     foreach (['node', 'entity_test'] as $group_type) {
-      $result = Og::getGroupContentIds($groups[$group_type]);
+      $result = $membership_manager->getGroupContentIds($groups[$group_type]);
       foreach (['node', 'entity_test'] as $group_content_type) {
         $this->assertEquals([$group_content[$group_content_type][$group_type]->id()], $result[$group_content_type], "The correct $group_content_type group content is returned for the $group_type group.");
       }
       // Test that the correct results are returned when filtering by entity
       // type.
       foreach (['node', 'entity_test'] as $filter) {
-        $result = Og::getGroupContentIds($groups[$group_type], [$filter]);
+        $result = $membership_manager->getGroupContentIds($groups[$group_type], [$filter]);
         $this->assertEquals(1, count($result), "Only one entity type is returned when getting $group_type results filtered by $group_content_type group content.");
         $this->assertEquals([$group_content[$filter][$group_type]->id()], $result[$filter], "The correct result is returned for the $group_type group, filtered by $group_content_type group content.");
       }
@@ -209,11 +213,14 @@ class GetGroupContentTest extends KernelTestBase {
     ]);
     $group_content->save();
 
+    /** @var \Drupal\og\MembershipManagerInterface $membership_manager */
+    $membership_manager = \Drupal::service('og.membership_manager');
+
     // Check that Og::getGroupContent() returns the group content entity for
     // both groups.
     $expected = ['entity_test' => [$group_content->id()]];
     foreach ($groups as $key => $groups) {
-      $result = Og::getGroupContentIds($groups);
+      $result = $membership_manager->getGroupContentIds($groups);
       $this->assertEquals($expected, $result, "The group content entity is returned for group $key.");
     }
   }
@@ -235,7 +242,7 @@ class GetGroupContentTest extends KernelTestBase {
     $groups['node'] = Node::create([
       'title' => $this->randomString(),
       'type' => $bundle,
-      'uid' => $this->groupAdmin->id()
+      'uid' => $this->groupAdmin->id(),
     ]);
     $groups['node']->save();
 
@@ -280,11 +287,14 @@ class GetGroupContentTest extends KernelTestBase {
     $group_content = $this->entityTypeManager->getStorage('entity_test')->create($values);
     $group_content->save();
 
+    /** @var \Drupal\og\MembershipManagerInterface $membership_manager */
+    $membership_manager = \Drupal::service('og.membership_manager');
+
     // Check that Og::getGroupContent() returns the group content entity for
     // both groups.
     $expected = ['entity_test' => [$group_content->id()]];
     foreach ($groups as $key => $groups) {
-      $result = Og::getGroupContentIds($groups);
+      $result = $membership_manager->getGroupContentIds($groups);
       $this->assertEquals($expected, $result, "The group content entity is returned for group $key.");
     }
   }

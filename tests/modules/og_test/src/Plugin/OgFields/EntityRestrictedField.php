@@ -29,7 +29,6 @@ class EntityRestrictedField extends OgFieldBase implements OgFieldsInterface {
     return parent::getFieldStorageBaseDefinition($values);
   }
 
-
   /**
    * {@inheritdoc}
    */
@@ -40,7 +39,8 @@ class EntityRestrictedField extends OgFieldBase implements OgFieldsInterface {
   /**
    * {@inheritdoc}
    */
-  public function getViewDisplayDefinition(array $values = [])  {
+  public function getViewDisplayDefinition(array $values = []) {
     return [];
   }
+
 }

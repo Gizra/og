@@ -1,13 +1,7 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\og_ui\Tests\BundleFormAlterTest.
- */
-
 namespace Drupal\og_ui\Tests;
 
-use Drupal\Core\Entity\EntityFieldManagerInterface;
 use Drupal\Core\Form\FormState;
 use Drupal\KernelTests\AssertLegacyTrait;
 use Drupal\node\Entity\NodeType;
@@ -133,7 +127,7 @@ class BundleFormAlterTest extends BrowserTestBase {
   /**
    * Checks whether the target bundles in the group content are as expected.
    *
-   * @param array|NULL $expected
+   * @param array|null $expected
    *   The expected value for the target bundles.
    * @param string $message
    *   The message to display with the assertion.
@@ -143,7 +137,7 @@ class BundleFormAlterTest extends BrowserTestBase {
     $entity_field_manager = $this->container->get('entity_field.manager');
     $entity_field_manager->clearCachedFieldDefinitions();
     $field_definitions = $entity_field_manager->getFieldDefinitions('node', 'class');
-    $settings = $field_definitions['og_group_ref']->getSetting('handler_settings');
+    $settings = $field_definitions['og_audience']->getSetting('handler_settings');
     $this->assertEquals($expected, $settings['target_bundles'], $message);
   }
 
@@ -160,7 +154,7 @@ class BundleFormAlterTest extends BrowserTestBase {
     $entity_field_manager = $this->container->get('entity_field.manager');
     $entity_field_manager->clearCachedFieldDefinitions();
     $field_definitions = $entity_field_manager->getFieldStorageDefinitions('node');
-    $setting = $field_definitions['og_group_ref']->getSetting('target_type');
+    $setting = $field_definitions['og_audience']->getSetting('target_type');
     $this->assertEquals($expected, $setting, $message);
   }
 

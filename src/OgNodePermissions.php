@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\og\OgNodePermissions.
- */
-
 namespace Drupal\og;
 
 use Drupal\node\Entity\NodeType;

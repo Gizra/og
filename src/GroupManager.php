@@ -1,21 +1,15 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\og\GroupManager.
- */
-
 namespace Drupal\og;
 
 use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Entity\EntityTypeBundleInfoInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\State\StateInterface;
-use Drupal\og\Entity\OgRole;
 use Drupal\og\Event\DefaultRoleEvent;
 use Drupal\og\Event\DefaultRoleEventInterface;
-use Drupal\og\Event\PermissionEvent;
-use Drupal\og\Event\PermissionEventInterface;
+use Drupal\og\Event\GroupCreationEvent;
+use Drupal\og\Event\GroupCreationEventInterface;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
 /**
@@ -78,6 +72,13 @@ class GroupManager {
   protected $state;
 
   /**
+   * The OG permission manager.
+   *
+   * @var \Drupal\og\PermissionManagerInterface
+   */
+  protected $permissionManager;
+
+  /**
    * A map of entity types and bundles.
    *
    * Do not access this property directly, use $this->getGroupMap() instead.
@@ -95,7 +96,7 @@ class GroupManager {
    * @var array $groupRelationMap
    *   An associative array representing group and group content relations, in
    *   the following format:
-   *   @code
+   * @code
    *   [
    *     'group_entity_type_id' => [
    *       'group_bundle_id' => [
@@ -105,9 +106,16 @@ class GroupManager {
    *       ],
    *     ],
    *   ]
-   *   @endcode
+   * @endcode
    */
   protected $groupRelationMap = [];
+
+  /**
+   * The module handler.
+   *
+   * @var \Drupal\Core\Extension\ModuleHandlerInterface
+   */
+  protected $moduleHandler;
 
   /**
    * Constructs an GroupManager object.
@@ -118,26 +126,32 @@ class GroupManager {
    *   The entity type manager.
    * @param \Drupal\Core\Entity\EntityTypeBundleInfoInterface $entity_type_bundle_info
    *   The service providing information about bundles.
-   * @param \Symfony\Component\EventDispatcher\EventDispatcherInterface
+   * @param EventDispatcherInterface $event_dispatcher
    *   The event dispatcher.
    * @param \Drupal\Core\State\StateInterface $state
    *   The state service.
+   * @param \Drupal\og\PermissionManagerInterface $permission_manager
+   *   The OG permission manager.
    */
-  public function __construct(ConfigFactoryInterface $config_factory, EntityTypeManagerInterface $entity_type_manager, EntityTypeBundleInfoInterface $entity_type_bundle_info, EventDispatcherInterface $event_dispatcher, StateInterface $state) {
+  public function __construct(ConfigFactoryInterface $config_factory, EntityTypeManagerInterface $entity_type_manager, EntityTypeBundleInfoInterface $entity_type_bundle_info, EventDispatcherInterface $event_dispatcher, StateInterface $state, PermissionManagerInterface $permission_manager) {
     $this->configFactory = $config_factory;
     $this->ogRoleStorage = $entity_type_manager->getStorage('og_role');
     $this->entityTypeBundleInfo = $entity_type_bundle_info;
     $this->eventDispatcher = $event_dispatcher;
     $this->state = $state;
+    $this->permissionManager = $permission_manager;
   }
 
   /**
    * Determines whether an entity type ID and bundle ID are group enabled.
    *
    * @param string $entity_type_id
+   *   The entity type name.
    * @param string $bundle
+   *   The bundle name.
    *
    * @return bool
+   *   TRUE if a bundle is a group.
    */
   public function isGroup($entity_type_id, $bundle) {
     $group_map = $this->getGroupMap();
@@ -145,9 +159,13 @@ class GroupManager {
   }
 
   /**
-   * @param $entity_type_id
+   * Returns the group of an entity type.
    *
-   * @return array
+   * @param string $entity_type_id
+   *   The entity type name.
+   *
+   * @return \Drupal\Core\Entity\EntityInterface[]
+   *   Array of groups, or an empty array if none found
    */
   public function getGroupsForEntityType($entity_type_id) {
     $group_map = $this->getGroupMap();
@@ -221,7 +239,7 @@ class GroupManager {
   }
 
   /**
-   * Sets an entity type instance as being an OG group.
+   * Declares a bundle of an entity type as being an OG group.
    *
    * @param string $entity_type_id
    *   The entity type ID of the bundle to declare as being a group.
@@ -237,6 +255,7 @@ class GroupManager {
       throw new \InvalidArgumentException("The '$entity_type_id' of type '$bundle_id' is already a group.");
     }
     $editable = $this->configFactory->getEditable('og.settings');
+
     $groups = $editable->get('groups');
     $groups[$entity_type_id][] = $bundle_id;
     // @todo, just key by bundle ID instead?
@@ -244,6 +263,10 @@ class GroupManager {
 
     $editable->set('groups', $groups);
     $editable->save();
+
+    // Trigger an event upon the new group creation.
+    $event = new GroupCreationEvent($entity_type_id, $bundle_id);
+    $this->eventDispatcher->dispatch(GroupCreationEventInterface::EVENT_NAME, $event);
 
     $this->createPerBundleRoles($entity_type_id, $bundle_id);
     $this->refreshGroupMap();
@@ -294,13 +317,12 @@ class GroupManager {
       $role->setGroupType($entity_type_id);
       $role->setGroupBundle($bundle_id);
 
-      // Populate the default permissions.
-      $event = new PermissionEvent($entity_type_id, $bundle_id);
-      /** @var \Drupal\og\Event\PermissionEventInterface $permissions */
-      $permissions = $this->eventDispatcher->dispatch(PermissionEventInterface::EVENT_NAME, $event);
-      foreach (array_keys($permissions->filterByDefaultRole($role->getName())) as $permission) {
+      // Populate the default roles with a set of default permissions.
+      $permissions = $this->permissionManager->getDefaultGroupPermissions($entity_type_id, $bundle_id, $role->getName());
+      foreach (array_keys($permissions) as $permission) {
         $role->grantPermission($permission);
       }
+
       $role->save();
     }
   }
@@ -310,6 +332,8 @@ class GroupManager {
    *
    * @return \Drupal\og\Entity\OgRole[]
    *   An associative array of (unsaved) OgRole entities, keyed by role name.
+   *   These are populated with the basic properties: name, label, role_type and
+   *   is_admin.
    *
    * @todo: Would a dedicated RoleManager service be a better place for this?
    */
@@ -457,8 +481,16 @@ class GroupManager {
 
     $this->groupRelationMap = [];
 
+    $user_bundles = \Drupal::entityTypeManager()->getDefinition('user')->getKey('bundle') ?: ['user'];
+
     foreach ($this->entityTypeBundleInfo->getAllBundleInfo() as $group_content_entity_type_id => $bundles) {
       foreach ($bundles as $group_content_bundle_id => $bundle_info) {
+
+        if (in_array($group_content_bundle_id, $user_bundles)) {
+          // User is not a group content per se. Remove it.
+          continue;
+        }
+
         foreach ($this->getGroupBundleIdsByGroupContentBundle($group_content_entity_type_id, $group_content_bundle_id) as $group_entity_type_id => $group_bundle_ids) {
           foreach ($group_bundle_ids as $group_bundle_id) {
             $this->groupRelationMap[$group_entity_type_id][$group_bundle_id][$group_content_entity_type_id][$group_content_bundle_id] = $group_content_bundle_id;

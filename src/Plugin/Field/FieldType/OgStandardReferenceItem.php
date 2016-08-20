@@ -1,13 +1,7 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\og\Plugin\Field\FieldType\OgStandardReferenceItem.
- */
-
 namespace Drupal\og\Plugin\Field\FieldType;
 
-use Drupal\Core\Field\FieldStorageDefinitionInterface;
 use Drupal\Core\Field\Plugin\Field\FieldType\EntityReferenceItem;
 use Drupal\Core\Form\FormStateInterface;
 

@@ -45,6 +45,13 @@ class OgMembershipTest extends KernelTestBase {
   protected $user;
 
   /**
+   * The entity type manager.
+   *
+   * @var \Drupal\Core\Entity\EntityTypeManagerInterface
+   */
+  protected $entityTypeManager;
+
+  /**
    * {@inheritdoc}
    */
   protected function setUp() {
@@ -56,7 +63,9 @@ class OgMembershipTest extends KernelTestBase {
     $this->installEntitySchema('user');
     $this->installSchema('system', 'sequences');
 
-    // Create a bundle and add as a group
+    $this->entityTypeManager = $this->container->get('entity_type.manager');
+
+    // Create a bundle and add as a group.
     $group = EntityTest::create([
       'type' => Unicode::strtolower($this->randomMachineName()),
       'name' => $this->randomString(),
@@ -66,7 +75,7 @@ class OgMembershipTest extends KernelTestBase {
     $this->group = $group;
 
     // Add that as a group.
-    Og::groupManager()->addGroup('entity_test', $group->id());
+    Og::groupManager()->addGroup('entity_test', $group->bundle());
 
     // Create test user.
     $user = User::create(['name' => $this->randomString()]);
@@ -82,50 +91,64 @@ class OgMembershipTest extends KernelTestBase {
    * @covers ::setUser
    */
   public function testGetSetUser() {
-    $membership = OgMembership::create(['type' => OgMembershipInterface::TYPE_DEFAULT]);
-    $membership
-      ->setUser($this->user->id())
-      ->setEntityId($this->group->id())
-      ->setGroupEntityType($this->group->getEntityTypeId())
-      ->save();
+    $membership = Og::createMembership($this->group, $this->user);
+    $membership->save();
 
     // Check the user is returned.
     $this->assertInstanceOf(UserInterface::class, $membership->getUser());
     $this->assertEquals($this->user->id(), $membership->getUser()->id());
 
     // And after re-loading.
-    $membership = Og::membershipStorage()->loadUnchanged($membership->id());
+    $membership = $this->entityTypeManager->getStorage('og_membership')->loadUnchanged($membership->id());
 
     $this->assertInstanceOf(UserInterface::class, $membership->getUser());
     $this->assertEquals($this->user->id(), $membership->getUser()->id());
   }
 
   /**
-   * Tests exceptions are thrown when trying to save a membership with no, or
-   * anonymous user.
+   * Tests exceptions are thrown when trying to save a membership with no user.
    *
-   * @covers ::getUser
-   * @dataProvider providerTestGetSetUserException
+   * @covers ::preSave
    * @expectedException \Drupal\Core\Entity\EntityStorageException
    */
-  public function testGetSetUserException($user_value) {
-    /** @var OgMembership $membership */
+  public function testSetNoUserException() {
+    /** @var OgMembershipInterface $membership */
     $membership = OgMembership::create(['type' => OgMembershipInterface::TYPE_DEFAULT]);
     $membership
-      ->setUser($user_value)
-      ->setEntityId($this->group->id())
-      ->setGroupEntityType($this->group->getEntityTypeId())
+      ->setGroup($this->group)
       ->save();
   }
 
   /**
-   * Data provider for testGetSetUserException.
+   * Tests exceptions are thrown when trying to save a membership with no group.
+   *
+   * @covers ::preSave
+   * @expectedException \Drupal\Core\Entity\EntityStorageException
    */
-  public function providerTestGetSetUserException() {
-    return [
-      [NULL],
-      [0]
-    ];
+  public function testSetNoGroupException() {
+    /** @var OgMembershipInterface $membership */
+    $membership = OgMembership::create();
+    $membership
+      ->setUser($this->user)
+      ->save();
+  }
+
+  /**
+   * Tests saving a membership with a non group entity.
+   *
+   * @covers ::preSave
+   * @expectedException \Drupal\Core\Entity\EntityStorageException
+   */
+  public function testSetNonValidGroupException() {
+    $non_group = EntityTest::create([
+      'type' => Unicode::strtolower($this->randomMachineName()),
+      'name' => $this->randomString(),
+    ]);
+
+    $non_group->save();
+    /** @var OgMembershipInterface $membership */
+    $membership = Og::createMembership($non_group, $this->user);
+    $membership->save();
   }
 
 }

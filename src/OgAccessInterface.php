@@ -23,12 +23,12 @@ interface OgAccessInterface {
    *   The entity operation being checked for.
    * @param \Drupal\Core\Session\AccountInterface $user
    *   (optional) The user to check. Defaults to the current user.
-   * @param $skip_alter
+   * @param bool $skip_alter
    *   (optional) If TRUE then user access will not be sent to other modules
    *   using drupal_alter(). This can be used by modules implementing
    *   hook_og_user_access_alter() that still want to use og_user_access(), but
    *   without causing a recursion. Defaults to FALSE.
-   * @param $ignore_admin
+   * @param bool $ignore_admin
    *   (optional) When TRUE the specific permission is checked, ignoring the
    *   "administer group" permission if the user has it. When FALSE, a user
    *   with "administer group" will be granted all permissions.
@@ -43,6 +43,7 @@ interface OgAccessInterface {
    * Check if a user has access to a permission on a certain entity context.
    *
    * @param string $operation
+   *   The operation to perform on the entity.
    * @param \Drupal\Core\Entity\EntityInterface $entity
    *   The entity object.
    * @param \Drupal\Core\Session\AccountInterface $user

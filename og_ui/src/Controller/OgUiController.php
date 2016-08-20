@@ -11,6 +11,9 @@ use Drupal\og_ui\OgUi;
 use Drupal\og_ui\OgUiAdminRouteInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
+/**
+ * The OG UI controller.
+ */
 class OgUiController extends ControllerBase {
 
   /**
@@ -26,7 +29,7 @@ class OgUiController extends ControllerBase {
    * @var \Drupal\Core\Entity\EntityTypeManagerInterface
    */
   protected $entityTypeManager;
-  
+
   /**
    * The entity type bundle info service.
    *
@@ -39,7 +42,7 @@ class OgUiController extends ControllerBase {
    *
    * @param \Drupal\og\GroupManager $group_manager
    *   The OG group manager.
-   * @param \Drupal\Core\Entity\EntityTypeManagerInterface
+   * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entity_type_manager
    *   The entity type manager.
    * @param \Drupal\Core\Entity\EntityTypeBundleInfoInterface $entity_type_bundle_info
    *   The entity type bundle info service.
@@ -49,7 +52,7 @@ class OgUiController extends ControllerBase {
     $this->entityTypeManager = $entity_type_manager;
     $this->entityTypeBundleInfo = $entity_type_bundle_info;
   }
-  
+
   /**
    * {@inheritdoc}
    */
@@ -60,7 +63,7 @@ class OgUiController extends ControllerBase {
       $container->get('entity_type.bundle.info')
     );
   }
-  
+
   /**
    * Returns the overview of OG roles and permissions.
    *
@@ -110,6 +113,7 @@ class OgUiController extends ControllerBase {
    *   The type of overview, either 'roles' or 'permissions'.
    *
    * @return \Drupal\Core\StringTranslation\TranslatableMarkup
+   *   Return the translated title.
    */
   public function rolesPermissionsOverviewTitleCallback($type) {
     return $this->t('OG @type overview', ['@type' => $type]);
@@ -148,5 +152,5 @@ class OgUiController extends ControllerBase {
       ],
     ];
   }
-  
+
 }
