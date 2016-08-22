@@ -113,15 +113,15 @@ class GroupManagerTest extends UnitTestCase {
   public function setUp() {
     $this->config = $this->prophesize(Config::class);
     $this->configFactory = $this->prophesize(ConfigFactoryInterface::class);
+    $this->entityTypeBundleInfo = $this->prophesize(EntityTypeBundleInfoInterface::class);
     $this->entityTypeManager = $this->prophesize(EntityTypeManagerInterface::class);
     $this->entityStorage = $this->prophesize(EntityStorageInterface::class);
-    $this->ogRole = $this->prophesize(OgRole::class);
-    $this->entityTypeBundleInfo = $this->prophesize(EntityTypeBundleInfoInterface::class);
     $this->eventDispatcher = $this->prophesize(EventDispatcherInterface::class);
-    $this->permissionEvent = $this->prophesize(PermissionEventInterface::class);
-    $this->state = $this->prophesize(StateInterface::class);
-    $this->permissionManager = $this->prophesize(PermissionManagerInterface::class);
+    $this->ogRole = $this->prophesize(OgRole::class);
     $this->ogRoleManager = $this->prophesize(OgRoleManagerInterface::class);
+    $this->permissionEvent = $this->prophesize(PermissionEventInterface::class);
+    $this->permissionManager = $this->prophesize(PermissionManagerInterface::class);
+    $this->state = $this->prophesize(StateInterface::class);
   }
 
   /**
