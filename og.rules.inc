@@ -108,7 +108,7 @@ function og_rules_action_info() {
   );
 
   $items['og_get_members_with_role'] = array(
-    'label' => t('Get group members with a choosen group role from group audience'),
+    'label' => t('Get group members with selected group role(s) from group audience'),
     'group' => t('Organic groups'),
     'parameter' => array(
       'group_content' => array(
@@ -152,6 +152,30 @@ function og_rules_action_info() {
       'group_content' => array('type' => 'list<entity>', 'label' => t('Group content')),
     ),
     'base' => 'og_rules_get_group_content',
+    'access callback' => 'og_rules_integration_access',
+  );
+
+  $items['og_get_members_with_role_in_group'] = array(
+    'label' => t('Get group members with role(s) in group'),
+    'group' => t('Organic groups'),
+    'parameter' => array(
+      'group' => array(
+        'type' => 'entity',
+        'label' => t('Group'),
+        'description' => t('The group.'),
+      ),
+
+      'og_role' => array(
+        'type' => 'list<text>',
+        'label' => t('Group roles'),
+        'options list' => 'og_rules_group_roles_options_list',
+        'description' => t('Select group role(s) to limit members list.'),
+      ),
+    ),
+    'provides' => array(
+      'group_members_with_role_in_group' => array('type' => 'list<user>', 'label' => t('List of group members with selected role(s) in group')),
+    ),
+    'base' => 'og_rules_get_members_with_role_in_group',
     'access callback' => 'og_rules_integration_access',
   );
 
@@ -303,7 +327,7 @@ function og_rules_action_info() {
 /**
  * Action: Get group members from a group content.
  */
-function og_rules_get_members($group_content) {
+function og_rules_get_members(EntityDrupalWrapper $group_content) {
   if (!isset($group_content->og_membership)) {
     // Not a group content.
     watchdog('rules', 'Entity is not a group content. <pre>@entity</pre>', array('@entity' => print_r($group_content->value(), TRUE)), WATCHDOG_ERROR);
@@ -331,7 +355,7 @@ function og_rules_get_members($group_content) {
 /**
  * Action: Get group members with selected group role from a group content.
  */
-function og_rules_get_members_with_role($group_content, $og_role) {
+function og_rules_get_members_with_role(EntityDrupalWrapper $group_content, array $og_roles) {
   if (!isset($group_content->og_membership)) {
     // Not a group content.
     watchdog('rules', 'Entity is not a group content. <pre>@entity</pre>', array('@entity' => print_r($group_content->value(), TRUE)), WATCHDOG_ERROR);
@@ -340,29 +364,29 @@ function og_rules_get_members_with_role($group_content, $og_role) {
 
   $members = array();
   foreach ($group_content->og_membership->value() as $og_membership) {
-    // Get the group members the group content belongs to.
+    // Get the group members in group(s) which this group content belongs to.
     // Limit list to users with selected role(s).
     $query = db_select('og_users_roles', 'ogur');
-    $query->innerJoin('og_role', 'ogr', 'ogr.rid = ogur.rid');
+    $query->join('og_role', 'ogr', 'ogr.rid = ogur.rid');
     $query->fields('ogur', array('uid'))
       ->condition('ogur.gid', $og_membership->gid)
       ->condition('ogur.group_type', $og_membership->group_type)
-      ->condition('ogr.name', $og_role);
+      ->condition('ogr.name', $og_roles, 'IN')
+      ->distinct();
 
-    $result = $query->execute();
-    $current_members = $result->fetchCol();
+    $current_members = $query->execute()->fetchCol();
     $members = array_merge($members, $current_members);
   }
 
   // Remove duplicate items.
-  $members = array_keys(array_flip($members));
+  $members = array_unique($members);
   return array('group_members_with_role' => $members);
 }
 
 /**
  * Action: Get group managers from a group content.
  */
-function og_rules_get_managers($group_content) {
+function og_rules_get_managers(EntityDrupalWrapper $group_content) {
   if (!isset($group_content->og_membership)) {
     // Not a group content.
     return;
@@ -379,6 +403,22 @@ function og_rules_get_managers($group_content) {
   // Remove duplicate items.
   $return = array_keys(array_flip($return));
   return array('group_managers' => $return);
+}
+
+/**
+ * Action: Get group members with selected group role(s) in a group.
+ */
+function og_rules_get_members_with_role_in_group(EntityDrupalWrapper $group, array $og_roles) {
+  // Get active members with specified role(s) in this group.
+  $query = db_select('og_users_roles', 'ogur');
+  $query->join('og_role', 'ogr', 'ogr.rid = ogur.rid');
+  $query->join('og_membership', 'ogm', 'ogm.gid = :og_gid', array(':og_gid' => $group->getIdentifier()));
+  $query->fields('ogur', array('uid'))
+    ->condition('ogur.group_type', $group->type())
+    ->condition('ogm.state', OG_STATE_ACTIVE)
+    ->condition('ogr.name', $og_roles, 'IN')
+    ->distinct();
+  return array('group_members_with_role_in_group' => $query->execute()->fetchCol());
 }
 
 /**
