@@ -1,6 +1,6 @@
 <?php
 
-  namespace Drupal\og;
+namespace Drupal\og;
 
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\og\Event\DefaultRoleEvent;
@@ -53,6 +53,7 @@ class OgRoleManager implements OgRoleManagerInterface {
    * {@inheritdoc}
    */
   public function createPerBundleRoles($entity_type_id, $bundle_id) {
+    $roles = [];
     foreach ($this->getDefaultRoles() as $role) {
       $role->setGroupType($entity_type_id);
       $role->setGroupBundle($bundle_id);
@@ -64,7 +65,10 @@ class OgRoleManager implements OgRoleManagerInterface {
       }
 
       $role->save();
+      $roles[] = $role;
     }
+
+    return $roles;
   }
 
   /**

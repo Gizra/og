@@ -16,6 +16,9 @@ interface OgRoleManagerInterface {
    *   The entity type ID of the group for which to create default roles.
    * @param string $bundle_id
    *   The bundle ID of the group for which to create default roles.
+   *
+   * @return [OgRolesInterface]
+   *   Array with the saved OG roles that were created
    */
   public function createPerBundleRoles($entity_type_id, $bundle_id);
 
