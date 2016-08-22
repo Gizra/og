@@ -1,6 +1,6 @@
 <?php
 
-  namespace Drupal\og;
+namespace Drupal\og;
 
 /**
  * Defines an interface for OG role manager.
@@ -17,7 +17,7 @@ interface OgRoleManagerInterface {
    * @param string $bundle_id
    *   The bundle ID of the group for which to create default roles.
    *
-   * @return [OgRolesInterface]
+   * @return \Drupal\og\Entity\OgRole[]
    *   Array with the saved OG roles that were created
    */
   public function createPerBundleRoles($entity_type_id, $bundle_id);
