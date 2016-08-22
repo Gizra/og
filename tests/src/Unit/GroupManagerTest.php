@@ -257,7 +257,8 @@ class GroupManagerTest extends UnitTestCase {
 
     $manager = $this->createGroupManager();
 
-    $this->expectDefaultRoleCreation('test_entity_new', 'a');
+    $this->ogRoleManager->createPerBundleRoles('test_entity_new', 'a');
+
 
     $this->eventDispatcher->dispatch(GroupCreationEventInterface::EVENT_NAME, Argument::type(GroupCreationEvent::class))
       ->shouldBeCalled();
@@ -294,7 +295,7 @@ class GroupManagerTest extends UnitTestCase {
       ->willReturn($groups_after)
       ->shouldBeCalled();
 
-    $this->expectRoleRemoval('test_entity', 'b');
+    $this->ogRoleManager->removeRoles('test_entity', 'b')->shouldBeCalled();
 
     $manager = $this->createGroupManager();
 
@@ -342,135 +343,6 @@ class GroupManagerTest extends UnitTestCase {
     $this->config->get('groups')
       ->willReturn($groups)
       ->shouldBeCalled();
-  }
-
-  /**
-   * Mocked method calls when system under test should create default roles.
-   *
-   * @param string $entity_type
-   *   The entity type for which default roles should be created.
-   * @param string $bundle
-   *   The bundle for which default roles should be created.
-   */
-  protected function expectDefaultRoleCreation($entity_type, $bundle) {
-    // In order to populate the default roles for a new group type, it is
-    // expected that the list of default roles to populate will be retrieved
-    // from the event listener.
-    $this->eventDispatcher->dispatch(DefaultRoleEventInterface::EVENT_NAME, Argument::type(DefaultRoleEvent::class))
-      ->shouldBeCalled();
-
-    foreach ([OgRoleInterface::ANONYMOUS, OgRoleInterface::AUTHENTICATED] as $role_name) {
-      $this->addNewDefaultRole($entity_type, $bundle, $role_name);
-    }
-  }
-
-  /**
-   * Expected method calls when creating a new default role.
-   *
-   * @param string $entity_type
-   *   The entity type for which the default role should be created.
-   * @param string $bundle
-   *   The bundle for which the default role should be created.
-   * @param string $role_name
-   *   The name of the role being created.
-   */
-  protected function addNewDefaultRole($entity_type, $bundle, $role_name) {
-    // The Prophecy mocking framework uses 'promises' for dynamically generating
-    // mocks that return context dependent data. This works by dynamically
-    // setting the expected behaviors in an anonymous function. Make sure the
-    // mocks are available in the local scope so they can be passed to the
-    // anonymous functions.
-    $permission_manager = $this->permissionManager;
-    $og_role = $this->prophesize(OgRole::class);
-
-    // It is expected that the role will be created with default properties.
-    $this->entityStorage->create($this->getDefaultRoleProperties($role_name))
-      ->will(function () use ($entity_type, $bundle, $role_name, $og_role, $permission_manager) {
-        // It is expected that the OG permissions that need to be populated on
-        // the new role will be requested. We are not testing permissions here
-        // so we can just return an empty array.
-        $permission_manager->getDefaultGroupPermissions($entity_type, $bundle, $role_name)
-          ->willReturn([])
-          ->shouldBeCalled();
-
-        // For each role that is created it is expected that the role name will
-        // be retrieved, so that the role name can be used to filter the
-        // permissions.
-        $og_role->getName()
-          ->willReturn($role_name)
-          ->shouldBeCalled();
-
-        // The group type, bundle and permissions will have to be set on the new
-        // role.
-        $og_role->setGroupType($entity_type)->shouldBeCalled();
-        $og_role->setGroupBundle($bundle)->shouldBeCalled();
-        return $og_role->reveal();
-      })
-      ->shouldBeCalled();
-
-    // The role is expected to be saved.
-    $og_role->save()
-      ->willReturn(1)
-      ->shouldBeCalled();
-  }
-
-  /**
-   * Returns the expected properties of the default role with the given name.
-   *
-   * @param string $role_name
-   *   The name of the default role for which to return the properties.
-   *
-   * @return array
-   *   The default properties.
-   */
-  protected function getDefaultRoleProperties($role_name) {
-    $role_properties = [
-      OgRoleInterface::ANONYMOUS => [
-        'role_type' => OgRoleInterface::ROLE_TYPE_REQUIRED,
-        'label' => 'Non-member',
-        'name' => OgRoleInterface::ANONYMOUS,
-      ],
-      OgRoleInterface::AUTHENTICATED => [
-        'role_type' => OgRoleInterface::ROLE_TYPE_REQUIRED,
-        'label' => 'Member',
-        'name' => OgRoleInterface::AUTHENTICATED,
-      ],
-    ];
-
-    return $role_properties[$role_name];
-  }
-
-  /**
-   * Expected method calls when deleting roles after a group is deleted.
-   *
-   * @param string $entity_type_id
-   *   The entity type for which the roles should be deleted.
-   * @param string $bundle_id
-   *   The bundle for which the roles should be deleted.
-   */
-  protected function expectRoleRemoval($entity_type_id, $bundle_id) {
-    // It is expected that a call is done to retrieve all roles associated with
-    // the group. This will return the 3 default role entities.
-    $this->entityTypeManager->getStorage('og_role')
-      ->willReturn($this->entityStorage->reveal())
-      ->shouldBeCalled();
-
-    $properties = [
-      'group_type' => $entity_type_id,
-      'group_bundle' => $bundle_id,
-    ];
-    $this->entityStorage->loadByProperties($properties)
-      ->willReturn([
-        $this->ogRole->reveal(),
-        $this->ogRole->reveal(),
-        $this->ogRole->reveal(),
-      ])
-      ->shouldBeCalled();
-
-    // It is expected that all roles will be deleted, so three delete() calls
-    // will be made.
-    $this->ogRole->delete()
-      ->shouldBeCalledTimes(3);
   }
 
 }
