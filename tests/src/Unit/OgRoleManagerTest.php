@@ -2,7 +2,6 @@
 
 namespace Drupal\Tests\og\Unit;
 
-use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Entity\EntityStorageInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\og\Entity\OgRole;
@@ -10,7 +9,6 @@ use Drupal\og\OgRoleInterface;
 use Drupal\og\OgRoleManager;
 use Drupal\og\PermissionManagerInterface;
 use Drupal\Tests\UnitTestCase;
-use Prophecy\Argument;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
 /**
@@ -102,10 +100,10 @@ class OgRoleManagerTest extends UnitTestCase {
   /**
    * Tests creation of per bundle roles.
    *
-   * @covers ::createPerBundleRoles
-   *
    * @param string $role_name
    *   The name of the role being created.
+   *
+   * @covers ::createPerBundleRoles
    *
    * @dataProvider bundleRolesProvider
    */
@@ -134,15 +132,15 @@ class OgRoleManagerTest extends UnitTestCase {
             ->willReturn([])
             ->shouldBeCalled();
 
-          // For each role that is created it is expected that the role name will
-          // be retrieved, so that the role name can be used to filter the
+          // For each role that is created it is expected that the role name
+          // will be retrieved, so that the role name can be used to filter the
           // permissions.
           $og_role->getName()
             ->willReturn($role_name)
             ->shouldBeCalled();
 
-          // The group type, bundle and permissions will have to be set on the new
-          // role.
+          // The group type, bundle and permissions will have to be set on the
+          // new role.
           $og_role->setGroupType($entity_type_id)->shouldBeCalled();
           $og_role->setGroupBundle($bundle)->shouldBeCalled();
           return $og_role->reveal();
@@ -154,8 +152,6 @@ class OgRoleManagerTest extends UnitTestCase {
         ->willReturn(1)
         ->shouldBeCalled();
     }
-
-
 
     $og_role_manager = $this->getOgRoleManager();
     $og_roles = $og_role_manager->createPerBundleRoles($this->entityTypeId, $this->bundle);
@@ -200,7 +196,6 @@ class OgRoleManagerTest extends UnitTestCase {
    * Tests role removal.
    *
    * @covers ::removeRoles
-   *
    */
   public function testRoleRemoval() {
     $properties = [

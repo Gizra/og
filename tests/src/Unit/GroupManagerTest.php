@@ -8,8 +8,6 @@ use Drupal\Core\Entity\EntityStorageInterface;
 use Drupal\Core\Entity\EntityTypeBundleInfoInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\State\StateInterface;
-use Drupal\og\Event\DefaultRoleEvent;
-use Drupal\og\Event\DefaultRoleEventInterface;
 use Drupal\og\Event\GroupCreationEvent;
 use Drupal\og\Event\GroupCreationEventInterface;
 use Drupal\og\GroupManager;
@@ -18,7 +16,6 @@ use Drupal\og\OgRoleManagerInterface;
 use Drupal\Tests\UnitTestCase;
 use Drupal\og\Entity\OgRole;
 use Drupal\og\Event\PermissionEventInterface;
-use Drupal\og\OgRoleInterface;
 use Prophecy\Argument;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
@@ -258,7 +255,6 @@ class GroupManagerTest extends UnitTestCase {
     $manager = $this->createGroupManager();
 
     $this->ogRoleManager->createPerBundleRoles('test_entity_new', 'a');
-
 
     $this->eventDispatcher->dispatch(GroupCreationEventInterface::EVENT_NAME, Argument::type(GroupCreationEvent::class))
       ->shouldBeCalled();
