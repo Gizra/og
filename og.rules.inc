@@ -107,6 +107,30 @@ function og_rules_action_info() {
     'access callback' => 'og_rules_integration_access',
   );
 
+  $items['og_get_members_with_role'] = array(
+    'label' => t('Get group members with a choosen group role from group audience'),
+    'group' => t('Organic groups'),
+    'parameter' => array(
+      'group_content' => array(
+        'type' => 'entity',
+        'label' => t('Group content'),
+        'description' => t('A content from the group. Determining the group audience.'),
+      ),
+
+      'og_role' => array(
+        'type' => 'list<text>',
+        'label' => t('Group roles'),
+        'options list' => 'og_rules_group_roles_options_list',
+        'description' => t('Select a group role to limit members list.'),
+      ),
+    ),
+    'provides' => array(
+      'group_members_with_role' => array('type' => 'list<user>', 'label' => t('List of group members with role')),
+    ),
+    'base' => 'og_rules_get_members_with_role',
+    'access callback' => 'og_rules_integration_access',
+  );
+
   $items['og_get_group_content'] = array(
     'label' => t('Get group content from a group'),
     'group' => t('Organic groups'),
@@ -282,6 +306,7 @@ function og_rules_action_info() {
 function og_rules_get_members($group_content) {
   if (!isset($group_content->og_membership)) {
     // Not a group content.
+    watchdog('rules', 'Entity is not a group content. <pre>@entity</pre>', array('@entity' => print_r($group_content->value(), TRUE)), WATCHDOG_ERROR);
     return;
   }
 
@@ -301,6 +326,37 @@ function og_rules_get_members($group_content) {
   // Remove duplicate items.
   $members = array_keys(array_flip($members));
   return array('group_members' => $members);
+}
+
+/**
+ * Action: Get group members with selected group role from a group content.
+ */
+function og_rules_get_members_with_role($group_content, $og_role) {
+  if (!isset($group_content->og_membership)) {
+    // Not a group content.
+    watchdog('rules', 'Entity is not a group content. <pre>@entity</pre>', array('@entity' => print_r($group_content->value(), TRUE)), WATCHDOG_ERROR);
+    return;
+  }
+
+  $members = array();
+  foreach ($group_content->og_membership->value() as $og_membership) {
+    // Get the group members the group content belongs to.
+    // Limit list to users with selected role(s).
+    $query = db_select('og_users_roles', 'ogur');
+    $query->innerJoin('og_role', 'ogr', 'ogr.rid = ogur.rid');
+    $query->fields('ogur', array('uid'))
+      ->condition('ogur.gid', $og_membership->gid)
+      ->condition('ogur.group_type', $og_membership->group_type)
+      ->condition('ogr.name', $og_role);
+
+    $result = $query->execute();
+    $current_members = $result->fetchCol();
+    $members = array_merge($members, $current_members);
+  }
+
+  // Remove duplicate items.
+  $members = array_keys(array_flip($members));
+  return array('group_members_with_role' => $members);
 }
 
 /**
