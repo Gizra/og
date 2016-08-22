@@ -45,7 +45,7 @@ before_script:
   - composer global require squizlabs/php_codesniffer
 
   # Coder.
-  - composer global require drupal/coder:dev-8.x-2.x
+  - composer global require drupal/coder:8.2.8
   - ln -s ~/.composer/vendor/drupal/coder/coder_sniffer/Drupal ~/.composer/vendor/squizlabs/php_codesniffer/CodeSniffer/Standards/
   - phpenv rehash
 
