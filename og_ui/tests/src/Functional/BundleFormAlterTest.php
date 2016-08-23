@@ -7,7 +7,7 @@ use Drupal\node\Entity\NodeType;
 use Drupal\og\Og;
 use Drupal\og_ui\BundleFormAlter;
 use Drupal\simpletest\AssertContentTrait;
-use \Drupal\Tests\BrowserTestBase;
+use Drupal\Tests\BrowserTestBase;
 
 /**
  * Test making a bundle a group and a group content.
