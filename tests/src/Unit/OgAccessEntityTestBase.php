@@ -11,7 +11,6 @@ use Drupal\Core\Entity\FieldableEntityInterface;
 use Drupal\Core\Field\FieldDefinitionInterface;
 use Drupal\Core\Field\FieldStorageDefinitionInterface;
 use Drupal\og\OgGroupAudienceHelper;
-use Prophecy\Argument;
 
 /**
  * OG access entity base class.
@@ -83,9 +82,6 @@ class OgAccessEntityTestBase extends OgAccessTestBase {
     $container = \Drupal::getContainer();
     $container->set('entity_type.manager', $entity_type_manager->reveal());
     $container->set('entity_field.manager', $entity_field_manager->reveal());
-
-    // Mock the results of Og::getGroups().
-    $storage->loadMultiple(Argument::type('array'))->willReturn([$this->group]);
   }
 
 }

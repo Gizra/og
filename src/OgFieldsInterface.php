@@ -73,10 +73,10 @@ interface OgFieldsInterface {
   /**
    * Get the field storage config base definition.
    *
-   * @param [] $values
+   * @param array $values
    *   Values to override the base definitions.
    *
-   * @return []
+   * @return array
    *   Array that will be used as the base values for
    *   FieldStorageConfig::create().
    */
@@ -85,10 +85,10 @@ interface OgFieldsInterface {
   /**
    * Get the field config base definition.
    *
-   * @param [] $values
+   * @param array $values
    *   Values to override the base definitions.
    *
-   * @return []
+   * @return array
    *   Array that will be used as the base values for
    *   FieldConfig::create().
    */
@@ -97,10 +97,10 @@ interface OgFieldsInterface {
   /**
    * Get the field's form display definition.
    *
-   * @param [] $values
+   * @param array $values
    *   Values to override the base definitions.
    *
-   * @return []
+   * @return array
    *   Array that will be used as the base values for
    *   FieldConfig::create().
    */
@@ -109,10 +109,10 @@ interface OgFieldsInterface {
   /**
    * Get the field's view modes definition.
    *
-   * @param [] $values
+   * @param array $values
    *   Values to override the base definitions.
    *
-   * @return []
+   * @return array
    *   Array that will be used as the base values for
    *   FieldConfig::create().
    */

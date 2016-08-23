@@ -80,6 +80,13 @@ class OgAccess implements OgAccessInterface {
   protected $permissionManager;
 
   /**
+   * The group membership manager.
+   *
+   * @var \Drupal\og\MembershipManagerInterface
+   */
+  protected $membershipManager;
+
+  /**
    * Constructs an OgManager service.
    *
    * @param \Drupal\Core\Config\ConfigFactoryInterface $config_factory
@@ -92,13 +99,16 @@ class OgAccess implements OgAccessInterface {
    *   The group manager.
    * @param \Drupal\og\PermissionManagerInterface $permission_manager
    *   The permission manager.
+   * @param \Drupal\og\MembershipManagerInterface $membership_manager
+   *   The group membership manager.
    */
-  public function __construct(ConfigFactoryInterface $config_factory, AccountProxyInterface $account_proxy, ModuleHandlerInterface $module_handler, GroupManager $group_manager, PermissionManagerInterface $permission_manager) {
+  public function __construct(ConfigFactoryInterface $config_factory, AccountProxyInterface $account_proxy, ModuleHandlerInterface $module_handler, GroupManager $group_manager, PermissionManagerInterface $permission_manager, MembershipManagerInterface $membership_manager) {
     $this->configFactory = $config_factory;
     $this->accountProxy = $account_proxy;
     $this->moduleHandler = $module_handler;
     $this->groupManager = $group_manager;
     $this->permissionManager = $permission_manager;
+    $this->membershipManager = $membership_manager;
   }
 
   /**
@@ -165,29 +175,20 @@ class OgAccess implements OgAccessInterface {
     if (!$pre_alter_cache) {
       $permissions = [];
       $user_is_group_admin = FALSE;
-
-      $states = [
-        OgMembershipInterface::STATE_ACTIVE,
-        OgMembershipInterface::STATE_PENDING,
-        OgMembershipInterface::STATE_BLOCKED,
-      ];
-      if ($membership = Og::getMembership($group, $user, $states)) {
-        // Blocked users don't have any permissions.
-        if ($membership->getState() !== OgMembershipInterface::STATE_BLOCKED) {
-          foreach ($membership->getRoles() as $role) {
-            // Check for the is_admin flag.
-            /** @var \Drupal\og\Entity\OgRole $role */
-            if ($role->isAdmin()) {
-              $user_is_group_admin = TRUE;
-              break;
-            }
-
-            $permissions = array_merge($permissions, $role->getPermissions());
+      if ($membership = Og::getMembership($group, $user)) {
+        foreach ($membership->getRoles() as $role) {
+          // Check for the is_admin flag.
+          /** @var \Drupal\og\Entity\OgRole $role */
+          if ($role->isAdmin()) {
+            $user_is_group_admin = TRUE;
+            break;
           }
+
+          $permissions = array_merge($permissions, $role->getPermissions());
         }
       }
-      else {
-        // User is a non-member.
+      elseif (!Og::isMemberBlocked($group, $user)) {
+        // User is a non-member or has a pending membership.
         /** @var \Drupal\og\Entity\OgRole $role */
         $role = OgRole::loadByGroupAndName($group, OgRoleInterface::ANONYMOUS);
         $permissions = $role->getPermissions();
@@ -251,12 +252,11 @@ class OgAccess implements OgAccessInterface {
       }
     }
 
-    // @TODO: add caching on Og::isGroupContent.
     $is_group_content = Og::isGroupContent($entity_type_id, $bundle);
     $cache_tags = $entity_type->getListCacheTags();
 
     // The entity might be a user or a non-user entity.
-    $groups = $entity->getEntityTypeId() == 'user' ? Og::getUserGroups($entity) : Og::getGroups($entity);
+    $groups = $entity->getEntityTypeId() == 'user' ? $this->membershipManager->getUserGroups($entity) : $this->membershipManager->getGroups($entity);
 
     if ($is_group_content && $groups) {
       $forbidden = AccessResult::forbidden()->addCacheTags($cache_tags);
@@ -265,6 +265,7 @@ class OgAccess implements OgAccessInterface {
           // Check if the operation matches a group content entity operation
           // such as 'create article content'.
           $operation_access = $this->userAccessGroupContentEntityOperation($operation, $group, $entity, $user);
+
           if ($operation_access->isAllowed()) {
             return $operation_access->addCacheTags($cache_tags);
           }
