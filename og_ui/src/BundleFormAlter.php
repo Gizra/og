@@ -43,6 +43,13 @@ class BundleFormAlter {
   protected $entityTypeId;
 
   /**
+   * The form entity which has been used for populating form element defaults.
+   *
+   * @var \Drupal\Core\Entity\EntityInterface
+   */
+  protected $entity;
+
+  /**
    * Construct a BundleFormAlter object.
    *
    * @param \Drupal\Core\Entity\EntityInterface $entity
