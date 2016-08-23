@@ -3,12 +3,12 @@
 namespace Drupal\og_ui\Tests;
 
 use Drupal\Core\Form\FormState;
-use Drupal\KernelTests\AssertLegacyTrait;
 use Drupal\node\Entity\NodeType;
 use Drupal\og\Og;
 use Drupal\og_ui\BundleFormAlter;
 use Drupal\simpletest\AssertContentTrait;
-use Drupal\simpletest\BrowserTestBase;
+use \Drupal\Tests\BrowserTestBase;
+use Drupal\Core\Entity\EntityFieldManagerInterface;
 
 /**
  * Test making a bundle a group and a group content.
@@ -18,7 +18,6 @@ use Drupal\simpletest\BrowserTestBase;
 class BundleFormAlterTest extends BrowserTestBase {
 
   use AssertContentTrait;
-  use AssertLegacyTrait;
 
   /**
    * {@inheritdoc}
