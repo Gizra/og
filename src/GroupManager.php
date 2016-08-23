@@ -441,7 +441,7 @@ class GroupManager {
    * @return array
    *   The group map.
    */
-  protected function getGroupMap() {
+  public function getGroupMap() {
     if (empty($this->groupMap)) {
       $this->refreshGroupMap();
     }

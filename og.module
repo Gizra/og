@@ -5,6 +5,7 @@
  * Enable users to create and manage groups with roles and permissions.
  */
 
+use Drupal\og\GroupManager;
 use Drupal\user\UserInterface;
 use Drupal\Core\Access\AccessResult;
 use Drupal\Core\Entity\ContentEntityInterface;
@@ -191,8 +192,9 @@ function og_field_formatter_info_alter(array &$info) {
  * Add link template to groups.
  */
 function og_entity_type_alter(array &$entity_types) {
-  // Not accessing to the config schema through the group manager proxy due to
-  // circular reference caused by the fact we in hook_entity_type_alter().
+  // We cannot use the group manager as it creates a circular reference error,
+  // so we get the groups definition directly from the config.
+
   $groups = \Drupal::config(GroupManager::SETTINGS_CONFIG_KEY)->get(GroupManager::GROUPS_CONFIG_KEY);
   if (!$groups) {
     // No groups defined.
