@@ -14,7 +14,7 @@ services:
       - { name: 'event_subscriber' }
   og.group.manager:
     class: Drupal\og\GroupManager
-    arguments: ['@config.factory', '@entity_type.manager', '@entity_type.bundle.info', '@event_dispatcher', '@state', '@og.permission_manager']
+    arguments: ['@config.factory', '@entity_type.manager', '@entity_type.bundle.info', '@event_dispatcher', '@state', '@og.permission_manager', '@og.role_manager']
   og.membership_manager:
     class: Drupal\og\MembershipManager
     arguments: ['@entity_type.manager']
@@ -24,6 +24,9 @@ services:
   og.permission_manager:
     class: Drupal\og\PermissionManager
     arguments: ['@event_dispatcher']
+  og.role_manager:
+    class: Drupal\og\OgRoleManager
+    arguments: ['@entity_type.manager', '@event_dispatcher', '@og.permission_manager']
   plugin.manager.og.delete_orphans:
     class: Drupal\og\OgDeleteOrphansPluginManager
     parent: default_plugin_manager
