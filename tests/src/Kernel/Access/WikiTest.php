@@ -61,6 +61,7 @@ class WikiTest extends KernelTestBase {
 
   /**
    * {@inheritdoc}
+   * @expectedException \LogicException
    */
   public function setUp() {
     parent::setUp();
@@ -133,11 +134,11 @@ class WikiTest extends KernelTestBase {
       /** @var \Drupal\og\Entity\OgRole $role */
       $role = OgRole::create();
       $role
-        ->setGroupType('block_content')
-        ->setGroupBundle('group')
+        ->setGroupType($this->randomString())
+        ->setGroupBundle($this->randomString())
         ->setName($role_name)
-        ->setLabel("Block content for group. Role: $role_name")
-        ->grantPermission('edit any group_content content');
+        ->setLabel($this->randomString())
+        ->grantPermission($this->randomString());
       $role->save();
     }
 
