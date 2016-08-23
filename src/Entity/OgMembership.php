@@ -321,7 +321,7 @@ class OgMembership extends ContentEntityBase implements OgMembershipInterface {
 
     foreach ($this->getRoles() as $role) {
       if ($role->getName() == OgRoleInterface::ANONYMOUS) {
-        throw new \LogicException('A group member role is required for creating a membership.');
+        throw new \LogicException('Cannot save an OgMembership with reference to a non-member role.');
       }
     }
 
