@@ -125,7 +125,7 @@ class GroupCheckTest extends UnitTestCase {
     $this->accessResult = $this->prophesize(AccessResultInterface::class);
 
     $container = new ContainerBuilder();
-    $container->set('group_type_manager', $this->groupTypeManager->reveal());
+    $container->set('og.group_type_manager', $this->groupTypeManager->reveal());
     \Drupal::setContainer($container);
   }
 

@@ -306,7 +306,7 @@ class Og {
    */
   public static function groupTypeManager() {
     // @todo store static reference for this?
-    return \Drupal::service('group_type_manager');
+    return \Drupal::service('og.group_type_manager');
   }
 
   /**

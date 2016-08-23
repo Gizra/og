@@ -191,7 +191,7 @@ class OgAccessTestBase extends UnitTestCase {
     $container->set('config.factory', $config_factory->reveal());
     $container->set('entity.manager', $this->entityManager->reveal());
     $container->set('module_handler', $this->prophesize(ModuleHandlerInterface::class)->reveal());
-    $container->set('group_type_manager', $this->groupTypeManager->reveal());
+    $container->set('og.group_type_manager', $this->groupTypeManager->reveal());
     $container->set('og.membership_manager', $this->membershipManager->reveal());
 
     // This is for caching purposes only.

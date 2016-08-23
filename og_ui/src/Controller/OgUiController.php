@@ -56,7 +56,7 @@ class OgUiController extends ControllerBase {
    */
   public static function create(ContainerInterface $container) {
     return new static(
-      $container->get('group_type_manager'),
+      $container->get('og.group_type_manager'),
       $container->get('entity_type.manager'),
       $container->get('entity_type.bundle.info')
     );

@@ -6,7 +6,7 @@ services:
       - { name: access_check, applies_to: _og_user_access_group }
   og.access:
     class: Drupal\og\OgAccess
-    arguments: ['@config.factory', '@current_user', '@module_handler', '@group_type_manager', '@og.permission_manager', '@og.membership_manager']
+    arguments: ['@config.factory', '@current_user', '@module_handler', '@og.group_type_manager', '@og.permission_manager', '@og.membership_manager']
   og.membership_manager:
     class: Drupal\og\MembershipManager
     arguments: ['@config.factory', '@current_user', '@module_handler', '@og.group.manager', '@og.permission_manager', '@og.membership_manager']
@@ -15,7 +15,7 @@ services:
     arguments: ['@og.permission_manager', '@entity_type.manager', '@entity_type.bundle.info']
     tags:
       - { name: 'event_subscriber' }
-  group_type_manager:
+  og.group_type_manager:
     class: Drupal\og\GroupTypeManager
     arguments: ['@config.factory', '@entity_type.manager', '@entity_type.bundle.info', '@event_dispatcher', '@state', '@og.permission_manager']
   og.group.manager:

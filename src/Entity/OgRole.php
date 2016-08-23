@@ -337,7 +337,7 @@ class OgRole extends Role implements OgRoleInterface {
     // array, which is not compatible with ContainerInjectionInterface.
     // See for example Entity::uuidGenerator() in the base Entity class, it
     // also uses this pattern.
-    return \Drupal::service('group_type_manager');
+    return \Drupal::service('og.group_type_manager');
   }
 
   /**

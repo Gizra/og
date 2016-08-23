@@ -62,7 +62,7 @@ class GetBundleByBundleTest extends KernelTestBase {
     $this->installEntitySchema('user');
     $this->installSchema('system', 'sequences');
 
-    $this->groupTypeManager = $this->container->get('group_type_manager');
+    $this->groupTypeManager = $this->container->get('og.group_type_manager');
 
     // Create four groups of two different entity types.
     for ($i = 0; $i < 2; $i++) {
