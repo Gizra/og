@@ -323,6 +323,9 @@ class OgMembership extends ContentEntityBase implements OgMembershipInterface {
       if ($role->getName() == OgRoleInterface::ANONYMOUS) {
         throw new \LogicException('Cannot save an OgMembership with reference to a non-member role.');
       }
+      if ($role->getName() == OgRoleInterface::AUTHENTICATED) {
+        throw new \LogicException('Cannot save an OgMembership with reference to a member role.');
+      }
     }
 
     parent::preSave($storage);
