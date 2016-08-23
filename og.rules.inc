@@ -412,9 +412,10 @@ function og_rules_get_members_with_role_in_group(EntityDrupalWrapper $group, arr
   // Get active members with specified role(s) in this group.
   $query = db_select('og_users_roles', 'ogur');
   $query->join('og_role', 'ogr', 'ogr.rid = ogur.rid');
-  $query->join('og_membership', 'ogm', 'ogm.gid = :og_gid', array(':og_gid' => $group->getIdentifier()));
+  $query->join('og_membership', 'ogm', 'ogm.gid = ogur.gid');
   $query->fields('ogur', array('uid'))
     ->condition('ogur.group_type', $group->type())
+    ->condition('ogur.gid', $group->getIdentifier())
     ->condition('ogm.state', OG_STATE_ACTIVE)
     ->condition('ogr.name', $og_roles, 'IN')
     ->distinct();
