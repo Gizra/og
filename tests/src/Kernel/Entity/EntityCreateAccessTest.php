@@ -67,7 +67,7 @@ class EntityCreateAccessTest extends KernelTestBase {
       'name' => $this->randomString(),
     ]);
     $this->groupType->save();
-    Og::groupManager()->addGroup('node', 'group');
+    Og::groupTypeManager()->addGroup('node', 'group');
 
     // Add a group audience field to the "post" node type, turning it into a
     // group content type.

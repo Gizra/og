@@ -66,11 +66,11 @@ class OgAccess implements OgAccessInterface {
   /**
    * The group manager.
    *
-   * @var \Drupal\og\GroupManager
+   * @var \Drupal\og\GroupTypeManager
    *
    * @todo This should be GroupManagerInterface.
    */
-  protected $groupManager;
+  protected $groupTypeManager;
 
   /**
    * The OG permission manager.
@@ -95,18 +95,18 @@ class OgAccess implements OgAccessInterface {
    *   The service that contains the current active user.
    * @param \Drupal\Core\Extension\ModuleHandlerInterface $module_handler
    *   The module handler.
-   * @param \Drupal\og\GroupManager $group_manager
+   * @param \Drupal\og\GroupTypeManager $group_manager
    *   The group manager.
    * @param \Drupal\og\PermissionManagerInterface $permission_manager
    *   The permission manager.
    * @param \Drupal\og\MembershipManagerInterface $membership_manager
    *   The group membership manager.
    */
-  public function __construct(ConfigFactoryInterface $config_factory, AccountProxyInterface $account_proxy, ModuleHandlerInterface $module_handler, GroupManager $group_manager, PermissionManagerInterface $permission_manager, MembershipManagerInterface $membership_manager) {
+  public function __construct(ConfigFactoryInterface $config_factory, AccountProxyInterface $account_proxy, ModuleHandlerInterface $module_handler, GroupTypeManager $group_manager, PermissionManagerInterface $permission_manager, MembershipManagerInterface $membership_manager) {
     $this->configFactory = $config_factory;
     $this->accountProxy = $account_proxy;
     $this->moduleHandler = $module_handler;
-    $this->groupManager = $group_manager;
+    $this->groupTypeManager = $group_manager;
     $this->permissionManager = $permission_manager;
     $this->membershipManager = $membership_manager;
   }
@@ -122,7 +122,7 @@ class OgAccess implements OgAccessInterface {
     $config = $this->configFactory->get('og.settings');
     $cacheable_metadata = (new CacheableMetadata)
         ->addCacheableDependency($config);
-    if (!$this->groupManager->isGroup($group_type_id, $bundle)) {
+    if (!$this->groupTypeManager->isGroup($group_type_id, $bundle)) {
       // Not a group.
       return AccessResult::neutral()->addCacheableDependency($cacheable_metadata);
     }
@@ -237,7 +237,7 @@ class OgAccess implements OgAccessInterface {
     $entity_type_id = $entity_type->id();
     $bundle = $entity->bundle();
 
-    if ($this->groupManager->isGroup($entity_type_id, $bundle)) {
+    if ($this->groupTypeManager->isGroup($entity_type_id, $bundle)) {
       $user_access = $this->userAccess($entity, $operation, $user);
       if ($user_access->isAllowed()) {
         return $user_access;

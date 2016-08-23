@@ -50,7 +50,7 @@ class OgStandardReferenceItemTest extends KernelTestBase {
     }
     for ($i = 0; $i < 2; $i++) {
       $bundle = $this->bundles[$i];
-      Og::groupManager()->addGroup('entity_test', $bundle);
+      Og::groupTypeManager()->addGroup('entity_test', $bundle);
       $group = EntityTest::create(['type' => $bundle]);
       $group->save();
       $this->groups[] = $group;

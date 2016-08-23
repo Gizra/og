@@ -102,7 +102,7 @@ class SelectionHandlerTest extends KernelTestBase {
     ])->save();
 
     // Define the group content as group.
-    Og::groupManager()->addGroup('node', $this->groupBundle);
+    Og::groupTypeManager()->addGroup('node', $this->groupBundle);
 
     // Add og audience field to group content.
     $this->fieldDefinition = Og::createField(OgGroupAudienceHelper::DEFAULT_FIELD, 'node', $this->groupContentBundle);
