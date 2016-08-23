@@ -15,6 +15,7 @@ use Drupal\og\OgRoleInterface;
 use Drupal\simpletest\ContentTypeCreationTrait;
 use Drupal\user\Entity\Role;
 use Drupal\user\Entity\User;
+use Drupal\og\Entity\OgRole;
 
 /**
  * Tests Wiki-style access: non-members have the right to edit any content.
@@ -130,11 +131,13 @@ class WikiTest extends KernelTestBase {
     // Grant both members and non-members permission to edit any group content.
     foreach ([OgRoleInterface::AUTHENTICATED, OgRoleInterface::ANONYMOUS] as $role_name) {
       /** @var \Drupal\og\Entity\OgRole $role */
-      $role = Role::create([
-        'id' => "block_content-group-$role_name",
-        'label' => "Block content for group. Role: $role_name",
-      ]);
-      $role->grantPermission('edit any group_content content');
+      $role = OgRole::create();
+      $role
+        ->setGroupType('block_content')
+        ->setGroupBundle('group')
+        ->setName($role_name)
+        ->setLabel("Block content for group. Role: $role_name")
+        ->grantPermission('edit any group_content content');
       $role->save();
     }
 
