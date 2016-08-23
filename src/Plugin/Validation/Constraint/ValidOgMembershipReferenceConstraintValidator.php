@@ -1,14 +1,7 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\og\Plugin\Validation\Constraint\ValidOgMembershipReferenceConstraintValidator.
- */
-
 namespace Drupal\og\Plugin\Validation\Constraint;
 
-use Drupal\Core\Entity\ContentEntityBase;
-use Drupal\Core\StringTranslation\StringTranslationTrait;
 use Drupal\og\Og;
 use Symfony\Component\Validator\Constraint;
 use Symfony\Component\Validator\ConstraintValidator;
@@ -43,4 +36,5 @@ class ValidOgMembershipReferenceConstraintValidator extends ConstraintValidator 
       $this->context->addViolation($constraint->NotValidGroup, $params);
     }
   }
+
 }

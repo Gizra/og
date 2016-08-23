@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\system\Tests\Entity\OgStandardReferenceItemTest.
- */
-
 namespace Drupal\Tests\og\Kernel\Entity;
 
 use Drupal\Component\Utility\Unicode;
@@ -53,7 +48,7 @@ class OgStandardReferenceItemTest extends KernelTestBase {
       $bundle->save();
       $this->bundles[] = $bundle->id();
     }
-    for ($i = 0 ; $i < 2; $i++) {
+    for ($i = 0; $i < 2; $i++) {
       $bundle = $this->bundles[$i];
       Og::groupManager()->addGroup('entity_test', $bundle);
       $group = EntityTest::create(['type' => $bundle]);
@@ -69,7 +64,7 @@ class OgStandardReferenceItemTest extends KernelTestBase {
    * Testing referencing of non-user entity to groups.
    */
   public function testStandardReference() {
-    $groups_query = function($gid) {
+    $groups_query = function ($gid) {
       return $this->container->get('entity.query')->get('entity_test')
         ->condition($this->fieldName, $gid)
         ->execute();

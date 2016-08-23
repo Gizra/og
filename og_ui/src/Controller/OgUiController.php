@@ -12,6 +12,9 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
+/**
+ * The OG UI controller.
+ */
 class OgUiController extends ControllerBase {
 
   /**
@@ -40,7 +43,7 @@ class OgUiController extends ControllerBase {
    *
    * @param \Drupal\og\GroupManager $group_manager
    *   The OG group manager.
-   * @param \Drupal\Core\Entity\EntityTypeManagerInterface
+   * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entity_type_manager
    *   The entity type manager.
    * @param \Drupal\Core\Entity\EntityTypeBundleInfoInterface $entity_type_bundle_info
    *   The entity type bundle info service.
@@ -111,6 +114,7 @@ class OgUiController extends ControllerBase {
    *   The type of overview, either 'roles' or 'permissions'.
    *
    * @return \Drupal\Core\StringTranslation\TranslatableMarkup
+   *   Return the translated title.
    */
   public function rolesPermissionsOverviewTitleCallback($type) {
     return $this->t('OG @type overview', ['@type' => $type]);

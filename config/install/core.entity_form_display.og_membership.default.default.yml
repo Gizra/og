@@ -1,0 +1,21 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.field.og_membership.default.og_membership_request
+    - og.og_membership_type.default
+  module:
+    - text
+id: og_membership.default.default
+targetEntityType: og_membership
+bundle: default
+mode: default
+content:
+  og_membership_request:
+    type: string_textarea
+    weight: 1
+    settings:
+      rows: 2
+      placeholder: ''
+    third_party_settings: {  }
+hidden: {  }

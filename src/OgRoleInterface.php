@@ -1,10 +1,8 @@
 <?php
 
-/**
- * @file
- * Contains Drupal\og\OgRoleInterface.
- */
 namespace Drupal\og;
+
+use Drupal\Core\Entity\EntityInterface;
 
 /**
  * Provides an interface defining an OG user role entity.
@@ -61,5 +59,36 @@ interface OgRoleInterface {
    *   Whether or not the role is locked.
    */
   public function isLocked();
+
+  /**
+   * Returns the role name.
+   *
+   * @return string
+   *   The role name.
+   */
+  public function getName();
+
+  /**
+   * Sets the role name.
+   *
+   * @param string $name
+   *   The role name.
+   *
+   * @return $this
+   */
+  public function setName($name);
+
+  /**
+   * Returns the role represented by the given group and role name.
+   *
+   * @param \Drupal\Core\Entity\EntityInterface $group
+   *   The group for which to return the role.
+   * @param string $name
+   *   The role name for which to return the role.
+   *
+   * @return \Drupal\og\OgRoleInterface
+   *   The role.
+   */
+  public static function loadByGroupAndName(EntityInterface $group, $name);
 
 }

@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\og\Plugin\Field\FieldWidget\OgComplex.
- */
-
 namespace Drupal\og\Plugin\Field\FieldWidget;
 
 use Drupal\Component\Utility\Html;
@@ -14,7 +9,6 @@ use Drupal\Core\Field\FieldItemListInterface;
 use Drupal\Core\Field\FieldStorageDefinitionInterface;
 use Drupal\Core\Field\Plugin\Field\FieldWidget\EntityReferenceAutocompleteWidget;
 use Drupal\Core\Form\FormStateInterface;
-use Drupal\og\Og;
 use Drupal\og\OgAccess;
 use Drupal\user\Entity\User;
 
@@ -67,7 +61,7 @@ class OgComplex extends EntityReferenceAutocompleteWidget {
    * Handles generic features for multiple fields:
    * - number of widgets
    * - AHAH-'add more' button
-   * - table display and drag-n-drop value reordering
+   * - table display and drag-n-drop value reordering.
    */
   protected function formMultipleElements(FieldItemListInterface $items, array &$form, FormStateInterface $form_state) {
     $field_name = $this->fieldDefinition->getName();
@@ -75,9 +69,12 @@ class OgComplex extends EntityReferenceAutocompleteWidget {
     $parents = $form['#parents'];
 
     $target_type = $this->fieldDefinition->getFieldStorageDefinition()->getSetting('target_type');
-    $user_groups = Og::getUserGroups(User::load(\Drupal::currentUser()->id()));
+
+    /** @var \Drupal\og\MembershipManagerInterface $membership_manager */
+    $membership_manager = \Drupal::service('og.membership_manager');
+    $user_groups = $membership_manager->getUserGroups(User::load(\Drupal::currentUser()->id()));
     $user_groups_target_type = isset($user_groups[$target_type]) ? $user_groups[$target_type] : [];
-    $user_group_ids = array_map(function($group) {
+    $user_group_ids = array_map(function ($group) {
       return $group->id();
     }, $user_groups_target_type);
 
@@ -189,8 +186,13 @@ class OgComplex extends EntityReferenceAutocompleteWidget {
   /**
    * Adding the other groups widget to the form.
    *
-   * @param $elements
-   *   The widget array.
+   * @param \Drupal\Core\Field\FieldItemListInterface $items
+   *   The existing items to add to the form.
+   * @param \Drupal\Core\Form\FormStateInterface $form_state
+   *   The form state.
+   *
+   * @return array
+   *   A renderable element with the "other groups".
    */
   protected function otherGroupsWidget(FieldItemListInterface $items, FormStateInterface $form_state) {
     if ($this->fieldDefinition->getTargetEntityTypeId() == 'user') {
@@ -231,9 +233,11 @@ class OgComplex extends EntityReferenceAutocompleteWidget {
 
     $target_type = $this->fieldDefinition->getFieldStorageDefinition()->getSetting('target_type');
 
-    $user_groups = Og::getUserGroups(User::load(\Drupal::currentUser()->id()));
+    /** @var \Drupal\og\MembershipManagerInterface $membership_manager */
+    $membership_manager = \Drupal::service('og.membership_manager');
+    $user_groups = $membership_manager->getUserGroups(User::load(\Drupal::currentUser()->id()));
     $user_groups_target_type = isset($user_groups[$target_type]) ? $user_groups[$target_type] : [];
-    $user_group_ids = array_map(function($group) {
+    $user_group_ids = array_map(function ($group) {
       return $group->id();
     }, $user_groups_target_type);
 
@@ -273,11 +277,12 @@ class OgComplex extends EntityReferenceAutocompleteWidget {
   /**
    * Generating other groups auto complete element.
    *
-   * @param $delta
+   * @param int $delta
    *   The delta of the new element. Need to be the last delta in order to be
    *   added in the end of the list.
-   * @param EntityInterface|NULL $entity
+   * @param EntityInterface|null $entity
    *   The entity object.
+   *
    * @return array
    *   A single entity reference input.
    */
@@ -338,6 +343,7 @@ class OgComplex extends EntityReferenceAutocompleteWidget {
    * Determines if the current user has group admin permission.
    *
    * @return bool
+   *   TRUE if the user is a group admin.
    */
   protected function isGroupAdmin() {
     // @todo Inject current user service as a dependency.

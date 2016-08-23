@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\og_ui\BundleFormAlter.
- */
-
 namespace Drupal\og_ui;
 
 use Drupal\Component\Utility\Unicode;
@@ -20,29 +15,45 @@ use Drupal\og\OgGroupAudienceHelper;
 class BundleFormAlter {
 
   /**
+   * Entity type definition.
+   *
    * @var \Drupal\Core\Entity\ContentEntityTypeInterface
    */
   protected $definition;
 
   /**
+   * The entity bundle.
+   *
    * @var string
    */
   protected $bundle;
 
   /**
+   * The bundle label.
+   *
    * @var string
    */
   protected $bundleLabel;
 
   /**
+   * The entity type ID.
+   *
    * @var string
    */
   protected $entityTypeId;
 
   /**
+   * The form entity which has been used for populating form element defaults.
+   *
+   * @var \Drupal\Core\Entity\EntityInterface
+   */
+  protected $entity;
+
+  /**
    * Construct a BundleFormAlter object.
    *
    * @param \Drupal\Core\Entity\EntityInterface $entity
+   *   The entity object.
    */
   public function __construct(EntityInterface $entity) {
     $this->entity = $entity;
@@ -52,7 +63,9 @@ class BundleFormAlter {
    * This is a helper for og_ui_form_alter().
    *
    * @param array $form
+   *   The form variable.
    * @param \Drupal\Core\Form\FormStateInterface $form_state
+   *   The form state object.
    */
   public function formAlter(array &$form, FormStateInterface $form_state) {
     $this->prepare($form, $form_state);
@@ -71,7 +84,9 @@ class BundleFormAlter {
    * Prepares object properties and adds the og details element.
    *
    * @param array $form
-   * @param $form_state
+   *   The form variable.
+   * @param \Drupal\Core\Form\FormStateInterface $form_state
+   *   The form state object.
    */
   protected function prepare(array &$form, FormStateInterface $form_state) {
     // Example: article.
@@ -201,6 +216,5 @@ class BundleFormAlter {
       $form_state->setValue('og_target_bundles', NULL);
     }
   }
-
 
 }

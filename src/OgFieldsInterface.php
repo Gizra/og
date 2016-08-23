@@ -1,12 +1,10 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\og\OgFieldsInterface.
- */
-
 namespace Drupal\og;
 
+/**
+ * The OG fields related interface.
+ */
 interface OgFieldsInterface {
 
   /**
@@ -15,23 +13,22 @@ interface OgFieldsInterface {
    * @param string $bundle
    *   The entity bundle.
    *
-   * @return OgFieldBase
+   * @return $this
    */
   public function setBundle($bundle);
 
   /**
    * Get the bundle name.
    *
-   * @return String
+   * @return string
    *   The entity bundle.
    */
   public function getBundle();
 
-
   /**
    * Get the entity type name.
    *
-   * @return String
+   * @return string
    *   The entity type name.
    */
   public function getEntityType();
@@ -39,10 +36,11 @@ interface OgFieldsInterface {
   /**
    * Set the entity type.
    *
-   * @param String $entity_type
+   * @param string $entity_type
    *   The entity type.
    *
-   * @return \Drupal\og\OgFieldBase
+   * @return $this
+   *
    * @throws \Exception
    *   Throw error if the field storage config definition explicitly defines to
    *   which entities the field can be attached to.
@@ -52,7 +50,7 @@ interface OgFieldsInterface {
   /**
    * Get the field name.
    *
-   * @return String
+   * @return string
    *   The field name.
    */
   public function getFieldName();
@@ -62,23 +60,23 @@ interface OgFieldsInterface {
    *
    * The field name is often the same as the plugin ID, however it is
    * overridable. For example, the group audience field is identified as
-   * \Drupal\og\OgGroupAudienceHelper::DEFAULT_FIELD, however the actual field name
-   * attached to the bundle can be arbitrary.
+   * \Drupal\og\OgGroupAudienceHelper::DEFAULT_FIELD, however the actual field
+   * name attached to the bundle can be arbitrary.
    *
-   * @param String $fieldName
+   * @param string $field_name
    *   The field name.
    *
-   * @return \Drupal\og\OgFieldBase
+   * @return $this
    */
-  public function setFieldName($fieldName);
+  public function setFieldName($field_name);
 
   /**
    * Get the field storage config base definition.
    *
-   * @param [] $values
+   * @param array $values
    *   Values to override the base definitions.
    *
-   * @return []
+   * @return array
    *   Array that will be used as the base values for
    *   FieldStorageConfig::create().
    */
@@ -87,10 +85,10 @@ interface OgFieldsInterface {
   /**
    * Get the field config base definition.
    *
-   * @param [] $values
+   * @param array $values
    *   Values to override the base definitions.
    *
-   * @return []
+   * @return array
    *   Array that will be used as the base values for
    *   FieldConfig::create().
    */
@@ -99,25 +97,25 @@ interface OgFieldsInterface {
   /**
    * Get the field's form display definition.
    *
-   * @param [] $values
+   * @param array $values
    *   Values to override the base definitions.
    *
-   * @return []
+   * @return array
    *   Array that will be used as the base values for
    *   FieldConfig::create().
    */
   public function getFormDisplayDefinition(array $values = []);
 
-
   /**
    * Get the field's view modes definition.
    *
-   * @param [] $values
+   * @param array $values
    *   Values to override the base definitions.
    *
-   * @return []
+   * @return array
    *   Array that will be used as the base values for
    *   FieldConfig::create().
    */
   public function getViewDisplayDefinition(array $values = []);
+
 }

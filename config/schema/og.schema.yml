@@ -62,6 +62,9 @@ og.settings:
     delete_orphans_plugin_id:
       type: string
       label: 'The method to use when deleting orphaned group content'
+    deny_subscribe_without_approval:
+      type: boolean
+      label: 'When enabled, a user that ask to join to a private group their membership status will be pending regardless of the group permissions'
 
 og.settings.group.*:
   type: sequence
@@ -110,6 +113,9 @@ og.og_role.*:
     group_bundle:
       type: string
       label: 'Group bundle'
+    is_admin:
+      type: boolean
+      label: 'User is group admin'
     permissions:
       type: sequence
       label: 'Permissions'

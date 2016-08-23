@@ -2,6 +2,8 @@
 
 namespace Drupal\og\Event;
 
+use Drupal\og\Entity\OgRole;
+
 /**
  * Interface for DefaultRoleEvent classes.
  *
@@ -18,8 +20,12 @@ interface DefaultRoleEventInterface extends \ArrayAccess, \IteratorAggregate {
   /**
    * Returns a single default role.
    *
-   * @param $name
+   * @param string $name
    *   The name of the role to return.
+   *
+   * @return \Drupal\og\Entity\OgRole
+   *   The OgRole entity. Note that we cannot specify OgRoleInterface here
+   *   because of limitations in interface inheritance in PHP 5.
    *
    * @throws \InvalidArgumentException
    *   Thrown when the role with the given name does not exist.
@@ -37,49 +43,43 @@ interface DefaultRoleEventInterface extends \ArrayAccess, \IteratorAggregate {
   /**
    * Adds a default role.
    *
-   * @param string $name
-   *   The name of the role to add.
-   * @param array $properties
-   *   An associative array of role properties, keyed by the following:
-   *   - 'label': The human readable label.
-   *   - 'role_type': Either OgRoleInterface::ROLE_TYPE_STANDARD or
-   *     OgRoleInterface::ROLE_TYPE_REQUIRED. Defaults to
-   *     OgRoleInterface::ROLE_TYPE_STANDARD.
+   * @param \Drupal\og\Entity\OgRole $role
+   *   The OgRole entity to add. This should be an unsaved entity that doesn't
+   *   have the group entity type and bundle IDs set.
    *
    * @throws \InvalidArgumentException
-   *   Thrown when the role that is added already exists, when the role name is
-   *   empty, or when the 'label' property is missing.
+   *   Thrown when the role that is added already exists.
    */
-  public function addRole($name, array $properties);
+  public function addRole(OgRole $role);
 
   /**
    * Adds multiple default roles.
    *
-   * @param array $roles
-   *   An associative array of default role properties, keyed by role name.
+   * @param \Drupal\og\Entity\OgRole[] $roles
+   *   An array of OgRole entities to add. These should be unsaved entities that
+   *   don't have the group entity type and bundle IDs set.
    */
   public function addRoles(array $roles);
 
   /**
    * Sets a default roles.
    *
-   * @param string $name
-   *   The name of the role to set.
-   * @param array $properties
-   *   An associative array of role properties to set, keyed by the following:
-   *   - 'label': The human readable label.
+   * @param \Drupal\og\Entity\OgRole $role
+   *   The OgRole entity to set. This should be an unsaved entity that doesn't
+   *   have the group entity type and bundle IDs set.
    *
    * @throws \InvalidArgumentException
    *   Thrown when the role name is empty, or when the 'label' property is
    *   missing.
    */
-  public function setRole($name, array $properties);
+  public function setRole(OgRole $role);
 
   /**
    * Sets multiple default roles.
    *
-   * @param array $roles
-   *   An associative array of default role properties, keyed by role name.
+   * @param \Drupal\og\Entity\OgRole[] $roles
+   *   An array of OgRole entities to set. These should be unsaved entities that
+   *   don't have the group entity type and bundle IDs set.
    */
   public function setRoles(array $roles);
 
@@ -95,7 +95,7 @@ interface DefaultRoleEventInterface extends \ArrayAccess, \IteratorAggregate {
    * Returns whether or not the given role exists.
    *
    * @param string $name
-   *   The name of the role for which to verify the existance.
+   *   The name of the role for which to verify the existence.
    *
    * @return bool
    *   TRUE if the role exists, FALSE otherwise.

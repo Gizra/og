@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\og\OgFieldsManager.
- */
-
 namespace Drupal\og;
 
 use Drupal\Core\Cache\CacheBackendInterface;

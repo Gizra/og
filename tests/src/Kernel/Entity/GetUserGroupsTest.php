@@ -1,16 +1,10 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\Tests\og\Kernel\Entity\GetEntityGroupsTest.
- */
-
 namespace Drupal\Tests\og\Kernel\Entity;
 
 use Drupal\entity_test\Entity\EntityTest;
 use Drupal\KernelTests\KernelTestBase;
 use Drupal\Component\Utility\Unicode;
-use Drupal\og\Entity\OgMembership;
 use Drupal\og\Og;
 use Drupal\og\OgMembershipInterface;
 use Drupal\user\Entity\User;
@@ -25,29 +19,45 @@ class GetUserGroupsTest extends KernelTestBase {
   /**
    * {@inheritdoc}
    */
-  public static $modules = ['system', 'user', 'field', 'og', 'entity_test'];
+  public static $modules = [
+    'system',
+    'user',
+    'field',
+    'og',
+    'entity_test',
+  ];
 
   /**
+   * A user object.
+   *
    * @var \Drupal\user\Entity\User
    */
   protected $user1;
 
   /**
+   * A user object.
+   *
    * @var \Drupal\user\Entity\User
    */
   protected $user2;
 
   /**
+   * A user object.
+   *
    * @var \Drupal\user\Entity\User
    */
   protected $user3;
 
   /**
+   * A group entity.
+   *
    * @var \Drupal\entity_test\Entity\EntityTest
    */
   protected $group1;
 
   /**
+   * A group entity.
+   *
    * @var \Drupal\entity_test\Entity\EntityTest
    */
   protected $group2;
@@ -115,7 +125,10 @@ class GetUserGroupsTest extends KernelTestBase {
    * Tests group owners have the correct groups.
    */
   public function testOwnerGroupsOnly() {
-    $actual = Og::getUserGroups($this->user1);
+    /** @var \Drupal\og\MembershipManagerInterface $membership_manager */
+    $membership_manager = \Drupal::service('og.membership_manager');
+
+    $actual = $membership_manager->getUserGroups($this->user1);
 
     $this->assertCount(1, $actual['entity_test']);
     $this->assertGroupExistsInResults($this->group1, $actual);
@@ -124,7 +137,7 @@ class GetUserGroupsTest extends KernelTestBase {
     $this->assertTrue(Og::isMember($this->group1, $this->user1));
     $this->assertFalse(Og::isMember($this->group1, $this->user2));
 
-    $actual = Og::getUserGroups($this->user2);
+    $actual = $membership_manager->getUserGroups($this->user2);
 
     $this->assertCount(1, $actual['entity_test']);
     $this->assertGroupExistsInResults($this->group2, $actual);
@@ -138,8 +151,11 @@ class GetUserGroupsTest extends KernelTestBase {
    * Tests other groups users are added to.
    */
   public function testOtherGroups() {
+    /** @var \Drupal\og\MembershipManagerInterface $membership_manager */
+    $membership_manager = \Drupal::service('og.membership_manager');
+
     // Should not be a part of any groups.
-    $this->assertEquals([], Og::getUserGroups($this->user3));
+    $this->assertEquals([], $membership_manager->getUserGroups($this->user3));
     $this->assertFalse(Og::isMember($this->group1, $this->user3));
     $this->assertFalse(Og::isMember($this->group2, $this->user3));
 
@@ -150,7 +166,7 @@ class GetUserGroupsTest extends KernelTestBase {
     // Add user to group 1 should now return that group only.
     $this->createMembership($this->user3, $this->group1);
 
-    $actual = Og::getUserGroups($this->user3);
+    $actual = $membership_manager->getUserGroups($this->user3);
 
     $this->assertCount(1, $actual['entity_test']);
     $this->assertGroupExistsInResults($this->group1, $actual);
@@ -163,7 +179,7 @@ class GetUserGroupsTest extends KernelTestBase {
     // Add to group 2 should also return that.
     $this->createMembership($this->user3, $this->group2);
 
-    $actual = Og::getUserGroups($this->user3);
+    $actual = $membership_manager->getUserGroups($this->user3);
 
     $this->assertCount(2, $actual['entity_test']);
     $this->assertGroupExistsInResults($this->group1, $actual);
@@ -222,18 +238,20 @@ class GetUserGroupsTest extends KernelTestBase {
    * @todo This is a temp function, which will be later replaced by Og::group().
    *
    * @param \Drupal\user\Entity\User $user
-   * @param \Drupal\Core\Entity\EntityInterface $group
+   *   The user object to create membership for.
+   * @param \Drupal\entity_test\Entity\EntityTest $group
+   *   The entity to create the membership for.
    * @param int $state
+   *   The state of the membership.
    *
-   * @return \Drupal\og\Entity|OgMembership
+   * @return \Drupal\og\OgMembershipInterface
+   *   The saved OG membership entity.
    */
-  protected function createMembership($user, $group, $state = OgMembershipInterface::STATE_ACTIVE) {
-    $membership = OgMembership::create(['type' => OgMembershipInterface::TYPE_DEFAULT])
-      ->setUser($user)
-      ->setEntityId($group->id())
-      ->setGroupEntityType($group->getEntityTypeId())
-      ->setState($state);
-    $membership->save();
+  protected function createMembership(User $user, EntityTest $group, $state = OgMembershipInterface::STATE_ACTIVE) {
+    $membership = Og::createMembership($group, $user);
+    $membership
+      ->setState($state)
+      ->save();
 
     return $membership;
   }
@@ -243,10 +261,12 @@ class GetUserGroupsTest extends KernelTestBase {
    *
    * Assumes entity_type is used.
    *
-   * @param \Drupal\Core\Entity\EntityInterface $group_to_check
+   * @param \Drupal\entity_test\Entity\EntityTest $group_to_check
+   *   The group entity to check.
    * @param array $results
+   *   Array keyed by the entity type, and with the group entities as values.
    */
-  protected function assertGroupExistsInResults($group_to_check, array $results) {
+  protected function assertGroupExistsInResults(EntityTest $group_to_check, array $results) {
     $found = FALSE;
     foreach ($results['entity_test'] as $group) {
       if ($group->id() == $group_to_check->id()) {

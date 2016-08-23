@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\Tests\og\Kernel\EntityCreateAccessTest.
- */
-
 namespace Drupal\Tests\og\Kernel\Entity;
 
 use Drupal\KernelTests\KernelTestBase;
@@ -32,7 +27,13 @@ class EntityCreateAccessTest extends KernelTestBase {
   /**
    * {@inheritdoc}
    */
-  public static $modules = ['field', 'node', 'og', 'system', 'user'];
+  public static $modules = [
+    'field',
+    'node',
+    'og',
+    'system',
+    'user',
+  ];
 
   /**
    * The group type.
@@ -51,7 +52,7 @@ class EntityCreateAccessTest extends KernelTestBase {
   /**
    * {@inheritdoc}
    */
-  function setUp() {
+  public function setUp() {
     parent::setUp();
 
     $this->installConfig(['og']);
@@ -81,11 +82,16 @@ class EntityCreateAccessTest extends KernelTestBase {
   /**
    * Tests that users that can only view cannot access the entity creation form.
    */
-  function testViewPermissionDoesNotGrantCreateAccess() {
+  public function testViewPermissionDoesNotGrantCreateAccess() {
+    // Create test user.
+    $user = User::create(['name' => $this->randomString()]);
+    $user->save();
+
     // Create a group.
     Node::create([
       'title' => $this->randomString(),
       'type' => 'group',
+      'uid' => $user->id(),
     ])->save();
 
     // Make sure the anonymous user exists. This normally is created in the
