@@ -319,6 +319,12 @@ class OgMembership extends ContentEntityBase implements OgMembershipInterface {
       throw new \LogicException(sprintf('Entity type %s with ID %s is not an OG group.', $entity_type_id, $group->id()));
     }
 
+    foreach ($this->getRoles() as $role) {
+      if ($role->getName() == OgRoleInterface::ANONYMOUS) {
+        throw new \LogicException('A group member role is required for creating a membership.');
+      }
+    }
+
     parent::preSave($storage);
   }
 
