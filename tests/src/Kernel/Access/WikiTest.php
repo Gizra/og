@@ -134,11 +134,11 @@ class WikiTest extends KernelTestBase {
       /** @var \Drupal\og\Entity\OgRole $role */
       $role = OgRole::create();
       $role
-        ->setGroupType($this->randomString())
-        ->setGroupBundle($this->randomString())
+        ->setGroupType('block_content')
+        ->setGroupBundle('group')
         ->setName($role_name)
         ->setLabel($this->randomString())
-        ->grantPermission($this->randomString());
+        ->grantPermission('edit any group_content content');
       $role->save();
     }
 
