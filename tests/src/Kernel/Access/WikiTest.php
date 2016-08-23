@@ -129,11 +129,11 @@ class WikiTest extends KernelTestBase {
 
     // Grant both members and non-members permission to edit any group content.
     foreach ([OgRoleInterface::AUTHENTICATED, OgRoleInterface::ANONYMOUS] as $role_name) {
-      $role_id = "block_content-group-$role_name";
       /** @var \Drupal\og\Entity\OgRole $role */
-      $role = $this->container->get('entity_type.manager')
-        ->getStorage('og_role')
-        ->load($role_id);
+      $role = Role::create([
+        'id' => "block_content-group-$role_name",
+        'label' => "Block content for group. Role: $role_name",
+      ]);
       $role->grantPermission('edit any group_content content');
       $role->save();
     }
