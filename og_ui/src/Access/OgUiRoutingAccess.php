@@ -2,6 +2,7 @@
 
 namespace Drupal\og_ui\Access;
 
+use Drupal\Core\Access\AccessResult;
 use Drupal\Core\Access\AccessResultAllowed;
 use Drupal\Core\Access\AccessResultForbidden;
 use Drupal\Core\Entity\ContentEntityBase;
@@ -9,11 +10,12 @@ use Drupal\Core\Routing\Access\AccessInterface;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\og\Og;
 use Drupal\og_ui\OgUi;
+use Symfony\Component\Routing\Route;
 
 /**
  * Checks access for displaying configuration translation page.
  */
-class OgUiRoutingAccess implements AccessInterface {
+class OgUiRoutingAccess extends AccessResult implements AccessInterface {
 
   /**
    * A custom access check.
@@ -23,9 +25,18 @@ class OgUiRoutingAccess implements AccessInterface {
    *
    * @return AccessResultAllowed
    */
-  public function GroupTabAccess(AccountInterface $account) {
+  public function GroupTabAccess(AccountInterface $account, Route $route, \Drupal\Core\Routing\RouteMatchInterface $routeMatch) {
 
     $entity = OgUi::getEntity();
+    foreach ($routeMatch->getParameters() as $parameter) {
+      if (!($parameter instanceof ContentEntityBase)) {
+        continue;
+      }
+
+      kint($parameter->getEntityTypeId());
+    }
+
+    return self::allowed();
 
     if (!Og::groupManager()->isGroup($entity->getEntityTypeId(), $entity->bundle())) {
       // Not a group. return.

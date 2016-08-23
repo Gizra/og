@@ -184,3 +184,30 @@ function og_field_formatter_info_alter(array &$info) {
     $info[$key]['field_types'][] = OgGroupAudienceHelper::GROUP_REFERENCE;
   }
 }
+
+/**
+ * Implements hook_entity_type_alter().
+ *
+ * Add link template to groups.
+ */
+function og_entity_type_alter(array &$entity_types) {
+  // Not accessing to the config schema through the group manager proxy due to
+  // circular reference caused by the fact we in hook_entity_type_alter().
+  $groups = \Drupal::config(GroupManager::SETTINGS_CONFIG_KEY)->get(GroupManager::GROUPS_CONFIG_KEY);
+  if (!$groups) {
+    // No groups defined.
+    return;
+  }
+
+  /** @var \Drupal\Core\Entity\EntityTypeInterface $entity_type */
+  foreach ($entity_types as $entity_type_id => $entity_type) {
+    if (empty($groups[$entity_type_id])) {
+      // Entity type is not a group.
+      continue;
+    }
+
+    $entity_type->setLinkTemplate('og-group-admin-pages', "/group/$entity_type_id/{{$entity_type_id}}");
+  }
+}
+
+
