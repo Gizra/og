@@ -1,17 +1,12 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\example\Routing\RouteSubscriber.
- */
 
-namespace Drupal\og_ui\Routing;
+namespace Drupal\og\Routing;
 
 use Drupal\Core\Entity\EntityTypeManager;
 use Drupal\Core\Routing\RouteProvider;
 use Drupal\Core\Routing\RouteSubscriberBase;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
-use Drupal\og_ui\OgUi;
 use Symfony\Component\Routing\Route;
 use Symfony\Component\Routing\RouteCollection;
 

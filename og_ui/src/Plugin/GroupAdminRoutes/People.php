@@ -2,8 +2,8 @@
 
 namespace Drupal\og_ui\Plugin\GroupAdminRoutes;
 
-use Drupal\og_ui\OgUiAdminRouteAbstract;
-use Drupal\og_ui\OgUiAdminRouteInterface;
+use Drupal\og_ui\OgAdminRouteAbstract;
+use Drupal\og_ui\OgAdminRouteInterface;
 
 /**
  * Manage people in the group.
@@ -20,7 +20,7 @@ use Drupal\og_ui\OgUiAdminRouteInterface;
  *   }
  * )
  */
-class People extends OgUiAdminRouteAbstract {
+class People extends OgAdminRouteAbstract {
 
   /**
    * {@inheritdoc}
@@ -28,7 +28,7 @@ class People extends OgUiAdminRouteAbstract {
   public function getRoutes() {
 
     return [
-      OgUiAdminRouteInterface::MAIN => [
+      OgAdminRouteInterface::MAIN => [
         'controller' => '\Drupal\og_ui\Controller\PeopleController::PeopleList',
         'sub_path' => 'manage',
         'title' => 'People',

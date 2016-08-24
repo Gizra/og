@@ -1,13 +1,13 @@
 <?php
 
-namespace Drupal\og_ui;
+namespace Drupal\og;
 
 use Drupal\Core\Controller\ControllerBase;
 
 /**
  * Base class to for OG UI admin routes to based upon.
  */
-class OgUiRoutesBase extends ControllerBase {
+class OgRoutesBase extends ControllerBase {
 
   /**
    * Basic access method. Can be override by the access plugin attribute.

@@ -5,5 +5,5 @@ services:
     tags:
       - { name: event_subscriber }
   plugin.manager.og_ui.group_admin_route:
-    class: Drupal\og_ui\OgUiAdminRoutesPluginManager
+    class: Drupal\og_ui\OgAdminRoutesPluginManager
     parent: default_plugin_manager

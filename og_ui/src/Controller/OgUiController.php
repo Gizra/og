@@ -8,7 +8,7 @@ use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Link;
 use Drupal\og\GroupManager;
 use Drupal\og_ui\OgUi;
-use Drupal\og_ui\OgUiAdminRouteInterface;
+use Drupal\og_ui\OgAdminRouteInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
@@ -142,7 +142,7 @@ class OgUiController extends ControllerBase {
       $list[] = [
         'title' => $definition['title'],
         'description' => $definition['description'],
-        'url' => $plugin->getUrlFromRoute(OgUiAdminRouteInterface::MAIN, \Drupal::request()),
+        'url' => $plugin->getUrlFromRoute(OgAdminRouteInterface::MAIN, \Drupal::request()),
       ];
     }
 

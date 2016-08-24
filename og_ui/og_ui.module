@@ -17,7 +17,7 @@ use Drupal\og\Og;
 use Drupal\og\OgGroupAudienceHelper;
 use Drupal\og_ui\BundleFormAlter;
 use Drupal\og_ui\OgUi;
-use Drupal\og_ui\OgUiAdminRouteInterface;
+use Drupal\og_ui\OgAdminRouteInterface;
 
 /**
  * Implements hook_form_alter().

@@ -54,7 +54,7 @@ class GroupAdminRoutes extends Plugin {
    * callable method to check if the user is allowed. The method will invoke the
    * plugin access method.
    *
-   * Optional. Default value is \Drupal\og_ui\OgUiRoutesBase::access.
+   * Optional. Default value is \Drupal\og_ui\OgRoutesBase::access.
    *
    * @ingroup plugin_translatable
    *

@@ -1,20 +1,15 @@
 <?php
 
-namespace Drupal\og_ui;
+namespace Drupal\og;
 
 use Drupal\Component\Plugin\PluginInspectionInterface;
 use Drupal\Core\Entity\ContentEntityBase;
 use Symfony\Component\HttpFoundation\Request;
 
 /**
- * Interface for the OG tasks plugins.
+ * Interface for the OG admin plugins.
  */
-interface OgUiAdminRouteInterface extends PluginInspectionInterface {
-
-  /**
-   * Represent the main route key in the sub array routes.
-   */
-  const MAIN = 'main';
+interface OgAdminRouteInterface extends PluginInspectionInterface {
 
   /**
    * Get the group the plugin handle.
@@ -30,7 +25,7 @@ interface OgUiAdminRouteInterface extends PluginInspectionInterface {
    * @param ContentEntityBase $group
    *   The group object.
    *
-   * @return OgUiAdminRouteInterface
+   * @return OgAdminRouteInterface
    *   The current instance.
    */
   public function setGroup(ContentEntityBase $group);

@@ -1,6 +1,6 @@
 <?php
 
-namespace Drupal\og_ui;
+namespace Drupal\og;
 
 use Drupal\Core\Entity\ContentEntityBase;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
@@ -14,9 +14,9 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpFoundation\Request;
 
 /**
- * Class OgUiAdminRouteAbstract.
+ * Class OgAdminRouteAbstract.
  */
-abstract class OgUiAdminRouteAbstract extends PluginBase implements OgUiAdminRouteInterface, ContainerFactoryPluginInterface {
+abstract class OgAdminRouteAbstract extends PluginBase implements OgAdminRouteInterface, ContainerFactoryPluginInterface {
 
   /**
    * The OG access service.
@@ -99,7 +99,7 @@ abstract class OgUiAdminRouteAbstract extends PluginBase implements OgUiAdminRou
    * @param AccountInterface $account
    *   The user object.
    *
-   * @return OgUiAdminRouteAbstract
+   * @return OgAdminRouteAbstract
    *   The current object.
    */
   public function setAccount(AccountInterface $account) {
