@@ -1,6 +1,6 @@
 <?php
 
-namespace Drupal\og\Plugin\GroupAdminRoutes;
+namespace Drupal\og\Plugin\OgAdmin;
 
 use Drupal\og\OgAdminRouteAbstract;
 
@@ -22,7 +22,7 @@ class Members extends OgAdminRouteAbstract {
   public function getParentRoute() {
 
     return [
-      'controller' => '\Drupal\og_ui\Controller\PeopleController::PeopleList',
+      'controller' => '\Drupal\og\Controller\OgAdminMembersController::membersList',
       'title' => 'Members',
     ];
   }
@@ -34,7 +34,7 @@ class Members extends OgAdminRouteAbstract {
 
     return [
       'add' => [
-        'controller' => '\Drupal\og_ui\Controller\PeopleController::addPeopleForm',
+        'controller' => '\Drupal\og\Controller\OgAdminMembersController::addPeopleForm',
         'sub_path' => 'add',
         'title' => 'Add people',
         'type' => 'local_action',
