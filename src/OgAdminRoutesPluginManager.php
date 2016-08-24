@@ -23,7 +23,7 @@ class OgAdminRoutesPluginManager extends DefaultPluginManager {
    *   The module handler to invoke the alter hook with.
    */
   public function __construct(\Traversable $namespaces, CacheBackendInterface $cache_backend, ModuleHandlerInterface $module_handler) {
-    parent::__construct('Plugin/GroupAdminRoutes', $namespaces, $module_handler, NULL, 'Drupal\og_ui\Annotation\GroupAdminRoutes');
+    parent::__construct('Plugin/OgAdmin', $namespaces, $module_handler, NULL, 'Drupal\og_ui\Annotation\GroupAdminRoutes');
     $this->alterInfo('og_ui_group_admin_routes');
     $this->setCacheBackend($cache_backend, 'og_ui_group_admin_routes');
   }

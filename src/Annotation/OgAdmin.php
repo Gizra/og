@@ -1,20 +1,15 @@
 <?php
 
-/**
- * @file
- * Contains Drupal\og_ui\Annotation\GroupAdminRoutes.
- */
-
-namespace Drupal\og_ui\Annotation;
+namespace Drupal\og\Annotation;
 
 use Drupal\Component\Annotation\Plugin;
 
 /**
- * Define an OG ui group admin routes.
+ * Define an OG admin annotation plugin.
  *
  * @Annotation
  */
-class GroupAdminRoutes extends Plugin {
+class OgAdmin extends Plugin {
 
   /**
    * The plugin ID.

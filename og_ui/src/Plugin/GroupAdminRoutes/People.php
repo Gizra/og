@@ -8,7 +8,7 @@ use Drupal\og_ui\OgAdminRouteInterface;
 /**
  * Manage people in the group.
  *
- * @GroupAdminRoutes(
+ * @OgAdmin(
  *   id = "people",
  *   path = "people",
  *   title = @Translation("People"),
