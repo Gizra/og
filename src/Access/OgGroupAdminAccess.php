@@ -24,8 +24,15 @@ class OgGroupAdminAccess extends AccessResult implements AccessInterface {
    * @return AccessResultInterface
    *   The access result object.
    */
-  public function access(AccountInterface $account, RouteMatchInterface $routeMatch, GroupTypeManager $group_type_manager, OgAdminRoutesPluginManager $og_admin_routes_plugin_manager) {
-    foreach ($routeMatch->getParameters() as $parameter) {
+  public function access(AccountInterface $account, RouteMatchInterface $route_match) {
+
+    /** @var \Drupal\og\GroupTypeManager $group_type_manager */
+    $group_type_manager = \Drupal::service('og.group_type_manager');
+
+    /** @var \Drupal\og\OgAdminRoutesPluginManager $og_admin_routes_plugin_manager */
+    $og_admin_routes_plugin_manager = \Drupal::service('plugin.manager.og.group_admin_route');
+
+    foreach ($route_match->getParameters() as $parameter) {
       if (!$parameter instanceof ContentEntityBase) {
         continue;
       }
