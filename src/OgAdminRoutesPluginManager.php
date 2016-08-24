@@ -29,18 +29,15 @@ class OgAdminRoutesPluginManager extends DefaultPluginManager {
   }
 
   /**
-   * Get all the admin routes plugins.
+   * Get all the admin plugins.
    *
    * @return OgAdminRouteInterface[]
-   *   Get all the OG plugins.
+   *   An array with the OG admin plugins.
    */
-  public static function getGroupAdminPlugins() {
-    /** @var OgAdminRoutesPluginManager $plugins */
-    $plugin_manager = \Drupal::service('plugin.manager.og_ui.group_admin_route');
-
+  public function getPlugins() {
     $plugins = [];
-    foreach ($plugin_manager->getDefinitions() as $definition) {
-      $plugins[$definition['id']] = $plugin_manager->createInstance($definition['id']);
+    foreach ($this->getDefinitions() as $definition) {
+      $plugins[$definition['id']] = $this->createInstance($definition['id']);
     }
 
     return $plugins;
