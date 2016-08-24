@@ -82,7 +82,7 @@ class RouteSubscriber extends RouteSubscriberBase {
         ])
         ->setOption('_admin_route', TRUE);
 
-      $collection->add('entity.' . $entity_type_id . '.og_admin', $route);
+      $collection->add('entity.' . $entity_type_id . '.og_group_admin_pages', $route);
 
       // Add the plugins routes.
       $this->createRoutesForOgAdminPlugins($og_admin_path, $entity_type_id, $collection);
