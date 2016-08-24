@@ -1,2 +1,0 @@
-og_ui.entities:
-  deriver: \Drupal\og_ui\Plugin\Derivative\OgUiLocalTask
