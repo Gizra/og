@@ -12,14 +12,6 @@ use Symfony\Component\HttpFoundation\Request;
 interface OgAdminRouteInterface extends PluginInspectionInterface {
 
   /**
-   * Get the path of the admin.
-   *
-   * @return string
-   *   Return the path of the route.
-   */
-  public function getPath();
-
-  /**
    * Check if the current user can access to the plugin routes callback.
    *
    * @param \Drupal\Core\Entity\ContentEntityInterface $group
@@ -31,36 +23,25 @@ interface OgAdminRouteInterface extends PluginInspectionInterface {
   public function access(ContentEntityInterface $group);
 
   /**
+   * Return the parent route.
+   *
+   * Every plugin must have at least a single route, which we call the parent
+   * route. Below it there may be other sub-routes. For example in the "People"
+   * plugin, the parent route is the page that shows the member management
+   * table and is under /members. However, that plugin also exposes other
+   * routes, such as the "add member" route which will be under /members/add-member
+   *
+   * @return array
+   *   Array with the route definition.
+   */
+  public function getParentRoute();
+
+  /**
    * Return list of defined sub-path of the plugin.
    *
    * @return array
    *   List of routes.
    */
-  public function getRoutes();
-
-  /**
-   * Get the routes easily.
-   *
-   * @param string $key
-   *   The key which represent the route in the array.
-   *
-   * @return array
-   *   Get the a single route form the routes list.
-   */
-  public function getRoute($key);
-
-  /**
-   * Get URL route from request.
-   *
-   * @param string $route_key
-   *   The key of the route as defined in the route list array.
-   * @param Request $request
-   *   The current request object or a request object for a given route.
-   *   Used to construct the path of the link.
-   *
-   * @return string
-   *   The route's URL.
-   */
-  public function getUrlFromRoute($route_key, Request $request);
+  public function getSubRoutes();
 
 }

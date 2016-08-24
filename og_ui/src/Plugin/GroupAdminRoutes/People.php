@@ -1,9 +1,9 @@
 <?php
 
-namespace Drupal\og_ui\Plugin\GroupAdminRoutes;
+namespace Drupal\og\Plugin\GroupAdminRoutes;
 
-use Drupal\og_ui\OgAdminRouteAbstract;
-use Drupal\og_ui\OgAdminRouteInterface;
+use Drupal\og\OgAdminRouteAbstract;
+use Drupal\og\OgAdminRouteInterface;
 
 /**
  * Manage people in the group.
@@ -12,12 +12,7 @@ use Drupal\og_ui\OgAdminRouteInterface;
  *   id = "people",
  *   path = "people",
  *   title = @Translation("People"),
- *   description = @Translation("Manage the group's members"),
- *   permission = "administer group",
- *   route_id = "people",
- *   parents_routes = {
- *    "node" = "entity.node.canonical"
- *   }
+ *   description = @Translation("Manage the group's members")
  * )
  */
 class People extends OgAdminRouteAbstract {

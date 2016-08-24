@@ -23,27 +23,6 @@ abstract class OgAdminRouteAbstract extends PluginBase implements OgAdminRouteIn
   protected $ogAccess;
 
   /**
-   * The current user service.
-   *
-   * @var AccountProxyInterface
-   */
-  protected $currentUser;
-
-  /**
-   * The account object.
-   *
-   * @var UserInterface
-   */
-  protected $account;
-
-  /**
-   * The group the plugin handle.
-   *
-   * @var ContentEntityBase
-   */
-  protected $group;
-
-  /**
    * Constructs a Drupal\Component\Plugin\PluginBase object.
    *
    * @param array $configuration
@@ -54,13 +33,10 @@ abstract class OgAdminRouteAbstract extends PluginBase implements OgAdminRouteIn
    *   The plugin implementation definition.
    * @param OgAccessInterface $og_access
    *   The OgAccess service.
-   * @param AccountProxyInterface $current_user
-   *   The current user object.
    */
-  public function __construct(array $configuration, $plugin_id, $plugin_definition, OgAccessInterface $og_access, AccountProxyInterface $current_user) {
+  public function __construct(array $configuration, $plugin_id, $plugin_definition, OgAccessInterface $og_access) {
     parent::__construct($configuration, $plugin_id, $plugin_definition);
     $this->ogAccess = $og_access;
-    $this->currentUser = $current_user;
   }
 
   /**
@@ -71,47 +47,15 @@ abstract class OgAdminRouteAbstract extends PluginBase implements OgAdminRouteIn
       $configuration,
       $plugin_id,
       $plugin_definition,
-      $container->get('og.access'),
-      $container->get('current_user')
+      $container->get('og.access')
     );
   }
 
   /**
    * {@inheritdoc}
    */
-  public function getPath() {
-    return $this->pluginDefinition['path'];
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function getRoutes() {
+  public function getSubRoutes() {
     return [];
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function getRoute($key) {
-    $routes = $this->getRoutes();
-
-    return $routes[$key];
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function getUrlFromRoute($route_key, Request $request) {
-    $route = $this->getRoute($route_key);
-
-    $route_info = [
-      '/' . Url::createFromRequest($request)->toString(),
-      $this->pluginDefinition['path'],
-      $route['sub_path'],
-    ];
-
-    return Url::fromUserInput(implode('/', $route_info));
   }
 
   /**
