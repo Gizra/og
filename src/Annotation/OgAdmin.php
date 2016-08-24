@@ -45,5 +45,4 @@ class OgAdmin extends Plugin {
    */
   public $description;
 
-
 }

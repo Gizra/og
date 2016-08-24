@@ -118,7 +118,6 @@ class RouteSubscriber extends RouteSubscriberBase {
 
       $this->addRoute($collection, $entity_type_id, $parent_route_name, $parent_path, $info);
 
-
       // Add the sub routes.
       foreach ($plugin->getSubRoutes() as $name => $route_info) {
         $route_name = $parent_route_name . '.' . $name;
@@ -135,7 +134,7 @@ class RouteSubscriber extends RouteSubscriberBase {
   }
 
   /**
-   * Add route to collection
+   * Add route to collection.
    *
    * @param \Symfony\Component\Routing\RouteCollection $collection
    *   The collection route.
@@ -148,7 +147,7 @@ class RouteSubscriber extends RouteSubscriberBase {
    * @param array $info
    *   Array with the router definitions. Required keys are:
    *   - controller
-   *   - title
+   *   - title.
    */
   protected function addRoute(RouteCollection $collection, $entity_type_id, $route_name, $path, array $info) {
     $route = new Route($path);

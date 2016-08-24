@@ -4,7 +4,6 @@ namespace Drupal\og;
 
 use Drupal\Component\Plugin\PluginInspectionInterface;
 use Drupal\Core\Entity\ContentEntityInterface;
-use Symfony\Component\HttpFoundation\Request;
 
 /**
  * Interface for the OG admin plugins.
@@ -29,7 +28,8 @@ interface OgAdminRouteInterface extends PluginInspectionInterface {
    * route. Below it there may be other sub-routes. For example in the "People"
    * plugin, the parent route is the page that shows the member management
    * table and is under /members. However, that plugin also exposes other
-   * routes, such as the "add member" route which will be under /members/add-member
+   * routes, such as the "add member" route which will be under
+   *  /members/add-member.
    *
    * @return array
    *   Array with the route definition.
