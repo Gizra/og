@@ -26,7 +26,7 @@ services:
     arguments: ['@event_dispatcher']
   og.route_subscriber:
     class: Drupal\og\Routing\RouteSubscriber
-    arguments: ['@entity_type.manager']
+    arguments: ['@entity_type.manager', '@router.route_provider', '@plugin.manager.og.group_admin_route']
     tags:
       - { name: event_subscriber }
   og.role_manager:

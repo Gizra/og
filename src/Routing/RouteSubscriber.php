@@ -7,6 +7,7 @@ use Drupal\Core\Entity\EntityTypeManager;
 use Drupal\Core\Routing\RouteProvider;
 use Drupal\Core\Routing\RouteSubscriberBase;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
+use Drupal\og\OgAdminRoutesPluginManager;
 use Symfony\Component\Routing\Route;
 use Symfony\Component\Routing\RouteCollection;
 
@@ -25,13 +26,31 @@ class RouteSubscriber extends RouteSubscriberBase {
   protected $entityTypeManager;
 
   /**
+   * The route provider service.
+   *
+   * @var \Drupal\Core\Routing\RouteProvider
+   */
+  protected $routeProvider;
+
+  /**
+   * The OG Admin plugin manager.
+   *
+   * @var \Drupal\og\Routing\OgAdminRoutesPluginManager
+   */
+  protected $ogAdminRoutesPluginManager;
+
+  /**
    * Constructs a new RouteSubscriber object.
    *
    * @param EntityTypeManager $entity_manager
    *   The entity type manager.
+   * @param \Drupal\Core\Routing\RouteProvider $route_provider
+   * @param \Drupal\og\OgAdminRoutesPluginManager $og_admin_routes_plugin_manager
    */
-  public function __construct(EntityTypeManager $entity_manager) {
+  public function __construct(EntityTypeManager $entity_manager, RouteProvider $route_provider, OgAdminRoutesPluginManager $og_admin_routes_plugin_manager) {
     $this->entityTypeManager = $entity_manager;
+    $this->routeProvider = $route_provider;
+    $this->ogAdminRoutesPluginManager = $og_admin_routes_plugin_manager;
   }
 
   /**
@@ -74,11 +93,7 @@ class RouteSubscriber extends RouteSubscriberBase {
    *   The route collection object.
    */
   protected function createRoutesFromAdminRoutesPlugins(RouteCollection $collection) {
-    /** @var RouteProvider $route_provider */
-    $route_provider = \Drupal::getContainer()->get('router.route_provider');
-
-    $plugins = OgUi::getGroupAdminPlugins();
-    foreach ($plugins as $plugin) {
+    foreach ($this->ogAdminRoutesPluginManager->getPlugins() as $plugin) {
 
       $definition = $plugin->getPluginDefinition() + [
         'access' => '\Drupal\og_ui\OgUiRoutesBase::access',
@@ -87,7 +102,7 @@ class RouteSubscriber extends RouteSubscriberBase {
       // Iterate over all the parent routes.
       foreach ($definition['parents_routes'] as $entity_type_id => $parent_route) {
 
-        if (!$route_provider->getRoutesByNames([$parent_route])) {
+        if (!$this->route_provider->getRoutesByNames([$parent_route])) {
           $params = [
             '@router_name' => $parent_route,
             '@plugin_name' => '',
@@ -96,7 +111,7 @@ class RouteSubscriber extends RouteSubscriberBase {
           continue;
         }
 
-        $parent_path = $route_provider->getRouteByName($parent_route)->getPath();
+        $parent_path = $this->route_provider->getRouteByName($parent_route)->getPath();
         $path = $parent_path . '/group/' . $definition['path'];
 
         // Create a route for each route callback.
