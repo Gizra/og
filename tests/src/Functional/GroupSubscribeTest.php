@@ -98,8 +98,8 @@ class GroupSubscribeTest extends BrowserTestBase {
     $this->membershipTypeBundle = Unicode::strtolower($this->randomMachineName());
 
     // Define the entities as groups.
-    Og::groupManager()->addGroup('node', $this->groupBundle1);
-    Og::groupManager()->addGroup('node', $this->groupBundle2);
+    Og::groupTypeManager()->addGroup('node', $this->groupBundle1);
+    Og::groupTypeManager()->addGroup('node', $this->groupBundle2);
 
     // Create node author user.
     $user = $this->createUser();

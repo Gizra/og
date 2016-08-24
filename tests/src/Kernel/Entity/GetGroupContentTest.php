@@ -79,7 +79,7 @@ class GetGroupContentTest extends KernelTestBase {
       'name' => $this->randomString(),
       'type' => $bundle,
     ])->save();
-    Og::groupManager()->addGroup('node', $bundle);
+    Og::groupTypeManager()->addGroup('node', $bundle);
 
     $groups['node'] = Node::create([
       'title' => $this->randomString(),
@@ -91,7 +91,7 @@ class GetGroupContentTest extends KernelTestBase {
     // The Entity Test entity doesn't have 'real' bundles, so we don't need to
     // create one, we can just add the group to the fake bundle.
     $bundle = Unicode::strtolower($this->randomMachineName());
-    Og::groupManager()->addGroup('entity_test', $bundle);
+    Og::groupTypeManager()->addGroup('entity_test', $bundle);
 
     $groups['entity_test'] = EntityTest::create([
       'type' => $bundle,
@@ -179,7 +179,7 @@ class GetGroupContentTest extends KernelTestBase {
       'name' => $this->randomString(),
       'type' => $bundle,
     ])->save();
-    Og::groupManager()->addGroup('node', $bundle);
+    Og::groupTypeManager()->addGroup('node', $bundle);
 
     for ($i = 0; $i < 2; $i++) {
       $groups[$i] = Node::create([
@@ -237,7 +237,7 @@ class GetGroupContentTest extends KernelTestBase {
       'name' => $this->randomString(),
       'type' => $bundle,
     ])->save();
-    Og::groupManager()->addGroup('node', $bundle);
+    Og::groupTypeManager()->addGroup('node', $bundle);
 
     $groups['node'] = Node::create([
       'title' => $this->randomString(),
@@ -249,7 +249,7 @@ class GetGroupContentTest extends KernelTestBase {
     // The Entity Test entity doesn't have 'real' bundles, so we don't need to
     // create one, we can just add the group to the fake bundle.
     $bundle = Unicode::strtolower($this->randomMachineName());
-    Og::groupManager()->addGroup('entity_test', $bundle);
+    Og::groupTypeManager()->addGroup('entity_test', $bundle);
 
     $groups['entity_test'] = EntityTest::create([
       'type' => $bundle,

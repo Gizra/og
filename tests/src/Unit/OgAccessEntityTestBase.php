@@ -58,7 +58,7 @@ class OgAccessEntityTestBase extends OgAccessTestBase {
       ->willReturn([]);
 
     // The group manager is expected to declare that this is not a group.
-    $this->groupManager->isGroup($entity_type_id, $bundle)->willReturn(FALSE);
+    $this->groupTypeManager->isGroup($entity_type_id, $bundle)->willReturn(FALSE);
 
     // Mock retrieval of field definitions.
     $field_definition = $this->prophesize(FieldDefinitionInterface::class);

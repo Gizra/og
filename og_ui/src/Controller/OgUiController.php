@@ -9,6 +9,7 @@ use Drupal\Core\Link;
 use Drupal\og\GroupManager;
 use Drupal\og_ui\OgUi;
 use Drupal\og_ui\OgAdminRouteInterface;
+use Drupal\og\GroupTypeManager;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
@@ -19,9 +20,9 @@ class OgUiController extends ControllerBase {
   /**
    * The OG group manager.
    *
-   * @var \Drupal\og\GroupManager
+   * @var \Drupal\og\GroupTypeManager
    */
-  protected $groupManager;
+  protected $groupTypeManager;
 
   /**
    * The entity type manager.
@@ -40,15 +41,15 @@ class OgUiController extends ControllerBase {
   /**
    * Constructs a OgUiController object.
    *
-   * @param \Drupal\og\GroupManager $group_manager
+   * @param \Drupal\og\GroupTypeManager $group_manager
    *   The OG group manager.
    * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entity_type_manager
    *   The entity type manager.
    * @param \Drupal\Core\Entity\EntityTypeBundleInfoInterface $entity_type_bundle_info
    *   The entity type bundle info service.
    */
-  public function __construct(GroupManager $group_manager, EntityTypeManagerInterface $entity_type_manager, EntityTypeBundleInfoInterface $entity_type_bundle_info) {
-    $this->groupManager = $group_manager;
+  public function __construct(GroupTypeManager $group_manager, EntityTypeManagerInterface $entity_type_manager, EntityTypeBundleInfoInterface $entity_type_bundle_info) {
+    $this->groupTypeManager = $group_manager;
     $this->entityTypeManager = $entity_type_manager;
     $this->entityTypeBundleInfo = $entity_type_bundle_info;
   }
@@ -58,7 +59,7 @@ class OgUiController extends ControllerBase {
    */
   public static function create(ContainerInterface $container) {
     return new static(
-      $container->get('og.group.manager'),
+      $container->get('og.group_type_manager'),
       $container->get('entity_type.manager'),
       $container->get('entity_type.bundle.info')
     );
@@ -78,7 +79,7 @@ class OgUiController extends ControllerBase {
     $header = [t('Group type'), t('Operations')];
     $rows = [];
 
-    foreach ($this->groupManager->getAllGroupBundles() as $entity_type => $bundles) {
+    foreach ($this->groupTypeManager->getAllGroupBundles() as $entity_type => $bundles) {
       $definition = $this->entityTypeManager->getDefinition($entity_type);
       $bundle_info = $this->entityTypeBundleInfo->getBundleInfo($entity_type);
       foreach ($bundles as $bundle) {
