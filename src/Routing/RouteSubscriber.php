@@ -61,82 +61,114 @@ class RouteSubscriber extends RouteSubscriberBase {
 
     foreach ($this->entityTypeManager->getDefinitions() as $entity_type_id => $entity_type) {
 
-      if ($og_task = $entity_type->getLinkTemplate('og-group-admin-pages')) {
-        $entity_type_id = $entity_type->id();
-        $route = new Route($og_task);
-
-        $route
-          ->addDefaults([
-            '_controller' => '\Drupal\og\Controller\OgAdminController::mainPage',
-            '_title' => 'Tasks',
-          ])
-          // @todo: Convert to service?
-          ->addRequirements([
-            '_custom_access' => '\Drupal\og\Access\OgGroupAdminAccess::access',
-          ])
-          ->setOption('parameters', [
-            $entity_type_id => ['type' => 'entity:' . $entity_type_id],
-          ])
-          ->setOption('entity_type_id', $entity_type_id)
-          ->setOption('_admin_route', TRUE);
-
-        $collection->add('entity.' . $entity_type_id . '.og_group_admin_pages', $route);
+      if (!$og_admin_path = $entity_type->getLinkTemplate('og-group-admin-pages')) {
+        // Entity type doesn't have the link template defined.
+        continue;
       }
+
+      $entity_type_id = $entity_type->id();
+      $route = new Route($og_admin_path);
+
+      $route
+        ->addDefaults([
+          '_controller' => '\Drupal\og\Controller\OgAdminController::mainPage',
+          '_title' => 'Group management',
+        ])
+        ->addRequirements([
+          '_custom_access' => '\Drupal\og\Access\OgGroupAdminAccess::access',
+        ])
+        ->setOption('parameters', [
+          $entity_type_id => ['type' => 'entity:' . $entity_type_id],
+        ])
+        ->setOption('_admin_route', TRUE);
+
+      $collection->add('entity.' . $entity_type_id . '.og_admin', $route);
+
+      // Add the plugins routes.
+      $this->createRoutesForOgAdminPlugins($og_admin_path, $entity_type_id, $collection);
+
     }
 
-    $this->createRoutesFromAdminRoutesPlugins($collection);
   }
 
   /**
-   * Creating from OG tasks plugins.
+   * Add all the OG admin plugins to the route collection.
    *
-   * @param RouteCollection $collection
+   * @param string $og_admin_path
+   *   The OG admin path.
+   * @param string $entity_type_id
+   *   The entity type ID.
+   * @param \Symfony\Component\Routing\RouteCollection $collection
    *   The route collection object.
    */
-  protected function createRoutesFromAdminRoutesPlugins(RouteCollection $collection) {
+  protected function createRoutesForOgAdminPlugins($og_admin_path, $entity_type_id, RouteCollection $collection) {
     foreach ($this->ogAdminRoutesPluginManager->getPlugins() as $plugin) {
 
-      $definition = $plugin->getPluginDefinition() + [
-        'access' => '\Drupal\og_ui\OgUiRoutesBase::access',
+      $plugin_definition = $plugin->getPluginDefinition();
+      $plugin_id = $plugin_definition['id'];
+
+      // Add the parent route.
+      $parent_route_name = "entity.$entity_type_id.og_admin.$plugin_id";
+      $parent_path = $og_admin_path . '/' . $plugin_definition['path'];
+
+      $info = [
+        'controller' => $plugin_definition['controller'],
+        'title' => $plugin_definition['title'],
       ];
 
-      // Iterate over all the parent routes.
-      foreach ($definition['parents_routes'] as $entity_type_id => $parent_route) {
+      $this->addRoute($collection, $entity_type_id, $parent_route_name, $parent_path, $info);
 
-        if (!$this->route_provider->getRoutesByNames([$parent_route])) {
-          $params = [
-            '@router_name' => $parent_route,
-            '@plugin_name' => '',
-          ];
-          \Drupal::logger('og_ui')->alert($this->t('The router @router_name, needed by @plugin_name, does not exists.', $params));
-          continue;
-        }
 
-        $parent_path = $this->route_provider->getRouteByName($parent_route)->getPath();
-        $path = $parent_path . '/group/' . $definition['path'];
+      // Add the sub routes.
+      foreach ($plugin->getSubRoutes() as $name => $route_info) {
+        $route_name = $parent_route_name . '.' . $name;
+        $path = $parent_path . '/' . $info['path'];
 
-        // Create a route for each route callback.
-        foreach ($plugin->getRoutes() as $sub_route => $route_info) {
-          $route = new Route($path . '/' . $route_info['sub_path']);
-          $route
-            ->addDefaults([
-              '_controller' => $route_info['controller'],
-              '_title' => $route_info['title'],
-            ])
-            ->addRequirements([
-              '_custom_access' => $definition['access'],
-              '_plugin_id' => $definition['id'],
-            ])
-            ->setOption('parameters', [
-              $entity_type_id => ['type' => 'entity:' . $entity_type_id],
-            ])
-            ->setOption('entity_type_id', $entity_type_id)
-            ->setOption('_admin_route', TRUE);
+        $info = [
+          'controller' => $route_info['controller'],
+          'title' => $route_info['title'],
+        ];
 
-          $collection->add($parent_route . '.' . $definition['route_id'] . '.' . $sub_route, $route);
-        }
+        $this->addRoute($collection, $entity_type_id, $route_name, $path, $info);
       }
     }
+  }
+
+  /**
+   * Add route to collection
+   *
+   * @param \Symfony\Component\Routing\RouteCollection $collection
+   *   The collection route.
+   * @param string $entity_type_id
+   *   The entity type ID.
+   * @param string $route_name
+   *   The route name.
+   * @param string $path
+   *   The route path.
+   * @param array $info
+   *   Array with the router definitions. Required keys are:
+   *   - controller
+   *   - title
+   */
+  protected function addRoute(RouteCollection $collection, $entity_type_id, $route_name, $path, array $info) {
+    $route = new Route($path);
+    $route
+      ->addDefaults([
+        '_controller' => $info['controller'],
+        '_title' => $info['title'],
+      ])
+      ->addRequirements([
+        // @todo: Allow to specify a callback instead of a permission.
+        '_og_user_access_group' => 'administer group',
+      ])
+      ->setOption('parameters', [
+        $entity_type_id => ['type' => 'entity:' . $entity_type_id],
+      ])
+      // @todo: We might need to define own admin route, like node module to
+      // prevent access denied?
+      ->setOption('_admin_route', TRUE);
+
+    $collection->add($route_name, $route);
   }
 
 }

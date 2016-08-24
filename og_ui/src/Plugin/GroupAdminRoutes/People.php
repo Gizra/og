@@ -3,31 +3,36 @@
 namespace Drupal\og\Plugin\GroupAdminRoutes;
 
 use Drupal\og\OgAdminRouteAbstract;
-use Drupal\og\OgAdminRouteInterface;
 
 /**
  * Manage people in the group.
  *
  * @OgAdmin(
- *   id = "people",
- *   path = "people",
- *   title = @Translation("People"),
+ *   id = "members",
+ *   path = "members",
+ *   title = @Translation("Members"),
  *   description = @Translation("Manage the group's members")
  * )
  */
-class People extends OgAdminRouteAbstract {
+class Members extends OgAdminRouteAbstract {
 
   /**
    * {@inheritdoc}
    */
-  public function getRoutes() {
+  public function getParentRoute() {
 
     return [
-      OgAdminRouteInterface::MAIN => [
-        'controller' => '\Drupal\og_ui\Controller\PeopleController::PeopleList',
-        'sub_path' => 'manage',
-        'title' => 'People',
-      ],
+      'controller' => '\Drupal\og_ui\Controller\PeopleController::PeopleList',
+      'title' => 'Members',
+    ];
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getSubRoutes() {
+
+    return [
       'add' => [
         'controller' => '\Drupal\og_ui\Controller\PeopleController::addPeopleForm',
         'sub_path' => 'add',
@@ -36,5 +41,4 @@ class People extends OgAdminRouteAbstract {
       ],
     ];
   }
-
 }
