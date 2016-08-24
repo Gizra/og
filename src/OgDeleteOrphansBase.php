@@ -33,6 +33,13 @@ abstract class OgDeleteOrphansBase extends PluginBase implements OgDeleteOrphans
   protected $queueFactory;
 
   /**
+   * The OG membership manager.
+   *
+   * @var \Drupal\og\MembershipManagerInterface
+   */
+  protected $membershipManager;
+
+  /**
    * Constructs an OgDeleteOrphansBase object.
    *
    * @param array $configuration
@@ -45,11 +52,14 @@ abstract class OgDeleteOrphansBase extends PluginBase implements OgDeleteOrphans
    *   The entity type manager.
    * @param \Drupal\Core\Queue\QueueFactory $queue_factory
    *   The queue factory.
+   * @param \Drupal\og\MembershipManagerInterface $membership_manager
+   *   The OG membership manager service.
    */
-  public function __construct(array $configuration, $plugin_id, $plugin_definition, EntityTypeManagerInterface $entity_type_manager, QueueFactory $queue_factory) {
+  public function __construct(array $configuration, $plugin_id, $plugin_definition, EntityTypeManagerInterface $entity_type_manager, QueueFactory $queue_factory, MembershipManagerInterface $membership_manager) {
     parent::__construct($configuration, $plugin_id, $plugin_definition);
     $this->entityTypeManager = $entity_type_manager;
     $this->queueFactory = $queue_factory;
+    $this->membershipManager = $membership_manager;
   }
 
   /**
@@ -61,7 +71,8 @@ abstract class OgDeleteOrphansBase extends PluginBase implements OgDeleteOrphans
       $plugin_id,
       $plugin_definition,
       $container->get('entity_type.manager'),
-      $container->get('queue')
+      $container->get('queue'),
+      $container->get('og.membership_manager')
     );
   }
 
@@ -90,14 +101,12 @@ abstract class OgDeleteOrphansBase extends PluginBase implements OgDeleteOrphans
    *   IDs to delete.
    */
   protected function query(EntityInterface $entity) {
-    /** @var \Drupal\og\MembershipManagerInterface $membership_manager */
-    $membership_manager = \Drupal::service('og.membership_manager');
-
     // Register orphaned group content.
-    $orphans = $membership_manager->getGroupContentIds($entity);
+    $orphans = $this->membershipManager->getGroupContentIds($entity);
 
     // Register orphaned user memberships.
-    $membership_ids = \Drupal::entityQuery('og_membership')
+    $membership_ids = $this->entityTypeManager->getStorage('og_membership')
+      ->getQuery()
       ->condition('entity_type', $entity->getEntityTypeId())
       ->condition('entity_id', $entity->id())
       ->execute();
@@ -121,10 +130,7 @@ abstract class OgDeleteOrphansBase extends PluginBase implements OgDeleteOrphans
     $entity = $this->entityTypeManager->getStorage($entity_type)->load($entity_id);
     // Only delete content that is fully orphaned, i.e. it is no longer
     // associated with any groups.
-    /** @var \Drupal\og\MembershipManagerInterface $membership_manager */
-    $membership_manager = \Drupal::service('og.membership_manager');
-
-    $group_count = $membership_manager->getGroupCount($entity);
+    $group_count = $this->membershipManager->getGroupCount($entity);
     if ($group_count == 0) {
       $entity->delete();
     }

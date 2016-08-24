@@ -4,6 +4,7 @@ namespace Drupal\og;
 
 use Drupal\Component\Utility\NestedArray;
 use Drupal\Core\Entity\EntityInterface;
+use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\field\Entity\FieldStorageConfig;
 use Drupal\field\FieldStorageConfigInterface;
@@ -20,6 +21,23 @@ class MembershipManager implements MembershipManagerInterface {
    * @var array
    */
   protected $cache;
+
+  /**
+   * The entity type manager.
+   *
+   * @var \Drupal\core\Entity\EntityTypeManagerInterface
+   */
+  protected $entityTypeManager;
+
+  /**
+   * Constructs a MembershipManager object.
+   *
+   * @param \Drupal\core\Entity\EntityTypeManagerInterface $entity_type_manager
+   *   The entity type manager.
+   */
+  public function __construct(EntityTypeManagerInterface $entity_type_manager) {
+    $this->entityTypeManager = $entity_type_manager;
+  }
 
   /**
    * {@inheritdoc}
@@ -43,7 +61,7 @@ class MembershipManager implements MembershipManagerInterface {
     $groups = [];
 
     foreach ($this->getUserGroupIds($user, $states) as $entity_type => $entity_ids) {
-      $groups[$entity_type] = \Drupal::entityTypeManager()->getStorage($entity_type)->loadMultiple($entity_ids);
+      $groups[$entity_type] = $this->entityTypeManager->getStorage($entity_type)->loadMultiple($entity_ids);
     }
 
     return $groups;
@@ -69,7 +87,9 @@ class MembershipManager implements MembershipManagerInterface {
       return $this->cache[$identifier];
     }
 
-    $query = \Drupal::entityQuery('og_membership')
+    $query = $this->entityTypeManager
+      ->getStorage('og_membership')
+      ->getQuery()
       ->condition('uid', $user->id());
 
     if ($states) {
@@ -79,7 +99,7 @@ class MembershipManager implements MembershipManagerInterface {
     $results = $query->execute();
 
     /** @var \Drupal\og\Entity\OgMembership[] $memberships */
-    $this->cache[$identifier] = \Drupal::entityTypeManager()
+    $this->cache[$identifier] = $this->entityTypeManager
       ->getStorage('og_membership')
       ->loadMultiple($results);
 
@@ -159,8 +179,10 @@ class MembershipManager implements MembershipManagerInterface {
       // Query the database to get the actual list of groups. The target IDs may
       // contain groups that no longer exist. Entity reference doesn't clean up
       // orphaned target IDs.
-      $entity_type = \Drupal::entityTypeManager()->getDefinition($target_type);
-      $query = \Drupal::entityQuery($target_type)
+      $entity_type = $this->entityTypeManager->getDefinition($target_type);
+      $query = $this->entityTypeManager
+        ->getStorage($target_type)
+        ->getQuery()
         ->condition($entity_type->getKey('id'), $target_ids, 'IN');
 
       // Optionally filter by group bundle.
@@ -183,7 +205,7 @@ class MembershipManager implements MembershipManagerInterface {
     $groups = [];
 
     foreach ($this->getGroupIds($entity, $group_type_id, $group_bundle) as $entity_type => $entity_ids) {
-      $groups[$entity_type] = \Drupal::entityTypeManager()->getStorage($entity_type)->loadMultiple($entity_ids);
+      $groups[$entity_type] = $this->entityTypeManager->getStorage($entity_type)->loadMultiple($entity_ids);
     }
 
     return $groups;
@@ -205,7 +227,9 @@ class MembershipManager implements MembershipManagerInterface {
     $group_content = [];
 
     // Retrieve the fields which reference our entity type and bundle.
-    $query = \Drupal::entityQuery('field_storage_config')
+    $query = $this->entityTypeManager
+      ->getStorage('field_storage_config')
+      ->getQuery()
       ->condition('type', OgGroupAudienceHelper::GROUP_REFERENCE);
 
     // Optionally filter group content entity types.
@@ -231,7 +255,9 @@ class MembershipManager implements MembershipManagerInterface {
       }
 
       // Query all group content that references the group through this field.
-      $results = \Drupal::entityQuery($group_content_entity_type)
+      $results = $this->entityTypeManager
+        ->getStorage($group_content_entity_type)
+        ->getQuery()
         ->condition($field->getName() . '.target_id', $entity->id())
         ->execute();
 

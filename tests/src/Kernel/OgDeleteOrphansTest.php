@@ -67,7 +67,7 @@ class OgDeleteOrphansTest extends KernelTestBase {
       'type' => $group_bundle,
       'name' => $this->randomString(),
     ])->save();
-    Og::groupManager()->addGroup('node', $group_bundle);
+    Og::groupTypeManager()->addGroup('node', $group_bundle);
 
     // Create a group content entity type.
     $group_content_bundle = Unicode::strtolower($this->randomMachineName());
