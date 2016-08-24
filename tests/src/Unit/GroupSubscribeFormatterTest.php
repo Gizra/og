@@ -11,7 +11,7 @@ use Drupal\Core\Field\FieldDefinitionInterface;
 use Drupal\Core\Field\FieldItemListInterface;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\Core\Session\AccountProxyInterface;
-use Drupal\og\GroupManager;
+use Drupal\og\GroupTypeManager;
 use Drupal\og\MembershipManagerInterface;
 use Drupal\og\OgAccessInterface;
 use Drupal\og\OgMembershipInterface;
@@ -86,9 +86,9 @@ class GroupSubscribeFormatterTest extends UnitTestCase {
   /**
    * The group manager.
    *
-   * @var \Drupal\og\GroupManager|\Prophecy\Prophecy\ObjectProphecy
+   * @var \Drupal\og\GroupTypeManager|\Prophecy\Prophecy\ObjectProphecy
    */
-  protected $groupManager;
+  protected $groupTypeManager;
 
   /**
    * The field definition.
@@ -155,7 +155,7 @@ class GroupSubscribeFormatterTest extends UnitTestCase {
     $this->fieldDefinitionInterface = $this->prophesize(FieldDefinitionInterface::class);
     $this->fieldItemList = $this->prophesize(FieldItemListInterface::class);
     $this->group = $this->prophesize(EntityInterface::class);
-    $this->groupManager = $this->prophesize(GroupManager::class);
+    $this->groupTypeManager = $this->prophesize(GroupTypeManager::class);
     $this->membershipManager = $this->prophesize(MembershipManagerInterface::class);
     $this->ogAccess = $this->prophesize(OgAccessInterface::class);
     $this->user = $this->prophesize(AccountInterface::class);
@@ -185,7 +185,7 @@ class GroupSubscribeFormatterTest extends UnitTestCase {
       ->id()
       ->willReturn($this->entityId);
 
-    $this->groupManager->isGroup($this->entityTypeId, $this->bundle)->willReturn(TRUE);
+    $this->groupTypeManager->isGroup($this->entityTypeId, $this->bundle)->willReturn(TRUE);
     $this->entityManager->getStorage('user')
       ->willReturn($this->entityStorage->reveal());
 
