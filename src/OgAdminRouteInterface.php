@@ -3,7 +3,6 @@
 namespace Drupal\og;
 
 use Drupal\Component\Plugin\PluginInspectionInterface;
-use Drupal\Core\Entity\ContentEntityBase;
 use Drupal\Core\Entity\ContentEntityInterface;
 use Symfony\Component\HttpFoundation\Request;
 
@@ -26,8 +25,8 @@ interface OgAdminRouteInterface extends PluginInspectionInterface {
    * @param \Drupal\Core\Entity\ContentEntityInterface $group
    *   The group entity.
    *
-   * @return boolean
-   *   Return if the user have access to the tasks realm.
+   * @return \Drupal\Core\Access\AccessResult
+   *   An access result object.
    */
   public function access(ContentEntityInterface $group);
 

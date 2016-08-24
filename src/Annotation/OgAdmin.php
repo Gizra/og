@@ -46,8 +46,7 @@ class OgAdmin extends Plugin {
   public $description;
 
   /**
-   * Callable method to check if the user is allowed. The method will invoke the
-   * plugin access method.
+   * The method will invoke the plugin access method.
    *
    * Optional. Default value is \Drupal\og_ui\OgRoutesBase::access.
    *
@@ -73,7 +72,7 @@ class OgAdmin extends Plugin {
    *
    * @var \Drupal\Core\Annotation\Translation
    */
-  public $route_id;
+  public $routeId;
 
   /**
    * List of routes IDs to display the group tab.
@@ -82,6 +81,6 @@ class OgAdmin extends Plugin {
    *
    * @var \Drupal\Core\Annotation\Translation
    */
-  public $parents_routes;
+  public $parentsRoutes;
 
 }

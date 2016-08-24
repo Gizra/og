@@ -2,11 +2,9 @@
 
 namespace Drupal\og;
 
-use Drupal\Core\Entity\ContentEntityBase;
 use Drupal\Core\Entity\ContentEntityInterface;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
 use Drupal\Core\Plugin\PluginBase;
-use Drupal\Core\Session\AccountInterface;
 use Drupal\Core\Session\AccountProxyInterface;
 use Drupal\Core\Url;
 use Symfony\Component\DependencyInjection\ContainerInterface;
@@ -79,14 +77,14 @@ abstract class OgAdminRouteAbstract extends PluginBase implements OgAdminRouteIn
   }
 
   /**
-   * {@inheritDoc}.
+   * {@inheritdoc}
    */
   public function getPath() {
     return $this->pluginDefinition['path'];
   }
 
   /**
-   * {@inheritDoc}.
+   * {@inheritdoc}
    */
   public function getRoutes() {
     return [];
@@ -102,7 +100,7 @@ abstract class OgAdminRouteAbstract extends PluginBase implements OgAdminRouteIn
   }
 
   /**
-   * {@inheritDoc}.
+   * {@inheritdoc}
    */
   public function getUrlFromRoute($route_key, Request $request) {
     $route = $this->getRoute($route_key);
