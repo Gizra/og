@@ -1,17 +1,10 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\og_ui\Tests\PeopleTabTest.
- */
-
 namespace Drupal\Tests\og_ui\Tests\Functional;
 
 use Drupal\KernelTests\AssertLegacyTrait;
-use Drupal\og\Entity\OgMembership;
 use Drupal\og\Entity\OgRole;
 use Drupal\og\Og;
-use Drupal\og\OgMembershipInterface;
 use Drupal\simpletest\AssertContentTrait;
 use Drupal\Tests\BrowserTestBase;
 

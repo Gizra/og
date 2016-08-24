@@ -3,13 +3,12 @@
 namespace Drupal\og;
 
 use Drupal\Core\Entity\ContentEntityBase;
+use Drupal\Core\Entity\ContentEntityInterface;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
 use Drupal\Core\Plugin\PluginBase;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\Core\Session\AccountProxyInterface;
 use Drupal\Core\Url;
-use Drupal\og\OgAccessInterface;
-use Drupal\user\UserInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpFoundation\Request;
 
@@ -80,58 +79,14 @@ abstract class OgAdminRouteAbstract extends PluginBase implements OgAdminRouteIn
   }
 
   /**
-   * Return the current user object.
-   *
-   * @return AccountInterface
-   *   The user object.
-   */
-  public function getAccount() {
-    if (!$this->account) {
-      $this->account = $this->currentUser->getAccount();
-    }
-
-    return $this->account;
-  }
-
-  /**
-   * Set the user object.
-   *
-   * @param AccountInterface $account
-   *   The user object.
-   *
-   * @return OgAdminRouteAbstract
-   *   The current object.
-   */
-  public function setAccount(AccountInterface $account) {
-    $this->account = $account;
-
-    return $this;
-  }
-
-  /**
-   * {@inheritDoc}
-   */
-  public function getGroup() {
-    return $this->group;
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function setGroup(ContentEntityBase $group) {
-    $this->group = $group;
-    return $this;
-  }
-
-  /**
-   * {@inheritDoc}
+   * {@inheritDoc}.
    */
   public function getPath() {
     return $this->pluginDefinition['path'];
   }
 
   /**
-   * {@inheritDoc}
+   * {@inheritDoc}.
    */
   public function getRoutes() {
     return [];
@@ -147,7 +102,7 @@ abstract class OgAdminRouteAbstract extends PluginBase implements OgAdminRouteIn
   }
 
   /**
-   * {@inheritDoc}
+   * {@inheritDoc}.
    */
   public function getUrlFromRoute($route_key, Request $request) {
     $route = $this->getRoute($route_key);
@@ -164,8 +119,8 @@ abstract class OgAdminRouteAbstract extends PluginBase implements OgAdminRouteIn
   /**
    * {@inheritdoc}
    */
-  public function access() {
-    return $this->ogAccess->userAccess($this->getGroup(), $this->pluginDefinition['permission'], $this->getAccount());
+  public function access(ContentEntityInterface $group) {
+    return $this->ogAccess->userAccess($group, $this->pluginDefinition['permission']);
   }
 
 }

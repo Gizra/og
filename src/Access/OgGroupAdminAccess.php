@@ -2,14 +2,17 @@
 
 namespace Drupal\og\Access;
 
+use Drupal\Core\Access\AccessResultInterface;
+use Drupal\Core\Routing\RouteMatchInterface;
 use Drupal\Core\Access\AccessResult;
 use Drupal\Core\Access\AccessResultAllowed;
 use Drupal\Core\Access\AccessResultForbidden;
 use Drupal\Core\Entity\ContentEntityBase;
 use Drupal\Core\Routing\Access\AccessInterface;
 use Drupal\Core\Session\AccountInterface;
+use Drupal\og\GroupTypeManager;
 use Drupal\og\Og;
-use Drupal\og_ui\OgUi;
+use Drupal\og\OgAdminRoutesPluginManager;
 use Symfony\Component\Routing\Route;
 
 /**
@@ -23,36 +26,29 @@ class OgGroupAdminAccess extends AccessResult implements AccessInterface {
    * @param \Drupal\Core\Session\AccountInterface $account
    *   Run access checks for this account.
    *
-   * @return AccessResultAllowed
+   * @return AccessResultInterface
+   *   The access result object.
    */
-  public function access(AccountInterface $account, Route $route, \Drupal\Core\Routing\RouteMatchInterface $routeMatch) {
+  public function access(AccountInterface $account, RouteMatchInterface $routeMatch, GroupTypeManager $group_type_manager, OgAdminRoutesPluginManager $og_admin_routes_plugin_manager) {
     foreach ($routeMatch->getParameters() as $parameter) {
-      if (!($parameter instanceof ContentEntityBase)) {
+      if (!$parameter instanceof ContentEntityBase) {
         continue;
       }
 
-      kint($parameter->getEntityTypeId());
-    }
-
-    return self::allowed();
-
-    if (!Og::groupManager()->isGroup($entity->getEntityTypeId(), $entity->bundle())) {
-      // Not a group. return.
-      return AccessResultForbidden::forbidden();
-    }
-
-    $plugins = OgUi::getGroupAdminPlugins();
-
-    $found = FALSE;
-    foreach ($plugins as $plugin) {
-      // We need at least one plugin which the user have access to.
-      if (AccessResultAllowed::allowedIf($plugin->setGroup($entity)->access())->mergeCacheMaxAge(0)) {
-        $found = true;
-        continue;
+      $entity = $parameter;
+      if (!$group_type_manager->isGroup($entity->getEntityTypeId(), $entity->bundle())) {
+        // Entity is not a group.
+        return self::forbidden();
       }
     }
 
-    return AccessResultAllowed::allowedIf($found)->mergeCacheMaxAge(0);
+    foreach ($og_admin_routes_plugin_manager->getPlugins() as $plugin) {
+      if ($plugin->access($entity)) {
+        return self::allowed();
+      }
+    }
+
+    return self::forbidden();
   }
 
 }

@@ -1,6 +1,5 @@
 <?php
 
-
 namespace Drupal\og\Routing;
 
 use Drupal\Core\Entity\EntityTypeManager;

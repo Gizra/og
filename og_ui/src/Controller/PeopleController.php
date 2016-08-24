@@ -4,7 +4,6 @@ namespace Drupal\og_ui\Controller;
 
 use Drupal\og_ui\OgUi;
 use Drupal\og_ui\OgUiRoutesBase;
-use Drupal\user\PrivateTempStoreFactory;
 use Drupal\views\Views;
 
 /**

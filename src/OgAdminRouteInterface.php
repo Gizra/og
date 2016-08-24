@@ -4,31 +4,13 @@ namespace Drupal\og;
 
 use Drupal\Component\Plugin\PluginInspectionInterface;
 use Drupal\Core\Entity\ContentEntityBase;
+use Drupal\Core\Entity\ContentEntityInterface;
 use Symfony\Component\HttpFoundation\Request;
 
 /**
  * Interface for the OG admin plugins.
  */
 interface OgAdminRouteInterface extends PluginInspectionInterface {
-
-  /**
-   * Get the group the plugin handle.
-   *
-   * @return ContentEntityBase
-   *   The group the plugin handle.
-   */
-  public function getGroup();
-
-  /**
-   * Set the group object for the OG task plugin.
-   *
-   * @param ContentEntityBase $group
-   *   The group object.
-   *
-   * @return OgAdminRouteInterface
-   *   The current instance.
-   */
-  public function setGroup(ContentEntityBase $group);
 
   /**
    * Get the path of the admin.
@@ -41,10 +23,13 @@ interface OgAdminRouteInterface extends PluginInspectionInterface {
   /**
    * Check if the current user can access to the plugin routes callback.
    *
+   * @param \Drupal\Core\Entity\ContentEntityInterface $group
+   *   The group entity.
+   *
    * @return boolean
    *   Return if the user have access to the tasks realm.
    */
-  public function access();
+  public function access(ContentEntityInterface $group);
 
   /**
    * Return list of defined sub-path of the plugin.
