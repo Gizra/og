@@ -5,7 +5,7 @@
  * Enable users to create and manage groups with roles and permissions.
  */
 
-use Drupal\og\GroupManager;
+use Drupal\og\GroupTypeManager;
 use Drupal\user\UserInterface;
 use Drupal\Core\Access\AccessResult;
 use Drupal\Core\Entity\ContentEntityInterface;
@@ -195,15 +195,14 @@ function og_entity_type_alter(array &$entity_types) {
   // We cannot use the group manager as it creates a circular reference error,
   // so we get the groups definition directly from the config.
 
-  $groups = \Drupal::config(GroupManager::SETTINGS_CONFIG_KEY)->get(GroupManager::GROUPS_CONFIG_KEY);
-  if (!$groups) {
+  if (!$groups_map = \Drupal::config(GroupTypeManager::SETTINGS_CONFIG_KEY)->get(GroupTypeManager::GROUPS_CONFIG_KEY)) {
     // No groups defined.
     return;
   }
 
   /** @var \Drupal\Core\Entity\EntityTypeInterface $entity_type */
   foreach ($entity_types as $entity_type_id => $entity_type) {
-    if (empty($groups[$entity_type_id])) {
+    if (empty($groups_map[$entity_type_id])) {
       // Entity type is not a group.
       continue;
     }
