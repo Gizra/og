@@ -24,9 +24,18 @@ services:
   og.permission_manager:
     class: Drupal\og\PermissionManager
     arguments: ['@event_dispatcher']
+  og.route_subscriber:
+    class: Drupal\og\Routing\RouteSubscriber
+    arguments: ['@entity_type.manager']
+    tags:
+      - { name: event_subscriber }
   plugin.manager.og.delete_orphans:
     class: Drupal\og\OgDeleteOrphansPluginManager
     parent: default_plugin_manager
   plugin.manager.og.fields:
     class: Drupal\og\OgFieldsPluginManager
     parent: default_plugin_manager
+  plugin.manager.og.group_admin_route:
+    class: Drupal\og\OgAdminRoutesPluginManager
+    parent: default_plugin_manager
+

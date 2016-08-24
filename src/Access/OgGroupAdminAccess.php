@@ -1,6 +1,6 @@
 <?php
 
-namespace Drupal\og_ui\Access;
+namespace Drupal\og\Access;
 
 use Drupal\Core\Access\AccessResult;
 use Drupal\Core\Access\AccessResultAllowed;
@@ -15,7 +15,7 @@ use Symfony\Component\Routing\Route;
 /**
  * Checks access for displaying configuration translation page.
  */
-class OgUiRoutingAccess extends AccessResult implements AccessInterface {
+class OgGroupAdminAccess extends AccessResult implements AccessInterface {
 
   /**
    * A custom access check.
@@ -25,9 +25,7 @@ class OgUiRoutingAccess extends AccessResult implements AccessInterface {
    *
    * @return AccessResultAllowed
    */
-  public function GroupTabAccess(AccountInterface $account, Route $route, \Drupal\Core\Routing\RouteMatchInterface $routeMatch) {
-
-    $entity = OgUi::getEntity();
+  public function access(AccountInterface $account, Route $route, \Drupal\Core\Routing\RouteMatchInterface $routeMatch) {
     foreach ($routeMatch->getParameters() as $parameter) {
       if (!($parameter instanceof ContentEntityBase)) {
         continue;

@@ -47,11 +47,12 @@ class RouteSubscriber extends RouteSubscriberBase {
 
         $route
           ->addDefaults([
-            '_controller' => '\Drupal\og_ui\Controller\OgUiController::ogTasks',
+            '_controller' => '\Drupal\og\Controller\OgAdminController::mainPage',
             '_title' => 'Tasks',
           ])
+          // @todo: Convert to service.
           ->addRequirements([
-            '_custom_access' => '\Drupal\og_ui\Access\OgUiRoutingAccess::GroupTabAccess',
+            '_custom_access' => '\Drupal\og\Access\OgGroupAdminAccess::access',
           ])
           ->setOption('parameters', [
             $entity_type_id => ['type' => 'entity:' . $entity_type_id],
