@@ -75,7 +75,8 @@ class RouteSubscriber extends RouteSubscriberBase {
           '_title' => 'Group management',
         ])
         ->addRequirements([
-          '_custom_access' => '\Drupal\og\Access\OgGroupAdminAccess::access',
+          // @todo: Allow to specify a callback instead of a permission.
+          '_og_user_access_group' => 'administer group',
         ])
         ->setOption('parameters', [
           $entity_type_id => ['type' => 'entity:' . $entity_type_id],
