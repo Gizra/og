@@ -108,7 +108,7 @@ class OgGroupContentOperationAccessTest extends KernelTestBase {
     $this->users['group_owner']->save();
 
     // Declare that the test entity is a group type.
-    Og::groupManager()->addGroup('entity_test', $this->groupBundle);
+    Og::groupTypeManager()->addGroup('entity_test', $this->groupBundle);
 
     // Create the test group.
     $this->group = EntityTest::create([

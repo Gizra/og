@@ -63,8 +63,8 @@ class GroupAudienceTest extends KernelTestBase {
    */
   public function testGetAllGroupAudienceFields() {
     // Set bundles as groups.
-    Og::groupManager()->addGroup('entity_test', $this->bundles[0]);
-    Og::groupManager()->addGroup('entity_test', $this->bundles[1]);
+    Og::groupTypeManager()->addGroup('entity_test', $this->bundles[0]);
+    Og::groupTypeManager()->addGroup('entity_test', $this->bundles[1]);
 
     $bundle = $this->bundles[2];
 
@@ -93,7 +93,7 @@ class GroupAudienceTest extends KernelTestBase {
    * Testing getting group audience fields filtered by group type.
    */
   public function testGetAllGroupAudienceFieldsFilterGroupType() {
-    Og::groupManager()->addGroup('entity_test', $this->bundles[0]);
+    Og::groupTypeManager()->addGroup('entity_test', $this->bundles[0]);
 
     $bundle = $this->bundles[1];
 
@@ -123,8 +123,8 @@ class GroupAudienceTest extends KernelTestBase {
    */
   public function testGetAllGroupAudienceFieldsFilterGroupBundle() {
     // Set bundles as groups.
-    Og::groupManager()->addGroup('entity_test', $this->bundles[0]);
-    Og::groupManager()->addGroup('entity_test', $this->bundles[1]);
+    Og::groupTypeManager()->addGroup('entity_test', $this->bundles[0]);
+    Og::groupTypeManager()->addGroup('entity_test', $this->bundles[1]);
 
     $group_bundle1 = $this->bundles[0];
     $group_bundle2 = $this->bundles[1];

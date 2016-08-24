@@ -119,7 +119,7 @@ class OgAccessHookTest extends KernelTestBase {
     // a group. Note we're not using the Entity Test entity for this since it
     // does not have real support for multiple bundles.
     BlockContentType::create(['type' => 'group']);
-    Og::groupManager()->addGroup('block_content', 'group');
+    Og::groupTypeManager()->addGroup('block_content', 'group');
 
     // Create a group.
     $this->group = BlockContent::create([
