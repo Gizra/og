@@ -45,7 +45,9 @@ class RouteSubscriber extends RouteSubscriberBase {
    * @param EntityTypeManager $entity_manager
    *   The entity type manager.
    * @param \Drupal\Core\Routing\RouteProvider $route_provider
+   *   The route provider service.
    * @param \Drupal\og\OgAdminRoutesPluginManager $og_admin_routes_plugin_manager
+   *   The OG Admin plugin manager.
    */
   public function __construct(EntityTypeManager $entity_manager, RouteProvider $route_provider, OgAdminRoutesPluginManager $og_admin_routes_plugin_manager) {
     $this->entityTypeManager = $entity_manager;
@@ -69,7 +71,7 @@ class RouteSubscriber extends RouteSubscriberBase {
             '_controller' => '\Drupal\og\Controller\OgAdminController::mainPage',
             '_title' => 'Tasks',
           ])
-          // @todo: Convert to service.
+          // @todo: Convert to service?
           ->addRequirements([
             '_custom_access' => '\Drupal\og\Access\OgGroupAdminAccess::access',
           ])
