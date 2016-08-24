@@ -75,8 +75,8 @@ class RouteSubscriber extends RouteSubscriberBase {
           '_title' => 'Group management',
         ])
         ->addRequirements([
-          // @todo: Allow to specify a callback instead of a permission.
-          '_og_user_access_group' => 'administer group',
+          // @todo: Allow to specify an OG permission instead.
+          '_permission' => 'administer group',
         ])
         ->setOption('parameters', [
           $entity_type_id => ['type' => 'entity:' . $entity_type_id],
@@ -158,8 +158,8 @@ class RouteSubscriber extends RouteSubscriberBase {
         '_title' => $info['title'],
       ])
       ->addRequirements([
-        // @todo: Allow to specify a callback instead of a permission.
-        '_og_user_access_group' => 'administer group',
+        // @todo: Allow to specify an Og permission instead.
+        '_permission' => 'administer group',
       ])
       ->setOption('parameters', [
         $entity_type_id => ['type' => 'entity:' . $entity_type_id],

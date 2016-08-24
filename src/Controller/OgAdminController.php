@@ -71,30 +71,13 @@ class OgAdminController extends ControllerBase {
    *   List of available admin routes for the current group.
    */
   public function mainPage() {
-    $entity = OgUi::getEntity();
-    $plugins = OgUi::getGroupAdminPlugins();
-    $list = [];
-    foreach ($plugins as $plugin) {
-
-      $plugin = $plugin->setGroup($entity);
-
-      if (!$plugin->access()) {
-        // The user does not have permission for the current admin page.
-        continue;
-      }
-      $definition = $plugin->getPluginDefinition();
-
-      $list[] = [
-        'title' => $definition['title'],
-        'description' => $definition['description'],
-        'url' => $plugin->getUrlFromRoute(OgAdminRouteInterface::MAIN, \Drupal::request()),
-      ];
-    }
+    // Get list from routes.
+    $content = [];
 
     return [
-      'roles_table' => [
+      'og_admin_routes' => [
         '#theme' => 'admin_block_content',
-        '#content' => $list,
+        '#content' => $content,
       ],
     ];
   }
