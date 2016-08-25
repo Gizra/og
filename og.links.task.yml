@@ -1,0 +1,2 @@
+og.entities:
+  deriver: \Drupal\og\Plugin\Derivative\OgLocalTask
