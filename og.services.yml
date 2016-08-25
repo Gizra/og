@@ -38,7 +38,4 @@ services:
   plugin.manager.og.fields:
     class: Drupal\og\OgFieldsPluginManager
     parent: default_plugin_manager
-  plugin.manager.og.group_admin_route:
-    class: Drupal\og\OgAdminRoutesPluginManager
-    parent: default_plugin_manager
 
