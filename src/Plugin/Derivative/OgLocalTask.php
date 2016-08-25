@@ -88,8 +88,8 @@ class OgLocalTask extends DeriverBase implements ContainerDeriverInterface {
 
     $derivatives["$base_route_name.$id"] = [
       'title' => $this->t('Members'),
+      'description' => $this->t('Manage members'),
       'route_name' => "$base_route_name.$id",
-      'appears_on' => [$base_route_name],
       'class' => '\Drupal\Core\Menu\LocalActionDefault',
     ];
 
