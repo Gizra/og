@@ -8,9 +8,7 @@ use Drupal\Core\Routing\RouteSubscriberBase;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
 use Drupal\og\Event\OgAdminRoutesEvent;
 use Drupal\og\Event\OgAdminRoutesEventInterface;
-use Drupal\og\OgAdminRoutesPluginManager;
-use Symfony\Component\EventDispatcher\EventDispatcher;
-use Symfony\Component\EventDispatcher\EventDispatcherInterface;
+use Drupal\Component\EventDispatcher\ContainerAwareEventDispatcher;
 use Symfony\Component\Routing\Route;
 use Symfony\Component\Routing\RouteCollection;
 
@@ -36,11 +34,11 @@ class RouteSubscriber extends RouteSubscriberBase {
   protected $routeProvider;
 
   /**
-   * The OG Admin plugin manager.
+   * The event dispatcher service.
    *
-   * @var \Drupal\og\Routing\OgAdminRoutesPluginManager
+   * @var \Symfony\Component\EventDispatcher\EventDispatcher
    */
-  protected $ogAdminRoutesPluginManager;
+  protected $eventDispatcher;
 
   /**
    * Constructs a new RouteSubscriber object.
@@ -49,15 +47,12 @@ class RouteSubscriber extends RouteSubscriberBase {
    *   The entity type manager.
    * @param \Drupal\Core\Routing\RouteProvider $route_provider
    *   The route provider service.
-   * @param \Drupal\og\OgAdminRoutesPluginManager $og_admin_routes_plugin_manager
-   *   The OG Admin plugin manager.
    * @param \Symfony\Component\EventDispatcher\EventDispatcher $event_dispatcher
    *   The event dispatcher service.
    */
-  public function __construct(EntityTypeManager $entity_manager, RouteProvider $route_provider, OgAdminRoutesPluginManager $og_admin_routes_plugin_manager, EventDispatcher $event_dispatcher) {
+  public function __construct(EntityTypeManager $entity_manager, RouteProvider $route_provider, ContainerAwareEventDispatcher $event_dispatcher) {
     $this->entityTypeManager = $entity_manager;
     $this->routeProvider = $route_provider;
-    $this->ogAdminRoutesPluginManager = $og_admin_routes_plugin_manager;
     $this->eventDispatcher = $event_dispatcher;
   }
 

@@ -12,7 +12,7 @@ services:
     arguments: ['@entity_type.manager']
   og.event_subscriber:
     class: Drupal\og\EventSubscriber\OgEventSubscriber
-    arguments: ['@og.permission_manager', '@entity_type.manager', '@entity_type.bundle.info', '@event_dispatcher']
+    arguments: ['@og.permission_manager', '@entity_type.manager', '@entity_type.bundle.info']
     tags:
       - { name: 'event_subscriber' }
   og.group_type_manager:
@@ -26,7 +26,7 @@ services:
     arguments: ['@event_dispatcher']
   og.route_subscriber:
     class: Drupal\og\Routing\RouteSubscriber
-    arguments: ['@entity_type.manager', '@router.route_provider', '@plugin.manager.og.group_admin_route']
+    arguments: ['@entity_type.manager', '@router.route_provider', '@event_dispatcher']
     tags:
       - { name: event_subscriber }
   og.role_manager:
