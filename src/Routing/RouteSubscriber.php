@@ -69,11 +69,14 @@ class RouteSubscriber extends RouteSubscriberBase {
       }
 
       $entity_type_id = $entity_type->id();
+      $route_name = 'entity.' . $entity_type_id . '.og_group_admin_pages';
       $route = new Route($og_admin_path);
+
 
       $route
         ->addDefaults([
           '_controller' => '\Drupal\system\Controller\SystemController::overview',
+          'link_id' => $route_name,
           '_title' => 'Group management',
         ])
         ->addRequirements([
@@ -85,7 +88,7 @@ class RouteSubscriber extends RouteSubscriberBase {
         ])
         ->setOption('_admin_route', TRUE);
 
-      $collection->add('entity.' . $entity_type_id . '.og_group_admin_pages', $route);
+      $collection->add($route_name, $route);
 
       // Add the plugins routes.
       $this->createRoutesFromEventSubscribers($og_admin_path, $entity_type_id, $collection);
