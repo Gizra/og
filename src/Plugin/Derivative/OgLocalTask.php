@@ -81,18 +81,6 @@ class OgLocalTask extends DeriverBase implements ContainerDeriverInterface {
       ];
     }
 
-    // @todo: Remove hardcoding
-    $entity_type_id = 'node';
-    $id = 'members';
-    $base_route_name = "entity.$entity_type_id.og_admin_routes";
-
-    $derivatives["$base_route_name.$id"] = [
-      'title' => $this->t('Members'),
-      'description' => $this->t('Manage members'),
-      'route_name' => "$base_route_name.$id",
-      'class' => '\Drupal\Core\Menu\LocalActionDefault',
-    ];
-
     foreach ($derivatives as &$entry) {
       $entry += $base_plugin_definition;
     }
