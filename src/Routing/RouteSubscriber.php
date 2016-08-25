@@ -6,7 +6,11 @@ use Drupal\Core\Entity\EntityTypeManager;
 use Drupal\Core\Routing\RouteProvider;
 use Drupal\Core\Routing\RouteSubscriberBase;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
+use Drupal\og\Event\OgAdminRoutesEvent;
+use Drupal\og\Event\OgAdminRoutesEventInterface;
 use Drupal\og\OgAdminRoutesPluginManager;
+use Symfony\Component\EventDispatcher\EventDispatcher;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\Routing\Route;
 use Symfony\Component\Routing\RouteCollection;
 
@@ -47,11 +51,14 @@ class RouteSubscriber extends RouteSubscriberBase {
    *   The route provider service.
    * @param \Drupal\og\OgAdminRoutesPluginManager $og_admin_routes_plugin_manager
    *   The OG Admin plugin manager.
+   * @param \Symfony\Component\EventDispatcher\EventDispatcher $event_dispatcher
+   *   The event dispatcher service.
    */
-  public function __construct(EntityTypeManager $entity_manager, RouteProvider $route_provider, OgAdminRoutesPluginManager $og_admin_routes_plugin_manager) {
+  public function __construct(EntityTypeManager $entity_manager, RouteProvider $route_provider, OgAdminRoutesPluginManager $og_admin_routes_plugin_manager, EventDispatcher $event_dispatcher) {
     $this->entityTypeManager = $entity_manager;
     $this->routeProvider = $route_provider;
     $this->ogAdminRoutesPluginManager = $og_admin_routes_plugin_manager;
+    $this->eventDispatcher = $event_dispatcher;
   }
 
   /**
@@ -71,7 +78,7 @@ class RouteSubscriber extends RouteSubscriberBase {
 
       $route
         ->addDefaults([
-          '_controller' => '\Drupal\og\Controller\OgAdminController::mainPage',
+          '_controller' => '\Drupal\system\Controller\SystemController::overview',
           '_title' => 'Group management',
         ])
         ->addRequirements([
@@ -86,7 +93,7 @@ class RouteSubscriber extends RouteSubscriberBase {
       $collection->add('entity.' . $entity_type_id . '.og_group_admin_pages', $route);
 
       // Add the plugins routes.
-      $this->createRoutesForOgAdminPlugins($og_admin_path, $entity_type_id, $collection);
+      $this->createRoutesFromEventSubscribers($og_admin_path, $entity_type_id, $collection);
 
     }
 
@@ -102,35 +109,19 @@ class RouteSubscriber extends RouteSubscriberBase {
    * @param \Symfony\Component\Routing\RouteCollection $collection
    *   The route collection object.
    */
-  protected function createRoutesForOgAdminPlugins($og_admin_path, $entity_type_id, RouteCollection $collection) {
-    foreach ($this->ogAdminRoutesPluginManager->getPlugins() as $plugin) {
+  protected function createRoutesFromEventSubscribers($og_admin_path, $entity_type_id, RouteCollection $collection) {
 
-      $plugin_definition = $plugin->getPluginDefinition();
-      $plugin_id = $plugin_definition['id'];
+    $event = new OgAdminRoutesEvent();
+    $this->eventDispatcher->dispatch(OgAdminRoutesEventInterface::EVENT_NAME, $event);
 
+    foreach ($event->getRoutes() as $name => $info) {
       // Add the parent route.
-      $parent_route_name = "entity.$entity_type_id.og_admin.$plugin_id";
-      $parent_path = $og_admin_path . '/' . $plugin_definition['path'];
-
-      $info = [
-        'controller' => $plugin_definition['controller'],
-        'title' => $plugin_definition['title'],
-      ];
+      $parent_route_name = "entity.$entity_type_id.og_admin.$name";
+      $parent_path = $og_admin_path . '/' . $info['path'];
 
       $this->addRoute($collection, $entity_type_id, $parent_route_name, $parent_path, $info);
 
-      // Add the sub routes.
-      foreach ($plugin->getSubRoutes() as $name => $route_info) {
-        $route_name = $parent_route_name . '.' . $name;
-        $path = $parent_path . '/' . $info['path'];
-
-        $info = [
-          'controller' => $route_info['controller'],
-          'title' => $route_info['title'],
-        ];
-
-        $this->addRoute($collection, $entity_type_id, $route_name, $path, $info);
-      }
+      // @todo: Add the sub routes.
     }
   }
 
