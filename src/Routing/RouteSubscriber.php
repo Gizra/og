@@ -63,13 +63,13 @@ class RouteSubscriber extends RouteSubscriberBase {
 
     foreach ($this->entityTypeManager->getDefinitions() as $entity_type_id => $entity_type) {
 
-      if (!$og_admin_path = $entity_type->getLinkTemplate('og-group-admin-pages')) {
+      if (!$og_admin_path = $entity_type->getLinkTemplate('og-admin-routes')) {
         // Entity type doesn't have the link template defined.
         continue;
       }
 
       $entity_type_id = $entity_type->id();
-      $route_name = 'entity.' . $entity_type_id . '.og_group_admin_pages';
+      $route_name = "entity.$entity_type_id.og_admin_routes";
       $route = new Route($og_admin_path);
 
       $route
@@ -113,7 +113,7 @@ class RouteSubscriber extends RouteSubscriberBase {
 
     foreach ($event->getRoutes() as $name => $info) {
       // Add the parent route.
-      $parent_route_name = "entity.$entity_type_id.og_admin.$name";
+      $parent_route_name = "entity.$entity_type_id.og_admin_routes.$name";
       $parent_path = $og_admin_path . '/' . $info['path'];
 
       $this->addRoute($collection, $entity_type_id, $parent_route_name, $parent_path, $info);

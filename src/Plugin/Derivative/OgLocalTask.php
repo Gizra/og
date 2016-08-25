@@ -32,7 +32,7 @@ class OgLocalTask extends DeriverBase implements ContainerDeriverInterface {
   protected $routProvider;
 
   /**
-   * Creates an DevelLocalTask object.
+   * Creates an OgLocalTask object.
    *
    * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entity_manager
    *   The entity manager.
@@ -64,20 +64,37 @@ class OgLocalTask extends DeriverBase implements ContainerDeriverInterface {
   public function getDerivativeDefinitions($base_plugin_definition) {
     $derivatives = [];
 
+    // @todo: Use GroupTypeManager.
     foreach ($this->entityManager->getDefinitions() as $entity_type_id => $entity_type) {
-      $route_name = 'entity.' . $entity_type_id . '.og_group_admin_pages';
+      $route_name = "entity.$entity_type_id.og_admin_routes";
 
       if (!$this->routProvider->getRoutesByNames([$route_name])) {
         // Route not found.
         continue;
       }
 
-      $derivatives[$entity_type_id . '.og_admin_routes'] = array(
+      $derivatives[$entity_type_id . '.og_admin_routes'] = [
         'route_name' => $route_name,
         'title' => $this->t('Group'),
         'base_route' => 'entity.' . $entity_type_id . '.canonical',
         'weight' => 50,
-      ) + $base_plugin_definition;
+      ];
+    }
+
+    // @todo: Remove hardcoding
+    $entity_type_id = 'node';
+    $id = 'members';
+    $base_route_name = "entity.$entity_type_id.og_admin_routes";
+
+    $derivatives["$base_route_name.$id"] = [
+      'title' => $this->t('Members'),
+      'route_name' => "$base_route_name.$id",
+      'appears_on' => [$base_route_name],
+      'class' => '\Drupal\Core\Menu\LocalActionDefault',
+    ];
+
+    foreach ($derivatives as &$entry) {
+      $entry += $base_plugin_definition;
     }
 
     return $derivatives;
