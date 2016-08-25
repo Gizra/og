@@ -68,6 +68,7 @@ class OgLocalTask extends DeriverBase implements ContainerDeriverInterface {
       $route_name = 'entity.' . $entity_type_id . '.og_group_admin_pages';
 
       if (!$this->routProvider->getRoutesByNames([$route_name])) {
+        // Route not found.
         continue;
       }
 
@@ -75,7 +76,7 @@ class OgLocalTask extends DeriverBase implements ContainerDeriverInterface {
         'route_name' => $route_name,
         'title' => $this->t('Group'),
         'base_route' => 'entity.' . $entity_type_id . '.canonical',
-        'weight' => 100,
+        'weight' => 50,
       );
     }
 
