@@ -63,7 +63,7 @@ class GroupSubscribeFormatterTest extends BrowserTestBase {
     $node_type->save();
 
     // Define the bundles as groups.
-    Og::groupManager()->addGroup('node', $this->groupBundle);
+    Og::groupTypeManager()->addGroup('node', $this->groupBundle);
 
     // Create node author user.
     $user = $this->createUser();
