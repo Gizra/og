@@ -62,7 +62,7 @@ class OgLocalTask extends DeriverBase implements ContainerDeriverInterface {
    * {@inheritdoc}
    */
   public function getDerivativeDefinitions($base_plugin_definition) {
-    $this->derivatives = array();
+    $derivatives = [];
 
     foreach ($this->entityManager->getDefinitions() as $entity_type_id => $entity_type) {
       $route_name = 'entity.' . $entity_type_id . '.og_group_admin_pages';
@@ -72,19 +72,15 @@ class OgLocalTask extends DeriverBase implements ContainerDeriverInterface {
         continue;
       }
 
-      $this->derivatives[$entity_type_id . '.og_admin_routes'] = array(
+      $derivatives[$entity_type_id . '.og_admin_routes'] = array(
         'route_name' => $route_name,
         'title' => $this->t('Group'),
         'base_route' => 'entity.' . $entity_type_id . '.canonical',
         'weight' => 50,
-      );
+      ) + $base_plugin_definition;
     }
 
-    foreach ($this->derivatives as &$entry) {
-      $entry += $base_plugin_definition;
-    }
-
-    return $this->derivatives;
+    return $derivatives;
   }
 
 }
