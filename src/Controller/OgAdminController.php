@@ -5,10 +5,7 @@ namespace Drupal\og\Controller;
 use Drupal\Core\Controller\ControllerBase;
 use Drupal\Core\Entity\EntityTypeBundleInfoInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
-use Drupal\og\GroupManager;
 use Drupal\og\GroupTypeManager;
-use Drupal\og_ui\OgUi;
-use Drupal\og_ui\OgAdminRouteInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**

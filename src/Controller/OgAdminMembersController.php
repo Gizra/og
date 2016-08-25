@@ -1,6 +1,7 @@
 <?php
 
 namespace Drupal\og\Controller;
+
 use Drupal\Core\Controller\ControllerBase;
 
 /**
@@ -13,7 +14,7 @@ class OgAdminMembersController extends ControllerBase {
    */
   public function membersList() {
     return [
-      '#markup' => 'membersList placeholder'
+      '#markup' => 'membersList placeholder',
     ];
   }
 
@@ -22,7 +23,7 @@ class OgAdminMembersController extends ControllerBase {
    */
   public function addPeopleForm() {
     return [
-      '#markup' => 'addPeopleForm placeholder'
+      '#markup' => 'addPeopleForm placeholder',
     ];
   }
 

@@ -6,7 +6,6 @@ use Symfony\Component\EventDispatcher\Event;
 
 /**
  * Event that is fired when OG admin routes are being compiled.
- *
  */
 class OgAdminRoutesEvent extends Event implements OgAdminRoutesEventInterface {
 
@@ -30,4 +29,5 @@ class OgAdminRoutesEvent extends Event implements OgAdminRoutesEventInterface {
   public function getRoutes() {
     return $this->routesInfo;
   }
+
 }

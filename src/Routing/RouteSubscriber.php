@@ -47,7 +47,7 @@ class RouteSubscriber extends RouteSubscriberBase {
    *   The entity type manager.
    * @param \Drupal\Core\Routing\RouteProvider $route_provider
    *   The route provider service.
-   * @param \Symfony\Component\EventDispatcher\EventDispatcher $event_dispatcher
+   * @param \Drupal\Component\EventDispatcher\ContainerAwareEventDispatcher $event_dispatcher
    *   The event dispatcher service.
    */
   public function __construct(EntityTypeManager $entity_manager, RouteProvider $route_provider, ContainerAwareEventDispatcher $event_dispatcher) {
@@ -71,7 +71,6 @@ class RouteSubscriber extends RouteSubscriberBase {
       $entity_type_id = $entity_type->id();
       $route_name = 'entity.' . $entity_type_id . '.og_group_admin_pages';
       $route = new Route($og_admin_path);
-
 
       $route
         ->addDefaults([

@@ -73,7 +73,7 @@ class OgEventSubscriber implements EventSubscriberInterface {
         ['provideDefaultNodePermissions'],
       ],
       DefaultRoleEventInterface::EVENT_NAME => [['provideDefaultRoles']],
-      OgAdminRoutesEventInterface::EVENT_NAME => [['provideOgAdminRoutes']]
+      OgAdminRoutesEventInterface::EVENT_NAME => [['provideOgAdminRoutes']],
     ];
   }
 
@@ -353,6 +353,7 @@ class OgEventSubscriber implements EventSubscriberInterface {
    * Provide OG admin routes.
    *
    * @param \Drupal\og\Event\OgAdminRoutesEventInterface $event
+   *   The OG admin routes event object.
    */
   public function provideOgAdminRoutes(OgAdminRoutesEventInterface $event) {
     $routes_info = [

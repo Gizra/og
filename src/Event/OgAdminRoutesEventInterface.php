@@ -20,10 +20,10 @@ interface OgAdminRoutesEventInterface {
    *
    * Array with the routes to create with the following keys:
    *   - title
-   *   - controller
+   *   - controller.
    *
    * @param array $routes_info
-   *   The routes info array
+   *   The routes info array.
    */
   public function setRoutes(array $routes_info);
 
