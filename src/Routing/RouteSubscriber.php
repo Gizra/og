@@ -13,7 +13,7 @@ use Symfony\Component\Routing\Route;
 use Symfony\Component\Routing\RouteCollection;
 
 /**
- * Listens to the dynamic route events.
+ * Route subscriber for OG related routes.
  */
 class RouteSubscriber extends RouteSubscriberBase {
 
@@ -95,7 +95,7 @@ class RouteSubscriber extends RouteSubscriberBase {
 
       $collection->add($route_name, $route);
 
-      // Add the plugins routes.
+      // Add the routes defined in the event subscribers.
       $this->createRoutesFromEventSubscribers($og_admin_path, $entity_type_id, $collection);
 
     }
@@ -103,7 +103,7 @@ class RouteSubscriber extends RouteSubscriberBase {
   }
 
   /**
-   * Add all the OG admin plugins to the route collection.
+   * Add all the OG admin items to the route collection.
    *
    * @param string $og_admin_path
    *   The OG admin path.
@@ -123,8 +123,6 @@ class RouteSubscriber extends RouteSubscriberBase {
       $parent_path = $og_admin_path . '/' . $info['path'];
 
       $this->addRoute($collection, $entity_type_id, $parent_route_name, $parent_path, $info);
-
-      // @todo: Add the sub routes.
     }
   }
 
