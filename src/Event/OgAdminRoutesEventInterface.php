@@ -30,9 +30,12 @@ interface OgAdminRoutesEventInterface {
   /**
    * Get routes.
    *
+   * @param string $entity_type_id
+   *   The entity type ID.
+   *
    * @return array
    *   Array with the routes info.
    */
-  public function getRoutes();
+  public function getRoutes($entity_type_id);
 
 }

@@ -362,6 +362,13 @@ class OgEventSubscriber implements EventSubscriberInterface {
         'title' => 'Members',
         'description' => 'Manage members',
         'path' => 'members',
+        'requirements' => [
+          '_permission' => 'administer group',
+          // Views module must be enabled.
+          '_module_dependencies' => 'views',
+        ],
+
+
       ],
     ];
 
