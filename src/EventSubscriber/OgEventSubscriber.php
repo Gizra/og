@@ -368,7 +368,6 @@ class OgEventSubscriber implements EventSubscriberInterface {
           '_module_dependencies' => 'views',
         ],
 
-
       ],
     ];
 

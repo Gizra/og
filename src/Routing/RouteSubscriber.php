@@ -149,7 +149,7 @@ class RouteSubscriber extends RouteSubscriberBase {
   }
 
   /**
-   * Overrides \Drupal\Core\Routing\RouteSubscriberBase::getSubscribedEvents
+   * Overrides \Drupal\Core\Routing\RouteSubscriberBase::getSubscribedEvents.
    *
    * See the event weight so it will be executed before other alters, such
    * as \Drupal\Core\EventSubscriber\ModuleRouteSubscriber::alterRoutes which
