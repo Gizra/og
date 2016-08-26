@@ -69,6 +69,11 @@ class OgSelection extends DefaultSelection {
 
     if ($bundle_key = $entityDefinition->getKey('bundle')) {
       $bundles = Og::groupTypeManager()->getAllGroupBundles($target_type);
+
+      if (!$bundles) {
+        // If there are no bundles defined, we can return early.
+        return $query;
+      }
       $query->condition($bundle_key, $bundles, 'IN');
     }
 
