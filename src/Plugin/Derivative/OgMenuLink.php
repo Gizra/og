@@ -52,6 +52,7 @@ class OgMenuLink extends DeriverBase implements ContainerDeriverInterface {
       'description' => $this->t('Manage members'),
       'parent' => $base_route_name,
       'route_name' =>  $route_name,
+      'route_parameters' => [$entity_type_id => "{$entity_type_id}"],
     ];
 
     foreach ($derivatives as &$entry) {
