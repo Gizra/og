@@ -8,11 +8,12 @@ namespace Drupal\og;
  */
 
 use Drupal\Component\Plugin\PluginInspectionInterface;
+use Drupal\Core\Plugin\Context\ContextProviderInterface;
 
 /**
  * Defines an interface for OG context plugins.
  */
-interface OgContextInterface extends PluginInspectionInterface {
+interface OgContextInterface extends PluginInspectionInterface, ContextProviderInterface {
 
   /**
    * Return the current group. If no group will be found return Null.

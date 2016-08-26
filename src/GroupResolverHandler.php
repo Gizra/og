@@ -64,7 +64,7 @@ class GroupResolverHandler implements GroupResolverHandlerInterface {
 
     foreach ($plugins as $plugin) {
       if ($group = $this->getPlugin($plugin['id'])->getGroup()) {
-        $groups = array_merge($groups, $group);
+        $groups = array_merge($groups, [$group]);
       }
     }
 

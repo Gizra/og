@@ -9,7 +9,7 @@ namespace Drupal\og\Plugin\GroupResolver;
 
 use Drupal\Core\Entity\ContentEntityBase;
 use Drupal\Core\Routing\RouteMatchInterface;
-use Drupal\og\GroupManager;
+use Drupal\og\GroupTypeManager;
 use Drupal\og\Og;
 use Drupal\og\OgContextBase;
 use Symfony\Component\DependencyInjection\ContainerInterface;
@@ -50,10 +50,10 @@ class Entity extends OgContextBase {
    *   The plugin implementation definition.
    * @param \Drupal\Core\Routing\RouteMatchInterface $route_match
    *   The route match service.
-   * @param \Drupal\og\GroupManager $group_manager
+   * @param \Drupal\og\GroupTypeManager $group_manager
    *   The group manager service.
    */
-  public function __construct(array $configuration, $plugin_id, $plugin_definition, RouteMatchInterface $route_match, GroupManager $group_manager) {
+  public function __construct(array $configuration, $plugin_id, $plugin_definition, RouteMatchInterface $route_match, GroupTypeManager $group_manager) {
     parent::__construct($configuration, $plugin_id, $plugin_definition);
     $this->routeMatch = $route_match;
     $this->groupManger = $group_manager;
@@ -68,7 +68,7 @@ class Entity extends OgContextBase {
       $plugin_id,
       $plugin_definition,
       $container->get('current_route_match'),
-      $container->get('og.group.manager')
+      $container->get('og.group_type_manager')
     );
   }
 
