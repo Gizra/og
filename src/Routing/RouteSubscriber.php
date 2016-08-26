@@ -74,8 +74,8 @@ class RouteSubscriber extends RouteSubscriberBase {
 
       $route
         ->addDefaults([
-          '_controller' => '\Drupal\system\Controller\SystemController::overview',
-          'link_id' => $route_name,
+          '_controller' => '\Drupal\og\Controller\OgAdminRoutesController::overview',
+          'entity_type_id' => $entity_type_id,
           '_title' => 'Group management',
         ])
         ->addRequirements([

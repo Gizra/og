@@ -360,6 +360,7 @@ class OgEventSubscriber implements EventSubscriberInterface {
       'members' => [
         'controller' => '\Drupal\og\Controller\OgAdminMembersController::membersList',
         'title' => 'Members',
+        'description' => 'Manage members',
         'path' => 'members',
       ],
     ];
