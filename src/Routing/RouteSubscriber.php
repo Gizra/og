@@ -3,7 +3,7 @@
 namespace Drupal\og\Routing;
 
 use Drupal\Core\Entity\EntityTypeManager;
-use Drupal\Core\Routing\RouteProvider;
+use Drupal\Core\Routing\RouteProviderInterface;
 use Drupal\Core\Routing\RouteSubscriberBase;
 use Drupal\Core\Routing\RoutingEvents;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
@@ -46,12 +46,12 @@ class RouteSubscriber extends RouteSubscriberBase {
    *
    * @param EntityTypeManager $entity_manager
    *   The entity type manager.
-   * @param \Drupal\Core\Routing\RouteProvider $route_provider
+   * @param \Drupal\Core\Routing\RouteProviderInterface $route_provider
    *   The route provider service.
    * @param \Drupal\Component\EventDispatcher\ContainerAwareEventDispatcher $event_dispatcher
    *   The event dispatcher service.
    */
-  public function __construct(EntityTypeManager $entity_manager, RouteProvider $route_provider, ContainerAwareEventDispatcher $event_dispatcher) {
+  public function __construct(EntityTypeManager $entity_manager, RouteProviderInterface $route_provider, ContainerAwareEventDispatcher $event_dispatcher) {
     $this->entityTypeManager = $entity_manager;
     $this->routeProvider = $route_provider;
     $this->eventDispatcher = $event_dispatcher;
