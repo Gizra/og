@@ -64,7 +64,7 @@ abstract class OgContextBase extends PluginBase implements OgContextInterface, C
    * @see \Drupal\Core\Plugin\Context\ContextProviderInterface:getAvailableContexts()
    */
   public function getRuntimeContexts(array $unqualified_context_ids) {
-    // TODO: Implement getRuntimeContexts() method.
+    return [];
   }
 
   /**
@@ -93,7 +93,7 @@ abstract class OgContextBase extends PluginBase implements OgContextInterface, C
    * @see \Drupal\Core\Plugin\Context\ContextProviderInterface::getRuntimeContext()
    */
   public function getAvailableContexts() {
-    // TODO: Implement getAvailableContexts() method.
+    return [];
   }
 
 }
