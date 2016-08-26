@@ -4,6 +4,8 @@ namespace Drupal\og\Controller;
 
 use Drupal\Component\EventDispatcher\ContainerAwareEventDispatcher;
 use Drupal\Core\Controller\ControllerBase;
+use Drupal\Core\Entity\EntityInterface;
+use Drupal\Core\Routing\RouteMatchInterface;
 use Drupal\Core\Url;
 use Drupal\og\Event\OgAdminRoutesEvent;
 use Drupal\og\Event\OgAdminRoutesEventInterface;
@@ -46,7 +48,15 @@ class OgAdminRoutesController extends ControllerBase {
    * @return mixed
    *   List of available admin routes for the current group.
    */
-  public function overview($entity_type_id) {
+  public function overview(RouteMatchInterface $route_match) {
+
+    $parameter_name = $route_match->getRouteObject()->getOption('_og_entity_type_id');
+
+    /** @var EntityInterface $group */
+    $group = $route_match->getParameter($parameter_name);
+
+    $entity_type_id = $group->getEntityTypeId();
+
     // Get list from routes.
     $content = [];
 
@@ -57,7 +67,7 @@ class OgAdminRoutesController extends ControllerBase {
       $route_name = "entity.$entity_type_id.og_admin_routes.$name";
 
       // @todo: How the get the id?
-      $route = Url::fromRoute($route_name, [$entity_type_id => "3"]);
+      $route = Url::fromRoute($route_name, [$entity_type_id => $group->id()]);
 
       if (!$route->access()) {
         // User doesn't have access to the route.

@@ -88,6 +88,9 @@ class RouteSubscriber extends RouteSubscriberBase {
         ->setOption('parameters', [
           $entity_type_id => ['type' => 'entity:' . $entity_type_id],
         ])
+        // @todo: Hack, as the above parameters doesn't send the entity,
+        // so we will have to use the Route matcher to extract it.
+        ->setOption('_og_entity_type_id', $entity_type_id)
         ->setOption('_admin_route', TRUE);
 
       $collection->add($route_name, $route);
@@ -154,6 +157,9 @@ class RouteSubscriber extends RouteSubscriberBase {
       ->setOption('parameters', [
         $entity_type_id => ['type' => 'entity:' . $entity_type_id],
       ])
+      // @todo: Hack, as the above parameters doesn't send the entity,
+      // so we will have to use the Route matcher to extract it.
+      ->setOption('_og_entity_type_id', $entity_type_id)
       ->setOption('_admin_route', TRUE);
 
     $collection->add($route_name, $route);
