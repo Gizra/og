@@ -48,10 +48,9 @@ class OgAdminRoutesController extends ControllerBase {
    *   List of available admin routes for the current group.
    */
   public function overview(RouteMatchInterface $route_match) {
-
     $parameter_name = $route_match->getRouteObject()->getOption('_og_entity_type_id');
 
-    /** @var EntityInterface $group */
+    /** @var \Drupal\Core\Entity\EntityInterface $group */
     $group = $route_match->getParameter($parameter_name);
 
     $entity_type_id = $group->getEntityTypeId();
@@ -62,7 +61,7 @@ class OgAdminRoutesController extends ControllerBase {
     $event = new OgAdminRoutesEvent();
     $this->eventDispatcher->dispatch(OgAdminRoutesEventInterface::EVENT_NAME, $event);
 
-    foreach ($event->getRoutes() as $name => $info) {
+    foreach ($event->getRoutes($entity_type_id) as $name => $info) {
       $route_name = "entity.$entity_type_id.og_admin_routes.$name";
 
       // @todo: How the get the id?
