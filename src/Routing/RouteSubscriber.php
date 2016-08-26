@@ -63,6 +63,11 @@ class RouteSubscriber extends RouteSubscriberBase {
 
     foreach ($this->entityTypeManager->getDefinitions() as $entity_type_id => $entity_type) {
 
+      if (!$entity_type->hasLinkTemplate('canonical')) {
+        // Entity type doesn't have a canonical route.
+        continue;
+      }
+
       if (!$og_admin_path = $entity_type->getLinkTemplate('og-admin-routes')) {
         // Entity type doesn't have the link template defined.
         continue;
@@ -75,11 +80,9 @@ class RouteSubscriber extends RouteSubscriberBase {
       $route
         ->addDefaults([
           '_controller' => '\Drupal\og\Controller\OgAdminRoutesController::overview',
-          'entity_type_id' => $entity_type_id,
           '_title' => 'Group management',
         ])
         ->addRequirements([
-          // @todo: Allow to specify an OG permission instead.
           '_permission' => 'administer group',
         ])
         ->setOption('parameters', [
@@ -146,14 +149,11 @@ class RouteSubscriber extends RouteSubscriberBase {
         '_title' => $info['title'],
       ])
       ->addRequirements([
-        // @todo: Allow to specify an Og permission instead.
         '_permission' => 'administer group',
       ])
       ->setOption('parameters', [
         $entity_type_id => ['type' => 'entity:' . $entity_type_id],
       ])
-      // @todo: We might need to define own admin route, like node module to
-      // prevent access denied?
       ->setOption('_admin_route', TRUE);
 
     $collection->add($route_name, $route);
