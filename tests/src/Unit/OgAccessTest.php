@@ -19,7 +19,7 @@ class OgAccessTest extends OgAccessTestBase {
    * @dataProvider permissionsProvider
    */
   public function testUserAccessNotGroup($operation) {
-    $this->groupManager->isGroup($this->entityTypeId, $this->bundle)->willReturn(FALSE);
+    $this->groupTypeManager->isGroup($this->entityTypeId, $this->bundle)->willReturn(FALSE);
     $user_access = $this->ogAccess->userAccess($this->group, $operation);
     $this->assertTrue($user_access->isNeutral());
   }

@@ -43,6 +43,13 @@ class BundleFormAlter {
   protected $entityTypeId;
 
   /**
+   * The form entity which has been used for populating form element defaults.
+   *
+   * @var \Drupal\Core\Entity\EntityInterface
+   */
+  protected $entity;
+
+  /**
    * Construct a BundleFormAlter object.
    *
    * @param \Drupal\Core\Entity\EntityInterface $entity
@@ -130,7 +137,7 @@ class BundleFormAlter {
     // Compile a list of group entity types and bundles.
     $target_types = [];
     $target_bundles = [];
-    foreach (Og::groupManager()->getAllGroupBundles() as $entity_type => $bundles) {
+    foreach (Og::groupTypeManager()->getAllGroupBundles() as $entity_type => $bundles) {
       $target_types[$entity_type] = \Drupal::entityTypeManager()->getDefinition($entity_type)->getLabel();
       $bundle_info = \Drupal::service('entity_type.bundle.info')->getBundleInfo($entity_type);
       foreach ($bundles as $bundle) {

@@ -79,7 +79,7 @@ class GetGroupContentTest extends KernelTestBase {
       'name' => $this->randomString(),
       'type' => $bundle,
     ])->save();
-    Og::groupManager()->addGroup('node', $bundle);
+    Og::groupTypeManager()->addGroup('node', $bundle);
 
     $groups['node'] = Node::create([
       'title' => $this->randomString(),
@@ -91,7 +91,7 @@ class GetGroupContentTest extends KernelTestBase {
     // The Entity Test entity doesn't have 'real' bundles, so we don't need to
     // create one, we can just add the group to the fake bundle.
     $bundle = Unicode::strtolower($this->randomMachineName());
-    Og::groupManager()->addGroup('entity_test', $bundle);
+    Og::groupTypeManager()->addGroup('entity_test', $bundle);
 
     $groups['entity_test'] = EntityTest::create([
       'type' => $bundle,
@@ -147,17 +147,20 @@ class GetGroupContentTest extends KernelTestBase {
       }
     }
 
+    /** @var \Drupal\og\MembershipManagerInterface $membership_manager */
+    $membership_manager = \Drupal::service('og.membership_manager');
+
     // Check that Og::getGroupContent() returns the correct group content for
     // each group.
     foreach (['node', 'entity_test'] as $group_type) {
-      $result = Og::getGroupContentIds($groups[$group_type]);
+      $result = $membership_manager->getGroupContentIds($groups[$group_type]);
       foreach (['node', 'entity_test'] as $group_content_type) {
         $this->assertEquals([$group_content[$group_content_type][$group_type]->id()], $result[$group_content_type], "The correct $group_content_type group content is returned for the $group_type group.");
       }
       // Test that the correct results are returned when filtering by entity
       // type.
       foreach (['node', 'entity_test'] as $filter) {
-        $result = Og::getGroupContentIds($groups[$group_type], [$filter]);
+        $result = $membership_manager->getGroupContentIds($groups[$group_type], [$filter]);
         $this->assertEquals(1, count($result), "Only one entity type is returned when getting $group_type results filtered by $group_content_type group content.");
         $this->assertEquals([$group_content[$filter][$group_type]->id()], $result[$filter], "The correct result is returned for the $group_type group, filtered by $group_content_type group content.");
       }
@@ -176,7 +179,7 @@ class GetGroupContentTest extends KernelTestBase {
       'name' => $this->randomString(),
       'type' => $bundle,
     ])->save();
-    Og::groupManager()->addGroup('node', $bundle);
+    Og::groupTypeManager()->addGroup('node', $bundle);
 
     for ($i = 0; $i < 2; $i++) {
       $groups[$i] = Node::create([
@@ -210,11 +213,14 @@ class GetGroupContentTest extends KernelTestBase {
     ]);
     $group_content->save();
 
+    /** @var \Drupal\og\MembershipManagerInterface $membership_manager */
+    $membership_manager = \Drupal::service('og.membership_manager');
+
     // Check that Og::getGroupContent() returns the group content entity for
     // both groups.
     $expected = ['entity_test' => [$group_content->id()]];
     foreach ($groups as $key => $groups) {
-      $result = Og::getGroupContentIds($groups);
+      $result = $membership_manager->getGroupContentIds($groups);
       $this->assertEquals($expected, $result, "The group content entity is returned for group $key.");
     }
   }
@@ -231,7 +237,7 @@ class GetGroupContentTest extends KernelTestBase {
       'name' => $this->randomString(),
       'type' => $bundle,
     ])->save();
-    Og::groupManager()->addGroup('node', $bundle);
+    Og::groupTypeManager()->addGroup('node', $bundle);
 
     $groups['node'] = Node::create([
       'title' => $this->randomString(),
@@ -243,7 +249,7 @@ class GetGroupContentTest extends KernelTestBase {
     // The Entity Test entity doesn't have 'real' bundles, so we don't need to
     // create one, we can just add the group to the fake bundle.
     $bundle = Unicode::strtolower($this->randomMachineName());
-    Og::groupManager()->addGroup('entity_test', $bundle);
+    Og::groupTypeManager()->addGroup('entity_test', $bundle);
 
     $groups['entity_test'] = EntityTest::create([
       'type' => $bundle,
@@ -281,11 +287,14 @@ class GetGroupContentTest extends KernelTestBase {
     $group_content = $this->entityTypeManager->getStorage('entity_test')->create($values);
     $group_content->save();
 
+    /** @var \Drupal\og\MembershipManagerInterface $membership_manager */
+    $membership_manager = \Drupal::service('og.membership_manager');
+
     // Check that Og::getGroupContent() returns the group content entity for
     // both groups.
     $expected = ['entity_test' => [$group_content->id()]];
     foreach ($groups as $key => $groups) {
-      $result = Og::getGroupContentIds($groups);
+      $result = $membership_manager->getGroupContentIds($groups);
       $this->assertEquals($expected, $result, "The group content entity is returned for group $key.");
     }
   }

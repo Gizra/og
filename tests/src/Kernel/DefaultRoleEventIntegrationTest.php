@@ -54,7 +54,7 @@ class DefaultRoleEventIntegrationTest extends KernelTestBase {
     // entity we don't actually need to create the group bundle. EntityTest does
     // not have real bundles, it just pretends it does.
     $this->groupBundleId = $this->randomMachineName();
-    Og::groupManager()->addGroup('entity_test', $this->groupBundleId);
+    Og::groupTypeManager()->addGroup('entity_test', $this->groupBundleId);
   }
 
   /**

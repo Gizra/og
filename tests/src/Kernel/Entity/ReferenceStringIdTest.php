@@ -74,7 +74,7 @@ class ReferenceStringIdTest extends KernelTestBase {
     $this->group = $group;
 
     // Let OG mark the group entity type as a group.
-    Og::groupManager()->addGroup('entity_test_string_id', $this->bundles[0]);
+    Og::groupTypeManager()->addGroup('entity_test_string_id', $this->bundles[0]);
 
     // Add a group audience field to the second bundle, this will turn it into a
     // group content type.

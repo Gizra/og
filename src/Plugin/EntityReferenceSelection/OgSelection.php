@@ -68,7 +68,7 @@ class OgSelection extends DefaultSelection {
     $entityDefinition = \Drupal::entityTypeManager()->getDefinition($target_type);
 
     if ($bundle_key = $entityDefinition->getKey('bundle')) {
-      $bundles = Og::groupManager()->getAllGroupBundles($target_type);
+      $bundles = Og::groupTypeManager()->getAllGroupBundles($target_type);
       $query->condition($bundle_key, $bundles, 'IN');
     }
 
@@ -116,7 +116,9 @@ class OgSelection extends DefaultSelection {
    */
   protected function getUserGroups() {
     $user = User::load($this->currentUser->id());
-    $other_groups = Og::getUserGroups($user);
+    /** @var \Drupal\og\MembershipManagerInterface $membership_manager */
+    $membership_manager = \Drupal::service('og.membership_manager');
+    $other_groups = $membership_manager->getUserGroups($user);
     return isset($other_groups[$this->configuration['target_type']]) ? $other_groups[$this->configuration['target_type']] : [];
   }
 

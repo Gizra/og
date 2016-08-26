@@ -3,12 +3,11 @@
 namespace Drupal\og_ui\Tests;
 
 use Drupal\Core\Form\FormState;
-use Drupal\KernelTests\AssertLegacyTrait;
 use Drupal\node\Entity\NodeType;
 use Drupal\og\Og;
 use Drupal\og_ui\BundleFormAlter;
 use Drupal\simpletest\AssertContentTrait;
-use Drupal\simpletest\BrowserTestBase;
+use Drupal\Tests\BrowserTestBase;
 
 /**
  * Test making a bundle a group and a group content.
@@ -18,7 +17,6 @@ use Drupal\simpletest\BrowserTestBase;
 class BundleFormAlterTest extends BrowserTestBase {
 
   use AssertContentTrait;
-  use AssertLegacyTrait;
 
   /**
    * {@inheritdoc}
@@ -107,8 +105,8 @@ class BundleFormAlterTest extends BrowserTestBase {
   public function testGroupContentAjax() {
     // Create two group bundles of different entity types.
     NodeType::create(['name' => 'group node', 'type' => 'group'])->save();
-    Og::groupManager()->addGroup('node', 'group');
-    Og::groupManager()->addGroup('entity_test', 'entity_test');
+    Og::groupTypeManager()->addGroup('node', 'group');
+    Og::groupTypeManager()->addGroup('entity_test', 'entity_test');
 
     // BrowserTestBase doesn't support JavaScript yet. Replace the following
     // unit test with a functional test once JavaScript support is added.
@@ -133,7 +131,7 @@ class BundleFormAlterTest extends BrowserTestBase {
    *   The message to display with the assertion.
    */
   protected function assertTargetBundles($expected, $message) {
-    /** @var EntityFieldManagerInterface $entity_field_manager */
+    /** @var \Drupal\Core\Entity\EntityFieldManagerInterface $entity_field_manager */
     $entity_field_manager = $this->container->get('entity_field.manager');
     $entity_field_manager->clearCachedFieldDefinitions();
     $field_definitions = $entity_field_manager->getFieldDefinitions('node', 'class');
@@ -150,7 +148,7 @@ class BundleFormAlterTest extends BrowserTestBase {
    *   The message to display with the assertion.
    */
   protected function assertTargetType($expected, $message) {
-    /** @var EntityFieldManagerInterface $entity_field_manager */
+    /** @var \Drupal\Core\Entity\EntityFieldManagerInterface $entity_field_manager */
     $entity_field_manager = $this->container->get('entity_field.manager');
     $entity_field_manager->clearCachedFieldDefinitions();
     $field_definitions = $entity_field_manager->getFieldStorageDefinitions('node');
