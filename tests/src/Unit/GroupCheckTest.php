@@ -283,6 +283,27 @@ class GroupCheckTest extends UnitTestCase {
   }
 
   /**
+   * Tests fetching the arguments from the route match.
+   *
+   * @expectedException BadMethodCallException
+   */
+  public function testNoArgumentsFromRouteMatch() {
+    $this
+      ->routeMatch
+      ->getRouteObject()
+      ->willReturn($this->route);
+
+    $this
+      ->route
+      ->getOption('_og_entity_type_id')
+      ->willReturn(NULL);
+
+    // Call the group check without the entity related arguments.
+    $group_check = new GroupCheck($this->entityTypeManager->reveal(), $this->ogAccess->reveal());
+    $group_check->access($this->user->reveal(), $this->route->reveal(), $this->routeMatch->reveal());
+  }
+
+  /**
    * Return the access result.
    *
    * @return \Drupal\Core\Access\AccessResultInterface
