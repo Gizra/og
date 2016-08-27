@@ -83,7 +83,7 @@ class RouteSubscriber extends RouteSubscriberBase {
           '_title' => 'Group management',
         ])
         ->addRequirements([
-          '_permission' => 'administer group',
+          '_og_user_access_group' => 'administer group',
         ])
         ->setOption('parameters', [
           $entity_type_id => ['type' => 'entity:' . $entity_type_id],

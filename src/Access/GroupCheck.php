@@ -5,6 +5,7 @@ namespace Drupal\og\Access;
 use Drupal\Core\Access\AccessResult;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Routing\Access\AccessInterface;
+use Drupal\Core\Routing\RouteMatchInterface;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\og\Og;
 use Drupal\og\OgAccess;
@@ -51,21 +52,38 @@ class GroupCheck implements AccessInterface {
    * @param \Symfony\Component\Routing\Route $route
    *   The route to check against.
    * @param string $entity_type_id
-   *   The entity type.
+   *   (optional) The entity type ID.
    * @param string $entity_id
-   *   The entity ID.
+   *   (optional) The entity ID. If the ID is not sent, the access method will
+   *   try to extract it from the route matcher.
    *
    * @return \Drupal\Core\Access\AccessResultInterface
    *   The access result.
    */
-  public function access(AccountInterface $user, Route $route, $entity_type_id, $entity_id) {
+  public function access(AccountInterface $user, Route $route, RouteMatchInterface $route_match, $entity_type_id = NULL, $entity_id = NULL) {
+    $group = NULL;
+    if (!$entity_type_id) {
+      $parameter_name = $route_match->getRouteObject()->getOption('_og_entity_type_id');
+
+      if (!$parameter_name) {
+        throw new \BadMethodCallException('Group is missing');
+      }
+
+      /** @var \Drupal\Core\Entity\EntityInterface $group */
+      if (!$group = $route_match->getParameter($parameter_name)) {
+        return AccessResult::forbidden();
+      }
+
+      $entity_type_id = $group->getEntityTypeId();
+    }
+
     // No access if the entity type doesn't exist.
     if (!$this->entityTypeManager->getDefinition($entity_type_id, FALSE)) {
       return AccessResult::forbidden();
     }
 
     $entity_storage = $this->entityTypeManager->getStorage($entity_type_id);
-    $group = $entity_storage->load($entity_id);
+    $group = $group ?: $entity_storage->load($entity_id);
 
     // No access if no entity was loaded or it's not a group.
     if (!$group || !Og::isGroup($entity_type_id, $group->bundle())) {

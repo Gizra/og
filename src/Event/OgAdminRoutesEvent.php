@@ -38,14 +38,14 @@ class OgAdminRoutesEvent extends Event implements OgAdminRoutesEventInterface {
         'description' => '',
 
         'requirements' => [
-          '_permission' => 'administer group',
+          '_og_user_access_group' => 'administer group',
         ],
 
         'options' => [
           'parameters' => [
             $entity_type_id => ['type' => 'entity:' . $entity_type_id],
           ],
-          // @todo: Hack, as the above parameters doesn't send the entity,
+          // The above parameters doesn't send the entity,
           // so we will have to use the Route matcher to extract it.
           '_og_entity_type_id' => $entity_type_id,
           '_admin_route' => TRUE,

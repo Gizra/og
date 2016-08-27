@@ -122,6 +122,7 @@ class OgAccess implements OgAccessInterface {
     $config = $this->configFactory->get('og.settings');
     $cacheable_metadata = (new CacheableMetadata)
         ->addCacheableDependency($config);
+
     if (!$this->groupTypeManager->isGroup($group_type_id, $bundle)) {
       // Not a group.
       return AccessResult::neutral()->addCacheableDependency($cacheable_metadata);
