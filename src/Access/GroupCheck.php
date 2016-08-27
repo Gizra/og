@@ -14,6 +14,9 @@ use Symfony\Component\Routing\Route;
 
 /**
  * Determines access to routes based on group access for the current user.
+ *
+ * This is a general service that can be used to determine if a user has access
+ * to a certain route.
  */
 class GroupCheck implements AccessInterface {
 
@@ -45,7 +48,12 @@ class GroupCheck implements AccessInterface {
   }
 
   /**
-   * Checks access.
+   * Checks access by OG related permissions.
+   *
+   * If the route parameter names don't have {entity_type_id} or {entity_id} you
+   * can still use this access check, by passing the "entity_type_id" definition
+   * using the Route::setOption method.
+   * see \Drupal\og\Routing\RouteSubscriber::alterRoutes as an example.
    *
    * @param \Drupal\Core\Session\AccountInterface $user
    *   The currently logged in user.
@@ -66,7 +74,7 @@ class GroupCheck implements AccessInterface {
       $parameter_name = $route_match->getRouteObject()->getOption('_og_entity_type_id');
 
       if (!$parameter_name) {
-        throw new \BadMethodCallException('Group is missing');
+        throw new \BadMethodCallException('Group definition is missing from the router. Did you define $route->setOption(\'_og_entity_type_id\', $entity_type_id) in your route declaration?');
       }
 
       /** @var \Drupal\Core\Entity\EntityInterface $group */
