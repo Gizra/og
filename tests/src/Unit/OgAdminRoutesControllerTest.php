@@ -3,6 +3,7 @@
 namespace Drupal\Tests\og\Unit;
 
 use Drupal\Component\EventDispatcher\ContainerAwareEventDispatcher;
+use Drupal\Core\Access\AccessManagerInterface;
 use Drupal\Core\DependencyInjection\ContainerBuilder;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Routing\RouteMatchInterface;
@@ -11,6 +12,7 @@ use Drupal\og\Controller\OgAdminRoutesController;
 use Drupal\og\Event\OgAdminRoutesEvent;
 use Drupal\og\Event\OgAdminRoutesEventInterface;
 use Drupal\Tests\UnitTestCase;
+use Prophecy\Argument;
 use Symfony\Component\Routing\Route;
 
 /**
@@ -22,11 +24,11 @@ use Symfony\Component\Routing\Route;
 class OgAdminRoutesControllerTest extends UnitTestCase {
 
   /**
-   * The group type manager.
+   * The access manager service.
    *
-   * @var \Drupal\og\GroupTypeManager|\Prophecy\Prophecy\ObjectProphecy
+   * @var \Drupal\Core\Access\AccessManagerInterface|\Prophecy\Prophecy\ObjectProphecy
    */
-  protected $groupTypeManager;
+  protected $accessManager;
 
   /**
    * Route provider object.
@@ -92,11 +94,18 @@ class OgAdminRoutesControllerTest extends UnitTestCase {
   protected $url;
 
   /**
+   * The entity ID.
+   *
+   * @var int
+   */
+  protected $entityId;
+
+  /**
    * {@inheritdoc}
    */
   public function setUp() {
 
-    // @todo: Change PHPdocs.
+    $this->accessManager = $this->prophesize(AccessManagerInterface::class);
     $this->routeMatch = $this->prophesize(RouteMatchInterface::class);
 
     $this->group = $this->prophesize(EntityInterface::class);
@@ -104,6 +113,7 @@ class OgAdminRoutesControllerTest extends UnitTestCase {
     $this->eventDispatcher = $this->prophesize(ContainerAwareEventDispatcher::class);
     $this->route = $this->prophesize(Route::class);
     $this->entityTypeId = $this->randomMachineName();
+    $this->entityId = rand(20, 30);
     $this->url = $this->prophesize(Url::class);
 
     $this->routesInfo = [
@@ -140,20 +150,27 @@ class OgAdminRoutesControllerTest extends UnitTestCase {
       ->getEntityTypeId()
       ->willReturn($this->entityTypeId);
 
-    $event = new OgAdminRoutesEvent();
+    $this
+      ->group
+      ->id()
+      ->willReturn($this->entityId);
+
     $this
       ->eventDispatcher
-      ->dispatch(OgAdminRoutesEventInterface::EVENT_NAME, $event)
+      ->dispatch(OgAdminRoutesEventInterface::EVENT_NAME, Argument::type(OgAdminRoutesEvent::class))
+      ->willReturn($this->event->reveal())
       ->shouldBeCalled();
 
     $this
       ->event
       ->getRoutes($this->entityTypeId)
-      ->willReturn($this->routesInfo);
+      ->willReturn($this->routesInfo)
+      ->shouldBeCalled();
 
     // Set the container for the string translation service.
     $translation = $this->getStringTranslationStub();
     $container = new ContainerBuilder();
+    $container->set('access_manager', $this->accessManager->reveal());
     $container->set('string_translation', $translation);
     \Drupal::setContainer($container);
   }
@@ -173,6 +190,30 @@ class OgAdminRoutesControllerTest extends UnitTestCase {
     $result = $og_admin_routes_controller->overview($this->routeMatch->reveal());
 
     $this->assertEquals('You do not have any administrative items.', $result['#markup']);
+  }
+
+  /**
+   * Tests overview with accessible routes.
+   *
+   * @covers ::overview
+   */
+  public function testRoutesAccess() {
+    $this
+      ->url
+      ->access()
+      ->willReturn(TRUE);
+
+
+    $og_admin_routes_controller = new OgAdminRoutesController($this->eventDispatcher->reveal());
+    $result = $og_admin_routes_controller->overview($this->routeMatch->reveal());
+
+    $content = $result['og_admin_routes']['#content'];
+
+    foreach ($this->routesInfo as $name => $info) {
+      foreach ($info as $key => $value) {
+        $this->assertEquals($value, $content[$name][$key]);
+      }
+    }
   }
 
 }
