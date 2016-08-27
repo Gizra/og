@@ -30,13 +30,4 @@ class OgAdminMembersController extends ControllerBase {
     return Views::getView('og_members_overview')->executeDisplay('default', $arguments);
   }
 
-  /**
-   * Add people to the group.
-   */
-  public function addPeopleForm() {
-    return [
-      '#markup' => 'addPeopleForm placeholder',
-    ];
-  }
-
 }
