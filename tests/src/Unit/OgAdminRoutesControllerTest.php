@@ -203,7 +203,6 @@ class OgAdminRoutesControllerTest extends UnitTestCase {
       ->access()
       ->willReturn(TRUE);
 
-
     $og_admin_routes_controller = new OgAdminRoutesController($this->eventDispatcher->reveal());
     $result = $og_admin_routes_controller->overview($this->routeMatch->reveal());
 
