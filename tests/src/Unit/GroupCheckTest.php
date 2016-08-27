@@ -7,6 +7,7 @@ use Drupal\Core\DependencyInjection\ContainerBuilder;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Entity\EntityStorageInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
+use Drupal\Core\Routing\RouteMatchInterface;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\og\Access\GroupCheck;
 use Drupal\og\GroupTypeManager;
@@ -107,6 +108,13 @@ class GroupCheckTest extends UnitTestCase {
   protected $accessResult;
 
   /**
+   * The route match service used in the test.
+   *
+   * @var \\Drupal\Core\Routing\RouteMatchInterface\Prophecy\Prophecy\ObjectProphecy
+   */
+  protected $routeMatch;
+
+  /**
    * {@inheritdoc}
    */
   public function setUp() {
@@ -115,6 +123,7 @@ class GroupCheckTest extends UnitTestCase {
     $this->entityStorage = $this->prophesize(EntityStorageInterface::class);
     $this->ogAccess = $this->prophesize(OgAccessInterface::class);
     $this->route = $this->prophesize(Route::class);
+    $this->routeMatch = $this->prophesize(RouteMatchInterface::class);
 
     $this->entityTypeId = $this->randomMachineName();
     $this->bundle = $this->randomMachineName();
@@ -140,8 +149,7 @@ class GroupCheckTest extends UnitTestCase {
       ->getDefinition($this->entityTypeId, FALSE)
       ->willReturn(NULL);
 
-    $group_check = new GroupCheck($this->entityTypeManager->reveal(), $this->ogAccess->reveal());
-    $result = $group_check->access($this->user->reveal(), $this->route->reveal(), $this->entityTypeId, $this->entityId);
+    $result = $this->getAccessResult();
     $this->assertTrue($result->isForbidden());
   }
 
@@ -165,8 +173,9 @@ class GroupCheckTest extends UnitTestCase {
       ->load($this->entityId)
       ->willReturn(NULL);
 
-    $group_check = new GroupCheck($this->entityTypeManager->reveal(), $this->ogAccess->reveal());
-    $result = $group_check->access($this->user->reveal(), $this->route->reveal(), $this->entityTypeId, $this->entityId);
+    $this->getAccessResult();
+
+    $result = $this->getAccessResult();
     $this->assertTrue($result->isForbidden());
   }
 
@@ -199,8 +208,7 @@ class GroupCheckTest extends UnitTestCase {
       ->isGroup($this->entityTypeId, $this->bundle)
       ->willReturn(FALSE);
 
-    $group_check = new GroupCheck($this->entityTypeManager->reveal(), $this->ogAccess->reveal());
-    $result = $group_check->access($this->user->reveal(), $this->route->reveal(), $this->entityTypeId, $this->entityId);
+    $result = $this->getAccessResult();
     $this->assertTrue($result->isForbidden());
   }
 
@@ -252,8 +260,7 @@ class GroupCheckTest extends UnitTestCase {
       ->isAllowed()
       ->willReturn($expected);
 
-    $group_check = new GroupCheck($this->entityTypeManager->reveal(), $this->ogAccess->reveal());
-    $result = $group_check->access($this->user->reveal(), $this->route->reveal(), $this->entityTypeId, $this->entityId);
+    $result = $this->getAccessResult();
 
     $actual = $expected ? $result->isAllowed() : $result->isForbidden();
     $this->assertTrue($actual);
@@ -273,6 +280,17 @@ class GroupCheckTest extends UnitTestCase {
       ['foo|bar', FALSE],
       ['foo|bar', TRUE],
     ];
+  }
+
+  /**
+   * Return the access result.
+   *
+   * @return \Drupal\Core\Access\AccessResultInterface
+   *   The access result.
+   */
+  protected function getAccessResult() {
+    $group_check = new GroupCheck($this->entityTypeManager->reveal(), $this->ogAccess->reveal());
+    return $group_check->access($this->user->reveal(), $this->route->reveal(), $this->routeMatch->reveal(), $this->entityTypeId, $this->entityId);
   }
 
 }
