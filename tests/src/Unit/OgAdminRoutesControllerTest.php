@@ -181,38 +181,9 @@ class OgAdminRoutesControllerTest extends UnitTestCase {
    * @covers ::overview
    */
   public function testRoutesWithNoAccess() {
-    $this
-      ->url
-      ->access()
-      ->willReturn(FALSE);
-
     $og_admin_routes_controller = new OgAdminRoutesController($this->eventDispatcher->reveal());
     $result = $og_admin_routes_controller->overview($this->routeMatch->reveal());
 
     $this->assertEquals('You do not have any administrative items.', $result['#markup']);
   }
-
-  /**
-   * Tests overview with accessible routes.
-   *
-   * @covers ::overview
-   */
-  public function testRoutesAccess() {
-    $this
-      ->url
-      ->access()
-      ->willReturn(TRUE);
-
-    $og_admin_routes_controller = new OgAdminRoutesController($this->eventDispatcher->reveal());
-    $result = $og_admin_routes_controller->overview($this->routeMatch->reveal());
-
-    $content = $result['og_admin_routes']['#content'];
-
-    foreach ($this->routesInfo as $name => $info) {
-      foreach ($info as $key => $value) {
-        $this->assertEquals($value, $content[$name][$key]);
-      }
-    }
-  }
-
 }
