@@ -7,7 +7,7 @@ use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Plugin\Discovery\ContainerDeriverInterface;
 use Drupal\Core\Routing\RouteProvider;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
-use Drupal\Core\StringTranslation\TranslationInterface;
+use Drupal\og\GroupTypeManager;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
@@ -18,11 +18,11 @@ class OgLocalTask extends DeriverBase implements ContainerDeriverInterface {
   use StringTranslationTrait;
 
   /**
-   * The entity manager.
+   * The group type manager.
    *
-   * @var \Drupal\Core\Entity\EntityManagerInterface
+   * @var \Drupal\og\GroupTypeManager
    */
-  protected $entityManager;
+  protected $groupTypeManager;
 
   /**
    * Route provider object.
@@ -36,14 +36,11 @@ class OgLocalTask extends DeriverBase implements ContainerDeriverInterface {
    *
    * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entity_manager
    *   The entity manager.
-   * @param \Drupal\Core\StringTranslation\TranslationInterface $string_translation
-   *   The translation manager.
    * @param RouteProvider $route_provider
    *   The route provider services.
    */
-  public function __construct(EntityTypeManagerInterface $entity_manager, TranslationInterface $string_translation, RouteProvider $route_provider) {
-    $this->entityManager = $entity_manager;
-    $this->stringTranslation = $string_translation;
+  public function __construct(GroupTypeManager $group_type_manager, RouteProvider $route_provider) {
+    $this->groupTypeManager = $group_type_manager;
     $this->routProvider = $route_provider;
   }
 
@@ -52,8 +49,7 @@ class OgLocalTask extends DeriverBase implements ContainerDeriverInterface {
    */
   public static function create(ContainerInterface $container, $base_plugin_id) {
     return new static(
-      $container->get('entity_type.manager'),
-      $container->get('string_translation'),
+      $container->get('og.group_type_manager'),
       $container->get('router.route_provider')
     );
   }
@@ -64,8 +60,7 @@ class OgLocalTask extends DeriverBase implements ContainerDeriverInterface {
   public function getDerivativeDefinitions($base_plugin_definition) {
     $derivatives = [];
 
-    // @todo: Use GroupTypeManager.
-    foreach ($this->entityManager->getDefinitions() as $entity_type_id => $entity_type) {
+    foreach (array_keys($this->groupTypeManager->getGroupMap()) as $entity_type_id) {
       $route_name = "entity.$entity_type_id.og_admin_routes";
 
       if (!$this->routProvider->getRoutesByNames([$route_name])) {
