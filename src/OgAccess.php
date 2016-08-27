@@ -67,8 +67,6 @@ class OgAccess implements OgAccessInterface {
    * The group manager.
    *
    * @var \Drupal\og\GroupTypeManager
-   *
-   * @todo This should be GroupManagerInterface.
    */
   protected $groupTypeManager;
 

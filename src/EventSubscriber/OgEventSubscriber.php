@@ -113,13 +113,6 @@ class OgEventSubscriber implements EventSubscriberInterface {
         'default roles' => [],
       ]),
       new GroupPermission([
-        'name' => 'unsubscribe',
-        'title' => t('Unsubscribe from group'),
-        'description' => t('Allow members to unsubscribe themselves from a group, removing their membership.'),
-        'roles' => [OgRoleInterface::AUTHENTICATED],
-        'default roles' => [OgRoleInterface::AUTHENTICATED],
-      ]),
-      new GroupPermission([
         'name' => 'approve and deny subscription',
         'title' => t('Approve and deny subscription'),
         'description' => t("Users may allow or deny another user's subscription request."),

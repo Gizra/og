@@ -131,7 +131,7 @@ class GroupTypeManager {
   protected $routeBuilder;
 
   /**
-   * Constructs an GroupManager object.
+   * Constructs a GroupTypeManager object.
    *
    * @param \Drupal\Core\Config\ConfigFactoryInterface $config_factory
    *   The config factory.

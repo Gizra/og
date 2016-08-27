@@ -196,8 +196,7 @@ class Og {
    *   Defaults to active memberships.
    *
    * @return bool
-   *   TRUE if the entity (e.g. the user or node) belongs to a group with
-   *   a certain state.
+   *   TRUE if the user belongs to a group with a certain state.
    */
   public static function isMember(EntityInterface $group, AccountInterface $user, $states = [OgMembershipInterface::STATE_ACTIVE]) {
     /** @var \Drupal\og\MembershipManagerInterface $membership_manager */
