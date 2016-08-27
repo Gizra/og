@@ -283,7 +283,7 @@ class GroupCheckTest extends UnitTestCase {
   }
 
   /**
-   * Tests fetching the arguments from the route match.
+   * Tests fetching arguments from the route match without "getOption" defined.
    *
    * @expectedException BadMethodCallException
    */
@@ -301,6 +301,33 @@ class GroupCheckTest extends UnitTestCase {
     // Call the group check without the entity related arguments.
     $group_check = new GroupCheck($this->entityTypeManager->reveal(), $this->ogAccess->reveal());
     $group_check->access($this->user->reveal(), $this->route->reveal(), $this->routeMatch->reveal());
+  }
+
+  /**
+   * Tests fetching arguments from the route match with invalid group entity.
+   */
+  public function testNoGroupFromRouteMatch() {
+    $this
+      ->routeMatch
+      ->getRouteObject()
+      ->willReturn($this->route);
+
+    $parameter_name = $this->randomMachineName();
+
+    $this
+      ->route
+      ->getOption('_og_entity_type_id')
+      ->willReturn($parameter_name);
+
+    $this
+      ->routeMatch
+      ->getParameter($parameter_name)
+      ->willReturn(NULL);
+
+    // Call the group check without the entity related arguments.
+    $group_check = new GroupCheck($this->entityTypeManager->reveal(), $this->ogAccess->reveal());
+    $result = $group_check->access($this->user->reveal(), $this->route->reveal(), $this->routeMatch->reveal());
+    $this->assertTrue($result->isForbidden());
   }
 
   /**
