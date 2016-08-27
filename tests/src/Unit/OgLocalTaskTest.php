@@ -10,7 +10,7 @@ use Drupal\Tests\UnitTestCase;
 use Symfony\Component\Routing\Route;
 
 /**
- * Tests OG local task defintion.
+ * Tests OG local task definition.
  *
  * Assert that the "Group" tab is properly added.
  *

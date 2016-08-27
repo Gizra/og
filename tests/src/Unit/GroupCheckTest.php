@@ -110,7 +110,7 @@ class GroupCheckTest extends UnitTestCase {
   /**
    * The route match service used in the test.
    *
-   * @var \\Drupal\Core\Routing\RouteMatchInterface\Prophecy\Prophecy\ObjectProphecy
+   * @var \\Drupal\Core\Routing\RouteMatchInterface|\Prophecy\Prophecy\ObjectProphecy
    */
   protected $routeMatch;
 

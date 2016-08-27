@@ -44,7 +44,10 @@ class OgAdminRoutesController extends ControllerBase {
   /**
    * Show all the available admin routes.
    *
-   * @return mixed
+   * @param \Drupal\Core\Routing\RouteMatchInterface $route_match
+   *   The route match service.
+   *
+   * @return array
    *   List of available admin routes for the current group.
    */
   public function overview(RouteMatchInterface $route_match) {
@@ -63,18 +66,20 @@ class OgAdminRoutesController extends ControllerBase {
 
     foreach ($event->getRoutes($entity_type_id) as $name => $info) {
       $route_name = "entity.$entity_type_id.og_admin_routes.$name";
+      $url = Url::fromRoute($route_name, [$entity_type_id => $group->id()]);
 
-      // @todo: How the get the id?
-      $route = Url::fromRoute($route_name, [$entity_type_id => $group->id()]);
-
-      if (!$route->access()) {
+      if (!$url->access()) {
         // User doesn't have access to the route.
         continue;
       }
 
       $content[$name]['title'] = $info['title'];
       $content[$name]['description'] = $info['description'];
-      $content[$name]['url'] = $route;
+      $content[$name]['url'] = $url;
+    }
+
+    if (!$content) {
+      return ['#markup' => $this->t('You do not have any administrative items.')];
     }
 
     return [
