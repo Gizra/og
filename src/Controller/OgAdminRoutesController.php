@@ -78,17 +78,18 @@ class OgAdminRoutesController extends ControllerBase {
 
     foreach ($event->getRoutes($entity_type_id) as $name => $info) {
       $route_name = "entity.$entity_type_id.og_admin_routes.$name";
+      $parameters = [$entity_type_id => $group->id()];
 
       // We don't use Url::fromRoute() here for the access check, as it will
       // prevent us from unit testing this method.
-      if (!$this->accessManager->checkNamedRoute($route_name)) {
+      if (!$this->accessManager->checkNamedRoute($route_name, $parameters)) {
         // User doesn't have access to the route.
         continue;
       }
 
       $content[$name]['title'] = $info['title'];
       $content[$name]['description'] = $info['description'];
-      $content[$name]['url'] = Url::fromRoute($route_name);;
+      $content[$name]['url'] = Url::fromRoute($route_name, $parameters);
     }
 
     if (!$content) {
