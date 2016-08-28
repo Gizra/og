@@ -210,11 +210,12 @@ class OgAdminRoutesControllerTest extends UnitTestCase {
    *   The render array.
    */
   protected function getRenderElementResult($allow_access) {
+    $parameters = [$this->entityTypeId => $this->entityId];
     foreach (array_keys($this->routesInfo) as $name) {
       $route_name = "entity.{$this->entityTypeId}.og_admin_routes.$name";
       $this
         ->accessManager
-        ->checkNamedRoute($route_name)
+        ->checkNamedRoute($route_name, $parameters)
         ->willReturn($allow_access);
     }
 
