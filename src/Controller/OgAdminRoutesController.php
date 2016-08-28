@@ -3,6 +3,7 @@
 namespace Drupal\og\Controller;
 
 use Drupal\Component\EventDispatcher\ContainerAwareEventDispatcher;
+use Drupal\Core\Access\AccessManagerInterface;
 use Drupal\Core\Controller\ControllerBase;
 use Drupal\Core\Routing\RouteMatchInterface;
 use Drupal\Core\Url;
@@ -23,13 +24,23 @@ class OgAdminRoutesController extends ControllerBase {
   protected $eventDispatcher;
 
   /**
+   * The access manager service.
+   *
+   * @var \Drupal\Core\Access\AccessManagerInterface
+   */
+  protected $accessManager;
+
+  /**
    * Constructs an OgAdminController object.
    *
    * @param \Drupal\Component\EventDispatcher\ContainerAwareEventDispatcher $event_dispatcher
    *   The event dispatcher service.
+   * @param \Drupal\Core\Access\AccessManagerInterface $access_manager
+   *   The access manager service.
    */
-  public function __construct(ContainerAwareEventDispatcher $event_dispatcher) {
+  public function __construct(ContainerAwareEventDispatcher $event_dispatcher, AccessManagerInterface $access_manager) {
     $this->eventDispatcher = $event_dispatcher;
+    $this->accessManager = $access_manager;
   }
 
   /**
@@ -37,7 +48,8 @@ class OgAdminRoutesController extends ControllerBase {
    */
   public static function create(ContainerInterface $container) {
     return new static(
-      $container->get('event_dispatcher')
+      $container->get('event_dispatcher'),
+      $container->get('access_manager')
     );
   }
 
@@ -66,16 +78,17 @@ class OgAdminRoutesController extends ControllerBase {
 
     foreach ($event->getRoutes($entity_type_id) as $name => $info) {
       $route_name = "entity.$entity_type_id.og_admin_routes.$name";
-      $url = Url::fromRoute($route_name, [$entity_type_id => $group->id()]);
 
-      if (!$url->access()) {
+      // We don't use Url::fromRoute() here for the access check, as it will
+      // prevent us from unit testing this method.
+      if (!$this->accessManager->checkNamedRoute($route_name)) {
         // User doesn't have access to the route.
         continue;
       }
 
       $content[$name]['title'] = $info['title'];
       $content[$name]['description'] = $info['description'];
-      $content[$name]['url'] = $url;
+      $content[$name]['url'] = Url::fromRoute($route_name);;
     }
 
     if (!$content) {

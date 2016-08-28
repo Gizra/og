@@ -181,10 +181,45 @@ class OgAdminRoutesControllerTest extends UnitTestCase {
    * @covers ::overview
    */
   public function testRoutesWithNoAccess() {
-    $og_admin_routes_controller = new OgAdminRoutesController($this->eventDispatcher->reveal());
-    $result = $og_admin_routes_controller->overview($this->routeMatch->reveal());
-
+    $result = $this->getRenderElementResult(FALSE);
     $this->assertEquals('You do not have any administrative items.', $result['#markup']);
+  }
+
+  /**
+   * Tests overview with accessible routes.
+   *
+   * @covers ::overview
+   */
+  public function testRoutesWithAccess() {
+    $result = $this->getRenderElementResult(TRUE);
+
+    foreach ($result['og_admin_routes']['#content'] as $key => $value) {
+      $this->assertEquals($this->routesInfo[$key]['title'], $value['title']);
+      $this->assertEquals($this->routesInfo[$key]['description'], $value['description']);
+    }
+
+  }
+
+  /**
+   * Return the render array from calling the "overview" method.
+   *
+   * @param bool $allow_access
+   *   Indicate of access to the routes should be given.
+   *
+   * @return array The render array.
+   *   The render array.
+   */
+  protected function getRenderElementResult($allow_access) {
+    foreach (array_keys($this->routesInfo) as $name) {
+      $route_name = "entity.{$this->entityTypeId}.og_admin_routes.$name";
+      $this
+        ->accessManager
+        ->checkNamedRoute($route_name)
+        ->willReturn($allow_access);
+    }
+
+    $og_admin_routes_controller = new OgAdminRoutesController($this->eventDispatcher->reveal(), $this->accessManager->reveal());
+    return $og_admin_routes_controller->overview($this->routeMatch->reveal());
   }
 
 }
