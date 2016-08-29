@@ -77,9 +77,9 @@ class GroupSubscribeFormTest extends KernelTestBase {
     $groupBundle3 = Unicode::strtolower($this->randomMachineName());
 
     // Define the entities as groups.
-    Og::groupManager()->addGroup('node', $groupBundle1);
-    Og::groupManager()->addGroup('node', $groupBundle2);
-    Og::groupManager()->addGroup('node', $groupBundle3);
+    Og::groupTypeManager()->addGroup('node', $groupBundle1);
+    Og::groupTypeManager()->addGroup('node', $groupBundle2);
+    Og::groupTypeManager()->addGroup('node', $groupBundle3);
 
     // Create node author user.
     $user = User::create(['name' => $this->randomString()]);

@@ -34,7 +34,7 @@ class OgRoleManager implements OgRoleManagerInterface {
   protected $permissionManager;
 
   /**
-   * Constructs an GroupManager object.
+   * Constructs an OgRoleManager object.
    *
    * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entity_type_manager
    *   The entity type manager.

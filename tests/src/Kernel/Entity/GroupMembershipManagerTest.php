@@ -80,7 +80,7 @@ class GetGroupsTest extends KernelTestBase {
         'name' => $this->randomString(),
         'type' => $bundle,
       ])->save();
-      Og::groupManager()->addGroup('node', $bundle);
+      Og::groupTypeManager()->addGroup('node', $bundle);
 
       $group = Node::create([
         'title' => $this->randomString(),
@@ -93,7 +93,7 @@ class GetGroupsTest extends KernelTestBase {
       // The Entity Test entity doesn't have 'real' bundles, so we don't need to
       // create one, we can just add the group to the fake bundle.
       $bundle = "entity_test_$i";
-      Og::groupManager()->addGroup('entity_test', $bundle);
+      Og::groupTypeManager()->addGroup('entity_test', $bundle);
 
       $group = EntityTest::create([
         'type' => $bundle,

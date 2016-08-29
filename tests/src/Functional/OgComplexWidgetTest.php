@@ -36,7 +36,7 @@ class OgComplexWidgetTest extends BrowserTestBase {
     // a group. Note we're not using the Entity Test entity for this since it
     // does not have real support for multiple bundles.
     BlockContentType::create(['type' => 'group']);
-    Og::groupManager()->addGroup('block_content', 'group');
+    Og::groupTypeManager()->addGroup('block_content', 'group');
 
     // Add a group audience field to the "post" node type, turning it into a
     // group content type.

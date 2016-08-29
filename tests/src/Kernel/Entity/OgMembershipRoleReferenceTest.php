@@ -69,7 +69,7 @@ class OgMembershipRoleReferenceTest extends KernelTestBase {
       'name' => $this->randomString(),
     ])->save();
 
-    Og::groupManager()->addGroup('node', $group_bundle);
+    Og::groupTypeManager()->addGroup('node', $group_bundle);
 
     $this->user = User::create(['name' => $this->randomString()]);
     $this->user->save();

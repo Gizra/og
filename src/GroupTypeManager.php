@@ -13,7 +13,7 @@ use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 /**
  * A manager to keep track of which entity type/bundles are OG group enabled.
  */
-class GroupManager {
+class GroupTypeManager {
 
   /**
    * The key used to identify the cached version of the group relation map.
@@ -123,7 +123,7 @@ class GroupManager {
   protected $ogRoleManager;
 
   /**
-   * Constructs an GroupManager object.
+   * Constructs a GroupTypeManager object.
    *
    * @param \Drupal\Core\Config\ConfigFactoryInterface $config_factory
    *   The config factory.

@@ -123,7 +123,7 @@ class Og {
     $view_display->save();
 
     // Refresh the group manager data, we have added a group type.
-    static::groupManager()->resetGroupRelationMap();
+    static::groupTypeManager()->resetGroupRelationMap();
 
     return $field_definition;
   }
@@ -196,8 +196,7 @@ class Og {
    *   Defaults to active memberships.
    *
    * @return bool
-   *   TRUE if the entity (e.g. the user or node) belongs to a group with
-   *   a certain state.
+   *   TRUE if the user belongs to a group with a certain state.
    */
   public static function isMember(EntityInterface $group, AccountInterface $user, $states = [OgMembershipInterface::STATE_ACTIVE]) {
     /** @var \Drupal\og\MembershipManagerInterface $membership_manager */
@@ -251,7 +250,7 @@ class Og {
    *   True or false if the given entity is group.
    */
   public static function isGroup($entity_type_id, $bundle_id) {
-    return static::groupManager()->isGroup($entity_type_id, $bundle_id);
+    return static::groupTypeManager()->isGroup($entity_type_id, $bundle_id);
   }
 
   /**
@@ -280,7 +279,7 @@ class Og {
    *   The bundle name.
    */
   public static function addGroup($entity_type_id, $bundle_id) {
-    static::groupManager()->addGroup($entity_type_id, $bundle_id);
+    static::groupTypeManager()->addGroup($entity_type_id, $bundle_id);
   }
 
   /**
@@ -295,18 +294,18 @@ class Og {
    *   True or false if the action succeeded.
    */
   public static function removeGroup($entity_type_id, $bundle_id) {
-    return static::groupManager()->removeGroup($entity_type_id, $bundle_id);
+    return static::groupTypeManager()->removeGroup($entity_type_id, $bundle_id);
   }
 
   /**
    * Returns the group manager instance.
    *
-   * @return \Drupal\og\GroupManager
+   * @return \Drupal\og\GroupTypeManager
    *   Returns the group manager.
    */
-  public static function groupManager() {
+  public static function groupTypeManager() {
     // @todo store static reference for this?
-    return \Drupal::service('og.group.manager');
+    return \Drupal::service('og.group_type_manager');
   }
 
   /**
