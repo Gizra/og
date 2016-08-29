@@ -1,6 +1,6 @@
 <?php
 
-namespace Drupal\Tests\og\Kernel;
+namespace Drupal\Tests\og\Kernel\Access;
 
 use Drupal\KernelTests\KernelTestBase;
 use Drupal\block_content\Entity\BlockContent;
@@ -176,18 +176,14 @@ class WikiTest extends KernelTestBase {
       ->grantPermission('edit any group_content content');
     $role->save();
 
-    // Subscribe the normal member and the blocked member types to the group.
-    foreach (['member', 'blocked'] as $membership_type) {
-      $state = $membership_type === 'member' ? OgMembershipInterface::STATE_ACTIVE : OgMembershipInterface::STATE_BLOCKED;
-      /** @var \Drupal\og\Entity\OgMembership $membership */
-      $membership = OgMembership::create();
-      $membership
-        ->setUser($this->users[$membership_type])
-        ->setGroup($this->group)
-        ->addRole($role)
-        ->setState($state)
-        ->save();
-    }
+    /** @var \Drupal\og\Entity\OgMembership $membership */
+    $membership = OgMembership::create();
+    $membership
+      ->setUser($this->users['member'])
+      ->setGroup($this->group)
+      ->addRole($role)
+      ->setState(OgMembershipInterface::STATE_ACTIVE)
+      ->save();
   }
 
   /**
@@ -206,18 +202,14 @@ class WikiTest extends KernelTestBase {
       ->grantPermission('edit any group_content content');
     $role->save();
 
-    // Subscribe the normal member and the blocked member types to the group.
-    foreach (['member', 'blocked'] as $membership_type) {
-      $state = $membership_type === 'member' ? OgMembershipInterface::STATE_ACTIVE : OgMembershipInterface::STATE_BLOCKED;
-      /** @var \Drupal\og\Entity\OgMembership $membership */
-      $membership = OgMembership::create();
-      $membership
-        ->setUser($this->users[$membership_type])
-        ->setGroup($this->group)
-        ->addRole($role)
-        ->setState($state)
-        ->save();
-    }
+    /** @var \Drupal\og\Entity\OgMembership $membership */
+    $membership = OgMembership::create();
+    $membership
+      ->setUser($this->users['member'])
+      ->setGroup($this->group)
+      ->addRole($role)
+      ->setState(OgMembershipInterface::STATE_ACTIVE)
+      ->save();
   }
 
   /**
