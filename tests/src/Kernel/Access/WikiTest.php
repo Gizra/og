@@ -61,7 +61,6 @@ class WikiTest extends KernelTestBase {
 
   /**
    * {@inheritdoc}
-   * @expectedException \LogicException
    */
   public function setUp() {
     parent::setUp();
@@ -129,32 +128,6 @@ class WikiTest extends KernelTestBase {
     ];
     Og::createField(OgGroupAudienceHelper::DEFAULT_FIELD, 'node', 'group_content', $settings);
 
-    // Grant both members and non-members permission to edit any group content.
-    foreach ([OgRoleInterface::AUTHENTICATED, OgRoleInterface::ANONYMOUS] as $role_name) {
-      /** @var \Drupal\og\Entity\OgRole $role */
-      $role = OgRole::create();
-      $role
-        ->setGroupType('block_content')
-        ->setGroupBundle('group')
-        ->setName($role_name)
-        ->setLabel($this->randomString())
-        ->grantPermission('edit any group_content content');
-      $role->save();
-    }
-
-    // Subscribe the normal member and the blocked member to the group.
-    foreach (['member', 'blocked'] as $membership_type) {
-      $state = $membership_type === 'member' ? OgMembershipInterface::STATE_ACTIVE : OgMembershipInterface::STATE_BLOCKED;
-      /** @var \Drupal\og\Entity\OgMembership $membership */
-      $membership = OgMembership::create();
-      $membership
-        ->setUser($this->users[$membership_type])
-        ->setGroup($this->group)
-        ->addRole($role)
-        ->setState($state)
-        ->save();
-    }
-
     // Create three group content items, one owned by the group owner, one by
     // the member, and one by the blocked user.
     foreach (['owner', 'member', 'blocked'] as $membership_type) {
@@ -184,6 +157,66 @@ class WikiTest extends KernelTestBase {
       /** @var \Drupal\Core\Access\AccessResult $result */
       $result = og_entity_access($this->groupContent[$group_content], 'update', $this->users[$user]);
       $this->assertEquals($expected_result, $result->isAllowed());
+    }
+  }
+
+  /**
+   * Tests exception is thrown when trying to save member role.
+   *
+   * @expectedException \LogicException
+   */
+  public function testMemberRoleMembershipSave() {
+    /** @var \Drupal\og\Entity\OgRole $role */
+    $role = OgRole::create();
+    $role
+      ->setGroupType('block_content')
+      ->setGroupBundle('group')
+      ->setName(OgRoleInterface::AUTHENTICATED)
+      ->setLabel($this->randomString())
+      ->grantPermission('edit any group_content content');
+    $role->save();
+
+    // Subscribe the normal member and the blocked member types to the group.
+    foreach (['member', 'blocked'] as $membership_type) {
+      $state = $membership_type === 'member' ? OgMembershipInterface::STATE_ACTIVE : OgMembershipInterface::STATE_BLOCKED;
+      /** @var \Drupal\og\Entity\OgMembership $membership */
+      $membership = OgMembership::create();
+      $membership
+        ->setUser($this->users[$membership_type])
+        ->setGroup($this->group)
+        ->addRole($role)
+        ->setState($state)
+        ->save();
+    }
+  }
+
+  /**
+   * Tests exception is thrown when trying to save non-member role.
+   *
+   * @expectedException \LogicException
+   */
+  public function testNonMemberRoleMembershipSave() {
+    /** @var \Drupal\og\Entity\OgRole $role */
+    $role = OgRole::create();
+    $role
+      ->setGroupType('block_content')
+      ->setGroupBundle('group')
+      ->setName(OgRoleInterface::ANONYMOUS)
+      ->setLabel($this->randomString())
+      ->grantPermission('edit any group_content content');
+    $role->save();
+
+    // Subscribe the normal member and the blocked member types to the group.
+    foreach (['member', 'blocked'] as $membership_type) {
+      $state = $membership_type === 'member' ? OgMembershipInterface::STATE_ACTIVE : OgMembershipInterface::STATE_BLOCKED;
+      /** @var \Drupal\og\Entity\OgMembership $membership */
+      $membership = OgMembership::create();
+      $membership
+        ->setUser($this->users[$membership_type])
+        ->setGroup($this->group)
+        ->addRole($role)
+        ->setState($state)
+        ->save();
     }
   }
 
