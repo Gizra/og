@@ -6,7 +6,6 @@ use Drupal\Component\Utility\Unicode;
 use Drupal\node\Entity\Node;
 use Drupal\node\Entity\NodeType;
 use Drupal\og\Og;
-use Drupal\og\OgRoleInterface;
 use Drupal\Tests\BrowserTestBase;
 
 /**
