@@ -320,16 +320,13 @@ class OgMembership extends ContentEntityBase implements OgMembershipInterface {
     }
 
     // Check for existing membership.
-    /** @var \Drupal\og\MembershipManagerInterface $membership_manager */
-    $membership_manager = \Drupal::service('og.membership_manager');
-    $states = [
-      OgMembershipInterface::STATE_ACTIVE,
-      OgMembershipInterface::STATE_PENDING,
-      OgMembershipInterface::STATE_BLOCKED,
+    $values = [
+      'uid' => $this->get('uid')->target_id,
+      'entity_id' => $this->get('entity_id')->value,
+      'entity_type' => $this->get('entity_type')->value,
     ];
-    $membership = $membership_manager->getMembership($this->getGroup(), $this->getUser(), $states);
-
-    if ($membership) {
+    $membership = \Drupal::entityTypeManager()->getStorage('og_membership')->loadByProperties($values);
+    if ($membership && $this->isNew()) {
       throw new \LogicException(sprintf('A membership exists for this user in the OG group: %s', $this->getGroup()->id()));
     }
 

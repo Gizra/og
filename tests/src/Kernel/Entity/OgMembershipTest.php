@@ -151,4 +151,28 @@ class OgMembershipTest extends KernelTestBase {
     $membership->save();
   }
 
+  /**
+   * Tests saving an existing membership as new.
+   *
+   * @covers ::preSave
+   * @expectedException \Drupal\Core\Entity\EntityStorageException
+   */
+  public function testSaveExistingMembership() {
+    $group = EntityTest::create([
+      'type' => Unicode::strtolower($this->randomMachineName()),
+      'name' => $this->randomString(),
+    ]);
+
+    $group->save();
+
+    Og::groupTypeManager()->addGroup('entity_test', $group->bundle());
+
+    /** @var OgMembershipInterface $membership */
+    $membership = Og::createMembership($group, $this->user);
+    $membership->save();
+
+    $membership2 = Og::createMembership($group, $this->user);
+    $membership2->save();
+  }
+
 }
