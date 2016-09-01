@@ -224,7 +224,7 @@ class OgMembership extends ContentEntityBase implements OgMembershipInterface {
    */
   public function hasPermission($permission) {
     // Blocked users do not have any permissions.
-    if ($this->getState() === OgMembershipInterface::STATE_BLOCKED) {
+    if ($this->isBlocked()) {
       return FALSE;
     }
 
@@ -342,6 +342,27 @@ class OgMembership extends ContentEntityBase implements OgMembershipInterface {
     // Use the default membership type by default.
     $values += ['type' => OgMembershipInterface::TYPE_DEFAULT];
     return parent::create($values);
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function isActive() {
+    return $this->getState() === OgMembershipInterface::STATE_ACTIVE;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function isPending() {
+    return $this->getState() === OgMembershipInterface::STATE_PENDING;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function isBlocked() {
+    return $this->getState() === OgMembershipInterface::STATE_BLOCKED;
   }
 
 }
