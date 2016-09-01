@@ -9,6 +9,8 @@ use Drupal\user\UserInterface;
 use Drupal\Core\Access\AccessResult;
 use Drupal\Core\Entity\ContentEntityInterface;
 use Drupal\Core\Entity\EntityInterface;
+use Drupal\Core\Entity\EntityTypeInterface;
+use Drupal\Core\Field\BaseFieldDefinition;
 use Drupal\Core\Field\FieldDefinitionInterface;
 use Drupal\Core\Field\FieldItemListInterface;
 use Drupal\Core\Session\AccountInterface;
@@ -168,6 +170,47 @@ function og_entity_create_access(AccountInterface $account, array $context, $bun
   // Otherwise, ignore or deny based on whether strict entity access is set.
   return $required ? AccessResult::forbiddenIf($node_access_strict) : AccessResult::neutral();
 }
+
+/**
+ *
+ * Implements hook_entity_bundle_field_info().
+ *
+ * Add a read only property to group entities as a group flag.
+ */
+function og_entity_bundle_field_info(EntityTypeInterface $entity_type, $bundle, array $base_field_definitions) {
+  if (!Og::isGroup($entity_type->id(), $bundle)) {
+    // Not a group type.
+    return NULL;
+  }
+
+  $fields = [];
+  $fields['og_group'] = BaseFieldDefinition::create('og_group')
+    ->setLabel(t('OG Group'))
+    ->setComputed(TRUE)
+    ->setTranslatable(FALSE)
+    ->setDefaultValue(TRUE)
+    ->setReadOnly(TRUE);
+
+  return $fields;
+}
+
+/**
+ * Implements hook_entity_bundle_field_info_alter().
+ *
+ * Set the default field formatter of fields of type OG group.
+ */
+function og_entity_bundle_field_info_alter(&$fields, EntityTypeInterface $entity_type, $bundle) {
+  if (!isset($fields['og_group'])) {
+    // No OG group fields.
+    return;
+  }
+
+  $fields['og_group']->setDisplayOptions('view', [
+    'weight' => 0,
+    'type' => 'og_group_subscribe',
+  ])->setDisplayConfigurable('view', TRUE);
+}
+
 
 /**
  * Implements hook_field_formatter_info_alter().
