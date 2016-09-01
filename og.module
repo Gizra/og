@@ -232,24 +232,15 @@ function og_field_formatter_info_alter(array &$info) {
 /**
  * Implements hook_entity_type_alter().
  *
- * Add link template to groups.
+ * Add link template to groups. We add it to all the entity types, and later on
+ * return the correct access, depending if the bundle is indeed a group and
+ * accessible. We do not filter here the entity type by groups, so whenever
+ * GroupTypeManager::addGroup is called, it's enough to mark route to be rebuilt
+ * via RouteBuilder::setRebuildNeeded.
  */
 function og_entity_type_alter(array &$entity_types) {
-  // We cannot use the group manager as it creates a circular reference error,
-  // so we get the groups definition directly from the config.
-
-  if (!$groups_map = \Drupal::config(GroupTypeManager::SETTINGS_CONFIG_KEY)->get(GroupTypeManager::GROUPS_CONFIG_KEY)) {
-    // No groups defined.
-    return;
-  }
-
   /** @var \Drupal\Core\Entity\EntityTypeInterface $entity_type */
   foreach ($entity_types as $entity_type_id => $entity_type) {
-    if (empty($groups_map[$entity_type_id])) {
-      // Entity type is not a group.
-      continue;
-    }
-
     $entity_type->setLinkTemplate('og-admin-routes', "/group/$entity_type_id/{{$entity_type_id}}/admin");
   }
 }
