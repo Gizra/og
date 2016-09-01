@@ -75,6 +75,20 @@ class OgAdminMembersViewTest extends ViewsKernelTestBase {
   );
 
   /**
+   * The user entity.
+   *
+   * @var \Drupal\user\UserInterface
+   */
+  protected $user;
+
+  /**
+   * The group entity.
+   *
+   * @var \Drupal\entity_test\Entity\EntityTest
+   */
+  protected $group;
+
+  /**
    * {@inheritdoc}
    */
   protected function setUpFixtures() {
