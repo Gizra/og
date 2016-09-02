@@ -5,6 +5,7 @@ namespace Drupal\og;
 use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Entity\EntityTypeBundleInfoInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
+use Drupal\Core\Routing\RouteBuilderInterface;
 use Drupal\Core\State\StateInterface;
 use Drupal\og\Event\GroupCreationEvent;
 use Drupal\og\Event\GroupCreationEventInterface;
@@ -123,6 +124,13 @@ class GroupTypeManager {
   protected $ogRoleManager;
 
   /**
+   * The route builder service.
+   *
+   * @var \Drupal\Core\Routing\RouteBuilderInterface
+   */
+  protected $routeBuilder;
+
+  /**
    * Constructs a GroupTypeManager object.
    *
    * @param \Drupal\Core\Config\ConfigFactoryInterface $config_factory
@@ -139,8 +147,10 @@ class GroupTypeManager {
    *   The OG permission manager.
    * @param \Drupal\og\OgRoleManagerInterface $og_role_manager
    *   The OG role manager.
+   * @param \Drupal\Core\Routing\RouteBuilderInterface $route_builder
+   *   The route builder service.
    */
-  public function __construct(ConfigFactoryInterface $config_factory, EntityTypeManagerInterface $entity_type_manager, EntityTypeBundleInfoInterface $entity_type_bundle_info, EventDispatcherInterface $event_dispatcher, StateInterface $state, PermissionManagerInterface $permission_manager, OgRoleManagerInterface $og_role_manager) {
+  public function __construct(ConfigFactoryInterface $config_factory, EntityTypeManagerInterface $entity_type_manager, EntityTypeBundleInfoInterface $entity_type_bundle_info, EventDispatcherInterface $event_dispatcher, StateInterface $state, PermissionManagerInterface $permission_manager, OgRoleManagerInterface $og_role_manager, RouteBuilderInterface $route_builder) {
     $this->configFactory = $config_factory;
     $this->ogRoleStorage = $entity_type_manager->getStorage('og_role');
     $this->entityTypeBundleInfo = $entity_type_bundle_info;
@@ -148,6 +158,7 @@ class GroupTypeManager {
     $this->state = $state;
     $this->permissionManager = $permission_manager;
     $this->ogRoleManager = $og_role_manager;
+    $this->routeBuilder = $route_builder;
   }
 
   /**
@@ -278,6 +289,9 @@ class GroupTypeManager {
 
     $this->ogRoleManager->createPerBundleRoles($entity_type_id, $bundle_id);
     $this->refreshGroupMap();
+
+    // Routes will need to be rebuilt.
+    $this->routeBuilder->setRebuildNeeded();
   }
 
   /**
@@ -305,6 +319,9 @@ class GroupTypeManager {
       $this->ogRoleManager->removeRoles($entity_type_id, $bundle_id);
 
       $this->resetGroupMap();
+
+      // Routes will need to be rebuilt.
+      $this->routeBuilder->setRebuildNeeded();
     }
   }
 
@@ -342,7 +359,7 @@ class GroupTypeManager {
    * @return array
    *   The group map.
    */
-  protected function getGroupMap() {
+  public function getGroupMap() {
     if (empty($this->groupMap)) {
       $this->refreshGroupMap();
     }

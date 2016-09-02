@@ -17,13 +17,18 @@ services:
       - { name: 'event_subscriber' }
   og.group_type_manager:
     class: Drupal\og\GroupTypeManager
-    arguments: ['@config.factory', '@entity_type.manager', '@entity_type.bundle.info', '@event_dispatcher', '@state', '@og.permission_manager', '@og.role_manager']
+    arguments: ['@config.factory', '@entity_type.manager', '@entity_type.bundle.info', '@event_dispatcher', '@state', '@og.permission_manager', '@og.role_manager', '@router.builder']
   og.permissions:
     class: Drupal\og\OgPermissionHandler
     arguments: ['@module_handler', '@string_translation', '@controller_resolver']
   og.permission_manager:
     class: Drupal\og\PermissionManager
     arguments: ['@event_dispatcher']
+  og.route_subscriber:
+    class: Drupal\og\Routing\RouteSubscriber
+    arguments: ['@entity_type.manager', '@router.route_provider', '@event_dispatcher']
+    tags:
+      - { name: event_subscriber }
   og.role_manager:
     class: Drupal\og\OgRoleManager
     arguments: ['@entity_type.manager', '@event_dispatcher', '@og.permission_manager']
@@ -33,3 +38,4 @@ services:
   plugin.manager.og.fields:
     class: Drupal\og\OgFieldsPluginManager
     parent: default_plugin_manager
+
