@@ -6,6 +6,7 @@ use Drupal\Core\Controller\ControllerBase;
 use Drupal\Core\Entity\ContentEntityInterface;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Url;
+use Drupal\og\OgMembershipInterface;
 use Drupal\og\OgMembershipTypeInterface;
 use Drupal\user\Entity\User;
 use Drupal\user\EntityOwnerInterface;
@@ -142,7 +143,13 @@ class SubscriptionController extends ControllerBase {
   public function unsubscribe(EntityInterface $group) {
     $user = $this->currentUser();
 
-    if (!$membership = Og::getMembership($group, $user)) {
+    $states = [
+      OgMembershipInterface::STATE_ACTIVE,
+      OgMembershipInterface::STATE_PENDING,
+      OgMembershipInterface::STATE_BLOCKED,
+    ];
+
+    if (!$membership = Og::getMembership($group, $user, $states)) {
       // User is not a member.
       throw new AccessDeniedHttpException();
     }
