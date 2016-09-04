@@ -4,7 +4,6 @@ namespace Drupal\og\Cache\Context;
 
 use Drupal\Core\Cache\CacheableMetadata;
 use Drupal\Core\Cache\Context\CacheContextInterface;
-use Drupal\Core\Routing\CurrentRouteMatch;
 use Drupal\Core\Routing\RouteMatchInterface;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\og\GroupTypeManager;
@@ -45,7 +44,6 @@ class OgMembershipStateCacheContext implements CacheContextInterface {
    * @var \Drupal\og\MembershipManagerInterface
    */
   protected $membershipManager;
-
 
   /**
    * Constructs a new UserCacheContextBase class.
@@ -95,7 +93,6 @@ class OgMembershipStateCacheContext implements CacheContextInterface {
     // Take just the first entity type ID.
     $entity_type_id = reset($entity_type_ids);
 
-
     $group = $this->routeMatch->getParameter($entity_type_id);
     $states = [
       OgMembershipInterface::STATE_ACTIVE,
@@ -103,9 +100,9 @@ class OgMembershipStateCacheContext implements CacheContextInterface {
       OgMembershipInterface::STATE_BLOCKED,
     ];
 
-    /** @var OgMembershipInterface $memebrship */
-    $memebrship = $this->membershipManager->getMembership($group, $this->user, $states);
-    return $memebrship ? $memebrship->getState() : 'none';
+    /** @var OgMembershipInterface $membership */
+    $membership = $this->membershipManager->getMembership($group, $this->user, $states);
+    return $membership ? $membership->getState() : 'none';
   }
 
   /**
