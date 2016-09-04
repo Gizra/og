@@ -102,10 +102,8 @@ class GroupSubscribeFormatter extends FormatterBase implements ContainerFactoryP
   public function viewElements(FieldItemListInterface $items, $langcode) {
     $elements = [];
 
-    // We cannot use the field cache, as the formatter changes according to the
-    // user. Furthermore, this is not an expensive check, so we remove the cache
-    // entirely.
-    $elements['#cache']['max-age'] = 0;
+    // Cache by the OG membership state.
+    $elements['#cache']['contexts'] = ['og_membership_state'];
 
     $group = $items->getEntity();
     $entity_type_id = $group->getEntityTypeId();

@@ -75,17 +75,17 @@ class OgMembershipStateCacheContext implements CacheContextInterface {
    * {@inheritdoc}
    */
   public function getContext() {
-    if (!$route_contexts = array_keys($this->routeMatch->getRouteObject()->getOption('parameters'))) {
+    if (!$route_contexts = $this->routeMatch->getRouteObject()->getOption('parameters')) {
       // No "parameters" defined in the route.
       return 'none';
     }
 
-    if ($entity_type_ids = array_keys($this->groupTypeManager->getAllGroupBundles())) {
+    if (!$entity_type_ids = array_keys($this->groupTypeManager->getAllGroupBundles())) {
       // No group entities.
       return 'none';
     }
 
-    if (!$entity_type_ids = array_intersect($route_contexts, $entity_type_ids)) {
+    if (!$entity_type_ids = array_intersect(array_keys($route_contexts), $entity_type_ids)) {
       // No parameters that match the group entities.
       return 'none';
     }
