@@ -83,7 +83,7 @@ class SubscriptionControllerTest extends UnitTestCase {
   }
 
   /**
-   * Tests setting local task definitions.
+   * Tests non-member trying to unsubscribe from group.
    *
    * @covers ::unsubscribe
    * @expectedException \Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException
@@ -99,6 +99,32 @@ class SubscriptionControllerTest extends UnitTestCase {
       ->membershipManager
       ->getMembership($this->group->reveal(), $this->user->reveal(), $states)
       ->willReturn(FALSE);
+
+    $this->getUnsubscribeResult();
+  }
+
+  /**
+   * Tests blocked member trying to unsubscribe from group.
+   *
+   * @covers ::unsubscribe
+   * @expectedException \Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException
+   */
+  public function testBlockedMember() {
+    $states = [
+      OgMembershipInterface::STATE_ACTIVE,
+      OgMembershipInterface::STATE_PENDING,
+      OgMembershipInterface::STATE_BLOCKED,
+    ];
+
+    $this
+      ->membershipManager
+      ->getMembership($this->group->reveal(), $this->user->reveal(), $states)
+      ->willReturn(TRUE);
+
+    $this
+      ->membershipManager
+      ->isMember($this->group->reveal(), $this->user->reveal(), [OgMembershipInterface::STATE_BLOCKED])
+      ->willReturn(TRUE);
 
     $this->getUnsubscribeResult();
   }
