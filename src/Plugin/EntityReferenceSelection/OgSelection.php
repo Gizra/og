@@ -85,7 +85,7 @@ class OgSelection extends DefaultSelection {
     $identifier_key = $entityDefinition->getKey('id');
 
     $ids = [];
-    if ($this->configuration['handler_settings']['field_mode'] == 'admin') {
+    if (!empty($this->configuration['handler_settings']['field_mode']) && $this->configuration['handler_settings']['field_mode'] == 'admin') {
       // Don't include the groups, the user doesn't have create permission.
       foreach ($user_groups as $delta => $group) {
         $ids[] = $group->id();
@@ -116,7 +116,7 @@ class OgSelection extends DefaultSelection {
   /**
    * Return all the user's groups.
    *
-   * @return ContentEntityInterface[]
+   * @return \Drupal\Core\Entity\ContentEntityInterface[]
    *   Array with the user's group, or an empty array if none found.
    */
   protected function getUserGroups() {

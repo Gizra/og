@@ -48,10 +48,8 @@ class OgLocalTaskTest extends UnitTestCase {
     $this->routeProvider = $this->prophesize(RouteProvider::class);
     $this->route = $this->prophesize(Route::class);
 
-    // Set the container for the string translation service.
-    $translation = $this->getStringTranslationStub();
     $container = new ContainerBuilder();
-    $container->set('string_translation', $translation);
+    $container->set('string_translation', $this->getStringTranslationStub());
     \Drupal::setContainer($container);
   }
 
