@@ -6,6 +6,7 @@ use Drupal\Core\Controller\ControllerBase;
 use Drupal\Core\Entity\ContentEntityInterface;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Url;
+use Drupal\og\OgAccessInterface;
 use Drupal\og\OgMembershipInterface;
 use Drupal\og\OgMembershipTypeInterface;
 use Drupal\user\Entity\User;
@@ -14,7 +15,6 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 use Drupal\og\Og;
-use Drupal\og\OgAccess;
 
 /**
  * Controller for OG subscription routes.
@@ -25,14 +25,17 @@ class SubscriptionController extends ControllerBase {
   /**
    * OG access service.
    *
-   * @var \Drupal\og\OgAccess
+   * @var \Drupal\og\OgAccessInterface
    */
   protected $ogAccess;
 
   /**
    * Constructs a SubscriptionController object.
+   *
+   * @param \Drupal\og\OgAccessInterface $og_access
+   *   The OG access service.
    */
-  public function __construct(OgAccess $og_access) {
+  public function __construct(OgAccessInterface $og_access) {
     $this->ogAccess = $og_access;
   }
 
@@ -133,14 +136,14 @@ class SubscriptionController extends ControllerBase {
   /**
    * Unsubscribe a user from group.
    *
-   * @param \Drupal\core\Entity\EntityInterface $group
-   *   The entity ID of the group entity.
+   * @param \Drupal\Core\Entity\ContentEntityInterface $group
+   *   The group entity.
    *
    * @return mixed
    *   Redirect user or show access denied if they are not allowed to subscribe,
    *   otherwise provide an un-subscribe confirmation form.
    */
-  public function unsubscribe(EntityInterface $group) {
+  public function unsubscribe(ContentEntityInterface $group) {
     $user = $this->currentUser();
 
     $states = [
