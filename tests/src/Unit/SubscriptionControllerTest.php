@@ -50,6 +50,13 @@ class SubscriptionControllerTest extends UnitTestCase {
   protected $ogAccess;
 
   /**
+   * The OG membership entity.
+   *
+   * @var \Drupal\og\OgMembershipInterface|\Prophecy\Prophecy\ObjectProphecy
+   */
+  protected $ogMembership;
+
+  /**
    * The URL object.
    *
    * @var \Drupal\Core\Url|\Prophecy\Prophecy\ObjectProphecy
@@ -71,12 +78,14 @@ class SubscriptionControllerTest extends UnitTestCase {
     $this->group = $this->prophesize(ContentEntityInterface::class);
     $this->membershipManager = $this->prophesize(MembershipManagerInterface::class);
     $this->ogAccess = $this->prophesize(OgAccessInterface::class);
+    $this->ogMembership = $this->prophesize(OgMembershipInterface::class);
     $this->url = $this->prophesize(Url::class);
     $this->user = $this->prophesize(AccountInterface::class);
 
     // Set the container for the string translation service.
     $container = new ContainerBuilder();
     $container->set('current_user', $this->user->reveal());
+    $container->set('entity.form_builder', $this->entityFormBuilder->reveal());
     $container->set('og.membership_manager', $this->membershipManager->reveal());
     \Drupal::setContainer($container);
 
@@ -98,7 +107,7 @@ class SubscriptionControllerTest extends UnitTestCase {
     $this
       ->membershipManager
       ->getMembership($this->group->reveal(), $this->user->reveal(), $states)
-      ->willReturn(FALSE);
+      ->willReturn(NULL);
 
     $this->getUnsubscribeResult();
   }
@@ -119,14 +128,58 @@ class SubscriptionControllerTest extends UnitTestCase {
     $this
       ->membershipManager
       ->getMembership($this->group->reveal(), $this->user->reveal(), $states)
-      ->willReturn(TRUE);
+      ->willReturn($this->ogMembership->reveal());
+
+    $this
+      ->ogMembership
+      ->getState()
+      ->willReturn(OgMembershipInterface::STATE_BLOCKED);
+
+    $this->getUnsubscribeResult();
+  }
+
+  /**
+   * Tests active and pending members trying to unsubscribe from group.
+   *
+   * @covers ::unsubscribe
+   * @dataProvider memberProvider
+   */
+  public function testMember($state) {
+    $states = [
+      OgMembershipInterface::STATE_ACTIVE,
+      OgMembershipInterface::STATE_PENDING,
+      OgMembershipInterface::STATE_BLOCKED,
+    ];
 
     $this
       ->membershipManager
-      ->isMember($this->group->reveal(), $this->user->reveal(), [OgMembershipInterface::STATE_BLOCKED])
-      ->willReturn(TRUE);
+      ->getMembership($this->group->reveal(), $this->user->reveal(), $states)
+      ->willReturn($this->ogMembership->reveal());
+
+    $this
+      ->ogMembership
+      ->getState()
+      ->willReturn($state);
+
+    $this
+      ->entityFormBuilder
+      ->getForm($this->ogMembership->reveal(), 'unsubscribe')
+      ->shouldBeCalled();
 
     $this->getUnsubscribeResult();
+  }
+
+  /**
+   * Provides test data to test members unsubscribe.
+   *
+   * @return array
+   *   Array with the membership state.
+   */
+  public function memberProvider() {
+    return [
+      [OgMembershipInterface::STATE_ACTIVE],
+      [OgMembershipInterface::STATE_PENDING],
+    ];
   }
 
   /**

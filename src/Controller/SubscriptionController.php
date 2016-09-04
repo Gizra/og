@@ -157,7 +157,7 @@ class SubscriptionController extends ControllerBase {
       throw new AccessDeniedHttpException();
     }
 
-    if (Og::isMemberBlocked($group, $user)) {
+    if ($membership->getState() == OgMembershipInterface::STATE_BLOCKED) {
       // User is a blocked member.
       throw new AccessDeniedHttpException();
     }
