@@ -167,6 +167,12 @@ class MembershipManager implements MembershipManagerInterface {
         continue;
       }
 
+      $values = $entity->get($field->getName())->getValue();
+      if (empty($values[0])) {
+        // Entity doesn't reference any groups.
+        continue;
+      }
+
       // Compile a list of group target IDs.
       $target_ids = array_map(function ($value) {
         return $value['target_id'];
