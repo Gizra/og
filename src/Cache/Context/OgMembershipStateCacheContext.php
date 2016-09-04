@@ -68,7 +68,7 @@ class OgMembershipStateCacheContext implements CacheContextInterface {
    * {@inheritdoc}
    */
   public static function getLabel() {
-    return t('Group membership');
+    return t('OG membership state');
   }
 
   /**
