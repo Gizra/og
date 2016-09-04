@@ -12,6 +12,7 @@ use Drupal\og\MembershipManagerInterface;
 use Drupal\og\OgAccessInterface;
 use Drupal\og\OgMembershipInterface;
 use Drupal\Tests\UnitTestCase;
+use Drupal\user\EntityOwnerInterface;
 
 /**
  * Tests the subscription controller.
@@ -87,6 +88,7 @@ class SubscriptionControllerTest extends UnitTestCase {
     $container->set('current_user', $this->user->reveal());
     $container->set('entity.form_builder', $this->entityFormBuilder->reveal());
     $container->set('og.membership_manager', $this->membershipManager->reveal());
+    $container->set('string_translation', $this->getStringTranslationStub());
     \Drupal::setContainer($container);
 
   }
@@ -109,7 +111,7 @@ class SubscriptionControllerTest extends UnitTestCase {
       ->getMembership($this->group->reveal(), $this->user->reveal(), $states)
       ->willReturn(NULL);
 
-    $this->getUnsubscribeResult();
+    $this->unsubscribe();
   }
 
   /**
@@ -135,7 +137,7 @@ class SubscriptionControllerTest extends UnitTestCase {
       ->getState()
       ->willReturn(OgMembershipInterface::STATE_BLOCKED);
 
-    $this->getUnsubscribeResult();
+    $this->unsubscribe();
   }
 
   /**
@@ -166,7 +168,7 @@ class SubscriptionControllerTest extends UnitTestCase {
       ->getForm($this->ogMembership->reveal(), 'unsubscribe')
       ->shouldBeCalled();
 
-    $this->getUnsubscribeResult();
+    $this->unsubscribe();
   }
 
   /**
@@ -183,14 +185,91 @@ class SubscriptionControllerTest extends UnitTestCase {
   }
 
   /**
-   * Get the result of the unsubscribe method.
+   * Tests group manager trying to unsubscribe from group.
    *
-   * @return mixed
-   *   Access defnied, redirect or renderable array.
+   * @covers ::unsubscribe
+   * @dataProvider memberProvider
    */
-  protected function getUnsubscribeResult() {
+  public function testGroupManager($state) {
+    $states = [
+      OgMembershipInterface::STATE_ACTIVE,
+      OgMembershipInterface::STATE_PENDING,
+      OgMembershipInterface::STATE_BLOCKED,
+    ];
+
+    $this
+      ->group
+      ->willImplement(EntityOwnerInterface::class);
+
+    $this
+      ->membershipManager
+      ->getMembership($this->group->reveal(), $this->user->reveal(), $states)
+      ->willReturn($this->ogMembership->reveal());
+
+    $this
+      ->ogMembership
+      ->getState()
+      ->willReturn($state);
+
+    $entity_id = rand(20, 50);
+
+    $this
+      ->user
+      ->id()
+      ->willReturn($entity_id);
+
+    $this
+      ->group
+      ->getOwnerId()
+      ->willReturn($entity_id);
+
+    $this
+      ->group
+      ->label()
+      ->shouldBeCalled();
+
+    $this
+      ->group
+      ->toUrl()
+      ->willReturn($this->url->reveal());
+
+    $this
+      ->url
+      ->setAbsolute()
+      ->willReturn($this->url->reveal());
+
+    $this
+      ->url
+      ->toString()
+      ->willReturn($this->randomMachineName());
+
+    $this
+      ->entityFormBuilder
+      ->getForm($this->ogMembership->reveal(), 'unsubscribe')
+      ->shouldNotBeCalled();
+
+    $this->unsubscribe();
+  }
+
+  /**
+   * Invoke the unsubscribe method.
+   */
+  protected function unsubscribe() {
     $controller = new SubscriptionController($this->ogAccess->reveal());
-    return $controller->unsubscribe($this->group->reveal());
+    $controller->unsubscribe($this->group->reveal());
+  }
+
+}
+
+// @todo Delete after https://www.drupal.org/node/1858196 is in.
+namespace Drupal\og\Controller;
+
+if (!function_exists('drupal_set_message')) {
+
+  /**
+   *
+   */
+  function drupal_set_message() {
   }
 
 }
