@@ -5,6 +5,7 @@
  * Enable users to create and manage groups with roles and permissions.
  */
 
+use Drupal\Core\Form\FormStateInterface;
 use Drupal\og\GroupTypeManager;
 use Drupal\user\UserInterface;
 use Drupal\Core\Access\AccessResult;
@@ -160,7 +161,7 @@ function og_entity_create_access(AccountInterface $account, array $context, $bun
     $handler = Og::getSelectionHandler($field_definition);
 
     if ($handler->getReferenceableEntities()) {
-      return Accessresult::neutral();
+      return AccessResult::neutral();
     }
 
     // Allow users to create content outside of groups, if none of the
@@ -230,6 +231,13 @@ function og_field_formatter_info_alter(array &$info) {
 }
 
 /**
+ * Implements hook_field_widget_info_alter().
+ */
+function og_field_widget_info_alter(array &$info) {
+  $info['options_buttons']['field_types'][] = OgGroupAudienceHelper::GROUP_REFERENCE;
+}
+
+/**
  * Implements hook_entity_type_alter().
  *
  * Add link template to groups. We add it to all the entity types, and later on
@@ -244,5 +252,3 @@ function og_entity_type_alter(array &$entity_types) {
     $entity_type->setLinkTemplate('og-admin-routes', "/group/$entity_type_id/{{$entity_type_id}}/admin");
   }
 }
-
-
