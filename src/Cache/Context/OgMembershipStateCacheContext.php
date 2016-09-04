@@ -9,6 +9,7 @@ use Drupal\Core\Routing\RouteMatchInterface;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\og\GroupTypeManager;
 use Drupal\og\MembershipManagerInterface;
+use Drupal\og\OgMembershipInterface;
 
 /**
  * Defines a cache context service, for "membership state" caching.
@@ -76,14 +77,35 @@ class OgMembershipStateCacheContext implements CacheContextInterface {
    * {@inheritdoc}
    */
   public function getContext() {
-    if (!$route_object = $this->routeMatch->getRouteObject()) {
+    if (!$route_contexts = array_keys($this->routeMatch->getRouteObject()->getOption('parameters'))) {
+      // No "parameters" defined in the route.
       return 'none';
     }
 
-    if (!$route_contexts = $route_object->getOption('parameters')) {
+    if ($entity_type_ids = array_keys($this->groupTypeManager->getAllGroupBundles())) {
+      // No group entities.
       return 'none';
     }
 
+    if (!$entity_type_ids = array_intersect($route_contexts, $entity_type_ids)) {
+      // No parameters that match the group entities.
+      return 'none';
+    }
+
+    // Take just the first entity type ID.
+    $entity_type_id = reset($entity_type_ids);
+
+
+    $group = $this->routeMatch->getParameter($entity_type_id);
+    $states = [
+      OgMembershipInterface::STATE_ACTIVE,
+      OgMembershipInterface::STATE_PENDING,
+      OgMembershipInterface::STATE_BLOCKED,
+    ];
+
+    /** @var OgMembershipInterface $memebrship */
+    $memebrship = $this->membershipManager->getMembership($group, $this->user, $states);
+    return $memebrship ? $memebrship->getState() : 'none';
   }
 
   /**
