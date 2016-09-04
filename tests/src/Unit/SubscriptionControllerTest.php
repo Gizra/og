@@ -267,7 +267,7 @@ namespace Drupal\og\Controller;
 if (!function_exists('drupal_set_message')) {
 
   /**
-   *
+   * Mocking for drupal_set_message().
    */
   function drupal_set_message() {
   }
