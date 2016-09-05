@@ -11,11 +11,9 @@ use Drupal\og\Entity\OgMembership;
 use Drupal\og\Og;
 use Drupal\og\OgGroupAudienceHelper;
 use Drupal\og\OgMembershipInterface;
-use Drupal\og\OgRoleInterface;
 use Drupal\simpletest\ContentTypeCreationTrait;
 use Drupal\user\Entity\Role;
 use Drupal\user\Entity\User;
-use Drupal\og\Entity\OgRole;
 
 /**
  * Tests Wiki-style access: non-members have the right to edit any content.
@@ -128,6 +126,27 @@ class WikiTest extends KernelTestBase {
     ];
     Og::createField(OgGroupAudienceHelper::DEFAULT_FIELD, 'node', 'group_content', $settings);
 
+    // Grant members permission to edit any group content.
+    /** @var \Drupal\og\Entity\OgRole $role */
+    $role = $this->container->get('entity_type.manager')
+      ->getStorage('og_role')
+      ->load('block_content-group-member');
+    $role->grantPermission('edit any group_content content');
+    $role->save();
+
+    // Subscribe the normal member and the blocked member to the group.
+    foreach (['member', 'blocked'] as $membership_type) {
+      $state = $membership_type === 'member' ? OgMembershipInterface::STATE_ACTIVE : OgMembershipInterface::STATE_BLOCKED;
+      /** @var \Drupal\og\Entity\OgMembership $membership */
+      $membership = OgMembership::create();
+      $membership
+          ->setUser($this->users[$membership_type])
+          ->setGroup($this->group)
+          ->addRole($role)
+          ->setState($state)
+          ->save();
+    }
+
     // Create three group content items, one owned by the group owner, one by
     // the member, and one by the blocked user.
     foreach (['owner', 'member', 'blocked'] as $membership_type) {
@@ -161,51 +180,22 @@ class WikiTest extends KernelTestBase {
   }
 
   /**
-   * Tests exception is thrown when trying to save member role.
-   *
-   * @expectedException \LogicException
-   */
-  public function testMemberRoleMembershipSave() {
-    /** @var \Drupal\og\Entity\OgRole $role */
-    $role = OgRole::create();
-    $role
-      ->setGroupType('block_content')
-      ->setGroupBundle('group')
-      ->setName(OgRoleInterface::AUTHENTICATED)
-      ->setLabel($this->randomString())
-      ->grantPermission('edit any group_content content');
-    $role->save();
-
-    /** @var \Drupal\og\Entity\OgMembership $membership */
-    $membership = OgMembership::create();
-    $membership
-      ->setUser($this->users['member'])
-      ->setGroup($this->group)
-      ->addRole($role)
-      ->setState(OgMembershipInterface::STATE_ACTIVE)
-      ->save();
-  }
-
-  /**
    * Tests exception is thrown when trying to save non-member role.
    *
-   * @expectedException \LogicException
+   * @expectedException \Drupal\Core\Entity\EntityStorageException
    */
   public function testNonMemberRoleMembershipSave() {
+    $role_id = "block_content-group-non-member";
     /** @var \Drupal\og\Entity\OgRole $role */
-    $role = OgRole::create();
-    $role
-      ->setGroupType('block_content')
-      ->setGroupBundle('group')
-      ->setName(OgRoleInterface::ANONYMOUS)
-      ->setLabel($this->randomString())
-      ->grantPermission('edit any group_content content');
+    $role = $this->container->get('entity_type.manager')
+      ->getStorage('og_role')
+      ->load($role_id);
+    $role->grantPermission('edit any group_content content');
     $role->save();
 
-    /** @var \Drupal\og\Entity\OgMembership $membership */
     $membership = OgMembership::create();
     $membership
-      ->setUser($this->users['member'])
+      ->setUser($this->users['non-member'])
       ->setGroup($this->group)
       ->addRole($role)
       ->setState(OgMembershipInterface::STATE_ACTIVE)
@@ -226,15 +216,6 @@ class WikiTest extends KernelTestBase {
       [
         // Members should have the right to edit any group content.
         'member',
-        [
-          'owner' => TRUE,
-          'member' => TRUE,
-          'blocked' => TRUE,
-        ],
-      ],
-      [
-        // Non-members should have the right to edit any group content.
-        'non-member',
         [
           'owner' => TRUE,
           'member' => TRUE,
