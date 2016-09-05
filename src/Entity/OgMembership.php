@@ -191,7 +191,6 @@ class OgMembership extends ContentEntityBase implements OgMembershipInterface {
    * {@inheritdoc}
    */
   public function getRoles() {
-    // Add the member role.
     $roles[] = Og::getRole($this->getGroupEntityType(), $this->getGroup()->bundle(), OgRoleInterface::AUTHENTICATED);
     $roles = array_merge($roles, $this->get('roles')->referencedEntities());
     return $roles;
@@ -319,14 +318,19 @@ class OgMembership extends ContentEntityBase implements OgMembershipInterface {
       throw new \LogicException(sprintf('Entity type %s with ID %s is not an OG group.', $entity_type_id, $group->id()));
     }
 
+    // Make sure we don't save non-member or member role with a membership.
+    $roles = [];
     foreach ($this->getRoles() as $role) {
+      /** @var \Drupal\og\Entity\OgRole $role */
       if ($role->getName() == OgRoleInterface::ANONYMOUS) {
         throw new \LogicException('Cannot save an OgMembership with reference to a non-member role.');
       }
-      elseif ($role->getName() == OgRoleInterface::AUTHENTICATED) {
-        throw new \LogicException('The OgMembership should not be saved along with the "member" role, as the role will be automatically retrieved when asking for the membership\'s roles. Having an OgMembership with an active or pending state already implies the user is a group member.');
+      elseif ($role->getName() != OgRoleInterface::AUTHENTICATED) {
+        $roles[] = $role;
       }
     }
+
+    $this->setRoles($roles);
 
     parent::preSave($storage);
   }
