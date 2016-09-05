@@ -320,6 +320,7 @@ class OgMembership extends ContentEntityBase implements OgMembershipInterface {
     }
 
     foreach ($this->getRoles() as $role) {
+      /** @var \Drupal\og\Entity\OgRole $role */
       if ($role->getName() == OgRoleInterface::ANONYMOUS) {
         throw new \LogicException('Cannot save an OgMembership with reference to a non-member role.');
       }
