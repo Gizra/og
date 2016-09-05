@@ -297,8 +297,8 @@ class OgMembership extends ContentEntityBase implements OgMembershipInterface {
     // This will watch actual empty values and '0'.
     if (!$this->get('uid')->target_id) {
       // Throw a generic logic exception as this will likely get caught in
-      // \Drupal\Core\Entity\Sql\SqlContentEntityStorage::save and turned in an
-      // EntityStorageException anyway.
+      // \Drupal\Core\Entity\Sql\SqlContentEntityStorage::save and turned into
+      // an EntityStorageException anyway.
       throw new \LogicException('OG membership can not be created for an empty or anonymous user.');
     }
 
