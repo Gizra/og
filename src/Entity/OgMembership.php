@@ -265,7 +265,7 @@ class OgMembership extends ContentEntityBase implements OgMembershipInterface {
       ->setDescription(t('The entity type of the group.'));
 
     $fields['entity_id'] = BaseFieldDefinition::create('string')
-      ->setLabel(t('Group entity id.'))
+      ->setLabel(t('Group entity id'))
       ->setDescription(t("The entity ID of the group."));
 
     $fields['state'] = BaseFieldDefinition::create('string')
@@ -281,7 +281,7 @@ class OgMembership extends ContentEntityBase implements OgMembershipInterface {
 
     $fields['created'] = BaseFieldDefinition::create('created')
       ->setLabel(t('Create'))
-      ->setDescription(t('The Unix timestamp when the group content was created.'));
+      ->setDescription(t('The Unix timestamp when the membership was created.'));
 
     $fields['language'] = BaseFieldDefinition::create('language')
       ->setLabel(t('Language'))

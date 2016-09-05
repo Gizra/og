@@ -7,6 +7,7 @@ use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Entity\EntityStorageInterface;
 use Drupal\Core\Entity\EntityTypeBundleInfoInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
+use Drupal\Core\Routing\RouteBuilderInterface;
 use Drupal\Core\State\StateInterface;
 use Drupal\og\Event\GroupCreationEvent;
 use Drupal\og\Event\GroupCreationEventInterface;
@@ -105,6 +106,13 @@ class GroupManagerTest extends UnitTestCase {
   protected $ogRoleManager;
 
   /**
+   * The route builder service used in the test.
+   *
+   * @var \Drupal\Core\Routing\RouteBuilderInterface|\Prophecy\Prophecy\ObjectProphecy
+   */
+  protected $routeBuilder;
+
+  /**
    * {@inheritdoc}
    */
   public function setUp() {
@@ -119,6 +127,7 @@ class GroupManagerTest extends UnitTestCase {
     $this->permissionEvent = $this->prophesize(PermissionEventInterface::class);
     $this->permissionManager = $this->prophesize(PermissionManagerInterface::class);
     $this->state = $this->prophesize(StateInterface::class);
+    $this->routeBuilder = $this->prophesize(RouteBuilderInterface::class);
   }
 
   /**
@@ -321,7 +330,8 @@ class GroupManagerTest extends UnitTestCase {
       $this->eventDispatcher->reveal(),
       $this->state->reveal(),
       $this->permissionManager->reveal(),
-      $this->ogRoleManager->reveal()
+      $this->ogRoleManager->reveal(),
+      $this->routeBuilder->reveal()
     );
   }
 
