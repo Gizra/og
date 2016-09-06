@@ -319,6 +319,19 @@ class OgMembership extends ContentEntityBase implements OgMembershipInterface {
       throw new \LogicException(sprintf('Entity type %s with ID %s is not an OG group.', $entity_type_id, $group->id()));
     }
 
+    // Check for existing membership.
+    if (!$this->isNew()) {
+      $values = [
+        'uid' => $this->get('uid')->target_id,
+        'entity_id' => $this->get('entity_id')->value,
+        'entity_type' => $this->get('entity_type')->value,
+      ];
+      $membership = \Drupal::entityTypeManager()->getStorage('og_membership')->loadByProperties($values);
+      if ($membership) {
+        throw new \LogicException(sprintf('A membership exists for this entity type $s and OG group: %s', $entity_type_id, $this->getGroup()->id()));
+      }
+    }
+
     parent::preSave($storage);
   }
 
