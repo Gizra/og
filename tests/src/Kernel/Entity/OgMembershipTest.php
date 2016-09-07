@@ -199,4 +199,36 @@ class OgMembershipTest extends KernelTestBase {
     $membership->save();
   }
 
+  /**
+   * Tests boolean check for states.
+   *
+   * @covers ::isActive
+   * @covers ::isPending
+   * @covers ::isBlocked
+   * @dataProvider statesProvider
+   */
+  public function testGetSetState($state, $method) {
+    $membership = Og::createMembership($this->group, $this->user);
+    $membership->setState($state)->save();
+
+    $membership = $this->entityTypeManager->getStorage('og_membership')->loadUnchanged($membership->id());
+
+    $this->assertEquals($state, $membership->getState());
+    $this->assertTrue($membership->$method());
+  }
+
+  /**
+   * Provides test data to check states.
+   *
+   * @return array
+   *   Array with the state names and the method to check their flags.
+   */
+  public function statesProvider() {
+    return [
+      [OgMembershipInterface::STATE_ACTIVE, 'isActive'],
+      [OgMembershipInterface::STATE_PENDING, 'isPending'],
+      [OgMembershipInterface::STATE_BLOCKED, 'isBlocked'],
+    ];
+  }
+
 }
