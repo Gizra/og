@@ -23,6 +23,13 @@ class OgMembershipStateCacheContextTest extends UnitTestCase {
 
 
   /**
+   * The entity type ID
+   *
+   * @var string
+   */
+  protected $entityTypeId;
+
+  /**
    * The group type manager service.
    *
    * @var \Drupal\og\GroupTypeManager|\Prophecy\Prophecy\ObjectProphecy
@@ -59,6 +66,21 @@ class OgMembershipStateCacheContextTest extends UnitTestCase {
   protected $user;
 
   /**
+   * The group entity type IDs.
+   *
+   * @var array
+   */
+  protected $groupEntities;
+
+  /**
+   * Array with the route parameters.
+   *
+   * @var array
+   */
+  protected $parameters;
+
+
+  /**
    * {@inheritdoc}
    */
   public function setUp() {
@@ -69,11 +91,18 @@ class OgMembershipStateCacheContextTest extends UnitTestCase {
 
 
     $this->route = $this->prophesize(Route::class);
-//    // Set the container for the string translation service.
-//    $translation = $this->getStringTranslationStub();
-//    $container = new ContainerBuilder();
-//    $container->set('string_translation', $translation);
-//    \Drupal::setContainer($container);
+
+    $this->entityTypeId = $this->randomMachineName();
+
+    $this->groupEntities = [
+      $this->entityTypeId => [$this->randomMachineName()],
+      $this->randomMachineName() => [$this->randomMachineName()],
+    ];
+
+    $this->parameters = [
+      $this->entityTypeId => [$this->randomMachineName()],
+      $this->randomMachineName() => [$this->randomMachineName()],
+    ];
   }
 
   /**
@@ -92,11 +121,46 @@ class OgMembershipStateCacheContextTest extends UnitTestCase {
       ->getOption('parameters')
       ->willReturn(NULL);
 
-
-    $cache_context = new OgMembershipStateCacheContext($this->user->reveal(), $this->routeMatch->reveal(), $this->groupTypeManager->reveal(), $this->membershipManager->reveal());
-    $result = $cache_context->getContext();
-
+    $result = $this->getContextResult();
     $this->assertEquals('none', $result);
   }
+
+  /**
+   * Tests getting context when there are no group entities defined.
+   *
+   * @covers ::getContext
+   */
+  public function testNoGroupEntities() {
+    $this
+      ->routeMatch
+      ->getRouteObject()
+      ->willReturn($this->route->reveal());
+
+    $this
+      ->route
+      ->getOption('parameters')
+      ->willReturn($this->parameters);
+
+    $this
+      ->groupTypeManager
+      ->getAllGroupBundles()
+      ->willReturn([]);
+
+
+    $result = $this->getContextResult();
+    $this->assertEquals('none', $result);
+  }
+
+  /**
+   * Return the context result.
+   *
+   * @return string
+   *   The context result.
+   */
+  protected function getContextResult() {
+    $cache_context = new OgMembershipStateCacheContext($this->user->reveal(), $this->routeMatch->reveal(), $this->groupTypeManager->reveal(), $this->membershipManager->reveal());
+    return $cache_context->getContext();
+  }
+
 
 }
