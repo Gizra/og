@@ -35,6 +35,12 @@ class OgMembershipStateCacheContextTest extends UnitTestCase {
    */
   protected $groupTypeManager;
 
+  /**
+   * The OG membership entity.
+   *
+   * @var \Drupal\og\OgMembershipInterface|\Prophecy\Prophecy\ObjectProphecy
+   */
+  protected $membership;
 
   /**
    * The membership manager service.
@@ -95,6 +101,7 @@ class OgMembershipStateCacheContextTest extends UnitTestCase {
     $this->group = $this->prophesize(EntityInterface::class);
     $this->groupTypeManager = $this->prophesize(GroupTypeManager::class);
 
+    $this->membership = $this->prophesize(OgMembershipInterface::class);
     $this->membershipManager = $this->prophesize(MembershipManagerInterface::class);
 
     $this->route = $this->prophesize(Route::class);
@@ -225,7 +232,67 @@ class OgMembershipStateCacheContextTest extends UnitTestCase {
 
     $result = $this->getContextResult();
     $this->assertEquals('none', $result);
+  }
 
+  /**
+   * Tests user with no membership.
+   *
+   * @covers ::getContext
+   * @dataProvider membershipProvider
+   */
+  public function testMembership($state) {
+    $this
+      ->routeMatch
+      ->getRouteObject()
+      ->willReturn($this->route->reveal());
+
+    $this
+      ->route
+      ->getOption('parameters')
+      ->willReturn($this->parameters);
+
+    $this
+      ->groupTypeManager
+      ->getAllGroupBundles()
+      ->willReturn($this->groupEntities);
+
+    $this
+      ->routeMatch
+      ->getParameter($this->entityTypeId)
+      ->willReturn($this->group->reveal());
+
+    $states = [
+      OgMembershipInterface::STATE_ACTIVE,
+      OgMembershipInterface::STATE_PENDING,
+      OgMembershipInterface::STATE_BLOCKED,
+    ];
+
+    $this
+      ->membershipManager
+      ->getMembership($this->group->reveal(), $this->user->reveal(), $states)
+      ->willReturn($this->membership->reveal());
+
+    $this
+      ->membership
+      ->getState()
+      ->willReturn($state);
+
+    $result = $this->getContextResult();
+    $this->assertEquals($state, $result);
+  }
+
+  /**
+   * Provides test data for the membership test.
+   *
+   * @return array
+   *   An array of test data arrays, each with the OG membership state.
+   */
+  public function membershipProvider() {
+    return [
+      [OgMembershipInterface::STATE_ACTIVE],
+      [OgMembershipInterface::STATE_PENDING],
+      [OgMembershipInterface::STATE_BLOCKED],
+    ];
   }
 
   /**
