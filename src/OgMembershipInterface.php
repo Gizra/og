@@ -207,4 +207,28 @@ interface OgMembershipInterface extends ContentEntityInterface {
    */
   public function hasPermission($permission);
 
+  /**
+   * Returns TRUE if the OG membership is active.
+   *
+   * @return bool
+   *   TRUE if the OG membership is active, false otherwise.
+   */
+  public function isActive();
+
+  /**
+   * Returns TRUE if the OG membership is pending.
+   *
+   * @return bool
+   *   TRUE if the OG membership is pending, false otherwise.
+   */
+  public function isPending();
+
+  /**
+   * Returns TRUE if the OG membership is blocked.
+   *
+   * @return bool
+   *   TRUE if the OG membership is blocked, false otherwise.
+   */
+  public function isBlocked();
+
 }
