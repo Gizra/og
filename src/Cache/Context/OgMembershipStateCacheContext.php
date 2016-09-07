@@ -47,8 +47,6 @@ class OgMembershipStateCacheContext implements CacheContextInterface {
    */
   protected $user;
 
-
-
   /**
    * Constructs a new UserCacheContextBase class.
    *

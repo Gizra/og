@@ -2,14 +2,11 @@
 
 namespace Drupal\Tests\og\Unit;
 
-use Drupal\Core\DependencyInjection\ContainerBuilder;
 use Drupal\Core\Routing\RouteMatchInterface;
-use Drupal\Core\Routing\RouteProvider;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\og\Cache\Context\OgMembershipStateCacheContext;
 use Drupal\og\GroupTypeManager;
 use Drupal\og\MembershipManagerInterface;
-use Drupal\og\Plugin\Derivative\OgLocalTask;
 use Drupal\Tests\UnitTestCase;
 use Symfony\Component\Routing\Route;
 
@@ -23,7 +20,7 @@ class OgMembershipStateCacheContextTest extends UnitTestCase {
 
 
   /**
-   * The entity type ID
+   * The entity type ID.
    *
    * @var string
    */
@@ -79,7 +76,6 @@ class OgMembershipStateCacheContextTest extends UnitTestCase {
    */
   protected $parameters;
 
-
   /**
    * {@inheritdoc}
    */
@@ -88,7 +84,6 @@ class OgMembershipStateCacheContextTest extends UnitTestCase {
     $this->routeMatch = $this->prophesize(RouteMatchInterface::class);;
     $this->groupTypeManager = $this->prophesize(GroupTypeManager::class);
     $this->membershipManager = $this->prophesize(MembershipManagerInterface::class);
-
 
     $this->route = $this->prophesize(Route::class);
 
@@ -126,10 +121,10 @@ class OgMembershipStateCacheContextTest extends UnitTestCase {
   }
 
   /**
- * Tests getting context when there are no group entities defined.
- *
- * @covers ::getContext
- */
+   * Tests getting context when there are no group entities defined.
+   *
+   * @covers ::getContext
+   */
   public function testNoGroupEntities() {
     $this
       ->routeMatch
@@ -145,7 +140,6 @@ class OgMembershipStateCacheContextTest extends UnitTestCase {
       ->groupTypeManager
       ->getAllGroupBundles()
       ->willReturn([]);
-
 
     $result = $this->getContextResult();
     $this->assertEquals('none', $result);
@@ -176,7 +170,6 @@ class OgMembershipStateCacheContextTest extends UnitTestCase {
       ->getAllGroupBundles()
       ->willReturn($group_entities);
 
-
     $result = $this->getContextResult();
     $this->assertEquals('none', $result);
   }
@@ -191,6 +184,5 @@ class OgMembershipStateCacheContextTest extends UnitTestCase {
     $cache_context = new OgMembershipStateCacheContext($this->user->reveal(), $this->routeMatch->reveal(), $this->groupTypeManager->reveal(), $this->membershipManager->reveal());
     return $cache_context->getContext();
   }
-
 
 }
