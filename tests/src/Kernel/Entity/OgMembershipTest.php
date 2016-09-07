@@ -155,8 +155,9 @@ class OgMembershipTest extends KernelTestBase {
    * Tests saving an existing membership.
    *
    * @covers ::preSave
+   * @expectedException \Drupal\Core\Entity\EntityStorageException
    */
-  public function testReSaveExistingMembership() {
+  public function testSaveExistingMembership() {
     $group = EntityTest::create([
       'type' => Unicode::strtolower($this->randomMachineName()),
       'name' => $this->randomString(),
@@ -167,15 +168,15 @@ class OgMembershipTest extends KernelTestBase {
     Og::groupTypeManager()->addGroup('entity_test', $group->bundle());
 
     /** @var OgMembershipInterface $membership */
-    $membership = Og::createMembership($group, $this->user);
-    $membership->save();
+    $membership1 = Og::createMembership($group, $this->user);
+    $membership1->save();
 
-    // Just by saving a second time, we validate there is no exception.
-    $membership->save();
+    $membership2 = Og::createMembership($group, $this->user);
+    $membership2->save();
   }
 
   /**
-   * Tests saving a membership twice.
+   * Tests re-saving a membership.
    *
    * @covers ::preSave
    */
