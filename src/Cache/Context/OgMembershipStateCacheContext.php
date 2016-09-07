@@ -17,6 +17,22 @@ use Drupal\og\OgMembershipInterface;
  */
 class OgMembershipStateCacheContext implements CacheContextInterface {
 
+
+  /**
+   * The group type manager service.
+   *
+   * @var \Drupal\og\GroupTypeManager
+   */
+  protected $groupTypeManager;
+
+
+  /**
+   * The membership manager service.
+   *
+   * @var \Drupal\og\MembershipManagerInterface
+   */
+  protected $membershipManager;
+
   /**
    * The route match service.
    *
@@ -31,19 +47,7 @@ class OgMembershipStateCacheContext implements CacheContextInterface {
    */
   protected $user;
 
-  /**
-   * The group type manager service.
-   *
-   * @var \Drupal\og\GroupTypeManager
-   */
-  protected $groupTypeManager;
 
-  /**
-   * The membership manager service.
-   *
-   * @var \Drupal\og\MembershipManagerInterface
-   */
-  protected $membershipManager;
 
   /**
    * Constructs a new UserCacheContextBase class.
