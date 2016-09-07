@@ -126,10 +126,10 @@ class OgMembershipStateCacheContextTest extends UnitTestCase {
   }
 
   /**
-   * Tests getting context when there are no group entities defined.
-   *
-   * @covers ::getContext
-   */
+ * Tests getting context when there are no group entities defined.
+ *
+ * @covers ::getContext
+ */
   public function testNoGroupEntities() {
     $this
       ->routeMatch
@@ -145,6 +145,36 @@ class OgMembershipStateCacheContextTest extends UnitTestCase {
       ->groupTypeManager
       ->getAllGroupBundles()
       ->willReturn([]);
+
+
+    $result = $this->getContextResult();
+    $this->assertEquals('none', $result);
+  }
+
+  /**
+   * Tests getting context when there are matching group entities in the route.
+   *
+   * @covers ::getContext
+   */
+  public function testNoGroupAndRouteParametersIntersection() {
+    $this
+      ->routeMatch
+      ->getRouteObject()
+      ->willReturn($this->route->reveal());
+
+    $this
+      ->route
+      ->getOption('parameters')
+      ->willReturn($this->parameters);
+
+    $group_entities = [
+      $this->randomMachineName() => [$this->randomMachineName()],
+    ];
+
+    $this
+      ->groupTypeManager
+      ->getAllGroupBundles()
+      ->willReturn($group_entities);
 
 
     $result = $this->getContextResult();
