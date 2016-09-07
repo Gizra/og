@@ -151,4 +151,84 @@ class OgMembershipTest extends KernelTestBase {
     $membership->save();
   }
 
+  /**
+   * Tests saving an existing membership.
+   *
+   * @covers ::preSave
+   * @expectedException \Drupal\Core\Entity\EntityStorageException
+   */
+  public function testSaveExistingMembership() {
+    $group = EntityTest::create([
+      'type' => Unicode::strtolower($this->randomMachineName()),
+      'name' => $this->randomString(),
+    ]);
+
+    $group->save();
+
+    Og::groupTypeManager()->addGroup('entity_test', $group->bundle());
+
+    /** @var OgMembershipInterface $membership */
+    $membership1 = Og::createMembership($group, $this->user);
+    $membership1->save();
+
+    $membership2 = Og::createMembership($group, $this->user);
+    $membership2->save();
+  }
+
+  /**
+   * Tests re-saving a membership.
+   *
+   * @covers ::preSave
+   */
+  public function testSaveSameMembershipTwice() {
+    $group = EntityTest::create([
+      'type' => Unicode::strtolower($this->randomMachineName()),
+      'name' => $this->randomString(),
+    ]);
+
+    $group->save();
+
+    Og::groupTypeManager()->addGroup('entity_test', $group->bundle());
+
+    /** @var OgMembershipInterface $membership */
+    $membership = Og::createMembership($group, $this->user);
+    $membership->save();
+
+    // Block membership and save.
+    $membership->setState(OgMembershipInterface::STATE_BLOCKED);
+    $membership->save();
+  }
+
+  /**
+   * Tests boolean check for states.
+   *
+   * @covers ::isActive
+   * @covers ::isPending
+   * @covers ::isBlocked
+   * @dataProvider statesProvider
+   */
+  public function testGetSetState($state, $method) {
+    $membership = Og::createMembership($this->group, $this->user);
+    $membership->setState($state)->save();
+
+    $membership = $this->entityTypeManager->getStorage('og_membership')->loadUnchanged($membership->id());
+
+    $this->assertEquals($state, $membership->getState());
+    $this->assertTrue($membership->$method());
+  }
+
+  /**
+   * Provides test data to check states.
+   *
+   * @return array
+   *   Array with the state names and the method to check their flags.
+   */
+  public function statesProvider() {
+    return [
+      [OgMembershipInterface::STATE_ACTIVE, 'isActive'],
+      [OgMembershipInterface::STATE_PENDING, 'isPending'],
+      [OgMembershipInterface::STATE_BLOCKED, 'isBlocked'],
+    ];
+  }
+
 }

@@ -223,7 +223,7 @@ class OgMembership extends ContentEntityBase implements OgMembershipInterface {
    */
   public function hasPermission($permission) {
     // Blocked users do not have any permissions.
-    if ($this->getState() === OgMembershipInterface::STATE_BLOCKED) {
+    if ($this->isBlocked()) {
       return FALSE;
     }
 
@@ -318,19 +318,26 @@ class OgMembership extends ContentEntityBase implements OgMembershipInterface {
       throw new \LogicException(sprintf('Entity type %s with ID %s is not an OG group.', $entity_type_id, $group->id()));
     }
 
-    // Make sure we don't save non-member or member role with a membership.
-    $roles = [];
-    foreach ($this->getRoles() as $role) {
-      /** @var \Drupal\og\Entity\OgRole $role */
-      if ($role->getName() == OgRoleInterface::ANONYMOUS) {
-        throw new \LogicException('Cannot save an OgMembership with reference to a non-member role.');
-      }
-      elseif ($role->getName() != OgRoleInterface::AUTHENTICATED) {
-        $roles[] = $role;
-      }
+    // Check for an existing membership.
+    $query = \Drupal::entityQuery('og_membership');
+    $query
+      ->condition('uid', $this->get('uid')->target_id)
+      ->condition('entity_id', $this->get('entity_id')->value)
+      ->condition('entity_type', $this->get('entity_type')->value);
+
+    if (!$this->isNew()) {
+      // Filter out this membership.
+      $query->condition('id', $this->id(), '<>');
     }
 
-    $this->setRoles($roles);
+    $count = $query
+      ->range(0, 1)
+      ->count()
+      ->execute();
+
+    if ($count) {
+      throw new \LogicException(sprintf('An OG membership already exists for group of entity-type %s and ID: %s', $entity_type_id, $this->getGroup()->id()));
+    }
 
     parent::preSave($storage);
   }
@@ -355,6 +362,27 @@ class OgMembership extends ContentEntityBase implements OgMembershipInterface {
     // Use the default membership type by default.
     $values += ['type' => OgMembershipInterface::TYPE_DEFAULT];
     return parent::create($values);
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function isActive() {
+    return $this->getState() === OgMembershipInterface::STATE_ACTIVE;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function isPending() {
+    return $this->getState() === OgMembershipInterface::STATE_PENDING;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function isBlocked() {
+    return $this->getState() === OgMembershipInterface::STATE_BLOCKED;
   }
 
 }
