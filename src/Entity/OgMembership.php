@@ -337,7 +337,7 @@ class OgMembership extends ContentEntityBase implements OgMembershipInterface {
       ->execute();
 
     if ($count) {
-      throw new \LogicException(sprintf('A membership exists for this group, of entity type $s with ID: %s', $entity_type_id, $this->getGroup()->id()));
+      throw new \LogicException(sprintf('A membership exists for this group, of entity type %s with ID: %s', $entity_type_id, $this->getGroup()->id()));
     }
 
     parent::preSave($storage);
