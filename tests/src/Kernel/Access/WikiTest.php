@@ -185,7 +185,7 @@ class WikiTest extends KernelTestBase {
    * @expectedException \Drupal\Core\Entity\EntityStorageException
    */
   public function testNonMemberRoleMembershipSave() {
-    $role_id = "block_content-group-non-member";
+    $role_id = 'block_content-group-non-member';
     /** @var \Drupal\og\Entity\OgRole $role */
     $role = $this->container->get('entity_type.manager')
       ->getStorage('og_role')
