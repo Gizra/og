@@ -223,7 +223,7 @@ class OgMembershipTest extends KernelTestBase {
    *
    * @covers ::getRoles
    */
-  public function testGetRoles() {
+  public function testMemberRole() {
     $membership = Og::createMembership($this->group, $this->user);
     $membership->setState(OgMembershipInterface::STATE_ACTIVE)->save();
 
