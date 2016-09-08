@@ -87,24 +87,42 @@ class SubscriptionController extends ControllerBase {
     }
 
     $user = User::load($this->currentUser()->id());
+    return $user->isAnonymous() ? $this->subscribeAnonymous() : $this->subscribeAuthenticated($group, $user, $membership_type);
 
-    if ($user->isAnonymous()) {
-      // Anonymous user can't request membership.
-      $destination = $this->getDestinationArray();
+  }
 
-      $user_login_url = Url::fromRoute('user.login', [], $destination)->toString();
+  /**
+   * @return \Symfony\Component\HttpFoundation\RedirectResponse
+   */
+  protected function subscribeAnonymous() {
+    // Anonymous user can't request membership.
+    $destination = $this->getDestinationArray();
 
-      if ($this->config('user.settings')->get('register') === USER_REGISTER_ADMINISTRATORS_ONLY) {
-        $params = [':login' => $user_login_url];
-        drupal_set_message($this->t('In order to join any group, you must <a href=":login">login</a>. After you have successfully done so, you will need to request membership again.', $params));
-      }
-      else {
-        $user_register_url = Url::fromRoute('user.register', [], $destination)->toString();
-        $params = [':register' => $user_register_url, ':login' => $user_login_url];
-        drupal_set_message($this->t('In order to join any group, you must <a href=":login">login</a> or <a href=":register">register</a> a new account. After you have successfully done so, you will need to request membership again.', $params));
-      }
+    $user_login_url = Url::fromRoute('user.login', [], $destination)->toString();
 
-      return new RedirectResponse(Url::fromRoute('user.page')->setAbsolute(TRUE)->toString());
+    if ($this->config('user.settings')->get('register') === USER_REGISTER_ADMINISTRATORS_ONLY) {
+      $params = [':login' => $user_login_url];
+      drupal_set_message($this->t('In order to join any group, you must <a href=":login">login</a>. After you have successfully done so, you will need to request membership again.', $params));
+    }
+    else {
+      $user_register_url = Url::fromRoute('user.register', [], $destination)->toString();
+      $params = [':register' => $user_register_url, ':login' => $user_login_url];
+      drupal_set_message($this->t('In order to join any group, you must <a href=":login">login</a> or <a href=":register">register</a> a new account. After you have successfully done so, you will need to request membership again.', $params));
+    }
+
+    return new RedirectResponse(Url::fromRoute('user.page')->setAbsolute(TRUE)->toString());
+  }
+
+  /**
+   * @param \Drupal\Core\Entity\EntityInterface $group
+   * @param \Drupal\Core\Session\AccountInterface $user
+   * @param \Drupal\og\OgMembershipTypeInterface $membership_type
+   * @return array|\Symfony\Component\HttpFoundation\RedirectResponse
+   */
+  protected function subscribeAuthenticated(EntityInterface $group, AccountInterface $user, OgMembershipTypeInterface $membership_type) {
+    if (Og::isMemberBlocked($group, $user)) {
+      // User is blocked, access denied.
+      throw new AccessDeniedHttpException();
     }
 
     $redirect = FALSE;
@@ -113,11 +131,6 @@ class SubscriptionController extends ControllerBase {
 
     // Show the group name only if user has access to it.
     $params['@group'] = $group->access('view', $user) ? $group->label() : $this->t('Private group');
-
-    if (Og::isMemberBlocked($group, $user)) {
-      // User is blocked, access denied.
-      throw new AccessDeniedHttpException();
-    }
 
     if (Og::isMemberPending($group, $user)) {
       // User is pending, return them back.
@@ -143,7 +156,6 @@ class SubscriptionController extends ControllerBase {
     $membership = Og::createMembership($group, $user, $membership_type->id());
     $form = $this->entityFormBuilder()->getForm($membership, 'subscribe');
     return $form;
-
   }
 
   /**

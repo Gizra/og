@@ -6,6 +6,7 @@ use Drupal\Core\DependencyInjection\ContainerBuilder;
 use Drupal\Core\Entity\ContentEntityInterface;
 use Drupal\Core\Entity\EntityFormBuilderInterface;
 use Drupal\Core\Entity\EntityInterface;
+use Drupal\Core\Entity\EntityManager;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\Core\Url;
 use Drupal\og\Controller\SubscriptionController;
@@ -68,6 +69,34 @@ class SubscriptionControllerSubscribeTest extends UnitTestCase {
   protected $bundle;
 
   /**
+   * The membership manager service.
+   *
+   * @var \Drupal\og\OgMembershipTypeInterface|\Prophecy\Prophecy\ObjectProphecy
+   */
+  protected $membershipManager;
+
+  /**
+   * The user object.
+   *
+   * @var \Drupal\Core\Session\AccountInterface|\Prophecy\Prophecy\ObjectProphecy
+   */
+  protected $user;
+
+  /**
+   * The entity manager service.
+   *
+   * @var \Drupal\Core\Entity\EntityManager|\Prophecy\Prophecy\ObjectProphecy
+   */
+  protected $entityManager;
+
+  /**
+   * The user ID.
+   *
+   * @var int
+   */
+  protected $userId;
+
+  /**
    * {@inheritdoc}
    */
   public function setUp() {
@@ -77,6 +106,15 @@ class SubscriptionControllerSubscribeTest extends UnitTestCase {
     $this->entityTypeId = $this->randomMachineName();
     $this->group = $this->prophesize(ContentEntityInterface::class);
     $this->membershipType = $this->prophesize(OgMembershipTypeInterface::class);
+    $this->user = $this->prophesize(AccountInterface::class);
+    $this->entityManager = $this->prophesize(EntityManager::class);
+    $this->userId = rand(20, 50);
+    $this->membershipManager = $this->prophesize(MembershipManagerInterface::class);
+
+    // Set the container for the string translation service.
+    $container = new ContainerBuilder();
+    $container->set('current_user', $this->user->reveal());
+    \Drupal::setContainer($container);
 
   }
 
@@ -94,12 +132,32 @@ class SubscriptionControllerSubscribeTest extends UnitTestCase {
   }
 
   /**
+ * Tests a non-group entity.
+ *
+ * @covers ::subscribe
+ * @expectedException \Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException
+ */
+  public function testNonGroupEntity() {
+    $this
+      ->group
+      ->bundle()
+      ->willReturn($this->bundle);
+
+    $this
+      ->groupTypeManager
+      ->isGroup($this->entityTypeId, $this->bundle)
+      ->willReturn(FALSE);
+
+    $this->getSubscribeResult();
+  }
+
+  /**
    * Tests a non-group entity.
    *
    * @covers ::subscribe
    * @expectedException \Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException
    */
-  public function testNonGroupEntity() {
+  public function testBlockedMember() {
     $this
       ->group
       ->bundle()
