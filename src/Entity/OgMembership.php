@@ -319,17 +319,15 @@ class OgMembership extends ContentEntityBase implements OgMembershipInterface {
     }
 
     // Make sure we don't save non-member or member role with a membership.
-    $roles = [];
     foreach ($this->getRoles() as $role) {
       /** @var \Drupal\og\Entity\OgRole $role */
       if ($role->getName() == OgRoleInterface::ANONYMOUS) {
         throw new \LogicException('Cannot save an OgMembership with reference to a non-member role.');
       }
-      elseif ($role->getName() != OgRoleInterface::AUTHENTICATED) {
-        $roles[] = $role;
+      elseif ($role->getName() == OgRoleInterface::AUTHENTICATED) {
+        $this->revokeRole($role);
       }
     }
-    $this->setRoles($roles);
 
     // Check for an existing membership.
     $query = \Drupal::entityQuery('og_membership');
