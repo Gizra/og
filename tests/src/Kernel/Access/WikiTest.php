@@ -1,6 +1,6 @@
 <?php
 
-namespace Drupal\Tests\og\Kernel;
+namespace Drupal\Tests\og\Kernel\Access;
 
 use Drupal\KernelTests\KernelTestBase;
 use Drupal\block_content\Entity\BlockContent;
@@ -11,7 +11,6 @@ use Drupal\og\Entity\OgMembership;
 use Drupal\og\Og;
 use Drupal\og\OgGroupAudienceHelper;
 use Drupal\og\OgMembershipInterface;
-use Drupal\og\OgRoleInterface;
 use Drupal\simpletest\ContentTypeCreationTrait;
 use Drupal\user\Entity\Role;
 use Drupal\user\Entity\User;
@@ -127,16 +126,13 @@ class WikiTest extends KernelTestBase {
     ];
     Og::createField(OgGroupAudienceHelper::DEFAULT_FIELD, 'node', 'group_content', $settings);
 
-    // Grant both members and non-members permission to edit any group content.
-    foreach ([OgRoleInterface::AUTHENTICATED, OgRoleInterface::ANONYMOUS] as $role_name) {
-      $role_id = "block_content-group-$role_name";
-      /** @var \Drupal\og\Entity\OgRole $role */
-      $role = $this->container->get('entity_type.manager')
-        ->getStorage('og_role')
-        ->load($role_id);
-      $role->grantPermission('edit any group_content content');
-      $role->save();
-    }
+    // Grant members permission to edit any group content.
+    /** @var \Drupal\og\Entity\OgRole $role */
+    $role = $this->container->get('entity_type.manager')
+      ->getStorage('og_role')
+      ->load('block_content-group-member');
+    $role->grantPermission('edit any group_content content');
+    $role->save();
 
     // Subscribe the normal member and the blocked member to the group.
     foreach (['member', 'blocked'] as $membership_type) {
@@ -144,11 +140,11 @@ class WikiTest extends KernelTestBase {
       /** @var \Drupal\og\Entity\OgMembership $membership */
       $membership = OgMembership::create();
       $membership
-        ->setUser($this->users[$membership_type])
-        ->setGroup($this->group)
-        ->addRole($role)
-        ->setState($state)
-        ->save();
+          ->setUser($this->users[$membership_type])
+          ->setGroup($this->group)
+          ->addRole($role)
+          ->setState($state)
+          ->save();
     }
 
     // Create three group content items, one owned by the group owner, one by
@@ -184,6 +180,29 @@ class WikiTest extends KernelTestBase {
   }
 
   /**
+   * Tests exception is thrown when trying to save non-member role.
+   *
+   * @expectedException \Drupal\Core\Entity\EntityStorageException
+   */
+  public function testNonMemberRoleMembershipSave() {
+    $role_id = 'block_content-group-non-member';
+    /** @var \Drupal\og\Entity\OgRole $role */
+    $role = $this->container->get('entity_type.manager')
+      ->getStorage('og_role')
+      ->load($role_id);
+    $role->grantPermission('edit any group_content content');
+    $role->save();
+
+    $membership = OgMembership::create();
+    $membership
+      ->setUser($this->users['non-member'])
+      ->setGroup($this->group)
+      ->addRole($role)
+      ->setState(OgMembershipInterface::STATE_ACTIVE)
+      ->save();
+  }
+
+  /**
    * Data provider for ::testEntityOperationAccess().
    *
    * @return array
@@ -197,15 +216,6 @@ class WikiTest extends KernelTestBase {
       [
         // Members should have the right to edit any group content.
         'member',
-        [
-          'owner' => TRUE,
-          'member' => TRUE,
-          'blocked' => TRUE,
-        ],
-      ],
-      [
-        // Non-members should have the right to edit any group content.
-        'non-member',
         [
           'owner' => TRUE,
           'member' => TRUE,
