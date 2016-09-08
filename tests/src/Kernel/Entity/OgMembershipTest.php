@@ -8,6 +8,7 @@ use Drupal\KernelTests\KernelTestBase;
 use Drupal\og\Entity\OgMembership;
 use Drupal\og\Og;
 use Drupal\og\OgMembershipInterface;
+use Drupal\og\OgRoleInterface;
 use Drupal\user\Entity\User;
 use Drupal\user\UserInterface;
 
@@ -215,6 +216,24 @@ class OgMembershipTest extends KernelTestBase {
 
     $this->assertEquals($state, $membership->getState());
     $this->assertTrue($membership->$method());
+  }
+
+  /**
+   * Tests that membership has "member" role when roles are retrieved.
+   *
+   * @covers ::getRoles
+   */
+  public function testMemberRole() {
+    $membership = Og::createMembership($this->group, $this->user);
+    $membership->setState(OgMembershipInterface::STATE_ACTIVE)->save();
+
+    $membership = $this->entityTypeManager->getStorage('og_membership')->loadUnchanged($membership->id());
+
+    $roles = $membership->getRoles();
+    $role = current($roles);
+
+    $this->assertEquals(1, count($roles));
+    $this->assertEquals(OgRoleInterface::AUTHENTICATED, $role->getName());
   }
 
   /**
