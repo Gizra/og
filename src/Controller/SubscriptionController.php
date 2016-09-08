@@ -7,6 +7,7 @@ use Drupal\Core\Entity\ContentEntityInterface;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\Core\Url;
+use Drupal\og\GroupTypeManager;
 use Drupal\og\OgAccessInterface;
 use Drupal\og\OgMembershipInterface;
 use Drupal\og\OgMembershipTypeInterface;
@@ -31,13 +32,23 @@ class SubscriptionController extends ControllerBase {
   protected $ogAccess;
 
   /**
+   * The group type manager service.
+   *
+   * @var \Drupal\og\GroupTypeManager
+   */
+  protected $groupTypeManager;
+
+  /**
    * Constructs a SubscriptionController object.
    *
    * @param \Drupal\og\OgAccessInterface $og_access
    *   The OG access service.
+   * @param \Drupal\og\GroupTypeManager $group_type_manager
+   *   The group type manager service.
    */
-  public function __construct(OgAccessInterface $og_access) {
+  public function __construct(OgAccessInterface $og_access, GroupTypeManager $group_type_manager) {
     $this->ogAccess = $og_access;
+    $this->groupTypeManager = $group_type_manager;
   }
 
   /**
@@ -45,7 +56,8 @@ class SubscriptionController extends ControllerBase {
    */
   public static function create(ContainerInterface $container) {
     return new static(
-      $container->get('og.access')
+      $container->get('og.access'),
+      $container->get('og.group_type_manager')
     );
   }
 
@@ -69,7 +81,7 @@ class SubscriptionController extends ControllerBase {
       throw new AccessDeniedHttpException();
     }
 
-    if (!Og::isGroup($entity_type_id, $group->bundle())) {
+    if (!$this->groupTypeManager->isGroup($entity_type_id, $group->bundle())) {
       // Not a valid group.
       throw new AccessDeniedHttpException();
     }
