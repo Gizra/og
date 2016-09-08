@@ -325,6 +325,13 @@ class OgRole extends Role implements OgRoleInterface {
   }
 
   /**
+   * {@inheritdoc}
+   */
+  public static function getRole($entity_type_id, $bundle, $role_name) {
+    return self::load($entity_type_id . '-' . $bundle . '-' . $role_name);
+  }
+
+  /**
    * Gets the group manager.
    *
    * @return \Drupal\og\GroupTypeManager

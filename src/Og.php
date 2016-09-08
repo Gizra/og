@@ -8,7 +8,6 @@ use Drupal\Core\Field\FieldDefinitionInterface;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\field\Entity\FieldConfig;
 use Drupal\field\Entity\FieldStorageConfig;
-use Drupal\og\Entity\OgRole;
 
 /**
  * A static helper class for OG.
@@ -306,23 +305,6 @@ class Og {
   public static function groupTypeManager() {
     // @todo store static reference for this?
     return \Drupal::service('og.group_type_manager');
-  }
-
-  /**
-   * Get a role by the group's bundle and role name.
-   *
-   * @param string $entity_type_id
-   *   The group entity type ID.
-   * @param string $bundle
-   *   The group bundle name.
-   * @param string $role_name
-   *   The role name.
-   *
-   * @return \Drupal\og\OgRoleInterface|null
-   *   The OG role object, or NULL if a matching role was not found.
-   */
-  public static function getRole($entity_type_id, $bundle, $role_name) {
-    return OgRole::load($entity_type_id . '-' . $bundle . '-' . $role_name);
   }
 
   /**
