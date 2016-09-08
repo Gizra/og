@@ -5,6 +5,7 @@ namespace Drupal\og\Controller;
 use Drupal\Core\Controller\ControllerBase;
 use Drupal\Core\Entity\ContentEntityInterface;
 use Drupal\Core\Entity\EntityInterface;
+use Drupal\Core\Session\AccountInterface;
 use Drupal\Core\Url;
 use Drupal\og\OgAccessInterface;
 use Drupal\og\OgMembershipInterface;

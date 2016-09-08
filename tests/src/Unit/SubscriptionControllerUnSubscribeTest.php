@@ -15,12 +15,12 @@ use Drupal\Tests\UnitTestCase;
 use Drupal\user\EntityOwnerInterface;
 
 /**
- * Tests the subscription controller.
+ * Tests the unsubscribe method from the subscription controller.
  *
  * @group og
  * @coversDefaultClass \Drupal\og\Controller\SubscriptionController
  */
-class SubscriptionControllerTest extends UnitTestCase {
+class SubscriptionControllerUnSubscribeTest extends UnitTestCase {
 
   /**
    * The entity for builder object.
