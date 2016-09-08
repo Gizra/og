@@ -1810,15 +1810,21 @@ function og_membership_access($op, $entity, $account = NULL, $entity_type = 'og_
  *   The entity type.
  * @param $entity
  *   The entity object, or the entity ID.
+ *
+ * @return
+ *   TRUE or FALSE if the entity is a group.
  */
 function og_is_group($entity_type, $entity) {
-  $wrapper = entity_metadata_wrapper($entity_type, $entity);
-  $bundle = $wrapper->getBundle();
-
+  if (is_numeric($entity)) {
+    $entity = entity_load_single($entity_type, $entity);
+  }
+  list(,, $bundle) = entity_extract_ids($entity_type, $entity);
   if (!field_info_instance($entity_type, OG_GROUP_FIELD, $bundle)) {
     return variable_get("og_is_group__{$entity_type}__{$bundle}", FALSE);
   }
-  return !empty($wrapper->{OG_GROUP_FIELD}) && $wrapper->{OG_GROUP_FIELD}->value();
+  $items = field_get_items($entity_type, $entity, OG_GROUP_FIELD);
+
+  return !empty($items[0]['value']);
 }
 
 
