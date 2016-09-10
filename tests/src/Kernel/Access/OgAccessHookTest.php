@@ -1,6 +1,6 @@
 <?php
 
-namespace Drupal\Tests\og\Kernel;
+namespace Drupal\Tests\og\Kernel\Access;
 
 use Drupal\KernelTests\KernelTestBase;
 use Drupal\block_content\Entity\BlockContent;

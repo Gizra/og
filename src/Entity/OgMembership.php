@@ -298,8 +298,8 @@ class OgMembership extends ContentEntityBase implements OgMembershipInterface {
     // This will watch actual empty values and '0'.
     if (!$this->get('uid')->target_id) {
       // Throw a generic logic exception as this will likely get caught in
-      // \Drupal\Core\Entity\Sql\SqlContentEntityStorage::save and turned in an
-      // EntityStorageException anyway.
+      // \Drupal\Core\Entity\Sql\SqlContentEntityStorage::save and turned into
+      // an EntityStorageException anyway.
       throw new \LogicException('OG membership can not be created for an empty or anonymous user.');
     }
 
@@ -317,6 +317,17 @@ class OgMembership extends ContentEntityBase implements OgMembershipInterface {
     if (!Og::isGroup($entity_type_id, $bundle)) {
       // Group is not valid.
       throw new \LogicException(sprintf('Entity type %s with ID %s is not an OG group.', $entity_type_id, $group->id()));
+    }
+
+    // Make sure we don't save non-member or member role with a membership.
+    foreach ($this->getRoles() as $role) {
+      /** @var \Drupal\og\Entity\OgRole $role */
+      if ($role->getName() == OgRoleInterface::ANONYMOUS) {
+        throw new \LogicException('Cannot save an OgMembership with reference to a non-member role.');
+      }
+      elseif ($role->getName() == OgRoleInterface::AUTHENTICATED) {
+        $this->revokeRole($role);
+      }
     }
 
     // Check for an existing membership.
