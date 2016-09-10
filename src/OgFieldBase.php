@@ -60,7 +60,6 @@ abstract class OgFieldBase extends PluginBase implements OgFieldsInterface {
     $field_storage = $this->getFieldStorageBaseDefinition();
 
     if (!empty($field_storage['entity']) && !in_array($entity_type, $field_storage['entity'])) {
-
       $plugin_id = $this->getPluginId();
       $entities = implode(', ', $field_storage['entity']);
 
@@ -69,7 +68,6 @@ abstract class OgFieldBase extends PluginBase implements OgFieldsInterface {
       }
 
       throw new \Exception("The Organic Groups field with plugin ID $plugin_id cannot be attached to the entity type. It can only be attached to the following entities: $entities.");
-
     }
 
     $this->entityType = $entity_type;

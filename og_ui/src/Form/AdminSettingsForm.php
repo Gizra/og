@@ -82,7 +82,6 @@ class AdminSettingsForm extends ConfigFormBase {
     ];
 
     // @todo: Port og_ui_admin_people_view.
-
     $form['og_delete_orphans'] = [
       '#type' => 'checkbox',
       '#title' => $this->t('Delete orphans'),

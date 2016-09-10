@@ -92,9 +92,7 @@ class GroupTypeManager {
    * Do not access this property directly, use $this->getGroupRelationMap()
    * instead.
    *
-   * @var array $groupRelationMap
-   *   An associative array representing group and group content relations, in
-   *   the following format:
+   * This mapping is in the following format:
    * @code
    *   [
    *     'group_entity_type_id' => [
@@ -106,6 +104,9 @@ class GroupTypeManager {
    *     ],
    *   ]
    * @endcode
+   *
+   * @var array $groupRelationMap
+   *   An associative array representing group and group content relations.
    */
   protected $groupRelationMap = [];
 
