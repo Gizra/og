@@ -16,11 +16,11 @@ use Drupal\user\Entity\Role;
 use Drupal\user\Entity\User;
 
 /**
- * Tests Wiki-style access: non-members have the right to edit any content.
+ * Tests access to content by OgMembership.
  *
  * @group og
  */
-class WikiTest extends KernelTestBase {
+class AccessByOgMembershipTest extends KernelTestBase {
 
   use ContentTypeCreationTrait;
 
