@@ -203,7 +203,7 @@ class OgMembership extends ContentEntityBase implements OgMembershipInterface {
   public function setRoles(array $roles = []) {
     $role_ids = array_map(function (OgRole $role) {
       return $role->id();
-    }, $roles);
+    }, array_values($roles));
 
     $this->set('roles', array_unique($role_ids));
 
