@@ -66,7 +66,6 @@ class AdminSettingsForm extends ConfigFormBase {
   public function buildForm(array $form, FormStateInterface $form_state) {
     $form = parent::buildForm($form, $form_state);
     $config_og = $this->config('og.settings');
-    $config_og_ui = $this->config('og_ui.settings');
 
     $form['og_group_manager_full_access'] = [
       '#type' => 'checkbox',

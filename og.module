@@ -134,13 +134,10 @@ function og_entity_create_access(AccountInterface $account, array $context, $bun
     return $access_result;
   }
 
-  if ($entity_type_id == 'node') {
-    $node_access_strict = \Drupal::config('og.settings')->get('node_access_strict');
-
-    if (!$node_access_strict && $account->hasPermission("create $bundle content")) {
-      // The user has the core permission and strict node access is not set.
-      return AccessResult::neutral();
-    }
+  $node_access_strict = \Drupal::config('og.settings')->get('node_access_strict');
+  if ($entity_type_id == 'node' && !$node_access_strict && $account->hasPermission("create $bundle content")) {
+    // The user has the core permission and strict node access is not set.
+    return AccessResult::neutral();
   }
 
   // We can't check if user has create permissions, as there is no group
