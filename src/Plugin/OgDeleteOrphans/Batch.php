@@ -30,7 +30,7 @@ class Batch extends OgDeleteOrphansBase {
   /**
    * {@inheritdoc}
    */
-  public function configurationForm($form, FormStateInterface $form_state) {
+  public function configurationForm(array $form, FormStateInterface $form_state) {
     $count = $this->getQueue()->numberOfItems();
     return [
       '#type' => 'fieldset',
