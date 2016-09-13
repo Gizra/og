@@ -4,13 +4,16 @@ namespace Drupal\Tests\og\Unit;
 
 use Drupal\Core\DependencyInjection\ContainerBuilder;
 use Drupal\Core\Entity\ContentEntityInterface;
+use Drupal\Core\Config\Entity\ConfigEntityInterface;
 use Drupal\Core\Entity\EntityFormBuilderInterface;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\Core\Url;
 use Drupal\og\Controller\SubscriptionController;
+use Drupal\og\GroupTypeManager;
 use Drupal\og\MembershipManagerInterface;
 use Drupal\og\OgAccessInterface;
 use Drupal\og\OgMembershipInterface;
+use Drupal\og\OgMembershipTypeInterface;
 use Drupal\Tests\UnitTestCase;
 use Drupal\user\EntityOwnerInterface;
 
@@ -72,6 +75,27 @@ class SubscriptionControllerTest extends UnitTestCase {
   protected $user;
 
   /**
+   * The config entity.
+   *
+   * @var \Drupal\Core\Config\Entity\ConfigEntityInterface|\Prophecy\Prophecy\ObjectProphecy
+   */
+  protected $configEntity;
+
+  /**
+   * The OG membership type entity.
+   *
+   * @var \Drupal\og\OgMembershipTypeInterface|\Prophecy\Prophecy\ObjectProphecy
+   */
+  protected $ogMembershipType;
+
+  /**
+   * The group type manager object.
+   *
+   * @var \Drupal\og\GroupTypeManager|\Prophecy\Prophecy\ObjectProphecy
+   */
+  protected $groupTypeManager;
+
+  /**
    * {@inheritdoc}
    */
   public function setUp() {
@@ -82,12 +106,16 @@ class SubscriptionControllerTest extends UnitTestCase {
     $this->ogMembership = $this->prophesize(OgMembershipInterface::class);
     $this->url = $this->prophesize(Url::class);
     $this->user = $this->prophesize(AccountInterface::class);
+    $this->configEntity = $this->prophesize(ConfigEntityInterface::class);
+    $this->ogMembershipType = $this->prophesize(OgMembershipTypeInterface::class);
+    $this->groupTypeManager = $this->prophesize(GroupTypeManager::class);
 
     // Set the container for the string translation service.
     $container = new ContainerBuilder();
     $container->set('current_user', $this->user->reveal());
     $container->set('entity.form_builder', $this->entityFormBuilder->reveal());
     $container->set('og.membership_manager', $this->membershipManager->reveal());
+    $container->set('og.group_type_manager', $this->groupTypeManager->reveal());
     $container->set('string_translation', $this->getStringTranslationStub());
     \Drupal::setContainer($container);
 
@@ -257,6 +285,32 @@ class SubscriptionControllerTest extends UnitTestCase {
   protected function unsubscribe() {
     $controller = new SubscriptionController($this->ogAccess->reveal());
     $controller->unsubscribe($this->group->reveal());
+  }
+
+  /**
+   * Tests subscribing a user to a non-content entity.
+   *
+   * @covers ::subscribe
+   * @expectedException \Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException
+   */
+  public function testSubscribeToNonContentEntity() {
+    $controller = new SubscriptionController($this->ogAccess->reveal());
+    $controller
+      ->subscribe('test_entity_1', $this->configEntity->reveal(), $this->ogMembershipType->reveal())
+      ->shouldBeCalled();
+  }
+
+  /**
+   * Tests subscribing a user to a non-group content entity.
+   *
+   * @covers ::subscribe
+   * @expectedException \Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException
+   */
+  public function testSubscribeToNonGroupEntity() {
+    $controller = new SubscriptionController($this->ogAccess->reveal());
+    $controller
+      ->subscribe('test_entity_2', $this->group->reveal(), $this->ogMembershipType->reveal())
+      ->shouldBeCalled();
   }
 
 }
