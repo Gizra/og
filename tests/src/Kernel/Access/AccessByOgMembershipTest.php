@@ -190,15 +190,13 @@ class AccessByOgMembershipTest extends KernelTestBase {
    *
    * @expectedException \Drupal\Core\Entity\EntityStorageException
    */
-  public function __testNonMemberRoleMembershipSave() {
-    $role_id = 'block_content-group-non-member';
-    /** @var \Drupal\og\Entity\OgRole $role */
-    $role = $this->container->get('entity_type.manager')
-      ->getStorage('og_role')
-      ->load($role_id);
+  public function testNonMemberRoleMembershipSave() {
+    /** @var OgRole $role */
+    $role = OgRole::getRole('block_content', 'group', OgRoleInterface::ANONYMOUS);
 
-    $role->grantPermission('edit any group_content content');
-    $role->save();
+    $role
+      ->grantPermission('edit any group_content content')
+      ->save();
 
     $membership = OgMembership::create();
     $membership
