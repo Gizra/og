@@ -189,6 +189,9 @@ class MembershipManager implements MembershipManagerInterface {
       $query = $this->entityTypeManager
         ->getStorage($target_type)
         ->getQuery()
+        // When rebuilding node_access grants then checking node_access is
+        // not conductive to success.
+        ->accessCheck(FALSE)
         ->condition($entity_type->getKey('id'), $target_ids, 'IN');
 
       // Optionally filter by group bundle.
