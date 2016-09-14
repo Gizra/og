@@ -109,7 +109,7 @@ class OgMembershipStateCacheContext implements CacheContextInterface {
 
     /** @var OgMembershipInterface $membership */
     $membership = $this->membershipManager->getMembership($group, $this->user, $states);
-    return $membership ? $membership->getState() : 'none';
+    return $membership ? $membership->getState() : self::NO_CONTEXT;
   }
 
   /**
@@ -118,5 +118,4 @@ class OgMembershipStateCacheContext implements CacheContextInterface {
   public function getCacheableMetadata() {
     return new CacheableMetadata();
   }
-
 }
