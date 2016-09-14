@@ -17,6 +17,11 @@ use Drupal\og\OgMembershipInterface;
  */
 class OgMembershipStateCacheContext implements CacheContextInterface {
 
+  /**
+   * The string to return when no context is found.
+   */
+  const NO_CONTEXT = 'none';
+
 
   /**
    * The group type manager service.
@@ -79,17 +84,17 @@ class OgMembershipStateCacheContext implements CacheContextInterface {
   public function getContext() {
     if (!$route_contexts = $this->routeMatch->getRouteObject()->getOption('parameters')) {
       // No "parameters" defined in the route.
-      return 'none';
+      return self::NO_CONTEXT;
     }
 
     if (!$entity_type_ids = array_keys($this->groupTypeManager->getAllGroupBundles())) {
       // No group entities.
-      return 'none';
+      return self::NO_CONTEXT;
     }
 
     if (!$entity_type_ids = array_intersect(array_keys($route_contexts), $entity_type_ids)) {
       // No parameters that match the group entities.
-      return 'none';
+      return self::NO_CONTEXT;
     }
 
     // Take just the first entity type ID.
