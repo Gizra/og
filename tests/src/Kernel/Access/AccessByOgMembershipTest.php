@@ -8,9 +8,11 @@ use Drupal\block_content\Entity\BlockContentType;
 use Drupal\node\Entity\Node;
 use Drupal\node\Entity\NodeType;
 use Drupal\og\Entity\OgMembership;
+use Drupal\og\Entity\OgRole;
 use Drupal\og\Og;
 use Drupal\og\OgGroupAudienceHelper;
 use Drupal\og\OgMembershipInterface;
+use Drupal\og\OgRoleInterface;
 use Drupal\simpletest\ContentTypeCreationTrait;
 use Drupal\user\Entity\Role;
 use Drupal\user\Entity\User;
@@ -126,14 +128,17 @@ class AccessByOgMembershipTest extends KernelTestBase {
     ];
     Og::createField(OgGroupAudienceHelper::DEFAULT_FIELD, 'node', 'group_content', $settings);
 
-    // Grant members permission to edit any group content.
-    /** @var \Drupal\og\Entity\OgRole $role */
-    $role = $this->container->get('entity_type.manager')
-      ->getStorage('og_role')
-      ->load('block_content-group-member');
+    // Grant both members and non-members permission to edit any group content.
+    foreach ([OgRoleInterface::AUTHENTICATED, OgRoleInterface::ANONYMOUS] as $role_name) {
+      /** @var OgRole $role */
+      $role = OgRole::getRole('block_content', 'group', $role_name);
 
-    $role->grantPermission('edit any group_content content');
-    $role->save();
+      $role
+        ->grantPermission('edit any group_content content')
+        ->save();
+    }
+
+    $role = OgRole::getRole('block_content', 'group', OgRoleInterface::AUTHENTICATED);
 
     // Subscribe the normal member and the blocked member to the group.
     foreach (['member', 'blocked'] as $membership_type) {
@@ -185,7 +190,7 @@ class AccessByOgMembershipTest extends KernelTestBase {
    *
    * @expectedException \Drupal\Core\Entity\EntityStorageException
    */
-  public function testNonMemberRoleMembershipSave() {
+  public function __testNonMemberRoleMembershipSave() {
     $role_id = 'block_content-group-non-member';
     /** @var \Drupal\og\Entity\OgRole $role */
     $role = $this->container->get('entity_type.manager')
@@ -218,6 +223,15 @@ class AccessByOgMembershipTest extends KernelTestBase {
       [
         // Members should have the right to edit any group content.
         'member',
+        [
+          'owner' => TRUE,
+          'member' => TRUE,
+          'blocked' => TRUE,
+        ],
+      ],
+      [
+        // Non-members should have the right to edit any group content.
+        'non-member',
         [
           'owner' => TRUE,
           'member' => TRUE,
