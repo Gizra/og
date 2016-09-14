@@ -136,7 +136,7 @@ class OgMembershipStateCacheContextTest extends UnitTestCase {
       ->willReturn(NULL);
 
     $result = $this->getContextResult();
-    $this->assertEquals('none', $result);
+    $this->assertEquals(OgMembershipStateCacheContext::NO_CONTEXT, $result);
   }
 
   /**
@@ -161,7 +161,7 @@ class OgMembershipStateCacheContextTest extends UnitTestCase {
       ->willReturn([]);
 
     $result = $this->getContextResult();
-    $this->assertEquals('none', $result);
+    $this->assertEquals(OgMembershipStateCacheContext::NO_CONTEXT, $result);
   }
 
   /**
@@ -190,7 +190,7 @@ class OgMembershipStateCacheContextTest extends UnitTestCase {
       ->willReturn($group_entities);
 
     $result = $this->getContextResult();
-    $this->assertEquals('none', $result);
+    $this->assertEquals(OgMembershipStateCacheContext::NO_CONTEXT, $result);
   }
 
   /**
@@ -231,7 +231,7 @@ class OgMembershipStateCacheContextTest extends UnitTestCase {
       ->willReturn(FALSE);
 
     $result = $this->getContextResult();
-    $this->assertEquals('none', $result);
+    $this->assertEquals(OgMembershipStateCacheContext::NO_CONTEXT, $result);
   }
 
   /**
