@@ -46,6 +46,6 @@ interface OgDeleteOrphansInterface {
    * @return array $form
    *   The renderable form array representing the entire configuration form.
    */
-  public function configurationForm($form, FormStateInterface $form_state);
+  public function configurationForm(array $form, FormStateInterface $form_state);
 
 }

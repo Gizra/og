@@ -106,7 +106,7 @@ class OgMembershipRoleReferenceTest extends KernelTestBase {
     $group_member->save();
 
     /** @var OgMembership $membership */
-    $membership = Og::createMembership($this->group, $this->user);
+    $membership = Og::getMembership($this->group, $this->user);
     $membership
       // Assign only the content editor role for now.
       ->setRoles([$content_editor])

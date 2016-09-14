@@ -38,6 +38,13 @@ use Drupal\user\Entity\Role;
 class OgRole extends Role implements OgRoleInterface {
 
   /**
+   * The role name.
+   *
+   * @var string
+   */
+  protected $name;
+
+  /**
    * Constructs an OgRole object.
    *
    * @param array $values
@@ -322,6 +329,13 @@ class OgRole extends Role implements OgRoleInterface {
       OgRoleInterface::ANONYMOUS,
       OgRoleInterface::AUTHENTICATED,
     ]) ? OgRoleInterface::ROLE_TYPE_REQUIRED : OgRoleInterface::ROLE_TYPE_STANDARD;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public static function getRole($entity_type_id, $bundle, $role_name) {
+    return self::load($entity_type_id . '-' . $bundle . '-' . $role_name);
   }
 
   /**

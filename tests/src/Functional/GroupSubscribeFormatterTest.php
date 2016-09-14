@@ -7,6 +7,7 @@ use Drupal\node\Entity\Node;
 use Drupal\node\Entity\NodeType;
 use Drupal\og\Og;
 use Drupal\og\OgRoleInterface;
+use Drupal\og\Entity\OgRole;
 use Drupal\Tests\BrowserTestBase;
 
 /**
@@ -77,7 +78,7 @@ class GroupSubscribeFormatterTest extends BrowserTestBase {
     $this->group->save();
 
     /** @var \Drupal\og\Entity\OgRole $role */
-    $role = Og::getRole('node', $this->groupBundle, OgRoleInterface::ANONYMOUS);
+    $role = OgRole::getRole('node', $this->groupBundle, OgRoleInterface::ANONYMOUS);
     $role
       ->grantPermission('subscribe without approval')
       ->save();
