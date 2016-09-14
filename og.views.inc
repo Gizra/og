@@ -34,7 +34,7 @@ function og_field_views_data(FieldStorageConfigInterface $field_storage) {
   // reference item is no different really.
   switch ($field_storage->getType()) {
     case 'og_standard_reference':
-      $entity_manager = \Drupal::entityManager();
+      $entity_manager = \Drupal::entityTypeManager();
       $entity_type_id = $field_storage->getTargetEntityTypeId();
       /** @var \Drupal\Core\Entity\Sql\DefaultTableMapping $table_mapping */
       $table_mapping = $entity_manager->getStorage($entity_type_id)->getTableMapping();

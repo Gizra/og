@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ruleset name="pbm_default">
+  <description>Default PHP CodeSniffer configuration for Organic Groups.</description>
+  <rule ref="phpcs-ruleset.xml.dist"/>
+  <arg name="extensions" value="php,inc,module,install,info,test,profile,theme,css,js"/>
+  <arg name="report" value="full"/>
+  <arg value="p"/>
+  <file>.</file>
+  <exclude-pattern>./vendor</exclude-pattern>
+</ruleset>

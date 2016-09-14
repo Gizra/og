@@ -192,7 +192,9 @@ class OgMembership extends ContentEntityBase implements OgMembershipInterface {
    */
   public function getRoles() {
     // Add the member role.
-    $roles[] = OgRole::getRole($this->getGroupEntityType(), $this->getGroup()->bundle(), OgRoleInterface::AUTHENTICATED);
+    $roles = [
+      OgRole::getRole($this->getGroupEntityType(), $this->getGroup()->bundle(), OgRoleInterface::AUTHENTICATED),
+    ];
     $roles = array_merge($roles, $this->get('roles')->referencedEntities());
     return $roles;
   }
@@ -228,7 +230,7 @@ class OgMembership extends ContentEntityBase implements OgMembershipInterface {
       return FALSE;
     }
 
-    return array_filter($this->getRoles(), function (OgRole $role) use ($permission) {
+    return (bool) array_filter($this->getRoles(), function (OgRole $role) use ($permission) {
       return $role->hasPermission($permission);
     });
   }
