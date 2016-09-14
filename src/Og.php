@@ -8,7 +8,6 @@ use Drupal\Core\Field\FieldDefinitionInterface;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\field\Entity\FieldConfig;
 use Drupal\field\Entity\FieldStorageConfig;
-use Drupal\og\Entity\OgRole;
 
 /**
  * A static helper class for OG.
@@ -196,8 +195,7 @@ class Og {
    *   Defaults to active memberships.
    *
    * @return bool
-   *   TRUE if the entity (e.g. the user or node) belongs to a group with
-   *   a certain state.
+   *   TRUE if the user belongs to a group with a certain state.
    */
   public static function isMember(EntityInterface $group, AccountInterface $user, $states = [OgMembershipInterface::STATE_ACTIVE]) {
     /** @var \Drupal\og\MembershipManagerInterface $membership_manager */
@@ -310,23 +308,6 @@ class Og {
   }
 
   /**
-   * Get a role by the group's bundle and role name.
-   *
-   * @param string $entity_type_id
-   *   The group entity type ID.
-   * @param string $bundle
-   *   The group bundle name.
-   * @param string $role_name
-   *   The role name.
-   *
-   * @return \Drupal\og\OgRoleInterface|null
-   *   The OG role object, or NULL if a matching role was not found.
-   */
-  public static function getRole($entity_type_id, $bundle, $role_name) {
-    return OgRole::load($entity_type_id . '-' . $bundle . '-' . $role_name);
-  }
-
-  /**
    * Return the og permission handler instance.
    *
    * @return \Drupal\og\OgPermissionHandler
@@ -391,11 +372,12 @@ class Og {
    * @param string $plugin_id
    *   The plugin ID, which is also the default field name.
    *
-   * @throws \Exception
-   *
    * @return OgFieldBase|bool
    *   An array with the field storage config and field config definitions, or
    *   FALSE if none found.
+   *
+   * @throws \Exception
+   *   Thrown when the requested plugin is not valid.
    */
   protected static function getFieldBaseDefinition($plugin_id) {
     /** @var OgFieldsPluginManager $plugin_manager */
@@ -419,6 +401,8 @@ class Og {
    *   Returns the OG selection handler.
    *
    * @throws \Exception
+   *   Thrown when the passed in field definition is not of a group audience
+   *   field.
    */
   public static function getSelectionHandler(FieldDefinitionInterface $field_definition, array $options = []) {
     if (!OgGroupAudienceHelper::isGroupAudienceField($field_definition)) {

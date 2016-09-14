@@ -5,6 +5,7 @@ namespace Drupal\Tests\og\Functional;
 use Drupal\Component\Utility\Unicode;
 use Drupal\node\Entity\Node;
 use Drupal\og\Entity\OgMembershipType;
+use Drupal\og\Entity\OgRole;
 use Drupal\og\Og;
 use Drupal\og\OgMembershipInterface;
 use Drupal\og\OgRoleInterface;
@@ -92,6 +93,8 @@ class GroupSubscribeTest extends BrowserTestBase {
     parent::setUp();
 
     // Create bundles.
+    // We don't need to later call NodeType::create() on the bundles, as we
+    // don't call the node view.
     $this->groupBundle1 = Unicode::strtolower($this->randomMachineName());
     $this->groupBundle2 = Unicode::strtolower($this->randomMachineName());
     $this->nonGroupBundle = Unicode::strtolower($this->randomMachineName());
@@ -136,8 +139,8 @@ class GroupSubscribeTest extends BrowserTestBase {
     ]);
     $this->group4->save();
 
-    /** @var \Drupal\og\Entity\OgRole $role */
-    $role = Og::getRole('node', $this->groupBundle1, OgRoleInterface::ANONYMOUS);
+    $role = OgRole::getRole('node', $this->groupBundle1, OgRoleInterface::ANONYMOUS);
+
     $role
       ->grantPermission('subscribe without approval')
       ->save();
@@ -210,14 +213,17 @@ class GroupSubscribeTest extends BrowserTestBase {
       [
         'entity_type_id' => Unicode::strtolower($this->randomMachineName()),
         'entity_id' => 1,
-        'code' => 403,
+        // @todo This currently returns a 500 error due to a bug in core. Change
+        //   this to a 403 or 404 when the bug is fixed.
+        // @see https://www.drupal.org/node/2786897
+        'code' => 500,
       ],
 
       // A non existing entity ID.
       [
         'entity_type_id' => 'node',
         'entity_id' => rand(1000, 2000),
-        'code' => 403,
+        'code' => 404,
       ],
     ];
 

@@ -2,18 +2,19 @@
 
 namespace Drupal\og\Controller;
 
-use Drupal\Component\Plugin\Exception\PluginNotFoundException;
 use Drupal\Core\Controller\ControllerBase;
+use Drupal\Core\Entity\ContentEntityInterface;
+use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Url;
+use Drupal\og\OgAccessInterface;
+use Drupal\og\OgMembershipInterface;
 use Drupal\og\OgMembershipTypeInterface;
 use Drupal\user\Entity\User;
 use Drupal\user\EntityOwnerInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpFoundation\RedirectResponse;
-use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 use Drupal\og\Og;
-use Drupal\og\OgAccess;
 
 /**
  * Controller for OG subscription routes.
@@ -24,14 +25,17 @@ class SubscriptionController extends ControllerBase {
   /**
    * OG access service.
    *
-   * @var \Drupal\og\OgAccess
+   * @var \Drupal\og\OgAccessInterface
    */
   protected $ogAccess;
 
   /**
    * Constructs a SubscriptionController object.
+   *
+   * @param \Drupal\og\OgAccessInterface $og_access
+   *   The OG access service.
    */
-  public function __construct(OgAccess $og_access) {
+  public function __construct(OgAccessInterface $og_access) {
     $this->ogAccess = $og_access;
   }
 
@@ -47,11 +51,9 @@ class SubscriptionController extends ControllerBase {
   /**
    * Subscribe a user to group.
    *
-   * @param \Symfony\Component\HttpFoundation\Request $request
-   *   The request object.
    * @param string $entity_type_id
    *   The entity type of the group entity.
-   * @param string|int $entity_id
+   * @param \Drupal\Core\Entity\EntityInterface $group
    *   The entity ID of the group entity.
    * @param \Drupal\og\OgMembershipTypeInterface $membership_type
    *   The membership type to be used for creating the membership.
@@ -60,16 +62,8 @@ class SubscriptionController extends ControllerBase {
    *   Redirect user or show access denied if they are not allowed to subscribe,
    *   otherwise provide a subscribe confirmation form.
    */
-  public function subscribe(Request $request, $entity_type_id, $entity_id, OgMembershipTypeInterface $membership_type) {
-    try {
-      $entity_storage = $this->entityTypeManager()->getStorage($entity_type_id);
-    }
-    catch (PluginNotFoundException $e) {
-      // Not a valid entity type.
-      throw new AccessDeniedHttpException();
-    }
-
-    if (!$group = $entity_storage->load($entity_id)) {
+  public function subscribe($entity_type_id, EntityInterface $group, OgMembershipTypeInterface $membership_type) {
+    if (!$group instanceof ContentEntityInterface) {
       // Not a valid entity.
       throw new AccessDeniedHttpException();
     }
@@ -142,27 +136,28 @@ class SubscriptionController extends ControllerBase {
   /**
    * Unsubscribe a user from group.
    *
-   * @param string $entity_type_id
-   *   The entity type of the group entity.
-   * @param string|int $entity_id
-   *   The entity ID of the group entity.
+   * @param \Drupal\Core\Entity\ContentEntityInterface $group
+   *   The group entity.
    *
    * @return mixed
    *   Redirect user or show access denied if they are not allowed to subscribe,
    *   otherwise provide an un-subscribe confirmation form.
    */
-  public function unsubscribe($entity_type_id, $entity_id) {
-    $entity_storage = $this->entityTypeManager()->getStorage($entity_type_id);
-    $group = $entity_storage->load($entity_id);
-
+  public function unsubscribe(ContentEntityInterface $group) {
     $user = $this->currentUser();
 
-    if (!$membership = Og::getMembership($group, $user)) {
+    $states = [
+      OgMembershipInterface::STATE_ACTIVE,
+      OgMembershipInterface::STATE_PENDING,
+      OgMembershipInterface::STATE_BLOCKED,
+    ];
+
+    if (!$membership = Og::getMembership($group, $user, $states)) {
       // User is not a member.
       throw new AccessDeniedHttpException();
     }
 
-    if (Og::isMemberBlocked($group, $user)) {
+    if ($membership->getState() == OgMembershipInterface::STATE_BLOCKED) {
       // User is a blocked member.
       throw new AccessDeniedHttpException();
     }

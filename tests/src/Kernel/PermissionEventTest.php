@@ -135,7 +135,6 @@ class PermissionEventTest extends KernelTestBase {
       'manage roles',
       'subscribe without approval',
       'subscribe',
-      'unsubscribe',
       'update group',
     ];
     // Test permissions that should only be available for the test group that

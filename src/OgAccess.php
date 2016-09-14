@@ -67,8 +67,6 @@ class OgAccess implements OgAccessInterface {
    * The group manager.
    *
    * @var \Drupal\og\GroupTypeManager
-   *
-   * @todo This should be GroupManagerInterface.
    */
   protected $groupTypeManager;
 
@@ -120,8 +118,9 @@ class OgAccess implements OgAccessInterface {
     // As Og::isGroup depends on this config, we retrieve it here and set it as
     // the minimal caching data.
     $config = $this->configFactory->get('og.settings');
-    $cacheable_metadata = (new CacheableMetadata)
+    $cacheable_metadata = (new CacheableMetadata())
         ->addCacheableDependency($config);
+
     if (!$this->groupTypeManager->isGroup($group_type_id, $bundle)) {
       // Not a group.
       return AccessResult::neutral()->addCacheableDependency($cacheable_metadata);

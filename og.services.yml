@@ -7,35 +7,40 @@ services:
   og.access:
     class: Drupal\og\OgAccess
     arguments: ['@config.factory', '@current_user', '@module_handler', '@og.group_type_manager', '@og.permission_manager', '@og.membership_manager']
-  og.membership_manager:
-    class: Drupal\og\MembershipManager
-    arguments: ['@entity_type.manager']
   og.event_subscriber:
     class: Drupal\og\EventSubscriber\OgEventSubscriber
     arguments: ['@og.permission_manager', '@entity_type.manager', '@entity_type.bundle.info']
     tags:
       - { name: 'event_subscriber' }
+  og.group_resolver:
+    class: Drupal\og\GroupResolverHandler
+    arguments: ['@config.factory', '@plugin.manager.og.context', '@entity_type.manager']
   og.group_type_manager:
     class: Drupal\og\GroupTypeManager
-    arguments: ['@config.factory', '@entity_type.manager', '@entity_type.bundle.info', '@event_dispatcher', '@state', '@og.permission_manager', '@og.role_manager']
+    arguments: ['@config.factory', '@entity_type.manager', '@entity_type.bundle.info', '@event_dispatcher', '@state', '@og.permission_manager', '@og.role_manager', '@router.builder']
+  og.membership_manager:
+    class: Drupal\og\MembershipManager
+    arguments: ['@entity_type.manager']
   og.permissions:
     class: Drupal\og\OgPermissionHandler
     arguments: ['@module_handler', '@string_translation', '@controller_resolver']
   og.permission_manager:
     class: Drupal\og\PermissionManager
     arguments: ['@event_dispatcher']
-  og.group_resolver:
-    class: Drupal\og\GroupResolverHandler
-    arguments: ['@config.factory', '@plugin.manager.og.context', '@entity_type.manager']
   og.role_manager:
     class: Drupal\og\OgRoleManager
     arguments: ['@entity_type.manager', '@event_dispatcher', '@og.permission_manager']
+  og.route_subscriber:
+    class: Drupal\og\Routing\RouteSubscriber
+    arguments: ['@entity_type.manager', '@router.route_provider', '@event_dispatcher']
+    tags:
+      - { name: event_subscriber }
+  plugin.manager.og.context:
+    class: Drupal\og\GroupResolverManager
+    parent: default_plugin_manager
   plugin.manager.og.delete_orphans:
     class: Drupal\og\OgDeleteOrphansPluginManager
     parent: default_plugin_manager
   plugin.manager.og.fields:
     class: Drupal\og\OgFieldsPluginManager
-    parent: default_plugin_manager
-  plugin.manager.og.context:
-    class: Drupal\og\GroupResolverManager
     parent: default_plugin_manager

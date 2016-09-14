@@ -75,6 +75,7 @@ class OgUiController extends ControllerBase {
     $action = $type === 'roles' ? t('Edit roles') : t('Edit permissions');
     $header = [t('Group type'), t('Operations')];
     $rows = [];
+    $build = [];
 
     foreach ($this->groupTypeManager->getAllGroupBundles() as $entity_type => $bundles) {
       $definition = $this->entityTypeManager->getDefinition($entity_type);

@@ -6,6 +6,7 @@ use Drupal\Component\Utility\Unicode;
 use Drupal\KernelTests\KernelTestBase;
 use Drupal\node\Entity\Node;
 use Drupal\og\Entity\OgMembership;
+use Drupal\og\Entity\OgRole;
 use Drupal\og\Og;
 use Drupal\og\OgRoleInterface;
 use Drupal\user\Entity\Role;
@@ -111,20 +112,20 @@ class GroupSubscribeFormTest extends KernelTestBase {
 
     // Change the permissions of group to "subscribe".
     /** @var OgRole $role */
-    $role = Og::getRole('node', $groupBundle1, OgRoleInterface::ANONYMOUS);
+    $role = OgRole::getRole('node', $groupBundle1, OgRoleInterface::ANONYMOUS);
     $role
       ->grantPermission('subscribe')
       ->save();
 
     // Change the permissions of group to allow "subscribe without approval".
-    $role = Og::getRole('node', $groupBundle2, OgRoleInterface::ANONYMOUS);
+    $role = OgRole::getRole('node', $groupBundle2, OgRoleInterface::ANONYMOUS);
     $role
       ->grantPermission('subscribe without approval')
       ->save();
 
     // Change the permissions of group to allow "subscribe without approval" on
     // the unpublished node.
-    $role = Og::getRole('node', $groupBundle3, OgRoleInterface::ANONYMOUS);
+    $role = OgRole::getRole('node', $groupBundle3, OgRoleInterface::ANONYMOUS);
     $role
       ->grantPermission('subscribe without approval')
       ->save();
