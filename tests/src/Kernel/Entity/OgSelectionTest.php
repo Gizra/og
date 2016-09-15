@@ -9,6 +9,7 @@ use Drupal\node\Entity\NodeType;
 use Drupal\KernelTests\KernelTestBase;
 use Drupal\og\Og;
 use Drupal\og\OgGroupAudienceHelper;
+use Drupal\user\Entity\Role;
 use Drupal\user\Entity\User;
 
 /**
@@ -16,7 +17,7 @@ use Drupal\user\Entity\User;
  *
  * @group og
  */
-class SelectionHandlerTest extends KernelTestBase {
+class OgSelectionTest extends KernelTestBase {
 
   /**
    * The selection handler.
@@ -38,18 +39,25 @@ class SelectionHandlerTest extends KernelTestBase {
   ];
 
   /**
-   * A user object.
+   * A site-wide group administrator.
    *
-   * @var User
+   * @var \Drupal\user\Entity\User
    */
-  protected $user1;
+  protected $groupAdmin;
 
   /**
-   * A user object.
+   * A group manager.
    *
-   * @var User
+   * @var \Drupal\user\Entity\User
    */
-  protected $user2;
+  protected $groupManager;
+
+  /**
+   * A regular group member.
+   *
+   * @var \Drupal\user\Entity\User
+   */
+  protected $groupMember;
 
   /**
    * The machine name of the group node type.
@@ -101,21 +109,38 @@ class SelectionHandlerTest extends KernelTestBase {
       'name' => $this->randomString(),
     ])->save();
 
-    // Define the group content as group.
+    // Define bundle as group.
     Og::groupTypeManager()->addGroup('node', $this->groupBundle);
 
     // Add og audience field to group content.
     $this->fieldDefinition = Og::createField(OgGroupAudienceHelper::DEFAULT_FIELD, 'node', $this->groupContentBundle);
 
-    // Get the storage of the field.
-    $this->selectionHandler = Og::getSelectionHandler($this->fieldDefinition, ['handler_settings' => ['field_mode' => 'default']]);
+    // The selection handler for the field.
+    $this->selectionHandler = Og::getSelectionHandler($this->fieldDefinition);
 
-    // Create two users.
-    $this->user1 = User::create(['name' => $this->randomString()]);
-    $this->user1->save();
+    // Create users.
+    $this->groupAdmin = User::create(['name' => $this->randomString()]);
+    $this->groupAdmin->save();
 
-    $this->user2 = User::create(['name' => $this->randomString()]);
-    $this->user2->save();
+    $this->groupManager = User::create(['name' => $this->randomString()]);
+    $this->groupManager->save();
+
+    $this->groupMember = User::create(['name' => $this->randomString()]);
+    $this->groupMember->save();
+
+    // Assign administer-group permission to admin.
+    $role = Role::create([
+      'id' => $this->randomMachineName(),
+      'label' => $this->randomMachineName(),
+    ]);
+
+    $role
+      ->grantPermission('administer group')
+      ->save();
+
+    $this
+      ->groupAdmin
+      ->addRole($role->id());
   }
 
   /**
@@ -138,28 +163,25 @@ class SelectionHandlerTest extends KernelTestBase {
    * and the other users group's in the other groups widget and vice versa.
    */
   public function testSelectionHandlerResults() {
-    $user1_groups = $this->createGroups(2, $this->user1);
-    $user2_groups = $this->createGroups(2, $this->user2);
+    $user1_groups = $this->createGroups(5, $this->groupAdmin);
+    $user2_groups = $this->createGroups(5, $this->groupManager);
 
-    // Checking that the user get the groups he mange.
-    $this->setCurrentAccount($this->user1);
+    $all_groups_ids = array_merge($user1_groups, $user2_groups);
+
+    // Admin user can create content on all groups.
+    $this->setCurrentAccount($this->groupAdmin);
     $groups = $this->selectionHandler->getReferenceableEntities();
-    $this->assertEquals($user1_groups, array_keys($groups[$this->groupBundle]));
+    $this->assertEquals($all_groups_ids, array_keys($groups[$this->groupBundle]));
 
-    $this->setCurrentAccount($this->user2);
-    $groups = $this->selectionHandler->getReferenceableEntities();
-    $this->assertEquals($user2_groups, array_keys($groups[$this->groupBundle]));
-
-    // Check the other groups.
-    $this->selectionHandler = Og::getSelectionHandler($this->fieldDefinition, ['handler_settings' => ['field_mode' => 'admin']]);
-
-    $this->setCurrentAccount($this->user1);
+    // Group manager can create content in their groups.
+    $this->setCurrentAccount($this->groupManager);
     $groups = $this->selectionHandler->getReferenceableEntities();
     $this->assertEquals($user2_groups, array_keys($groups[$this->groupBundle]));
 
-    $this->setCurrentAccount($this->user2);
-    $groups = $this->selectionHandler->getReferenceableEntities();
-    $this->assertEquals($user1_groups, array_keys($groups[$this->groupBundle]));
+    // Group member cannot create content in their groups when they don't have
+    // access to.
+
+    // Grant group member access to create content.
   }
 
   /**

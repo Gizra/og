@@ -401,7 +401,7 @@ class Og {
     $options = [
       'target_type' => $field_definition->getFieldStorageDefinition()->getSetting('target_type'),
       'handler' => $field_definition->getSetting('handler'),
-      'handler_settings' => $field_definition->getSetting('handler_settings')
+      'handler_settings' => $field_definition->getSetting('handler_settings'),
     ];
 
     return \Drupal::service('plugin.manager.entity_reference_selection')->createInstance('og:default', $options);

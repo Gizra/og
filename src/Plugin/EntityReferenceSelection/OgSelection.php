@@ -2,10 +2,7 @@
 
 namespace Drupal\og\Plugin\EntityReferenceSelection;
 
-use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Entity\Plugin\EntityReferenceSelection\DefaultSelection;
-use Drupal\og\OgAccess;
-use Drupal\og\OgAccessInterface;
 use Drupal\user\Entity\User;
 use Drupal\og\Og;
 
@@ -95,7 +92,7 @@ class OgSelection extends DefaultSelection {
     foreach ($this->getUserGroups() as $group) {
       // Check user has "create" permission on this entity.
       $operation = 'create ' . $group->getEntityTypeId() . ' ' . $group->bundle();
-      if ($og_access->userAccess($group, $operation , $user)) {
+      if ($og_access->userAccess($group, $operation, $user)) {
         $ids[] = $group->id();
       }
     }
