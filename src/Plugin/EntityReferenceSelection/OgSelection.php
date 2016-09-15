@@ -4,6 +4,8 @@ namespace Drupal\og\Plugin\EntityReferenceSelection;
 
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Entity\Plugin\EntityReferenceSelection\DefaultSelection;
+use Drupal\og\OgAccess;
+use Drupal\og\OgAccessInterface;
 use Drupal\user\Entity\User;
 use Drupal\og\Og;
 
@@ -86,9 +88,17 @@ class OgSelection extends DefaultSelection {
     // User is a non-site wide group admin.
     $identifier_key = $definition->getKey('id');
 
-    $ids = array_map(function (EntityInterface $group) {
-      return $group->id();
-    }, $this->getUserGroups());
+    /** @var \Drupal\og\OgAccessInterface $og_access */
+    $og_access = \Drupal::service('og.access');
+
+    $ids = [];
+    foreach ($this->getUserGroups() as $group) {
+      // Check user has "create" permission on this entity.
+      $operation = 'create ' . $group->getEntityTypeId() . ' ' . $group->bundle();
+      if ($og_access->userAccess($group, $operation , $user)) {
+        $ids[] = $group->id();
+      }
+    }
 
     if ($ids) {
       $query->condition($identifier_key, $ids, 'IN');
