@@ -223,7 +223,19 @@ function og_field_formatter_info_alter(array &$info) {
  * Implements hook_field_widget_info_alter().
  */
 function og_field_widget_info_alter(array &$info) {
-  $info['options_buttons']['field_types'][] = OgGroupAudienceHelper::GROUP_REFERENCE;
+  $field_types = [
+    'entity_reference_autocomplete',
+    'entity_reference_autocomplete_tags',
+    'options_buttons',
+    'options_select',
+  ];
+
+  foreach ($field_types as $field_type) {
+    $info[$field_type]['field_types'][] = OgGroupAudienceHelper::GROUP_REFERENCE;
+  }
+
+
+
 }
 
 /**
