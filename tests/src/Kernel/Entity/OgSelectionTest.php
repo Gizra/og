@@ -7,8 +7,10 @@ use Drupal\Core\Session\AccountInterface;
 use Drupal\node\Entity\Node;
 use Drupal\node\Entity\NodeType;
 use Drupal\KernelTests\KernelTestBase;
+use Drupal\og\Entity\OgRole;
 use Drupal\og\Og;
 use Drupal\og\OgGroupAudienceHelper;
+use Drupal\og\OgRoleInterface;
 use Drupal\user\Entity\Role;
 use Drupal\user\Entity\User;
 
@@ -178,10 +180,31 @@ class OgSelectionTest extends KernelTestBase {
     $groups = $this->selectionHandler->getReferenceableEntities();
     $this->assertEquals($user2_groups, array_keys($groups[$this->groupBundle]));
 
+    // Non-group member.
+    $this->setCurrentAccount($this->groupMember);
+    $groups = $this->selectionHandler->getReferenceableEntities();
+    $this->assertTrue(empty($groups[$this->groupBundle]));
+
+    // Group member access to create content.
+    $group_id = $user1_groups[0];
+    $group = Node::load($group_id);
+    $membership = Og::createMembership($group, $this->groupMember);
+    $membership->save();
+
     // Group member cannot create content in their groups when they don't have
     // access to.
+    $groups = $this->selectionHandler->getReferenceableEntities();
+    $this->assertTrue(empty($groups[$this->groupBundle]));
 
-    // Grant group member access to create content.
+
+    // Grant OG permission.
+    $og_role = OgRole::getRole('node', $this->groupBundle, OgRoleInterface::AUTHENTICATED);
+    $og_role
+      ->grantPermission('create node ' . $this->groupContentBundle)
+      ->save();
+
+    $groups = $this->selectionHandler->getReferenceableEntities();
+    $this->assertEquals([$group_id], array_keys($groups[$this->groupBundle]));
   }
 
   /**

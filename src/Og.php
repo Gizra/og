@@ -402,6 +402,8 @@ class Og {
       'target_type' => $field_definition->getFieldStorageDefinition()->getSetting('target_type'),
       'handler' => $field_definition->getSetting('handler'),
       'handler_settings' => $field_definition->getSetting('handler_settings'),
+      'entity_type_id' => $field_definition->getTargetEntityTypeId(),
+      'bundle' => $field_definition->getTargetBundle(),
     ];
 
     return \Drupal::service('plugin.manager.entity_reference_selection')->createInstance('og:default', $options);
@@ -412,6 +414,9 @@ class Og {
    */
   public static function reset() {
     static::$cache = [];
+
+    \Drupal::service('og.access')->reset();
+    \Drupal::service('og.membership_manager')->reset();
   }
 
 }
