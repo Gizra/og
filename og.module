@@ -232,9 +232,6 @@ function og_field_widget_info_alter(array &$info) {
   foreach ($field_types as $field_type) {
     $info[$field_type]['field_types'][] = OgGroupAudienceHelper::GROUP_REFERENCE;
   }
-
-
-
 }
 
 /**

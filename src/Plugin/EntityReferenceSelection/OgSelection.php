@@ -2,7 +2,6 @@
 
 namespace Drupal\og\Plugin\EntityReferenceSelection;
 
-use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Entity\Plugin\EntityReferenceSelection\DefaultSelection;
 use Drupal\user\Entity\User;
 use Drupal\og\Og;
@@ -99,8 +98,6 @@ class OgSelection extends DefaultSelection {
       $entity_type_id = $entity->getEntityTypeId();
       $bundle = $entity->bundle();
     }
-
-
 
     $ids = [];
     foreach ($this->getUserGroups() as $group) {

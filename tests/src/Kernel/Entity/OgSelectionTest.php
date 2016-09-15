@@ -196,7 +196,6 @@ class OgSelectionTest extends KernelTestBase {
     $groups = $this->selectionHandler->getReferenceableEntities();
     $this->assertTrue(empty($groups[$this->groupBundle]));
 
-
     // Grant OG permission.
     $og_role = OgRole::getRole('node', $this->groupBundle, OgRoleInterface::AUTHENTICATED);
     $og_role
