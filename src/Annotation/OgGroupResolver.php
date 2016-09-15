@@ -5,14 +5,14 @@ namespace Drupal\og\Annotation;
 use Drupal\Component\Annotation\Plugin;
 
 /**
- * Defines a OG group resolver item annotation object.
+ * Defines the OgGroupResolver annotation object.
  *
- * @see \Drupal\og\Plugin\GroupResolverManager
+ * @see \Drupal\og\OgGroupResolverPluginManager
  * @see plugin_api
  *
  * @Annotation
  */
-class GroupResolver extends Plugin {
+class OgGroupResolver extends Plugin {
 
   /**
    * The plugin ID.

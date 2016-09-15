@@ -32,12 +32,12 @@ services:
     arguments: ['@entity_type.manager', '@router.route_provider', '@event_dispatcher']
     tags:
       - { name: event_subscriber }
-  plugin.manager.og.context:
-    class: Drupal\og\GroupResolverPluginManager
-    parent: default_plugin_manager
   plugin.manager.og.delete_orphans:
     class: Drupal\og\OgDeleteOrphansPluginManager
     parent: default_plugin_manager
   plugin.manager.og.fields:
     class: Drupal\og\OgFieldsPluginManager
+    parent: default_plugin_manager
+  plugin.manager.og.group_resolver:
+    class: Drupal\og\OgGroupResolverPluginManager
     parent: default_plugin_manager

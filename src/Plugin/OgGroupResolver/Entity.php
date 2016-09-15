@@ -1,29 +1,24 @@
 <?php
 
-namespace Drupal\og\Plugin\GroupResolver;
-
-/**
- * @file
- * Contains \Drupal\og\Plugin\GroupResolver\Entity.
- */
+namespace Drupal\og\Plugin\OgGroupResolver;
 
 use Drupal\Core\Entity\ContentEntityBase;
 use Drupal\Core\Routing\RouteMatchInterface;
 use Drupal\og\GroupTypeManager;
 use Drupal\og\Og;
-use Drupal\og\OgContextBase;
+use Drupal\og\OgGroupResolverBase;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Get the group from the given viewed entity.
  *
- * @GroupResolver(
+ * @OgGroupResolver(
  *  id = "entity",
  *  label = "Entity",
  *  description = @Translation("Get the group from the current entity, by checking if it is a group or a group content entity.")
  * )
  */
-class Entity extends OgContextBase {
+class Entity extends OgGroupResolverBase {
 
   /**
    * The route match service.

@@ -7,12 +7,12 @@ use Drupal\Core\Extension\ModuleHandlerInterface;
 use Drupal\Core\Plugin\DefaultPluginManager;
 
 /**
- * Plugin manager for GroupResolver plugins.
+ * Plugin manager for OgGroupResolver plugins.
  */
-class GroupResolverPluginManager extends DefaultPluginManager {
+class OgGroupResolverPluginManager extends DefaultPluginManager {
 
   /**
-   * Constructs a GroupResolverPluginManager.
+   * Constructs an OgGroupResolverPluginManager service.
    *
    * @param \Traversable $namespaces
    *   An object that implements \Traversable which contains the root paths
@@ -23,7 +23,7 @@ class GroupResolverPluginManager extends DefaultPluginManager {
    *   The module handler to invoke the alter hook with.
    */
   public function __construct(\Traversable $namespaces, CacheBackendInterface $cache_backend, ModuleHandlerInterface $module_handler) {
-    parent::__construct('Plugin/GroupResolver', $namespaces, $module_handler, 'Drupal\og\OgContextInterface', 'Drupal\og\Annotation\GroupResolver');
+    parent::__construct('Plugin/OgGroupResolver', $namespaces, $module_handler, 'Drupal\og\OgGroupResolverInterface', 'Drupal\og\Annotation\OgGroupResolver');
 
     $this->alterInfo('og_group_resolver_info');
     $this->setCacheBackend($cache_backend, 'og_group_resolver');
