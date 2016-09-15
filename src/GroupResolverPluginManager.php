@@ -2,17 +2,17 @@
 
 namespace Drupal\og;
 
-use Drupal\Core\Plugin\DefaultPluginManager;
 use Drupal\Core\Cache\CacheBackendInterface;
 use Drupal\Core\Extension\ModuleHandlerInterface;
+use Drupal\Core\Plugin\DefaultPluginManager;
 
 /**
- * Provides the OG group resolver plugin manager.
+ * Plugin manager for GroupResolver plugins.
  */
-class GroupResolverManager extends DefaultPluginManager {
+class GroupResolverPluginManager extends DefaultPluginManager {
 
   /**
-   * Constructor for GroupResolverManager objects.
+   * Constructs a GroupResolverPluginManager.
    *
    * @param \Traversable $namespaces
    *   An object that implements \Traversable which contains the root paths
@@ -26,7 +26,7 @@ class GroupResolverManager extends DefaultPluginManager {
     parent::__construct('Plugin/GroupResolver', $namespaces, $module_handler, 'Drupal\og\OgContextInterface', 'Drupal\og\Annotation\GroupResolver');
 
     $this->alterInfo('og_group_resolver_info');
-    $this->setCacheBackend($cache_backend, 'og_group_resolver_plugins');
+    $this->setCacheBackend($cache_backend, 'og_group_resolver');
   }
 
 }
