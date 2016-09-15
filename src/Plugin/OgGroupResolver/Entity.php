@@ -28,11 +28,11 @@ class Entity extends OgGroupResolverBase {
   protected $routeMatch;
 
   /**
-   * The group manager service.
+   * The group type manager service.
    *
-   * @var \Drupal\og\GroupManager
+   * @var \Drupal\og\GroupTypeManager
    */
-  protected $groupManger;
+  protected $groupTypeManager;
 
   /**
    * Constructs a Drupal\Component\Plugin\PluginBase object.
@@ -45,13 +45,13 @@ class Entity extends OgGroupResolverBase {
    *   The plugin implementation definition.
    * @param \Drupal\Core\Routing\RouteMatchInterface $route_match
    *   The route match service.
-   * @param \Drupal\og\GroupTypeManager $group_manager
-   *   The group manager service.
+   * @param \Drupal\og\GroupTypeManager $group_type_manager
+   *   The group type manager service.
    */
-  public function __construct(array $configuration, $plugin_id, $plugin_definition, RouteMatchInterface $route_match, GroupTypeManager $group_manager) {
+  public function __construct(array $configuration, $plugin_id, $plugin_definition, RouteMatchInterface $route_match, GroupTypeManager $group_type_manager) {
     parent::__construct($configuration, $plugin_id, $plugin_definition);
     $this->routeMatch = $route_match;
-    $this->groupManger = $group_manager;
+    $this->groupTypeManager = $group_type_manager;
   }
 
   /**
@@ -76,7 +76,7 @@ class Entity extends OgGroupResolverBase {
         continue;
       }
 
-      if ($this->groupManger->isGroup($parameter->getEntityTypeId(), $parameter->bundle())) {
+      if ($this->groupTypeManager->isGroup($parameter->getEntityTypeId(), $parameter->bundle())) {
         return $parameter;
       }
 
