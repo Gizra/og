@@ -2,6 +2,7 @@
 
 namespace Drupal\og\Plugin\EntityReferenceSelection;
 
+use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Entity\Plugin\EntityReferenceSelection\DefaultSelection;
 use Drupal\user\Entity\User;
 use Drupal\og\Og;
@@ -58,7 +59,6 @@ class OgSelection extends DefaultSelection {
    *   it.
    */
   protected function buildEntityQuery($match = NULL, $match_operator = 'CONTAINS') {
-
     // Getting the original entity selection handler. OG selection handler using
     // the default selection handler of the entity, which the field reference
     // to, and add another logic to the query object i.e. check if the entities
@@ -77,37 +77,26 @@ class OgSelection extends DefaultSelection {
       $query->condition($bundle_key, $bundles, 'IN');
     }
 
-    $user_groups = $this->getUserGroups();
-    if (!$user_groups) {
+    $user = User::load(\Drupal::currentUser()->id());
+    if ($user->hasPermission('administer group')) {
+      // User can see all the groups.
       return $query;
     }
 
+    // User is a non-site wide group admin.
     $identifier_key = $definition->getKey('id');
 
-    $ids = [];
-    if (!empty($this->configuration['handler_settings']['field_mode']) && $this->configuration['handler_settings']['field_mode'] == 'admin') {
-      // Don't include the groups, the user doesn't have create permission.
-      foreach ($user_groups as $delta => $group) {
-        $ids[] = $group->id();
-      }
+    $ids = array_map(function (EntityInterface $group) {
+      return $group->id();
+    }, $this->getUserGroups());
 
-      if ($ids) {
-        $query->condition($identifier_key, $ids, 'NOT IN');
-      }
+    if ($ids) {
+      $query->condition($identifier_key, $ids, 'IN');
     }
     else {
-      // Determine which groups should be selectable.
-      foreach ($user_groups as $group) {
-        $ids[] = $group->id();
-      }
-      if ($ids) {
-        $query->condition($identifier_key, $ids, 'IN');
-      }
-      else {
-        // User doesn't have permission to select any group so falsify this
-        // query.
-        $query->condition($identifier_key, -1, '=');
-      }
+      // User doesn't have permission to select any group so falsify this
+      // query.
+      $query->condition($identifier_key, -1);
     }
 
     return $query;

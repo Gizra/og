@@ -60,7 +60,7 @@ class AudienceField extends OgFieldBase implements OgFieldsInterface {
    */
   public function getFormDisplayDefinition(array $values = []) {
     $values += [
-      'type' => 'og_complex',
+      'type' => 'entity_reference_autocomplete',
       'settings' => [
         'match_operator' => 'CONTAINS',
         'size' => 60,
