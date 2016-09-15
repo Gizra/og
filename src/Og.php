@@ -384,8 +384,6 @@ class Og {
    *
    * @param \Drupal\Core\Field\FieldDefinitionInterface $field_definition
    *   The field definition.
-   * @param array $options
-   *   Overriding the default options of the selection handler.
    *
    * @return \Drupal\og\Plugin\EntityReferenceSelection\OgSelection
    *   Returns the OG selection handler.
@@ -394,22 +392,17 @@ class Og {
    *   Thrown when the passed in field definition is not of a group audience
    *   field.
    */
-  public static function getSelectionHandler(FieldDefinitionInterface $field_definition, array $options = []) {
+  public static function getSelectionHandler(FieldDefinitionInterface $field_definition) {
     if (!OgGroupAudienceHelper::isGroupAudienceField($field_definition)) {
       $field_name = $field_definition->getName();
-      throw new \Exception("The field $field_name is not an audience field.");
+      throw new \Exception("The field $field_name is not a group audience field.");
     }
 
-    $options = NestedArray::mergeDeep([
+    $options = [
       'target_type' => $field_definition->getFieldStorageDefinition()->getSetting('target_type'),
       'handler' => $field_definition->getSetting('handler'),
-      'handler_settings' => [
-        'field_mode' => 'default',
-      ],
-    ], $options);
-
-    // Deep merge the handler settings.
-    $options['handler_settings'] = NestedArray::mergeDeep($field_definition->getSetting('handler_settings'), $options['handler_settings']);
+      'handler_settings' => $field_definition->getSetting('handler_settings')
+    ];
 
     return \Drupal::service('plugin.manager.entity_reference_selection')->createInstance('og:default', $options);
   }

@@ -150,9 +150,8 @@ function og_entity_create_access(AccountInterface $account, array $context, $bun
     }
 
     $handler = Og::getSelectionHandler($field_definition);
-
-    if ($handler->getReferenceableEntities()) {
-      return AccessResult::neutral();
+    if ($handler->countReferenceableEntities()) {
+      return AccessResult::allowed();
     }
 
     // Allow users to create content outside of groups, if none of the
