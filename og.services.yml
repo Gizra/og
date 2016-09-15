@@ -12,9 +12,6 @@ services:
     arguments: ['@og.permission_manager', '@entity_type.manager', '@entity_type.bundle.info']
     tags:
       - { name: 'event_subscriber' }
-  og.group_resolver:
-    class: Drupal\og\GroupResolverHandler
-    arguments: ['@config.factory', '@plugin.manager.og.context', '@entity_type.manager']
   og.group_type_manager:
     class: Drupal\og\GroupTypeManager
     arguments: ['@config.factory', '@entity_type.manager', '@entity_type.bundle.info', '@event_dispatcher', '@state', '@og.permission_manager', '@og.role_manager', '@router.builder']

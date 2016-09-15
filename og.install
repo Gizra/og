@@ -74,10 +74,3 @@ function og_schema() {
 
   return $schema;
 }
-
-/**
- * Implements hook_install().
- */
-function og_install() {
-  \Drupal\og\Og::groupResolverHandler()->updateConfigStorage();
-}

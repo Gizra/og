@@ -318,16 +318,6 @@ class Og {
   }
 
   /**
-   * Return the og context handler instance.
-   *
-   * @return GroupResolverHandler
-   *   The OG context handler.
-   */
-  public static function groupResolverHandler() {
-    return \Drupal::service('og.group_resolver');
-  }
-
-  /**
    * Invalidate cache.
    *
    * @param array $group_ids

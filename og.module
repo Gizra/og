@@ -165,13 +165,6 @@ function og_entity_create_access(AccountInterface $account, array $context, $bun
 }
 
 /**
- * Implements hook_cache_flush().
- */
-function og_cache_flush() {
-  Og::groupResolverHandler()->updateConfigStorage();
-}
-
-/**
  * Implements hook_entity_bundle_field_info().
  *
  * Add a read only property to group entities as a group flag.
