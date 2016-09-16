@@ -136,7 +136,7 @@ class MembershipManager implements MembershipManagerInterface {
   /**
    * {@inheritdoc}
    */
-  public function getGroupIds(EntityInterface $entity, $group_type_id = NULL, $group_bundle = NULL) {
+  public function getGroupIds(EntityInterface $entity, $group_type_id = NULL, $group_bundle = NULL, $access_check = FALSE) {
     // This does not work for user entities.
     if ($entity->getEntityTypeId() === 'user') {
       throw new \InvalidArgumentException('\Drupal\og\GroupMembership::getGroupIds() cannot be used for user entities. Use \Drupal\og\GroupMembership::getUserGroups() instead.');
@@ -189,9 +189,7 @@ class MembershipManager implements MembershipManagerInterface {
       $query = $this->entityTypeManager
         ->getStorage($target_type)
         ->getQuery()
-        // When rebuilding node_access grants then checking node_access is
-        // not conductive to success.
-        ->accessCheck(FALSE)
+        ->accessCheck($access_check)
         ->condition($entity_type->getKey('id'), $target_ids, 'IN');
 
       // Optionally filter by group bundle.
