@@ -111,13 +111,6 @@ interface MembershipManagerInterface {
    *   Filter results to only include group IDs of this entity type.
    * @param string $group_bundle
    *   Filter list to only include group IDs with this bundle.
-   * @param bool $access_check
-   *   Determine if access should be checked. When set to FALSE we disable
-   *   entity access check so fetching the groups related to group content are
-   *   not affected by the current user. Furthermore, when rebuilding node
-   *   access and the groups are nodes, we should not try to retrieve node
-   *   access records which do not exist because the rebuild process has already
-   *   erased the grants table.
    *
    * @return array
    *   An associative array, keyed by group entity type, each item an array of
@@ -128,7 +121,7 @@ interface MembershipManagerInterface {
    *
    * @see \Drupal\og\GroupMembershipInterface::getUserGroups()
    */
-  public function getGroupIds(EntityInterface $entity, $group_type_id = NULL, $group_bundle = NULL, $access_check = FALSE);
+  public function getGroupIds(EntityInterface $entity, $group_type_id = NULL, $group_bundle = NULL);
 
   /**
    * Returns all groups that are associated with the given group content entity.
