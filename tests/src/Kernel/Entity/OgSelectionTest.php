@@ -214,7 +214,7 @@ class OgSelectionTest extends KernelTestBase {
    * @param User $user
    *   The user object which owns the groups.
    *
-   * @return ContentEntityBase[]
+   * @return \Drupal\Core\Entity\ContentEntityBase[]
    *   An array of group entities.
    */
   protected function createGroups($amount, User $user) {
