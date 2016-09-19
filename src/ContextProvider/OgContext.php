@@ -70,6 +70,14 @@ class OgContext implements ContextProviderInterface {
     return ['og' => $context];
   }
 
+  /**
+   * Returns the context object containing the relevant group.
+   *
+   * @return \Drupal\Core\Plugin\Context\Context
+   *   A context object containing the group which is relevant in the current
+   *   context as a value. If there is no relevant group in the current context
+   *   then the value will be empty.
+   */
   protected function getOgContext() {
     $cache_contexts = [];
 
@@ -80,8 +88,39 @@ class OgContext implements ContextProviderInterface {
     $cacheability->setCacheContexts($this->cacheContexts);
 
     $context->addCacheableDependency($cacheability);
+
+    return $context;
   }
 
+  /**
+   * Returns the group which best matches the current context.
+   *
+   * There might be several groups that are relevant in the current context, and
+   * this method tries to determine which is the best possible candidate.
+   *
+   * For example, if we are on a page that displays a group content entity that
+   * belongs to two groups, then both groups are relevant in the current
+   * context. We might then decide which group is the better candidate by
+   * looking at a URL query argument or inspecting the user's browsing history
+   * to see if they are coming from a group page.
+   *
+   * This discovery of groups is handled by OgGroupResolver plugins. Each plugin
+   * is responsible for discovering groups in a specific domain (e.g. find all
+   * groups belonging to the current route). The plugins that will be used for
+   * the discovery are configurable; they are listed under the 'group_resolvers'
+   * key in the 'og.settings' config. The plugins are ordered by priority,
+   * meaning that if two groups are relevant to the current context, then the
+   * plugin with the highest priority will decide which group is going to 'win'.
+   *
+   * Developers can customize the group context result by providing their own
+   * plugins and by activating, disabling or reordering the default ones.
+   *
+   * @return \Drupal\Core\Entity\EntityInterface|null
+   *   The group entity which is most relevant in the current context, or NULL
+   *   if no relevant group was found.
+   *
+   * @see \Drupal\og\OgGroupResolverInterface
+   */
   protected function getBestCandidate() {
     /** @var EntityInterface[] $candidates */
     $candidates = [];
@@ -94,6 +133,9 @@ class OgContext implements ContextProviderInterface {
     foreach ($group_resolvers as $plugin_id) {
       /** @var OgGroupResolverInterface $plugin */
       if ($plugin = $this->pluginManager->getInstance(['id' => $plugin_id])) {
+        // @todo Account for plugins that supply auxiliary/optional data, such
+        // as the user session plugin. This data should only be used if there is
+        // no actual data.
         $plugins[$plugin_id] = $plugin;
 
         // Retrieve the "best candidate" in the plugin's domain.
@@ -148,7 +190,10 @@ class OgContext implements ContextProviderInterface {
   }
 
   /**
-   * @todo Document.
+   * Adds a list of cache context IDs to be included in the context object.
+   *
+   * @param string[] $contexts
+   *   An array of cache context IDs.
    */
   protected function addCacheContextIds($contexts) {
     foreach ($contexts as $context) {
