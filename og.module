@@ -81,8 +81,8 @@ function og_help($path, $arg) {
   switch ($path) {
     case 'admin/help#og':
       $path = drupal_get_path('module', 'og');
-      $output  = '<p>' . t("Read the <a href='@url'>README.txt</a> file in the Organic groups module directory.", array('@url' => "/$path/README.txt")) . '</p>';
-      $output .= '<p>' . t("Information about Organic Groups can also be found on the module's<a href='@og'>documentation page</a>.", array('@og' => 'http://drupal.org/documentation/modules/og')) . '</p>';
+      $output  = '<p>' . t("Read the <a href='@url'>README.md</a> file in the Organic groups module directory.", array('@url' => "/$path/README.md")) . '</p>';
+      $output .= '<p>' . t("Information about Organic Groups can also be found on the module's <a href='@og'>documentation page</a>.", array('@og' => 'http://drupal.org/documentation/modules/og')) . '</p>';
       return $output;
   }
 }
