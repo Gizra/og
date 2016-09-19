@@ -118,4 +118,5 @@ class OgMembershipStateCacheContext implements CacheContextInterface {
   public function getCacheableMetadata() {
     return new CacheableMetadata();
   }
+
 }
