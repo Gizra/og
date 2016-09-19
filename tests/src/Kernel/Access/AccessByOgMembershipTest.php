@@ -1,6 +1,6 @@
 <?php
 
-namespace Drupal\Tests\og\Kernel;
+namespace Drupal\Tests\og\Kernel\Access;
 
 use Drupal\KernelTests\KernelTestBase;
 use Drupal\block_content\Entity\BlockContent;
@@ -8,6 +8,7 @@ use Drupal\block_content\Entity\BlockContentType;
 use Drupal\node\Entity\Node;
 use Drupal\node\Entity\NodeType;
 use Drupal\og\Entity\OgMembership;
+use Drupal\og\Entity\OgRole;
 use Drupal\og\Og;
 use Drupal\og\OgGroupAudienceHelper;
 use Drupal\og\OgMembershipInterface;
@@ -17,11 +18,11 @@ use Drupal\user\Entity\Role;
 use Drupal\user\Entity\User;
 
 /**
- * Tests Wiki-style access: non-members have the right to edit any content.
+ * Tests access to content by OgMembership.
  *
  * @group og
  */
-class WikiTest extends KernelTestBase {
+class AccessByOgMembershipTest extends KernelTestBase {
 
   use ContentTypeCreationTrait;
 
@@ -129,14 +130,15 @@ class WikiTest extends KernelTestBase {
 
     // Grant both members and non-members permission to edit any group content.
     foreach ([OgRoleInterface::AUTHENTICATED, OgRoleInterface::ANONYMOUS] as $role_name) {
-      $role_id = "block_content-group-$role_name";
-      /** @var \Drupal\og\Entity\OgRole $role */
-      $role = $this->container->get('entity_type.manager')
-        ->getStorage('og_role')
-        ->load($role_id);
-      $role->grantPermission('edit any group_content content');
-      $role->save();
+      /** @var OgRole $role */
+      $role = OgRole::getRole('block_content', 'group', $role_name);
+
+      $role
+        ->grantPermission('edit any group_content content')
+        ->save();
     }
+
+    $role = OgRole::getRole('block_content', 'group', OgRoleInterface::AUTHENTICATED);
 
     // Subscribe the normal member and the blocked member to the group.
     foreach (['member', 'blocked'] as $membership_type) {
@@ -181,6 +183,28 @@ class WikiTest extends KernelTestBase {
       $result = og_entity_access($this->groupContent[$group_content], 'update', $this->users[$user]);
       $this->assertEquals($expected_result, $result->isAllowed());
     }
+  }
+
+  /**
+   * Tests exception is thrown when trying to save non-member role.
+   *
+   * @expectedException \Drupal\Core\Entity\EntityStorageException
+   */
+  public function testNonMemberRoleMembershipSave() {
+    /** @var OgRole $role */
+    $role = OgRole::getRole('block_content', 'group', OgRoleInterface::ANONYMOUS);
+
+    $role
+      ->grantPermission('edit any group_content content')
+      ->save();
+
+    $membership = OgMembership::create();
+    $membership
+      ->setUser($this->users['non-member'])
+      ->setGroup($this->group)
+      ->addRole($role)
+      ->setState(OgMembershipInterface::STATE_ACTIVE)
+      ->save();
   }
 
   /**
