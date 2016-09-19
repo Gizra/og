@@ -4,3 +4,5 @@ node_access_strict: true
 delete_orphans: false
 delete_orphans_plugin_id: simple
 deny_subscribe_without_approval: true
+group_resolvers:
+  - route_group

@@ -1,0 +1,54 @@
+<?php
+
+namespace Drupal\og;
+
+use Drupal\Core\Plugin\PluginBase;
+
+/**
+ * Base class for OgGroupResolver plugins.
+ */
+abstract class OgGroupResolverBase extends PluginBase implements OgGroupResolverInterface {
+
+  /**
+   * Whether the group resolving process can be stopped.
+   *
+   * @var bool
+   */
+  protected $propagationStopped = FALSE;
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getGroups() {
+    return [];
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getBestCandidate() {
+    $candidates = $this->getGroups();
+    return !empty($candidates) ? reset($candidates) : NULL;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function stopPropagation() {
+    $this->propagationStopped = TRUE;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function isPropagationStopped() {
+    return $this->propagationStopped;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getCacheContextIds() {
+    return [];
+  }
+}
