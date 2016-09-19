@@ -13,14 +13,14 @@ class GroupContentOperationPermission extends Permission {
   /**
    * The group content entity type ID to which this permission applies.
    *
-   * @var $string
+   * @var string
    */
   protected $entityType;
 
   /**
    * The group content bundle ID to which this permission applies.
    *
-   * @var $string
+   * @var string
    */
   protected $bundle;
 
@@ -29,7 +29,7 @@ class GroupContentOperationPermission extends Permission {
    *
    * Examples: 'create', 'update', 'delete'.
    *
-   * @var $string
+   * @var string
    */
   protected $operation;
 

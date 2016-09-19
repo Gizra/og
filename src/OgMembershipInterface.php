@@ -82,7 +82,7 @@ interface OgMembershipInterface extends ContentEntityInterface {
   /**
    * Gets the membership's owner.
    *
-   * @return \Drupal\Core\Session\AccountInterface $user
+   * @return \Drupal\Core\Session\AccountInterface
    *   The user object referenced by the membership.
    */
   public function getUser();
@@ -101,7 +101,7 @@ interface OgMembershipInterface extends ContentEntityInterface {
   /**
    * Gets the group associated with the membership.
    *
-   * @return \Drupal\Core\Entity\EntityInterface $group
+   * @return \Drupal\Core\Entity\EntityInterface
    *   The group object which the membership reference to.
    */
   public function getGroup();
