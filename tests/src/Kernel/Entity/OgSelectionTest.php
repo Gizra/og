@@ -24,7 +24,7 @@ class OgSelectionTest extends KernelTestBase {
   /**
    * The selection handler.
    *
-   * @var \Drupal\og\Plugin\EntityReferenceSelection\OgSelection.
+   * @var \Drupal\og\Plugin\EntityReferenceSelection\OgSelection
    */
   protected $selectionHandler;
 

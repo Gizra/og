@@ -5,7 +5,6 @@ namespace Drupal\Tests\og\Functional;
 use Drupal\block_content\Entity\BlockContent;
 use Drupal\block_content\Entity\BlockContentType;
 use Drupal\node\Entity\Node;
-use Drupal\node\NodeInterface;
 use Drupal\og\Og;
 use Drupal\og\OgGroupAudienceHelper;
 use Drupal\simpletest\BrowserTestBase;

@@ -119,7 +119,7 @@ class OgAccess implements OgAccessInterface {
     // the minimal caching data.
     $config = $this->configFactory->get('og.settings');
     $cacheable_metadata = (new CacheableMetadata())
-        ->addCacheableDependency($config);
+      ->addCacheableDependency($config);
 
     if (!$this->groupTypeManager->isGroup($group_type_id, $bundle)) {
       // Not a group.

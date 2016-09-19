@@ -105,7 +105,7 @@ class GroupTypeManager {
    *   ]
    * @endcode
    *
-   * @var array $groupRelationMap
+   * @var array
    *   An associative array representing group and group content relations.
    */
   protected $groupRelationMap = [];
