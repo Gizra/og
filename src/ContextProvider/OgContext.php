@@ -66,7 +66,7 @@ class OgContext implements ContextProviderInterface {
    * {@inheritdoc}
    */
   public function getAvailableContexts() {
-    $context = new Context(new ContextDefinition('og', $this->t('Active group')));
+    $context = new Context(new ContextDefinition('entity', $this->t('Active group')));
     return ['og' => $context];
   }
 
@@ -79,13 +79,11 @@ class OgContext implements ContextProviderInterface {
    *   then the value will be empty.
    */
   protected function getOgContext() {
-    $cache_contexts = [];
-
-    $context_definition = new ContextDefinition('og', $this->t('Active group'), FALSE);
-    $context = new Context($context_definition, $this->getBestCandidate($cache_contexts));
+    $context_definition = new ContextDefinition('entity', $this->t('Active group'), FALSE);
+    $context = new Context($context_definition, $this->getBestCandidate());
 
     $cacheability = new CacheableMetadata();
-    $cacheability->setCacheContexts($this->cacheContexts);
+    $cacheability->setCacheContexts($this->cacheContextIds);
 
     $context->addCacheableDependency($cacheability);
 
@@ -132,7 +130,7 @@ class OgContext implements ContextProviderInterface {
     $priority = 0;
     foreach ($group_resolvers as $plugin_id) {
       /** @var OgGroupResolverInterface $plugin */
-      if ($plugin = $this->pluginManager->getInstance(['id' => $plugin_id])) {
+      if ($plugin = $this->pluginManager->createInstance($plugin_id)) {
         // @todo Account for plugins that supply auxiliary/optional data, such
         // as the user session plugin. This data should only be used if there is
         // no actual data.
@@ -179,6 +177,10 @@ class OgContext implements ContextProviderInterface {
 
     // We found the best candidate.
     $candidate = reset($candidates);
+
+    if (empty($candidate)) {
+      return NULL;
+    }
 
     // Compile the cache contexts that were used by the plugins that voted for
     // our chosen candidate.
