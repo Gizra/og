@@ -185,7 +185,7 @@ class OgContext implements ContextProviderInterface {
     // Compile the cache contexts that were used by the plugins that voted for
     // our chosen candidate.
     foreach (array_keys($candidate['votes']) as $plugin_id) {
-      $this->addCacheContextIds($plugins[$plugin_id]->getContextIds());
+      $this->addCacheContextIds($plugins[$plugin_id]->getCacheContextIds());
     };
 
     return $candidate['entity'];
