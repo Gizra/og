@@ -7,3 +7,4 @@ deny_subscribe_without_approval: true
 group_resolvers:
   - route_group
   - route_group_content
+  - request_query_argument
