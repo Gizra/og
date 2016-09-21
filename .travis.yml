@@ -34,13 +34,12 @@ before_script:
   # Create new site, stubbing sendmail path with true to prevent delivery errors
   # and manually resolving drush path
   - mysql -e 'create database og'
-  - php -d sendmail_path=`which true` ~/.composer/vendor/bin/drush.php --yes core-quick-drupal --profile=testing --no-server --db-url=mysql://root:@127.0.0.1/og --enable=simpletest og
+  - php -d sendmail_path=`which true` ~/.composer/vendor/bin/drush.php --yes core-quick-drupal --profile=testing --no-server --db-url=mysql://root:@127.0.0.1/og --enable=simpletest
 
   # Reference and enable og in build site.
   - ln -s $(readlink -e $(cd -)) og/drupal/sites/all/modules/og
   - cd og/drupal
-  - drush dl entity ctools features views token
-  - drush --yes pm-enable og og_access og_ui og_field_access og_context entity_feature
+  - drush dl entity ctools
 
   # Start a web server on port 8080, run in the background.
   - drush runserver 127.0.0.1:8080 > ~/php-server.log 2>&1 &
