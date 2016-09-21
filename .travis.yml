@@ -46,6 +46,6 @@ before_script:
   - drush runserver 127.0.0.1:8080 > ~/php-server.log 2>&1 &
 
 script:
-  - php scripts/run-tests.sh --php $(which php) --concurrency 4 --verbose --color --url 127.0.0.1:8080 Message 2>&1 | tee /tmp/simpletest-result.txt
+  - php scripts/run-tests.sh --php $(which php) --concurrency 4 --verbose --color --url 127.0.0.1:8080 OG 2>&1 | tee /tmp/simpletest-result.txt
   - egrep -i "([1-9]+ fail)|(Fatal error)|([1-9]+ exception)" /tmp/simpletest-result.txt && exit 1
   - exit 0
