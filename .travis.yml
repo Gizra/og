@@ -34,7 +34,7 @@ before_script:
   # Create new site, stubbing sendmail path with true to prevent delivery errors
   # and manually resolving drush path
   - mysql -e 'create database og'
-  - php -d sendmail_path=`which true` ~/.composer/vendor/bin/drush.php --yes core-quick-drupal --profile=testing --no-server --db-url=mysql://root:@127.0.0.1/og --enable=simpletest
+  - php -d sendmail_path=`which true` ~/.composer/vendor/bin/drush.php --yes core-quick-drupal --profile=testing --no-server --db-url=mysql://root:@127.0.0.1/og --enable=simpletest og
 
   # Reference and enable og in build site.
   - ln -s $(readlink -e $(cd -)) og/drupal/sites/all/modules/og
