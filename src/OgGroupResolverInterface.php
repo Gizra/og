@@ -2,8 +2,6 @@
 
 namespace Drupal\og;
 
-use Drupal\Component\Plugin\PluginInspectionInterface;
-
 /**
  * Defines an interface for OgGroupResolver plugins.
  *
@@ -31,22 +29,6 @@ interface OgGroupResolverInterface {
    *   An array of groups.
    */
   public function getGroups();
-
-  /**
-   * Returns the group that is most relevant in the plugin's context.
-   *
-   * A plugin can have enough domain specific knowledge to determine with
-   * certainty that a particular group is the most relevant in a certain domain.
-   * This method can be used to return that group.
-   *
-   * If the plugin doesn't have absolute certainty that a particular group is
-   * the most relevant, this will return NULL.
-   *
-   * @return \Drupal\Core\Entity\EntityInterface|null
-   *   The group that is the best candidate, or NULL if there is no best
-   *   candidate.
-   */
-  public function getBestCandidate();
 
   /**
    * Declares that no further group resolving is necessary.

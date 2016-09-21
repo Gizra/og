@@ -112,16 +112,6 @@ class RequestQueryArgumentResolver extends OgGroupResolverBase implements Contai
   }
 
   /**
-   * {@inheritdoc}
-   */
-  public function getBestCandidate() {
-    if ($this->group === FALSE) {
-      $this->resolve();
-    }
-    return $this->group;
-  }
-
-  /**
    * Resolve the group from the query arguments.
    *
    * The resolved group will be cached locally in $this->group.

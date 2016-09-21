@@ -72,14 +72,6 @@ class RouteGroupContentResolver extends OgRouteGroupResolverBase {
   /**
    * {@inheritdoc}
    */
-  public function getBestCandidate() {
-    // We can't decide which of the groups is the best candidate.
-    return NULL;
-  }
-
-  /**
-   * {@inheritdoc}
-   */
   public function getGroups() {
     $entity = $this->getContentEntity();
     if ($entity && Og::isGroupContent($entity->getEntityTypeId(), $entity->bundle())) {

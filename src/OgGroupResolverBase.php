@@ -26,14 +26,6 @@ abstract class OgGroupResolverBase extends PluginBase implements OgGroupResolver
   /**
    * {@inheritdoc}
    */
-  public function getBestCandidate() {
-    $candidates = $this->getGroups();
-    return !empty($candidates) ? reset($candidates) : NULL;
-  }
-
-  /**
-   * {@inheritdoc}
-   */
   public function stopPropagation() {
     $this->propagationStopped = TRUE;
   }

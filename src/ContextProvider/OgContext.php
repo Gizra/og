@@ -136,26 +136,17 @@ class OgContext implements ContextProviderInterface {
         // no actual data.
         $plugins[$plugin_id] = $plugin;
 
-        // Retrieve the "best candidate" in the plugin's domain.
-        $best_candidate = $plugin->getBestCandidate();
-
-        // If the plugin is certain that the candidate belongs to the current
-        // context, it can declare the search to be over and we can return the
-        // candidate. Note that the candidate may even be empty at this point -
-        // this means the plugin has discovered with 100% certainty that the
-        // current context does NOT have a group.
-        if ($plugin->isPropagationStopped()) {
-          $this->addCacheContextIds($plugin->getCacheContextIds());
-          return $best_candidate;
-        }
-
-        // The search continues. Add the plugin's results to the list of
-        // potential candidates. If the plugin was not able to provide a "best"
-        // candidate, add all of its results instead.
-        foreach ($best_candidate ? [$best_candidate] : $plugin->getGroups() as $candidate) {
+        // Add the plugin's results to the list of potential candidates.
+        foreach ($plugin->getGroups() as $candidate) {
           $key = $candidate->getEntityTypeId() . '|' . $candidate->id();
           $candidates[$key]['votes'][$plugin_id] = $priority;
           $candidates[$key]['entity'] = $candidate;
+        }
+
+        // If the plugin is certain that the candidate belongs to the current
+        // context, it can declare the search to be over.
+        if ($plugin->isPropagationStopped()) {
+          break;
         }
 
         // The next plugin we try will have a lower priority.
@@ -163,11 +154,18 @@ class OgContext implements ContextProviderInterface {
       }
     }
 
-    // None of the plugins has been able to discover a group candidate with 100%
-    // certainty. We will iterate over the candidates and return the one that
-    // has the most "votes". If there are multiple candidates with the same
-    // number of votes then the candidate that was resolved by the plugin(s)
-    // with the highest priority will be returned.
+    // Filter out results that are not accessible by the current user. Since
+    // this makes the result vary by the user, we need to add the user as a
+    // cache context.
+    $this->addCacheContextIds(['user']);
+    array_filter($candidates, function (EntityInterface $candidate) {
+      return $candidate->access('view');
+    });
+
+    // Find the best matching group by iterating over the candidates and return
+    // the one that has the most "votes". If there are multiple candidates with
+    // the same number of votes then the candidate that was resolved by the
+    // plugin(s) with the highest priority will be returned.
     uasort($candidates, function ($a, $b) {
       if (count($a['votes']) == count($b['votes'])) {
         return array_sum($a['votes']) < array_sum($b['votes']) ? -1 : 1;
