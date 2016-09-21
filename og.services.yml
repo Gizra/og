@@ -4,6 +4,11 @@ services:
     arguments: ['@entity_type.manager', '@og.access']
     tags:
       - { name: access_check, applies_to: _og_user_access_group }
+  cache_context.og_membership_state:
+    class: 'Drupal\og\Cache\Context\OgMembershipStateCacheContext'
+    arguments: ['@current_user', '@current_route_match', '@og.group_type_manager', '@og.membership_manager']
+    tags:
+      - { name: 'cache.context'}
   og.access:
     class: Drupal\og\OgAccess
     arguments: ['@config.factory', '@current_user', '@module_handler', '@og.group_type_manager', '@og.permission_manager', '@og.membership_manager']
