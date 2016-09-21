@@ -1097,7 +1097,7 @@ class OgFieldWidgetTestCase extends DrupalWebTestCase {
    * Test "field widget settings" of the OG reference widget.
    */
   function testFieldSettings() {
-    $user = $this->drupalCreateUser(array('administer content types', 'administer group', 'access content', ));
+    $user = $this->drupalCreateUser(array('administer content types', 'administer group', 'access content', 'administer fields'));
     $this->drupalLogin($user);
 
     $widgets = field_info_widget_types();
