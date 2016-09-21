@@ -40,7 +40,7 @@ before_script:
   - ln -s $(readlink -e $(cd -)) og/drupal/sites/all/modules/og
   - cd og/drupal
   - drush dl entity ctools features views token
-  - drush --yes pm-enable og og_access og_ui og_field_access og_context
+  - drush --yes pm-enable og og_access og_ui og_field_access og_context entity_feature
 
   # Start a web server on port 8080, run in the background.
   - drush runserver 127.0.0.1:8080 > ~/php-server.log 2>&1 &
