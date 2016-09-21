@@ -13,8 +13,8 @@ before_script:
   - cd ../..
 
   # install drush
-  - pear channel-discover pear.drush.org
-  - pear install drush/drush-5.8.0
+  - export PATH="$HOME/.composer/vendor/bin:$PATH"
+  - composer global require drush/drush:6.*
   - phpenv rehash
 
   # install php packages required for running a web server from drush on php 5.3
