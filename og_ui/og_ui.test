@@ -278,7 +278,7 @@ class OgUiManagePeopleTestCase extends DrupalWebTestCase {
   /**
    * Change membership status for a single group user.
    */
-  function testOgUiEditMembershipStatus() {
+  function __testOgUiEditMembershipStatus() {
     $this->drupalLogin($this->user1);
 
     // Group the user to the group.
