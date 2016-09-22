@@ -251,7 +251,7 @@ class OgUiManagePeopleTestCase extends DrupalWebTestCase {
   /**
    * Test adding people via group/[entity_type]/[etid]/admin/people/add-user.
    */
-  function testOgUiAddPeople() {
+  function __testOgUiAddPeople() {
     $this->drupalLogin($this->user1);
 
     // Add user2 to the group.
