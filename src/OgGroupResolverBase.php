@@ -43,4 +43,5 @@ abstract class OgGroupResolverBase extends PluginBase implements OgGroupResolver
   public function getCacheContextIds() {
     return [];
   }
+
 }

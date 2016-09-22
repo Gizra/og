@@ -10,8 +10,10 @@ use Drupal\Core\Plugin\Context\Context;
 use Drupal\Core\Plugin\Context\ContextDefinition;
 use Drupal\Core\Plugin\Context\ContextProviderInterface;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
-use Drupal\og\OgGroupResolverInterface;
 
+/**
+ * Provides the group that best matches the current context.
+ */
 class OgContext implements ContextProviderInterface {
 
   use StringTranslationTrait;
@@ -129,7 +131,7 @@ class OgContext implements ContextProviderInterface {
     $group_resolvers = $this->configFactory->get('og.settings')->get('group_resolvers');
     $priority = 0;
     foreach ($group_resolvers as $plugin_id) {
-      /** @var OgGroupResolverInterface $plugin */
+      /** @var \Drupal\og\OgGroupResolverInterface $plugin */
       if ($plugin = $this->pluginManager->createInstance($plugin_id)) {
         // @todo Account for plugins that supply auxiliary/optional data, such
         // as the user session plugin. This data should only be used if there is

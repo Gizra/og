@@ -58,7 +58,7 @@ class RequestQueryArgumentResolver extends OgGroupResolverBase implements Contai
   /**
    * The resolved group.
    *
-   * @var \Drupal\Core\Entity\EntityInterface|NULL|FALSE
+   * @var \Drupal\Core\Entity\EntityInterface|null|false
    *   The resolved group, or NULL if no group has been resolved, or FALSE if
    *   resolution has not yet taken place.
    */

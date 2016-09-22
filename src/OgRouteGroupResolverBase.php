@@ -3,7 +3,6 @@
 namespace Drupal\og;
 
 use Drupal\Core\Entity\ContentEntityInterface;
-use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
 use Drupal\Core\Routing\RouteMatchInterface;
@@ -85,7 +84,7 @@ class OgRouteGroupResolverBase extends OgGroupResolverBase implements ContainerF
    * This will return the entity if the current route matches the entity paths
    * ('link templates') that are defined in the entity definition.
    *
-   * @return \Drupal\Core\Entity\ContentEntityInterface|NULL
+   * @return \Drupal\Core\Entity\ContentEntityInterface|null
    *   The entity, or NULL if we are not on a content entity path.
    */
   protected function getContentEntity() {
@@ -113,7 +112,7 @@ class OgRouteGroupResolverBase extends OgGroupResolverBase implements ContainerF
   protected function getContentEntityPaths() {
     if (!isset($this->contentEntityPaths)) {
       $this->contentEntityPaths = [];
-      /** @var EntityTypeInterface[] $entity_types */
+      /** @var \Drupal\Core\Entity\EntityTypeInterface[] $entity_types */
       $entity_types = $this->entityTypeManager->getDefinitions();
       foreach ($entity_types as $entity_type_id => $entity_type) {
         if ($entity_type->isSubclassOf(ContentEntityInterface::class)) {
