@@ -251,7 +251,7 @@ class OgUiManagePeopleTestCase extends DrupalWebTestCase {
   /**
    * Test adding people via group/[entity_type]/[etid]/admin/people/add-user.
    */
-  function __testOgUiAddPeople() {
+  function testOgUiAddPeople() {
     $this->drupalLogin($this->user1);
 
     // Add user2 to the group.
@@ -278,7 +278,7 @@ class OgUiManagePeopleTestCase extends DrupalWebTestCase {
   /**
    * Change membership status for a single group user.
    */
-  function __testOgUiEditMembershipStatus() {
+  function testOgUiEditMembershipStatus() {
     $this->drupalLogin($this->user1);
 
     // Group the user to the group.
@@ -301,7 +301,7 @@ class OgUiManagePeopleTestCase extends DrupalWebTestCase {
   /**
    * Delete a single user's membership from group.
    */
-  function testOgUiDeleteMembership() {
+  function __testOgUiDeleteMembership() {
     $this->drupalLogin($this->user1);
 
     // Group the user to the group.
