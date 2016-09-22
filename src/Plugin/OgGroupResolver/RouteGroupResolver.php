@@ -11,9 +11,10 @@ use Drupal\og\OgRouteGroupResolverBase;
  * a group entity.
  *
  * @OgGroupResolver(
- *  id = "route_group",
- *  label = "Group entity from current route",
- *  description = @Translation("Checks if the current route is an entity path that belongs to a group entity.")
+ *   id = "route_group",
+ *   type = "provider",
+ *   label = "Group entity from current route",
+ *   description = @Translation("Checks if the current route is an entity path that belongs to a group entity.")
  * )
  */
 class RouteGroupResolver extends OgRouteGroupResolverBase {

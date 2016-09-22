@@ -17,9 +17,10 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
  * a group entity.
  *
  * @OgGroupResolver(
- *  id = "route_group_content",
- *  label = "Group entities from the group content entity on the current route",
- *  description = @Translation("Checks if the current route is an entity path for a group content entity and returns the group(s) that it belongs to.")
+ *   id = "route_group_content",
+ *   type = "provider",
+ *   label = "Group entities from the group content entity on the current route",
+ *   description = @Translation("Checks if the current route is an entity path for a group content entity and returns the group(s) that it belongs to.")
  * )
  */
 class RouteGroupContentResolver extends OgRouteGroupResolverBase {

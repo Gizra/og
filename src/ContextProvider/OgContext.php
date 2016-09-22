@@ -10,6 +10,7 @@ use Drupal\Core\Plugin\Context\Context;
 use Drupal\Core\Plugin\Context\ContextDefinition;
 use Drupal\Core\Plugin\Context\ContextProviderInterface;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
+use Drupal\og\OgGroupResolverInterface;
 
 /**
  * Provides the group that best matches the current context.
@@ -133,14 +134,12 @@ class OgContext implements ContextProviderInterface {
     foreach ($group_resolvers as $plugin_id) {
       /** @var \Drupal\og\OgGroupResolverInterface $plugin */
       if ($plugin = $this->pluginManager->createInstance($plugin_id)) {
-        // @todo Account for plugins that supply auxiliary/optional data, such
-        // as the user session plugin. This data should only be used if there is
-        // no actual data.
         $plugins[$plugin_id] = $plugin;
 
         // Add the plugin's results to the list of potential candidates.
         foreach ($plugin->getGroups() as $candidate) {
           $key = $candidate->getEntityTypeId() . '|' . $candidate->id();
+          $candidates[$key]['types'][$plugin->getResolverType()] = TRUE;
           $candidates[$key]['votes'][$plugin_id] = $priority;
           $candidates[$key]['entity'] = $candidate;
         }
@@ -156,13 +155,23 @@ class OgContext implements ContextProviderInterface {
       }
     }
 
-    // Filter out results that are not accessible by the current user. Since
-    // this makes the result vary by the user, we need to add the user as a
-    // cache context.
-    $this->addCacheContextIds(['user']);
-    array_filter($candidates, function (EntityInterface $candidate) {
-      return $candidate->access('view');
+    // Filter out inappropriate results.
+    array_filter($candidates, function (array $candidate) {
+      // Filter out results that are not accessible by the current user.
+      $has_access = $candidate['entity']->access('view');
+
+      // We have two types of plugins: 'provider' plugins discover groups that
+      // actually exist in their specific domain, while 'selector' plugins help
+      // to select the right group if multiple groups were found by providers.
+      // Filter out all groups that were not discovered by any 'provider'.
+      $is_provided = array_key_exists(OgGroupResolverInterface::PROVIDER, $candidate['types']);
+
+      return $has_access && $is_provided;
     });
+
+    // Since we have filtered the results by the current user, we need to add
+    // the user as a cache context.
+    $this->addCacheContextIds(['user']);
 
     // Find the best matching group by iterating over the candidates and return
     // the one that has the most "votes". If there are multiple candidates with

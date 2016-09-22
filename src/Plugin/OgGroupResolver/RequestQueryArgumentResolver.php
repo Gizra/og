@@ -17,9 +17,10 @@ use Symfony\Component\HttpFoundation\RequestStack;
  * arguments available that point to a group entity.
  *
  * @OgGroupResolver(
- *  id = "request_query_argument",
- *  label = "Group entity from query arguments",
- *  description = @Translation("Checks if the current request has query arguments that indicate the group context.")
+ *   id = "request_query_argument",
+ *   type = "selector",
+ *   label = "Group entity from query arguments",
+ *   description = @Translation("Checks if the current request has query arguments that indicate the group context.")
  * )
  */
 class RequestQueryArgumentResolver extends OgGroupResolverBase implements ContainerFactoryPluginInterface {

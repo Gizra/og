@@ -44,4 +44,11 @@ abstract class OgGroupResolverBase extends PluginBase implements OgGroupResolver
     return [];
   }
 
+  /**
+   * {@inheritdoc}
+   */
+  public function getResolverType() {
+    return $this->pluginDefinition['type'];
+  }
+
 }
