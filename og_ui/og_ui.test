@@ -315,7 +315,7 @@ class OgUiManagePeopleTestCase extends DrupalWebTestCase {
   /**
    * Test that only the correct group audience fields are shown.
    */
-  function __testOgUiAddPeopleMultipleAudienceFields() {
+  function testOgUiAddPeopleMultipleAudienceFields() {
     $user1 = $this->drupalCreateUser();
     $this->drupalLogin($user1);
 
@@ -426,7 +426,7 @@ class OgUiManagePeopleTestCase extends DrupalWebTestCase {
   /**
    * Tests that invalid group IDs in the menu path do not cause exceptions.
    */
-  public function testOgUiPath() {
+  public function __testOgUiPath() {
     $this->drupalGet('entity_test/' . $this->entity->pid . 'invalid/group');
     $this->assertResponse(403);
     // Numeric values that are not integers are forbidden, too.
