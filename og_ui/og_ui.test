@@ -301,7 +301,7 @@ class OgUiManagePeopleTestCase extends DrupalWebTestCase {
   /**
    * Delete a single user's membership from group.
    */
-  function __testOgUiDeleteMembership() {
+  function testOgUiDeleteMembership() {
     $this->drupalLogin($this->user1);
 
     // Group the user to the group.
@@ -315,7 +315,7 @@ class OgUiManagePeopleTestCase extends DrupalWebTestCase {
   /**
    * Test that only the correct group audience fields are shown.
    */
-  function testOgUiAddPeopleMultipleAudienceFields() {
+  function __testOgUiAddPeopleMultipleAudienceFields() {
     $user1 = $this->drupalCreateUser();
     $this->drupalLogin($user1);
 
