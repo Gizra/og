@@ -1,0 +1,124 @@
+<?php
+
+namespace Drupal\og\Command;
+
+use Drupal\og\Og;
+use Symfony\Component\Console\Input\InputArgument;
+use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Input\InputOption;
+use Symfony\Component\Console\Output\OutputInterface;
+use Drupal\Console\Command\Command;
+use Drupal\Console\Style\DrupalStyle;
+
+/**
+ * Class OgAddFieldCommand.
+ *
+ * @package Drupal\og
+ */
+class OgAddFieldCommand extends Command {
+
+  /**
+   * {@inheritdoc}
+   */
+  protected function configure() {
+    $this
+      ->setName('og:add_field')
+      ->setDescription($this->trans('Attach OG field to entities'))
+      ->addOption('field_id', '', InputArgument::OPTIONAL, $this->trans('Field name'))
+      ->addOption('entity_type', '', InputArgument::OPTIONAL, $this->trans('The entity type. i.e node, user, taxonomy_term'))
+      ->addOption('bundle', '', InputArgument::OPTIONAL, $this->trans('The bundle name'))
+      ->addOption('target_entity', '', InputArgument::OPTIONAL, $this->trans('The referenced entity type. i.e node, user, taxonomy_term'));
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  protected function interact(InputInterface $input, OutputInterface $output) {
+    $io = new DrupalStyle($input, $output);
+
+    if (!$input->getOption('field_id')) {
+      $input->setOption('field_id', $io->choiceNoList(
+        $this->getDefinition()->getOption('field_id')->getDescription(),
+        $this->getOgFields()
+      ));
+    }
+
+    if (!$entity_type = $input->getOption('entity_type')) {
+      $entity_type = $io->choiceNoList(
+        $this->getDefinition()->getOption('entity_type')->getDescription(),
+        $this->getEntityTypes()
+      );
+      $input->setOption('entity_type', $entity_type);
+    }
+
+    if (!$input->getOption('bundle')) {
+      $bundles = \Drupal::service('entity_type.bundle.info')->getBundleInfo($entity_type);
+      $input->setOption('bundle', $io->choiceNoList(
+        $this->getDefinition()->getOption('bundle')->getDescription(),
+        array_keys($bundles)
+      ));
+    }
+
+    if (!$input->getOption('target_entity')) {
+      $input->setOption('target_entity', $io->choiceNoList(
+        $this->getDefinition()->getOption('target_entity')->getDescription(),
+        $this->getEntityTypes()
+      ));
+    }
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  protected function execute(InputInterface $input, OutputInterface $output) {
+    $io = new DrupalStyle($input, $output);
+
+    $settings = [
+      'field_storage_config' => [
+        'settings' => [
+          'target_type' => $input->getOption('target_entity'),
+        ],
+      ],
+    ];
+
+    Og::createField($input->getOption('field_id'), $input->getOption('entity_type'), $input->getOption('bundle'), $settings);
+    $io->info('The field attached successfully.');
+  }
+
+  /**
+   * Get OG fields.
+   *
+   * @return array
+   *   List of OG fields ID.
+   */
+  protected function getOgFields() {
+    return array_map(function($item) {
+      return $item['id'];
+    },
+    $this->getOgPluginManager()->getDefinitions());
+  }
+
+  /**
+   * Get all the entity types.
+   *
+   * @return array
+   *   List of entity IDs.
+   */
+  protected function getEntityTypes() {
+    $groups = \Drupal::service('entity_type.repository')->getEntityTypeLabels(TRUE);
+    return array_map(function($item) {
+      return $item->render();
+    }, $groups['Content']);
+  }
+
+  /**
+   * Return OG plugin manager.
+   *
+   * @return \Drupal\og\OgFieldsPluginManager
+   *   OG plugin manager instance.
+   */
+  protected function getOgPluginManager() {
+    return \Drupal::getContainer()->get('plugin.manager.og.fields');
+  }
+
+}
