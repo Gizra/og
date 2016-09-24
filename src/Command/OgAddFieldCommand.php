@@ -36,11 +36,12 @@ class OgAddFieldCommand extends Command {
   protected function interact(InputInterface $input, OutputInterface $output) {
     $io = new DrupalStyle($input, $output);
 
-    if (!$input->getOption('field_id')) {
-      $input->setOption('field_id', $io->choiceNoList(
+    if (!$field_id = $input->getOption('field_id')) {
+      $field_id = $io->choiceNoList(
         $this->getDefinition()->getOption('field_id')->getDescription(),
         $this->getOgFields()
-      ));
+      );
+      $input->setOption('field_id', $field_id);
     }
 
     if (!$entity_type = $input->getOption('entity_type')) {
@@ -59,7 +60,7 @@ class OgAddFieldCommand extends Command {
       ));
     }
 
-    if (!$input->getOption('target_entity')) {
+    if ($this->fieldIsAudienceField($field_id) && !$input->getOption('target_entity')) {
       $input->setOption('target_entity', $io->choiceNoList(
         $this->getDefinition()->getOption('target_entity')->getDescription(),
         $this->getEntityTypes()
@@ -73,13 +74,16 @@ class OgAddFieldCommand extends Command {
   protected function execute(InputInterface $input, OutputInterface $output) {
     $io = new DrupalStyle($input, $output);
 
-    $settings = [
-      'field_storage_config' => [
-        'settings' => [
-          'target_type' => $input->getOption('target_entity'),
+    $settings = [];
+    if ($this->fieldIsAudienceField($input->getOption('field_id'))) {
+      $settings = [
+        'field_storage_config' => [
+          'settings' => [
+            'target_type' => $input->getOption('target_entity'),
+          ],
         ],
-      ],
-    ];
+      ];
+    }
 
     Og::createField($input->getOption('field_id'), $input->getOption('entity_type'), $input->getOption('bundle'), $settings);
     $io->info('The field attached successfully.');
@@ -119,6 +123,19 @@ class OgAddFieldCommand extends Command {
    */
   protected function getOgPluginManager() {
     return \Drupal::getContainer()->get('plugin.manager.og.fields');
+  }
+
+  /**
+   * check if the field is an audience field or not.
+   *
+   * @param $field_id
+   *   The field ID.
+   *
+   * @return boolean
+   *   True or false if the field is an audience or not.
+   */
+  protected function fieldIsAudienceField($field_id) {
+    return $this->getOgPluginManager()->createInstance($field_id) instanceof \Drupal\og\Plugin\OgFields\AudienceField;
   }
 
 }
