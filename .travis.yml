@@ -45,8 +45,8 @@ before_script:
   - mysql -e 'create database og'
 
   # Geting composer depdandecies.
-  - composer global require drush/drush:8.0.5
-  - drush dl composer_manager
+  - composer require drush/drush:8.0.5
+  - vendor/drush/drush/drush dl composer_manager
   - php modules/composer_manager/scripts/init.php
   - composer drupal-update
 
