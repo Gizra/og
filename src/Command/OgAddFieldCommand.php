@@ -3,9 +3,9 @@
 namespace Drupal\og\Command;
 
 use Drupal\og\Og;
+use Drupal\og\Plugin\OgFields\AudienceField;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
-use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Drupal\Console\Command\Command;
 use Drupal\Console\Style\DrupalStyle;
@@ -96,7 +96,7 @@ class OgAddFieldCommand extends Command {
    *   List of OG fields ID.
    */
   protected function getOgFields() {
-    return array_map(function($item) {
+    return array_map(function ($item) {
       return $item['id'];
     },
     $this->getOgPluginManager()->getDefinitions());
@@ -110,7 +110,7 @@ class OgAddFieldCommand extends Command {
    */
   protected function getEntityTypes() {
     $groups = \Drupal::service('entity_type.repository')->getEntityTypeLabels(TRUE);
-    return array_map(function($item) {
+    return array_map(function ($item) {
       return $item->render();
     }, $groups['Content']);
   }
@@ -126,16 +126,16 @@ class OgAddFieldCommand extends Command {
   }
 
   /**
-   * check if the field is an audience field or not.
+   * Check if the field is an audience field or not.
    *
-   * @param $field_id
+   * @param string $field_id
    *   The field ID.
    *
-   * @return boolean
+   * @return bool
    *   True or false if the field is an audience or not.
    */
   protected function fieldIsAudienceField($field_id) {
-    return $this->getOgPluginManager()->createInstance($field_id) instanceof \Drupal\og\Plugin\OgFields\AudienceField;
+    return $this->getOgPluginManager()->createInstance($field_id) instanceof AudienceField;
   }
 
 }
