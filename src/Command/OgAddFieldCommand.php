@@ -23,11 +23,11 @@ class OgAddFieldCommand extends Command {
   protected function configure() {
     $this
       ->setName('og:add_field')
-      ->setDescription($this->trans('Attach OG field to entities'))
-      ->addOption('field_id', '', InputArgument::OPTIONAL, $this->trans('Field name'))
-      ->addOption('entity_type', '', InputArgument::OPTIONAL, $this->trans('The entity type. i.e node, user, taxonomy_term'))
-      ->addOption('bundle', '', InputArgument::OPTIONAL, $this->trans('The bundle name'))
-      ->addOption('target_entity', '', InputArgument::OPTIONAL, $this->trans('The referenced entity type. i.e node, user, taxonomy_term'));
+      ->setDescription('Attach OG field to entities')
+      ->addOption('field_id', '', InputArgument::OPTIONAL, 'Field name')
+      ->addOption('entity_type', '', InputArgument::OPTIONAL, 'The entity type. i.e node, user, taxonomy_term')
+      ->addOption('bundle', '', InputArgument::OPTIONAL, 'The bundle name')
+      ->addOption('target_entity', '', InputArgument::OPTIONAL, 'The referenced entity type. i.e node, user, taxonomy_term');
   }
 
   /**

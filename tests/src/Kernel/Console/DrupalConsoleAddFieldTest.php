@@ -5,9 +5,9 @@ namespace Drupal\Tests\og\Kernel\Console;
 use Drupal\KernelTests\KernelTestBase;
 use Drupal\node\Entity\NodeType;
 use Drupal\og\Command\OgAddFieldCommand;
-use Drupal\og\Helper\OgDrupalConsoleHelperTrait;
 use Drupal\og\OgGroupAudienceHelper;
 use Symfony\Component\Console\Tester\CommandTester;
+use Symfony\Component\Console\Helper\HelperSet;
 
 /**
  * Tests create membership helper function.
@@ -16,8 +16,6 @@ use Symfony\Component\Console\Tester\CommandTester;
  * @coversDefaultClass \Drupal\og\Og
  */
 class DrupalConsoleAddFieldTest extends KernelTestBase {
-
-  use OgDrupalConsoleHelperTrait;
 
   /**
    * {@inheritdoc}
@@ -52,9 +50,10 @@ class DrupalConsoleAddFieldTest extends KernelTestBase {
    * Tests creating membership for an un-saved group.
    */
   public function testNewGroup() {
-    $command = new OgAddFieldCommand($this->getHelperSet());
+    $helper = new HelperSet();
+    $command = new OgAddFieldCommand($helper);
     $commandTester = new CommandTester($command);
-    $command->setHelperSet($this->getHelperSet());
+    $command->setHelperSet($helper);
 
     $commandTester->execute(
       [
