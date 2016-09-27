@@ -51,8 +51,9 @@ before_script:
   - DRUPAL_DIR=$(pwd)/drupal
 
   # Reference OG in the Drupal site.
-  - ls -al ${DRUPAL_DIR}
-  - ls -al ${DRUPAL_DIR}/modules
+  - echo $MODULE_DIR
+  - ls -al $MODULE_DIR
+  - ln -s $MODULE_DIR modules/og
 
   # Geting composer depdandecies.
   - cd $DRUPAL_DIR
