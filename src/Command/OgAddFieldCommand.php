@@ -81,8 +81,9 @@ class OgAddFieldCommand extends Command {
     $io = new DrupalStyle($input, $output);
 
     $settings = [
-      'field_name' => $input->getOption('field_name')
+      'field_name' => $input->getOption('field_name'),
     ];
+
     if ($this->fieldIsAudienceField($input->getOption('field_id'))) {
       $settings['field_storage_config']['settings'] = [
         'target_type' => $input->getOption('target_entity'),
