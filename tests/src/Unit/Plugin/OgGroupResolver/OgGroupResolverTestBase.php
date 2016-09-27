@@ -9,7 +9,7 @@ use Drupal\Tests\UnitTestCase;
  *
  * @group og
  */
-abstract class OgGroupResolverTestBase extends UnitTestCase  {
+abstract class OgGroupResolverTestBase extends UnitTestCase {
 
   /**
    * The fully qualified class name of the plugin under test.

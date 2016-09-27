@@ -5,7 +5,6 @@ namespace Drupal\og\ContextProvider;
 use Drupal\Component\Plugin\PluginManagerInterface;
 use Drupal\Core\Cache\CacheableMetadata;
 use Drupal\Core\Config\ConfigFactoryInterface;
-use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Plugin\Context\Context;
 use Drupal\Core\Plugin\Context\ContextDefinition;
 use Drupal\Core\Plugin\Context\ContextProviderInterface;
@@ -123,7 +122,7 @@ class OgContext implements ContextProviderInterface {
    * @see \Drupal\og\OgGroupResolverInterface
    */
   protected function getBestCandidate() {
-    /** @var EntityInterface[] $candidates */
+    /** @var \Drupal\Core\Entity\EntityInterface[] $candidates */
     $candidates = [];
     $plugins = [];
 

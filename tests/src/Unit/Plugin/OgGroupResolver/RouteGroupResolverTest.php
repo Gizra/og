@@ -126,7 +126,7 @@ class RouteGroupResolverTest extends OgRouteGroupResolverTestBase {
   /**
    * {@inheritdoc}
    *
-   * @covers getGroups
+   * @covers ::getGroups
    * @dataProvider getGroupsProvider
    */
   public function testGetGroups($path = NULL, $route_object_type = NULL, $expected = NULL) {

@@ -2,9 +2,6 @@
 
 namespace Drupal\Tests\og\Unit\Plugin\OgGroupResolver;
 
-use Drupal\Core\Entity\EntityTypeManagerInterface;
-use Drupal\Core\Routing\RouteMatchInterface;
-use Drupal\og\GroupTypeManager;
 use Drupal\og\OgGroupResolverInterface;
 
 /**
@@ -47,8 +44,8 @@ abstract class OgRouteGroupResolverTestBase extends OgGroupResolverTestBase {
    * @return array
    *   The mocked dependencies.
    */
-   protected function getInjectedDependencies() {
-     return [];
-   }
+  protected function getInjectedDependencies() {
+    return [];
+  }
 
 }
