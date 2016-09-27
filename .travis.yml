@@ -50,6 +50,10 @@ before_script:
   # Remember the Drupal installation path.
   - DRUPAL_DIR=$(pwd)/drupal
 
+  # Reference OG in the Drupal site.
+  - ls -al ${DRUPAL_DIR}
+  - ls -al ${DRUPAL_DIR}/modules
+
   # Geting composer depdandecies.
   - cd $DRUPAL_DIR
   - composer require drush/drush:8.0.5
