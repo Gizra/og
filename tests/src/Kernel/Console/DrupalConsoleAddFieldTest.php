@@ -6,6 +6,7 @@ use Drupal\KernelTests\KernelTestBase;
 use Drupal\node\Entity\NodeType;
 use Drupal\og\Command\OgAddFieldCommand;
 use Drupal\og\Helper\OgDrupalConsoleHelperTrait;
+use Drupal\og\OgGroupAudienceHelper;
 use Symfony\Component\Console\Tester\CommandTester;
 
 /**
@@ -55,7 +56,7 @@ class DrupalConsoleAddFieldTest extends KernelTestBase {
     $commandTester = new CommandTester($command);
     $command->setHelperSet($this->getHelperSet());
 
-    $code = $commandTester->execute(
+    $commandTester->execute(
       [
         '--field_id' => 'og_audience',
         '--entity_type' => 'node',
@@ -64,7 +65,8 @@ class DrupalConsoleAddFieldTest extends KernelTestBase {
       ]
     );
 
-    $this->assertEquals(0, $code);
+    $field_names = OgGroupAudienceHelper::getAllGroupAudienceFields('node', 'article');
+    $this->assertEquals(['og_audience'], array_keys($field_names));
   }
 
 }

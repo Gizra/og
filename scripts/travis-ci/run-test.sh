@@ -12,7 +12,10 @@ case "$1" in
         ;;
     *)
         ln -s $MODULE_DIR $DRUPAL_DIR/modules/og
+        composer install
         cd $DRUPAL_DIR
+        php modules/composer_manager/scripts/init.php
+        composer drupal-update
         ./vendor/bin/phpunit -c ./core/phpunit.xml.dist $MODULE_DIR/tests
         exit $?
 esac
