@@ -103,7 +103,7 @@ class RouteGroupResolverTest extends OgRouteGroupResolverTestBase {
 
     // Prepare mocked group and group content entities as well as an entity that
     // is neither a group nor group content.
-    foreach($this->testEntityTypes as $id => $metadata) {
+    foreach ($this->testEntityTypes as $id => $metadata) {
       $entity = $this->prophesize(ContentEntityInterface::class);
       // In case this entity is questioned about its identity, it shall
       // willingly provide the information.
@@ -156,7 +156,7 @@ class RouteGroupResolverTest extends OgRouteGroupResolverTestBase {
       $this->mightRetrieveRouteObject($route_object_type);
       // If a route object is returned the plugin will need to inspect it to
       // check if it is a group.
-      $this->mightCheckIfRouteObjectIsAGroup($route_object_type);
+      $this->mightCheckIfRouteObjectIsGroup($route_object_type);
     }
 
     return [
@@ -232,7 +232,7 @@ class RouteGroupResolverTest extends OgRouteGroupResolverTestBase {
   protected function mightRetrieveRouteObject($route_object_type) {
     // The route object should only be retrieved if we are on a content entity
     // path.
-    if ($route_object_type)  {
+    if ($route_object_type) {
       $this->routeMatch->getParameter($this->testEntityTypes[$route_object_type]['type'])
         ->willReturn($this->testEntities[$route_object_type])
         ->shouldBeCalled();
@@ -251,8 +251,8 @@ class RouteGroupResolverTest extends OgRouteGroupResolverTestBase {
    *   are not on a content entity path. The types may be any of the ones
    *   created in the test setup, e.g. 'group', 'group_content', 'non_group'.
    */
-  protected function mightCheckIfRouteObjectIsAGroup($route_object_type) {
-    if ($route_object_type || TRUE)  {
+  protected function mightCheckIfRouteObjectIsGroup($route_object_type) {
+    if ($route_object_type || TRUE) {
       $entity_type_id = $this->testEntityTypes[$route_object_type]['type'];
       $bundle = $this->testEntityTypes[$route_object_type]['bundle'];
       $this->groupTypeManager->isGroup($entity_type_id, $bundle)
@@ -273,7 +273,7 @@ class RouteGroupResolverTest extends OgRouteGroupResolverTestBase {
    */
   protected function getEntityTypes() {
     return [
-      'node' => $this->prophesize(ContentEntityInterface::class)
+      'node' => $this->prophesize(ContentEntityInterface::class),
     ];
   }
 
