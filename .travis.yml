@@ -53,7 +53,7 @@ before_script:
   # Reference OG in the Drupal site.
   - echo $MODULE_DIR
   - ls -al $MODULE_DIR
-  - ln -s $MODULE_DIR modules/og
+  - ln -s $MODULE_DIR $DRUPAL_DIR/modules/og
 
   # Geting composer depdandecies.
   - cd $DRUPAL_DIR
