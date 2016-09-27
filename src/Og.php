@@ -128,6 +128,34 @@ class Og {
   }
 
   /**
+   * Get the parent groups of an entity.
+   *
+   * @param \Drupal\Core\Entity\EntityInterface $entity
+   *   The entity objects.
+   *
+   * @return array
+   *   Array of group entities.
+   */
+  public static function getParentGroups(EntityInterface $entity) {
+    $groups = [];
+    $fields = OgGroupAudienceHelper::getAllGroupAudienceFields($entity->getEntityTypeId(), $entity->bundle());
+    if (Og::isGroup($entity->getEntityTypeId(), $entity->bundle())) {
+      $groups[$entity->uuid()] = $entity;
+    }
+    if ($fields) {
+      // We have not reached the top level group, we have audience fields.
+      foreach ($fields as $field) {
+        $field_name = $field->getName();
+        foreach ($entity->{$field_name} as $value) {
+          $group = $value->entity;
+          $groups += self::getParentGroups($group);
+        }
+      }
+    }
+    return $groups;
+  }
+
+  /**
    * Returns the group memberships a user is associated with.
    *
    * @param \Drupal\Core\Session\AccountInterface $user
