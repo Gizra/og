@@ -24,7 +24,8 @@ class OgAddFieldCommand extends Command {
     $this
       ->setName('og:add_field')
       ->setDescription('Attach OG field to entities')
-      ->addOption('field_id', '', InputArgument::OPTIONAL, 'Field name')
+      ->addOption('field_id', '', InputArgument::OPTIONAL, 'Field ID')
+      ->addOption('field_name', '', InputArgument::OPTIONAL, 'Field name')
       ->addOption('entity_type', '', InputArgument::OPTIONAL, 'The entity type. i.e node, user, taxonomy_term')
       ->addOption('bundle', '', InputArgument::OPTIONAL, 'The bundle name')
       ->addOption('target_entity', '', InputArgument::OPTIONAL, 'The referenced entity type. i.e node, user, taxonomy_term');
@@ -42,6 +43,11 @@ class OgAddFieldCommand extends Command {
         $this->getOgFields()
       );
       $input->setOption('field_id', $field_id);
+    }
+
+    if (!$field_name = $input->getOption('field_name')) {
+      $field_name = $io->ask($this->getDefinition()->getOption('field_name')->getDescription(), $field_id);
+      $input->setOption('field_name', $field_name);
     }
 
     if (!$entity_type = $input->getOption('entity_type')) {
@@ -74,14 +80,12 @@ class OgAddFieldCommand extends Command {
   protected function execute(InputInterface $input, OutputInterface $output) {
     $io = new DrupalStyle($input, $output);
 
-    $settings = [];
+    $settings = [
+      'field_name' => $input->getOption('field_name')
+    ];
     if ($this->fieldIsAudienceField($input->getOption('field_id'))) {
-      $settings = [
-        'field_storage_config' => [
-          'settings' => [
-            'target_type' => $input->getOption('target_entity'),
-          ],
-        ],
+      $settings['field_storage_config']['settings'] = [
+        'target_type' => $input->getOption('target_entity'),
       ];
     }
 

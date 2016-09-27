@@ -55,17 +55,29 @@ class DrupalConsoleAddFieldTest extends KernelTestBase {
     $commandTester = new CommandTester($command);
     $command->setHelperSet($helper);
 
-    $commandTester->execute(
+    $fields = [
       [
         '--field_id' => 'og_audience',
+        '--field_name' => 'og_group_ref',
+        '--entity_type' => 'node',
+        '--bundle' => 'article',
+        '--target_entity' => 'node',
+      ],
+      [
+        '--field_id' => 'og_audience',
+        '--field_name' => 'og_audience',
         '--entity_type' => 'node',
         '--bundle' => 'article',
         '--target_entity' => 'node',
       ]
-    );
+    ];
+
+    foreach ($fields as $field) {
+      $commandTester->execute($field);
+    }
 
     $field_names = OgGroupAudienceHelper::getAllGroupAudienceFields('node', 'article');
-    $this->assertEquals(['og_audience'], array_keys($field_names));
+    $this->assertEquals(['og_group_ref', 'og_audience'], array_keys($field_names));
   }
 
 }
