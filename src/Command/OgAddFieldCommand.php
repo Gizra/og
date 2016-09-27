@@ -46,7 +46,7 @@ class OgAddFieldCommand extends Command {
     }
 
     if (!$field_name = $input->getOption('field_name')) {
-      $field_name = $io->ask($this->getDefinition()->getOption('field_name')->getDescription(), $field_id);
+      $field_name = $io->ask($this->getDefinition()->getOption('field_name')->getDescription());
       $input->setOption('field_name', $field_name);
     }
 

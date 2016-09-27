@@ -65,6 +65,7 @@ class DrupalConsoleAddFieldTest extends KernelTestBase {
       ],
       [
         '--field_id' => 'og_audience',
+        '--field_name' => 'og_audience',
         '--entity_type' => 'node',
         '--bundle' => 'article',
         '--target_entity' => 'node',
