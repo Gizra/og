@@ -33,6 +33,14 @@ abstract class OgGroupResolverTestBase extends UnitTestCase  {
   protected $pluginType;
 
   /**
+   * Tests the groups that are resolved by the plugin.
+   *
+   * @dataProvider getGroupsProvider
+   * @covers ::getGroups
+   */
+  abstract public function testGetGroups();
+
+  /**
    * Tests if the plugin is able to stop the group resolving process.
    *
    * @covers ::isPropagationStopped

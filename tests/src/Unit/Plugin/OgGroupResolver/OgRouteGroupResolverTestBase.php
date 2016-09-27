@@ -37,12 +37,18 @@ abstract class OgRouteGroupResolverTestBase extends OgGroupResolverTestBase {
    * {@inheritdoc}
    */
   protected function getPluginInstance(array $args = []) {
-    $args = [
-      $this->prophesize(RouteMatchInterface::class)->reveal(),
-      $this->prophesize(GroupTypeManager::class)->reveal(),
-      $this->prophesize(EntityTypeManagerInterface::class)->reveal(),
-    ];
+    $args = $args ?: $this->getInjectedDependencies();
     return parent::getPluginInstance($args);
   }
+
+  /**
+   * Returns the mocked classes that the plugin depends on.
+   *
+   * @return array
+   *   The mocked dependencies.
+   */
+   protected function getInjectedDependencies() {
+     return [];
+   }
 
 }
