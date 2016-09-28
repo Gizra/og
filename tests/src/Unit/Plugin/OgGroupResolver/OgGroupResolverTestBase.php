@@ -26,13 +26,6 @@ abstract class OgGroupResolverTestBase extends UnitTestCase {
   protected $pluginId;
 
   /**
-   * The plugin type of the plugin under test. Either 'provider' or 'selector'.
-   *
-   * @var string
-   */
-  protected $pluginType;
-
-  /**
    * Tests the groups that are resolved by the plugin.
    *
    * @dataProvider getGroupsProvider
@@ -65,13 +58,6 @@ abstract class OgGroupResolverTestBase extends UnitTestCase {
   abstract public function testGetCacheContextIds();
 
   /**
-   * Tests if the plugin returns the correct resolver type.
-   *
-   * @covers ::getResolverType
-   */
-  abstract public function testGetResolverType();
-
-  /**
    * Returns an instance of the plugin under test.
    *
    * @param array $args
@@ -87,7 +73,6 @@ abstract class OgGroupResolverTestBase extends UnitTestCase {
       $this->pluginId,
       [
         'id' => $this->pluginId,
-        'type' => $this->pluginType,
         'class' => $this->className,
         'provider' => 'og',
       ],

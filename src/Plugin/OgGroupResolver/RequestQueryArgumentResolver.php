@@ -18,7 +18,6 @@ use Symfony\Component\HttpFoundation\RequestStack;
  *
  * @OgGroupResolver(
  *   id = "request_query_argument",
- *   type = "selector",
  *   label = "Group entity from query arguments",
  *   description = @Translation("Checks if the current request has query arguments that indicate the group context.")
  * )

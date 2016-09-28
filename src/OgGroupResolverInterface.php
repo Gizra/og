@@ -23,16 +23,6 @@ namespace Drupal\og;
 interface OgGroupResolverInterface {
 
   /**
-   * The 'provider' group resolver type.
-   */
-  const PROVIDER = 'provider';
-
-  /**
-   * The 'selector' group resolver type.
-   */
-  const SELECTOR = 'selector';
-
-  /**
    * Returns the groups that were resolved by the plugin.
    *
    * @return \Drupal\Core\Entity\EntityInterface[]
@@ -68,20 +58,5 @@ interface OgGroupResolverInterface {
    *   An array of cache context IDs.
    */
   public function getCacheContextIds();
-
-  /**
-   * Returns the resolver type.
-   *
-   * @return string
-   *   The resolver type. Can be one of the following:
-   *   - `OgGroupResolverInterface::PROVIDER`: The plugin provides new groups
-   *     that were discovered in their domain. For example the plugin might
-   *     discover a group in a route object.
-   *   - `OgGroupResolverInterface::SELECTOR`: The plugin doesn't provide groups
-   *     of their own but helps to choose the right group from the groups that
-   *     were discovered by other plugins. For example the plugin might inspect
-   *     the user session to check if the user is coming from a group page.
-   */
-  public function getResolverType();
 
 }

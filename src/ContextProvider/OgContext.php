@@ -138,7 +138,6 @@ class OgContext implements ContextProviderInterface {
         // Add the plugin's results to the list of potential candidates.
         foreach ($plugin->getGroups() as $candidate) {
           $key = $candidate->getEntityTypeId() . '|' . $candidate->id();
-          $candidates[$key]['types'][$plugin->getResolverType()] = TRUE;
           $candidates[$key]['votes'][$plugin_id] = $priority;
           $candidates[$key]['entity'] = $candidate;
         }
@@ -157,15 +156,7 @@ class OgContext implements ContextProviderInterface {
     // Filter out inappropriate results.
     array_filter($candidates, function (array $candidate) {
       // Filter out results that are not accessible by the current user.
-      $has_access = $candidate['entity']->access('view');
-
-      // We have two types of plugins: 'provider' plugins discover groups that
-      // actually exist in their specific domain, while 'selector' plugins help
-      // to select the right group if multiple groups were found by providers.
-      // Filter out all groups that were not discovered by any 'provider'.
-      $is_provided = array_key_exists(OgGroupResolverInterface::PROVIDER, $candidate['types']);
-
-      return $has_access && $is_provided;
+      return $candidate['entity']->access('view');
     });
 
     // Since we have filtered the results by the current user, we need to add
