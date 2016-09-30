@@ -75,6 +75,7 @@ class OgSelectionWidgetOptionsTest extends BrowserTestBase {
 
     // Creating users.
     $this->demoUser = $this->drupalCreateUser([
+      'access content',
       'create group_content content',
     ]);
 
@@ -105,6 +106,21 @@ class OgSelectionWidgetOptionsTest extends BrowserTestBase {
    */
   public function testFields() {
     $this->drupalLogin($this->demoUser);
+    $this->drupalGet('node/add/group_content');
+
+    // Verify the user can't see the groups in the selection handler.
+
+
+    // Add the user as a group member.
+    $role = Og::createOgRole($this->group1, ['create node group_content']);
+    $role->save();
+    Og::createMembership($this->group1, $this->demoUser)
+      ->addRole($role)
+      ->save();
+
+    // Verify the user can't see the groups.
+
+    // Add to the user the adminster group permissions.
   }
 
 }
