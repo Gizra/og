@@ -9,7 +9,6 @@ use Drupal\og\OgGroupAudienceHelper;
 use Drupal\Tests\BrowserTestBase;
 use Drupal\simpletest\ContentTypeCreationTrait;
 use Drupal\simpletest\NodeCreationTrait;
-use Drupal\user\Entity\User;
 
 /**
  * Tests the various OG handler options.
@@ -29,35 +28,35 @@ class OgSelectionWidgetOptionsTest extends BrowserTestBase {
   /**
    * A group object.
    *
-   * @var Node
+   * @var \Drupal\node\Entity\Node
    */
   protected $group1;
 
   /**
    * A group object.
    *
-   * @var Node
+   * @var \Drupal\node\Entity\Node
    */
   protected $group2;
 
   /**
    * Demo user.
    *
-   * @var User
+   * @var \Drupal\user\Entity\User
    */
   protected $groupMemberUser;
 
   /**
    * Group owner.
    *
-   * @var User
+   * @var \Drupal\user\Entity\User
    */
   protected $groupOwnerUser;
 
   /**
    * Administrator groups user.
    *
-   * @var User
+   * @var \Drupal\user\Entity\User
    */
   protected $groupAdministratorUser;
 
