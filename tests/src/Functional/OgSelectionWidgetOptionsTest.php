@@ -45,14 +45,21 @@ class OgSelectionWidgetOptionsTest extends BrowserTestBase {
    *
    * @var User
    */
-  protected $demoUser;
+  protected $groupMemberUser;
 
   /**
    * Group owner.
    *
    * @var User
    */
-  protected $groupOwner;
+  protected $groupOwnerUser;
+
+  /**
+   * Administrator groups user.
+   *
+   * @var User
+   */
+  protected $groupAdministratorUser;
 
   /**
    * {@inheritdoc}
@@ -74,14 +81,17 @@ class OgSelectionWidgetOptionsTest extends BrowserTestBase {
     Og::createField(OgGroupAudienceHelper::DEFAULT_FIELD, 'node', 'group_content', $settings);
 
     // Creating users.
-    $this->demoUser = $this->drupalCreateUser([
+    $this->groupMemberUser = $this->drupalCreateUser([
       'access content',
       'create group_content content',
     ]);
 
-    $this->groupOwner = $this->drupalCreateUser([
+    $this->groupOwnerUser = $this->drupalCreateUser([
+      'create group_content content',
+    ]);
+
+    $this->groupAdministratorUser = $this->drupalCreateUser([
       'administer group',
-      'create group content',
       'create group_content content',
     ]);
 
@@ -89,14 +99,14 @@ class OgSelectionWidgetOptionsTest extends BrowserTestBase {
     $this->group1 = Node::create([
       'type' => 'group',
       'title' => $this->randomString(),
-      'uid' => $this->groupOwner->id(),
+      'uid' => $this->groupOwnerUser->id(),
     ]);
     $this->group1->save();
 
     $this->group2 = Node::create([
       'type' => 'group',
       'title' => $this->randomString(),
-      'uid' => $this->groupOwner->id(),
+      'uid' => $this->groupOwnerUser->id(),
     ]);
     $this->group2->save();
   }
@@ -105,22 +115,36 @@ class OgSelectionWidgetOptionsTest extends BrowserTestBase {
    * Tests adding groups, and node access.
    */
   public function testFields() {
-    $this->drupalLogin($this->demoUser);
+    $this->drupalLogin($this->groupMemberUser);
     $this->drupalGet('node/add/group_content');
 
     // Verify the user can't see the groups in the selection handler.
+    $this->assertSession()->pageTextNotContains($this->group1->label());
+    $this->assertSession()->pageTextNotContains($this->group2->label());
 
-
-    // Add the user as a group member.
+    // Assign the permission to the user role.
     $role = Og::createOgRole($this->group1, ['create node group_content']);
     $role->save();
-    Og::createMembership($this->group1, $this->demoUser)
+    Og::createMembership($this->group1, $this->groupMemberUser)
       ->addRole($role)
       ->save();
 
-    // Verify the user can't see the groups.
+    // Verify the user can reference to the group.
+    $this->drupalGet('node/add/group_content');
+    $this->assertSession()->pageTextContains($this->group1->label());
+    $this->assertSession()->pageTextNotContains($this->group2->label());
 
-    // Add to the user the adminster group permissions.
+    // Verify the group can reference to all the groups.
+    $this->drupalLogin($this->groupOwnerUser);
+    $this->drupalGet('node/add/group_content');
+    $this->assertSession()->pageTextContains($this->group1->label());
+    $this->assertSession()->pageTextContains($this->group2->label());
+
+    // Verify the groups administrator can reference to all the groups.
+    $this->drupalLogin($this->groupAdministratorUser);
+    $this->drupalGet('node/add/group_content');
+    $this->assertSession()->pageTextContains($this->group1->label());
+    $this->assertSession()->pageTextContains($this->group2->label());
   }
 
 }
