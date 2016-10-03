@@ -118,13 +118,12 @@ class OgRoleManager implements OgRoleManagerInterface {
   /**
    * {@inheritdoc}
    */
-  public function loadRolesByGroup(EntityInterface $group) {
+  public function loadRolesByGroup($entity_type_id, $bundle) {
     $properties = [
-      'group_type' => $group->getEntityTypeId(),
-      'group_bundle' => $group->bundle(),
+      'group_type' => $entity_type_id,
+      'group_bundle' => $bundle,
     ];
-    $role_ids = $this->ogRoleStorage->loadByProperties($properties);
-    return $this->ogRoleStorage->loadMultiple($role_ids);
+    return $this->ogRoleStorage->loadByProperties($properties);
   }
 
   /**

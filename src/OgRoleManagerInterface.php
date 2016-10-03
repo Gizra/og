@@ -49,13 +49,15 @@ interface OgRoleManagerInterface {
   /**
    * Returns all the roles of a provided group.
    *
-   * @param \Drupal\Core\Entity\EntityInterface $group
-   *   The group for which to return the roles.
+   * @param string $entity_type_id
+   *    The entity type id of the group.
+   * @param string $bundle
+   *    The bundle of the group.
    *
    * @return \Drupal\og\OgRoleInterface[]
    *   An array of roles indexed by their ids.
    */
-  public function loadRolesByGroup(EntityInterface $group);
+  public function loadRolesByGroup($entity_type_id, $bundle);
 
   /**
    * Deletes the roles associated with a group type.
