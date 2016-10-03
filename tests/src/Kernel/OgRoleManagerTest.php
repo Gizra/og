@@ -66,8 +66,8 @@ class OgRoleManagerTest extends KernelTestBase {
     ])->save();
     Og::groupTypeManager()->addGroup('node', $this->bundle);
 
-    // Create a custom role as well to verify that the tests covers custom roles
-    // as well.
+    // Create a custom role to verify that the tests covers custom roles as
+    // well.
     $og_role = OgRole::create();
     $og_role
       ->setName($this->roleName)
