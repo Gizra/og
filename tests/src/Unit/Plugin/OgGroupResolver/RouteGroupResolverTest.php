@@ -4,9 +4,6 @@ namespace Drupal\Tests\og\Unit\Plugin\OgGroupResolver;
 
 use Drupal\Core\Entity\ContentEntityInterface;
 use Drupal\Core\Entity\EntityTypeInterface;
-use Drupal\Core\Entity\EntityTypeManagerInterface;
-use Drupal\Core\Routing\RouteMatchInterface;
-use Drupal\og\GroupTypeManager;
 use Drupal\og\Plugin\OgGroupResolver\RouteGroupResolver;
 use Symfony\Component\Routing\Route;
 
