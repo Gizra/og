@@ -90,7 +90,7 @@ class OgRoleManagerTest extends KernelTestBase {
     ];
 
     $role_manager = $this->container->get('og.role_manager');
-    $roles = $role_manager->getRolesByGroupTypeAndBundle('node', $this->bundle);
+    $roles = $role_manager->loadRolesByBundle('node', $this->bundle);
     $role_ids = array_keys($roles);
     $this->assertEquals($expected_role_ids, $role_ids);
   }
