@@ -9,7 +9,7 @@ use Drupal\Core\Plugin\Context\Context;
 use Drupal\Core\Plugin\Context\ContextDefinition;
 use Drupal\Core\Plugin\Context\ContextProviderInterface;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
-use Drupal\og\OgGroupResolverInterface;
+use Drupal\og\OgResolvedGroupCollection;
 
 /**
  * Provides the group that best matches the current context.
@@ -122,8 +122,7 @@ class OgContext implements ContextProviderInterface {
    * @see \Drupal\og\OgGroupResolverInterface
    */
   protected function getBestCandidate() {
-    /** @var \Drupal\Core\Entity\EntityInterface[] $candidates */
-    $candidates = [];
+    $collection = new OgResolvedGroupCollection();
     $plugins = [];
 
     // Retrieve the list of group resolvers. These are stored in config, and are
@@ -135,12 +134,11 @@ class OgContext implements ContextProviderInterface {
       if ($plugin = $this->pluginManager->createInstance($plugin_id)) {
         $plugins[$plugin_id] = $plugin;
 
-        // Add the plugin's results to the list of potential candidates.
-        foreach ($plugin->getGroups() as $candidate) {
-          $key = $candidate->getEntityTypeId() . '|' . $candidate->id();
-          $candidates[$key]['votes'][$plugin_id] = $priority;
-          $candidates[$key]['entity'] = $candidate;
-        }
+        // Set the default vote weight according to the plugin's priority.
+        $collection->setVoteWeight($priority);
+
+        // Let the plugin do its magic.
+        $plugin->resolve($collection);
 
         // If the plugin is certain that the candidate belongs to the current
         // context, it can declare the search to be over.
@@ -153,21 +151,25 @@ class OgContext implements ContextProviderInterface {
       }
     }
 
+    // @todo This should be moved to a plugin.
     // Filter out inappropriate results.
-    array_filter($candidates, function (array $candidate) {
+    array_filter($collection, function (array $candidate) {
       // Filter out results that are not accessible by the current user.
       return $candidate['entity']->access('view');
     });
 
+    // @todo This should be handled in the collection.
     // Since we have filtered the results by the current user, we need to add
     // the user as a cache context.
     $this->addCacheContextIds(['user']);
 
+    // @todo Move this in the collection? Seems to make sense, since the
+    //   collection has knowledge about the groups and votes.
     // Find the best matching group by iterating over the candidates and return
     // the one that has the most "votes". If there are multiple candidates with
     // the same number of votes then the candidate that was resolved by the
     // plugin(s) with the highest priority will be returned.
-    uasort($candidates, function ($a, $b) {
+    uasort($collection, function ($a, $b) {
       if (count($a['votes']) == count($b['votes'])) {
         return array_sum($a['votes']) < array_sum($b['votes']) ? -1 : 1;
       }
@@ -175,7 +177,7 @@ class OgContext implements ContextProviderInterface {
     });
 
     // We found the best candidate.
-    $candidate = reset($candidates);
+    $candidate = reset($collection);
 
     if (empty($candidate)) {
       return NULL;

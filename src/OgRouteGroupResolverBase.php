@@ -11,7 +11,7 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 /**
  * Base class for OgGroupResolver plugins that inspect the route.
  */
-class OgRouteGroupResolverBase extends OgGroupResolverBase implements ContainerFactoryPluginInterface {
+abstract class OgRouteGroupResolverBase extends OgGroupResolverBase implements ContainerFactoryPluginInterface {
 
   /**
    * The route matching service.

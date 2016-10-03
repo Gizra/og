@@ -19,13 +19,6 @@ abstract class OgGroupResolverBase extends PluginBase implements OgGroupResolver
   /**
    * {@inheritdoc}
    */
-  public function getGroups() {
-    return [];
-  }
-
-  /**
-   * {@inheritdoc}
-   */
   public function stopPropagation() {
     $this->propagationStopped = TRUE;
   }
