@@ -159,27 +159,6 @@ class OgRoleManagerTest extends UnitTestCase {
   }
 
   /**
-   * Tests retrieval of roles from the database for a certain group.
-   *
-   * @covers ::loadRolesByGroup
-   *
-   * @dataProvider bundleRolesProvider
-   */
-  public function testLoadRolesByGroup() {
-    $properties = [
-      'group_type' => $this->entityTypeId,
-      'group_bundle' => $this->bundle,
-    ];
-    $this->ogRoleStorage->loadByProperties($properties)
-      ->willReturn([
-        $this->ogRole->reveal(),
-        $this->ogRole->reveal(),
-        $this->ogRole->reveal(),
-      ])
-      ->shouldBeCalled();
-  }
-
-  /**
    * Provides test data to test bundle roles creation.
    *
    * @return array
