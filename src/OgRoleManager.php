@@ -2,6 +2,7 @@
 
 namespace Drupal\og;
 
+use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\og\Event\DefaultRoleEvent;
 use Drupal\og\Event\DefaultRoleEventInterface;
@@ -112,6 +113,18 @@ class OgRoleManager implements OgRoleManagerInterface {
     }
 
     return $roles;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function loadRolesByGroup(EntityInterface $group) {
+    $properties = [
+      'group_type' => $group->getEntityTypeId(),
+      'group_bundle' => $group->bundle(),
+    ];
+    $role_ids = $this->ogRoleStorage->loadByProperties($properties);
+    return $this->ogRoleStorage->loadMultiple($role_ids);
   }
 
   /**

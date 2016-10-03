@@ -1,6 +1,7 @@
 <?php
 
 namespace Drupal\og;
+use Drupal\Core\Entity\EntityInterface;
 
 /**
  * Defines an interface for OG role manager.
@@ -44,6 +45,17 @@ interface OgRoleManagerInterface {
    *   role_type.
    */
   public function getRequiredDefaultRoles();
+
+  /**
+   * Returns all the roles of a provided group.
+   *
+   * @param \Drupal\Core\Entity\EntityInterface $group
+   *   The group for which to return the roles.
+   *
+   * @return \Drupal\og\OgRoleInterface[]
+   *   An array of roles indexed by their ids.
+   */
+  public function loadRolesByGroup(EntityInterface $group);
 
   /**
    * Deletes the roles associated with a group type.
