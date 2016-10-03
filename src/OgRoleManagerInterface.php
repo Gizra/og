@@ -1,7 +1,6 @@
 <?php
 
 namespace Drupal\og;
-use Drupal\Core\Entity\EntityInterface;
 
 /**
  * Defines an interface for OG role manager.

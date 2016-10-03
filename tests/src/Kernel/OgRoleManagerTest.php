@@ -22,7 +22,6 @@ class OgRoleManagerTest extends KernelTestBase {
     'system',
     'user',
     'field',
-    'entity_reference',
     'node',
     'og',
   ];
@@ -59,7 +58,6 @@ class OgRoleManagerTest extends KernelTestBase {
     $this->installEntitySchema('node');
     $this->bundle = Unicode::strtolower($this->randomMachineName());
     $this->roleName = Unicode::strtolower($this->randomMachineName());
-
 
     // Create a group entity type.
     NodeType::create([
