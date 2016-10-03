@@ -19,25 +19,14 @@ use Symfony\Component\Routing\Route;
 class RouteGroupResolverTest extends OgRouteGroupResolverTestBase {
 
   /**
-   * The mocked route matcher.
-   *
-   * @var \Drupal\Core\Routing\RouteMatchInterface|\Prophecy\Prophecy\ObjectProphecy
+   * {@inheritdoc}
    */
-  protected $routeMatch;
+  protected $className = RouteGroupResolver::class;
 
   /**
-   * The mocked OG group type manager.
-   *
-   * @var \Drupal\og\GroupTypeManager|\Prophecy\Prophecy\ObjectProphecy
+   * {@inheritdoc}
    */
-  protected $groupTypeManager;
-
-  /**
-   * The mocked entity type manager.
-   *
-   * @var \Drupal\Core\Entity\EntityTypeManagerInterface|\Prophecy\Prophecy\ObjectProphecy
-   */
-  protected $entityTypeManager;
+  protected $pluginId = 'route_group';
 
   /**
    * A list of link templates that belong to our test entities.
@@ -71,13 +60,6 @@ class RouteGroupResolverTest extends OgRouteGroupResolverTestBase {
   ];
 
   /**
-   * Mocked test entities.
-   *
-   * @var \Drupal\Core\Entity\ContentEntityInterface[]
-   */
-  protected $testEntities;
-
-  /**
    * Stores the entity types and bundles of the test entities.
    *
    * @var array
@@ -96,10 +78,7 @@ class RouteGroupResolverTest extends OgRouteGroupResolverTestBase {
    * {@inheritdoc}
    */
   public function setUp() {
-    // Instantiate mocks of the classes that the plugins rely on.
-    $this->routeMatch = $this->prophesize(RouteMatchInterface::class);
-    $this->groupTypeManager = $this->prophesize(GroupTypeManager::class);
-    $this->entityTypeManager = $this->prophesize(EntityTypeManagerInterface::class);
+    parent::setUp();
 
     // Prepare mocked group and group content entities as well as an entity that
     // is neither a group nor group content.
@@ -115,31 +94,18 @@ class RouteGroupResolverTest extends OgRouteGroupResolverTestBase {
 
   /**
    * {@inheritdoc}
-   */
-  protected $className = RouteGroupResolver::class;
-
-  /**
-   * {@inheritdoc}
-   */
-  protected $pluginId = 'route_group';
-
-  /**
-   * {@inheritdoc}
    *
-   * @covers ::getGroups
-   * @dataProvider getGroupsProvider
+   * @param string $path
+   *   The current route path that should be returned by the route matcher.
+   * @param string $route_object_id
+   *   The ID of the entity that is present on the current route, or NULL if we
+   *   are not on a content entity path. The ID may be any of the ones created
+   *   in the test setup and is stored in $this->testEntities.
+   *
+   * @covers ::resolve
+   * @dataProvider resolveProvider
    */
-  public function testGetGroups($path = NULL, $route_object_type = NULL, $expected = NULL) {
-    $plugin = $this->getPluginInstance($this->getInjectedDependencies($path, $route_object_type));
-
-    $expected = $expected ? [$this->testEntities[$expected]] : [];
-    $this->assertEquals($expected, $plugin->getGroups());
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  protected function getInjectedDependencies($path = NULL, $route_object_type = NULL) {
+  public function testResolve($path = NULL, $route_object_id = NULL, $expected_added_groups = [], $expected_removed_groups = []) {
     if ($path) {
       // It is expected that the plugin will retrieve the current path from the
       // route matcher.
@@ -150,15 +116,22 @@ class RouteGroupResolverTest extends OgRouteGroupResolverTestBase {
       $this->willRetrieveContentEntityPaths();
     }
 
-    if ($route_object_type) {
+    if ($route_object_id) {
       // The plugin might retrieve the route object. This should only happen if
       // we are on an actual entity path.
-      $this->mightRetrieveRouteObject($route_object_type);
+      $this->mightRetrieveRouteObject($route_object_id);
       // If a route object is returned the plugin will need to inspect it to
       // check if it is a group.
-      $this->mightCheckIfRouteObjectIsGroup($route_object_type);
+      $this->mightCheckIfRouteObjectIsGroup($route_object_id);
     }
 
+    parent::testResolve($path, $route_object_id, $expected_added_groups, $expected_removed_groups);
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  protected function getInjectedDependencies() {
     return [
       $this->routeMatch->reveal(),
       $this->groupTypeManager->reveal(),
@@ -224,17 +197,17 @@ class RouteGroupResolverTest extends OgRouteGroupResolverTestBase {
    * entity from the route so it can check if the entity is a group. If we are
    * not, then it should not attempt to retrieve it.
    *
-   * @param string|null $route_object_type
-   *   The type of entity that is present on the current route, or NULL if we
-   *   are not on a content entity path. The types may be any of the ones
-   *   created in the test setup, e.g. 'group', 'group_content', 'non_group'.
+   * @param string|null $route_object_id
+   *   The ID of the entity that is present on the current route, or NULL if we
+   *   are not on a content entity path. The ID may be any of the ones created
+   *   in the test setup, e.g. 'group', 'group_content', 'non_group'.
    */
-  protected function mightRetrieveRouteObject($route_object_type) {
+  protected function mightRetrieveRouteObject($route_object_id) {
     // The route object should only be retrieved if we are on a content entity
     // path.
-    if ($route_object_type) {
-      $this->routeMatch->getParameter($this->testEntityTypes[$route_object_type]['type'])
-        ->willReturn($this->testEntities[$route_object_type])
+    if ($route_object_id) {
+      $this->routeMatch->getParameter($this->testEntityTypes[$route_object_id]['type'])
+        ->willReturn($this->testEntities[$route_object_id])
         ->shouldBeCalled();
     }
   }
@@ -246,17 +219,17 @@ class RouteGroupResolverTest extends OgRouteGroupResolverTestBase {
    * whether the entity is a group or not. If no content entity was found, it
    * should not perform this check.
    *
-   * @param string|null $route_object_type
-   *   The type of entity that is present on the current route, or NULL if we
-   *   are not on a content entity path. The types may be any of the ones
-   *   created in the test setup, e.g. 'group', 'group_content', 'non_group'.
+   * @param string|null $route_object_id
+   *   The ID of the entity that is present on the current route, or NULL if we
+   *   are not on a content entity path. The ID may be any of the ones created
+   *   in the test setup, e.g. 'group', 'group_content', 'non_group'.
    */
-  protected function mightCheckIfRouteObjectIsGroup($route_object_type) {
-    if ($route_object_type || TRUE) {
-      $entity_type_id = $this->testEntityTypes[$route_object_type]['type'];
-      $bundle = $this->testEntityTypes[$route_object_type]['bundle'];
+  protected function mightCheckIfRouteObjectIsGroup($route_object_id) {
+    if ($route_object_id || TRUE) {
+      $entity_type_id = $this->testEntityTypes[$route_object_id]['type'];
+      $bundle = $this->testEntityTypes[$route_object_id]['bundle'];
       $this->groupTypeManager->isGroup($entity_type_id, $bundle)
-        ->willReturn($route_object_type === 'group')
+        ->willReturn($route_object_id === 'group')
         ->shouldBeCalled();
     }
   }
@@ -295,11 +268,11 @@ class RouteGroupResolverTest extends OgRouteGroupResolverTestBase {
   }
 
   /**
-   * Data provider for testGetGroups().
+   * Data provider for testResolve().
    *
-   * @see ::testGetGroups()
+   * @see ::testResolve()
    */
-  public function getGroupsProvider() {
+  public function resolveProvider() {
     return [
       // Test that no groups are returned on a path that is not associated with
       // any entities.
@@ -309,7 +282,7 @@ class RouteGroupResolverTest extends OgRouteGroupResolverTestBase {
         // There is no entity on this route.
         NULL,
         // So the plugin should not return anything.
-        NULL,
+        [],
       ],
       // Test that if we are on the canonical entity page of a group, the
       // correct group is returned.
@@ -320,42 +293,42 @@ class RouteGroupResolverTest extends OgRouteGroupResolverTestBase {
         'group',
         // The plugin should be able to figure out this is a group, and return
         // it.
-        'group',
+        ['group'],
       ],
       // Test that if we are on the delete form of a group, the correct group is
       // returned.
       [
         '/node/{node}/delete',
         'group',
-        'group',
+        ['group'],
       ],
       // Test that if we are on the canonical entity page of a group content
       // entity, no group should be returned.
       [
         '/entity_test/{entity_test}',
         'group_content',
-        NULL,
+        [],
       ],
       // Test that if we are on the delete form of a group content entity, no
       // group should be returned.
       [
         '/entity_test/delete/entity_test/{entity_test}',
         'group_content',
-        NULL,
+        [],
       ],
       // Test that if we are on the canonical entity page of an entity that is
       // neither a group nor group content, no group should be returned.
       [
         '/taxonomy/term/{taxonomy_term}',
         'non_group',
-        NULL,
+        [],
       ],
       // Test that if we are on the delete form of an entity that is neither a
       // group nor group content, no group should be returned.
       [
         '/taxonomy/term/{taxonomy_term}/delete',
         'non_group',
-        NULL,
+        [],
       ],
     ];
   }

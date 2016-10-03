@@ -28,10 +28,10 @@ abstract class OgGroupResolverTestBase extends UnitTestCase {
   /**
    * Tests the groups that are resolved by the plugin.
    *
-   * @dataProvider getGroupsProvider
-   * @covers ::getGroups
+   * @dataProvider resolveProvider
+   * @covers ::resolve()
    */
-  abstract public function testGetGroups();
+  abstract public function testResolve();
 
   /**
    * Tests if the plugin is able to stop the group resolving process.
@@ -54,6 +54,8 @@ abstract class OgGroupResolverTestBase extends UnitTestCase {
    * Tests if the plugin returns the correct cache context IDs.
    *
    * @covers ::getCacheContextIds
+   *
+   * @todo Remove this when the method is removed from the interface.
    */
   abstract public function testGetCacheContextIds();
 

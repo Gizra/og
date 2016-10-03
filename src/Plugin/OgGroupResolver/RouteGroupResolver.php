@@ -2,6 +2,7 @@
 
 namespace Drupal\og\Plugin\OgGroupResolver;
 
+use Drupal\og\OgResolvedGroupCollectionInterface;
 use Drupal\og\OgRouteGroupResolverBase;
 
 /**
@@ -21,18 +22,16 @@ class RouteGroupResolver extends OgRouteGroupResolverBase {
   /**
    * {@inheritdoc}
    */
-  public function getGroups() {
+  public function resolve(OgResolvedGroupCollectionInterface $collection) {
     $entity = $this->getContentEntity();
     if ($entity && $this->groupTypeManager->isGroup($entity->getEntityTypeId(), $entity->bundle())) {
+      $collection->addGroup($entity);
+
       // We are on a route that matches an entity path for a group entity. We
       // can conclude with 100% certainty that this group is relevant for the
       // current context. There's no need to keep searching.
       $this->stopPropagation();
-
-      return [$entity];
     }
-
-    return [];
   }
 
   /**
