@@ -7,6 +7,7 @@ use Drupal\Core\Routing\RouteMatchInterface;
 use Drupal\og\GroupTypeManager;
 use Drupal\og\MembershipManagerInterface;
 use Drupal\og\Og;
+use Drupal\og\OgResolvedGroupCollectionInterface;
 use Drupal\og\OgRouteGroupResolverBase;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
@@ -72,15 +73,17 @@ class RouteGroupContentResolver extends OgRouteGroupResolverBase {
   /**
    * {@inheritdoc}
    */
-  public function getGroups() {
+  public function resolve(OgResolvedGroupCollectionInterface $collection) {
     $entity = $this->getContentEntity();
     if ($entity && Og::isGroupContent($entity->getEntityTypeId(), $entity->bundle())) {
       $groups = $this->membershipManager->getGroups($entity);
       // The groups are returned as a two-dimensional array. Flatten it.
-      return array_reduce($groups, 'array_merge', []);
-    }
+      $groups = array_reduce($groups, 'array_merge', []);
 
-    return [];
+      foreach ($groups as $group) {
+        $collection->addGroup($group);
+      }
+    }
   }
 
   /**
