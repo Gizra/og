@@ -30,13 +30,23 @@ class MembershipManager implements MembershipManagerInterface {
   protected $entityTypeManager;
 
   /**
+   * The OG group audience helper.
+   *
+   * @var \Drupal\og\OgGroupAudienceHelperInterface
+   */
+  protected $groupAudienceHelper;
+
+  /**
    * Constructs a MembershipManager object.
    *
    * @param \Drupal\core\Entity\EntityTypeManagerInterface $entity_type_manager
    *   The entity type manager.
+   * @param \Drupal\og\OgGroupAudienceHelperInterface $group_audience_helper
+   *   The OG group audience helper.
    */
-  public function __construct(EntityTypeManagerInterface $entity_type_manager) {
+  public function __construct(EntityTypeManagerInterface $entity_type_manager, OgGroupAudienceHelperInterface $group_audience_helper) {
     $this->entityTypeManager = $entity_type_manager;
+    $this->groupAudienceHelper = $group_audience_helper;
   }
 
   /**
@@ -158,7 +168,7 @@ class MembershipManager implements MembershipManagerInterface {
 
     $group_ids = [];
 
-    $fields = OgGroupAudienceHelper::getAllGroupAudienceFields($entity->getEntityTypeId(), $entity->bundle(), $group_type_id, $group_bundle);
+    $fields = $this->groupAudienceHelper->getAllGroupAudienceFields($entity->getEntityTypeId(), $entity->bundle(), $group_type_id, $group_bundle);
     foreach ($fields as $field) {
       $target_type = $field->getFieldStorageDefinition()->getSetting('target_type');
 
@@ -189,6 +199,12 @@ class MembershipManager implements MembershipManagerInterface {
       $query = $this->entityTypeManager
         ->getStorage($target_type)
         ->getQuery()
+        // Disable entity access check so fetching the groups related to group
+        // content are not affected by the current user. Furthermore, when
+        // rebuilding node access and the groups are nodes, we should not try to
+        // retrieve node access records which do not exist because the rebuild
+        // process has already erased the grants table.
+        ->accessCheck(FALSE)
         ->condition($entity_type->getKey('id'), $target_ids, 'IN');
 
       // Optionally filter by group bundle.
@@ -236,7 +252,7 @@ class MembershipManager implements MembershipManagerInterface {
     $query = $this->entityTypeManager
       ->getStorage('field_storage_config')
       ->getQuery()
-      ->condition('type', OgGroupAudienceHelper::GROUP_REFERENCE);
+      ->condition('type', OgGroupAudienceHelperInterface::GROUP_REFERENCE);
 
     // Optionally filter group content entity types.
     if ($entity_types) {

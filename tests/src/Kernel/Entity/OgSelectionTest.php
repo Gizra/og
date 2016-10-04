@@ -9,9 +9,9 @@ use Drupal\node\Entity\NodeType;
 use Drupal\KernelTests\KernelTestBase;
 use Drupal\og\Entity\OgRole;
 use Drupal\og\Og;
-use Drupal\og\OgGroupAudienceHelper;
 use Drupal\og\OgRoleInterface;
 use Drupal\user\Entity\Role;
+use Drupal\og\OgGroupAudienceHelperInterface;
 use Drupal\user\Entity\User;
 
 /**
@@ -115,7 +115,7 @@ class OgSelectionTest extends KernelTestBase {
     Og::groupTypeManager()->addGroup('node', $this->groupBundle);
 
     // Add og audience field to group content.
-    $this->fieldDefinition = Og::createField(OgGroupAudienceHelper::DEFAULT_FIELD, 'node', $this->groupContentBundle);
+    $this->fieldDefinition = Og::createField(OgGroupAudienceHelperInterface::DEFAULT_FIELD, 'node', $this->groupContentBundle);
 
     // The selection handler for the field.
     $this->selectionHandler = Og::getSelectionHandler($this->fieldDefinition);

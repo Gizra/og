@@ -275,7 +275,7 @@ class Og {
   /**
    * Check if the given entity type and bundle is a group content.
    *
-   * This is just a convenience wrapper around Og::getAllGroupAudienceFields().
+   * This works by checking if the bundle has one or more group audience fields.
    *
    * @param string $entity_type_id
    *   The entity type.
@@ -286,7 +286,7 @@ class Og {
    *   True or false if the given entity is group content.
    */
   public static function isGroupContent($entity_type_id, $bundle_id) {
-    return (bool) OgGroupAudienceHelper::getAllGroupAudienceFields($entity_type_id, $bundle_id);
+    return \Drupal::service('og.group_audience_helper')->hasGroupAudienceField($entity_type_id, $bundle_id);
   }
 
   /**
@@ -325,16 +325,6 @@ class Og {
   public static function groupTypeManager() {
     // @todo store static reference for this?
     return \Drupal::service('og.group_type_manager');
-  }
-
-  /**
-   * Return the og permission handler instance.
-   *
-   * @return \Drupal\og\OgPermissionHandler
-   *   Returns the OG permissions handler.
-   */
-  public static function permissionHandler() {
-    return \Drupal::service('og.permissions');
   }
 
   /**
@@ -413,7 +403,7 @@ class Og {
    *   field.
    */
   public static function getSelectionHandler(FieldDefinitionInterface $field_definition) {
-    if (!OgGroupAudienceHelper::isGroupAudienceField($field_definition)) {
+    if (!\Drupal::service('og.group_audience_helper')->isGroupAudienceField($field_definition)) {
       $field_name = $field_definition->getName();
       throw new \Exception("The field $field_name is not a group audience field.");
     }
