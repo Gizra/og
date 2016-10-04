@@ -81,7 +81,7 @@ class OgRoleManagerTest extends KernelTestBase {
   /**
    * Tests that all roles are loaded for a certain group.
    */
-  public function testLoadRolesByGroup() {
+  public function testGetRolesByBundle() {
     $expected_role_ids = [
       'node-' . $this->bundle . '-administrator',
       'node-' . $this->bundle . '-member',
