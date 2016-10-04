@@ -4,8 +4,10 @@ namespace Drupal\Tests\og\Functional;
 
 use Drupal\node\Entity\Node;
 use Drupal\node\Entity\NodeType;
+use Drupal\og\Entity\OgRole;
 use Drupal\og\Og;
 use Drupal\og\OgGroupAudienceHelper;
+use Drupal\og\OgRoleInterface;
 use Drupal\Tests\BrowserTestBase;
 use Drupal\simpletest\ContentTypeCreationTrait;
 use Drupal\simpletest\NodeCreationTrait;
@@ -121,9 +123,12 @@ class OgSelectionWidgetOptionsTest extends BrowserTestBase {
     $this->assertSession()->pageTextNotContains($this->group1->label());
     $this->assertSession()->pageTextNotContains($this->group2->label());
 
-    // Assign the permission to the user role.
-    $role = Og::createOgRole($this->group1, ['create node group_content']);
-    $role->save();
+    // Assign the permission.
+    $role = OgRole::getRole($this->group1->getEntityTypeId(), $this->group1->bundle(), OgRoleInterface::AUTHENTICATED);
+    $role
+      ->grantPermission('create node group_content')
+      ->save();
+
     Og::createMembership($this->group1, $this->groupMemberUser)
       ->addRole($role)
       ->save();

@@ -185,25 +185,6 @@ class Og {
   }
 
   /**
-   * Create an OG role instance.
-   *
-   * @param EntityInterface $group
-   *   The group object.
-   * @param array $permission
-   *   List of permissions.
-   * @param string $role_name
-   *   OG role name. i.e member or non member.
-   *
-   * @return \Drupal\og\Entity\OgRole
-   *   The OG role instance.
-   */
-  public static function createOgRole(EntityInterface $group, array $permission, $role_name = OgRoleInterface::AUTHENTICATED) {
-    $og_role = OgRole::getRole($group->getEntityTypeId(), $group->bundle(), $role_name);
-    return $og_role
-      ->set('permissions', $permission);
-  }
-
-  /**
    * Returns whether a user belongs to a group.
    *
    * @param \Drupal\Core\Entity\EntityInterface $group
