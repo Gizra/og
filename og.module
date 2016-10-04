@@ -12,7 +12,7 @@ use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Field\BaseFieldDefinition;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\og\Og;
-use Drupal\og\OgGroupAudienceHelper;
+use Drupal\og\OgGroupAudienceHelperInterface;
 use Drupal\user\EntityOwnerInterface;
 use Drupal\user\UserInterface;
 
@@ -145,7 +145,7 @@ function og_entity_create_access(AccountInterface $account, array $context, $bun
   $field_definitions = \Drupal::service('entity_field.manager')->getFieldDefinitions($entity_type_id, $bundle);
   foreach ($field_definitions as $field_name => $field_definition) {
     /** @var \Drupal\Core\Field\FieldDefinitionInterface $field_definition */
-    if (!OgGroupAudienceHelper::isGroupAudienceField($field_definition)) {
+    if (!\Drupal::service('og.group_audience_helper')->isGroupAudienceField($field_definition)) {
       continue;
     }
 
@@ -215,7 +215,7 @@ function og_field_formatter_info_alter(array &$info) {
       continue;
     }
 
-    $info[$key]['field_types'][] = OgGroupAudienceHelper::GROUP_REFERENCE;
+    $info[$key]['field_types'][] = OgGroupAudienceHelperInterface::GROUP_REFERENCE;
   }
 }
 
@@ -223,7 +223,7 @@ function og_field_formatter_info_alter(array &$info) {
  * Implements hook_field_widget_info_alter().
  */
 function og_field_widget_info_alter(array &$info) {
-  $info['options_buttons']['field_types'][] = OgGroupAudienceHelper::GROUP_REFERENCE;
+  $info['options_buttons']['field_types'][] = OgGroupAudienceHelperInterface::GROUP_REFERENCE;
 }
 
 /**

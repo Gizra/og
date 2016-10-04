@@ -132,6 +132,13 @@ class GroupTypeManager {
   protected $routeBuilder;
 
   /**
+   * The OG group audience helper.
+   *
+   * @var \Drupal\og\OgGroupAudienceHelperInterface
+   */
+  protected $groupAudienceHelper;
+
+  /**
    * Constructs a GroupTypeManager object.
    *
    * @param \Drupal\Core\Config\ConfigFactoryInterface $config_factory
@@ -150,8 +157,10 @@ class GroupTypeManager {
    *   The OG role manager.
    * @param \Drupal\Core\Routing\RouteBuilderInterface $route_builder
    *   The route builder service.
+   * @param \Drupal\og\OgGroupAudienceHelperInterface $group_audience_helper
+   *   The OG group audience helper.
    */
-  public function __construct(ConfigFactoryInterface $config_factory, EntityTypeManagerInterface $entity_type_manager, EntityTypeBundleInfoInterface $entity_type_bundle_info, EventDispatcherInterface $event_dispatcher, StateInterface $state, PermissionManagerInterface $permission_manager, OgRoleManagerInterface $og_role_manager, RouteBuilderInterface $route_builder) {
+  public function __construct(ConfigFactoryInterface $config_factory, EntityTypeManagerInterface $entity_type_manager, EntityTypeBundleInfoInterface $entity_type_bundle_info, EventDispatcherInterface $event_dispatcher, StateInterface $state, PermissionManagerInterface $permission_manager, OgRoleManagerInterface $og_role_manager, RouteBuilderInterface $route_builder, OgGroupAudienceHelperInterface $group_audience_helper) {
     $this->configFactory = $config_factory;
     $this->ogRoleStorage = $entity_type_manager->getStorage('og_role');
     $this->entityTypeBundleInfo = $entity_type_bundle_info;
@@ -160,6 +169,7 @@ class GroupTypeManager {
     $this->permissionManager = $permission_manager;
     $this->ogRoleManager = $og_role_manager;
     $this->routeBuilder = $route_builder;
+    $this->groupAudienceHelper = $group_audience_helper;
   }
 
   /**
@@ -220,7 +230,7 @@ class GroupTypeManager {
   public function getGroupBundleIdsByGroupContentBundle($group_content_entity_type_id, $group_content_bundle_id) {
     $bundles = [];
 
-    foreach (OgGroupAudienceHelper::getAllGroupAudienceFields($group_content_entity_type_id, $group_content_bundle_id) as $field) {
+    foreach ($this->groupAudienceHelper->getAllGroupAudienceFields($group_content_entity_type_id, $group_content_bundle_id) as $field) {
       $group_entity_type_id = $field->getSetting('target_type');
       $handler_settings = $field->getSetting('handler_settings');
       $group_bundle_ids = !empty($handler_settings['target_bundles']) ? $handler_settings['target_bundles'] : [];
