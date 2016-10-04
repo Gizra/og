@@ -7,7 +7,7 @@ use Drupal\KernelTests\KernelTestBase;
 use Drupal\node\Entity\Node;
 use Drupal\node\Entity\NodeType;
 use Drupal\og\Og;
-use Drupal\og\OgGroupAudienceHelper;
+use Drupal\og\OgGroupAudienceHelperInterface;
 use Drupal\user\Entity\User;
 
 /**
@@ -75,7 +75,7 @@ class OgDeleteOrphansTest extends KernelTestBase {
       'type' => $group_content_bundle,
       'name' => $this->randomString(),
     ])->save();
-    Og::createField(OgGroupAudienceHelper::DEFAULT_FIELD, 'node', $group_content_bundle);
+    Og::createField(OgGroupAudienceHelperInterface::DEFAULT_FIELD, 'node', $group_content_bundle);
 
     // Create group admin user.
     $group_admin = User::create(['name' => $this->randomString()]);
@@ -93,7 +93,7 @@ class OgDeleteOrphansTest extends KernelTestBase {
     $group_content = Node::create([
       'title' => $this->randomString(),
       'type' => $group_content_bundle,
-      OgGroupAudienceHelper::DEFAULT_FIELD => [['target_id' => $this->group->id()]],
+      OgGroupAudienceHelperInterface::DEFAULT_FIELD => [['target_id' => $this->group->id()]],
     ]);
     $group_content->save();
   }

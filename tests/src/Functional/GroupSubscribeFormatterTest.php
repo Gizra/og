@@ -105,7 +105,6 @@ class GroupSubscribeFormatterTest extends BrowserTestBase {
     $this->drupalLogin($this->user2);
     $this->drupalGet('node/' . $this->group->id());
     $this->clickLink('Subscribe to group');
-
   }
 
 }

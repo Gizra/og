@@ -11,23 +11,26 @@ services:
       - { name: 'cache.context'}
   og.access:
     class: Drupal\og\OgAccess
-    arguments: ['@config.factory', '@current_user', '@module_handler', '@og.group_type_manager', '@og.permission_manager', '@og.membership_manager']
+    arguments: ['@config.factory', '@current_user', '@module_handler', '@og.group_type_manager', '@og.permission_manager', '@og.membership_manager', '@og.group_audience_helper']
   og.context:
     class: Drupal\og\ContextProvider\OgContext
     arguments: ['@plugin.manager.og.group_resolver', '@config.factory']
     tags:
       - { name: 'context_provider' }
+  og.membership_manager:
+    class: Drupal\og\MembershipManager
+    arguments: ['@entity_type.manager', '@og.group_audience_helper']
   og.event_subscriber:
     class: Drupal\og\EventSubscriber\OgEventSubscriber
     arguments: ['@og.permission_manager', '@entity_type.manager', '@entity_type.bundle.info']
     tags:
       - { name: 'event_subscriber' }
+  og.group_audience_helper:
+    class: Drupal\og\OgGroupAudienceHelper
+    arguments: ['@entity_type.manager', '@entity_field.manager']
   og.group_type_manager:
     class: Drupal\og\GroupTypeManager
-    arguments: ['@config.factory', '@entity_type.manager', '@entity_type.bundle.info', '@event_dispatcher', '@state', '@og.permission_manager', '@og.role_manager', '@router.builder']
-  og.membership_manager:
-    class: Drupal\og\MembershipManager
-    arguments: ['@entity_type.manager']
+    arguments: ['@config.factory', '@entity_type.manager', '@entity_type.bundle.info', '@event_dispatcher', '@state', '@og.permission_manager', '@og.role_manager', '@router.builder', '@og.group_audience_helper']
   og.permissions:
     class: Drupal\og\OgPermissionHandler
     arguments: ['@module_handler', '@string_translation', '@controller_resolver']

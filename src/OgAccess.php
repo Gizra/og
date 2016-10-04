@@ -85,6 +85,13 @@ class OgAccess implements OgAccessInterface {
   protected $membershipManager;
 
   /**
+   * The OG group audience helper.
+   *
+   * @var \Drupal\og\OgGroupAudienceHelperInterface
+   */
+  protected $groupAudienceHelper;
+
+  /**
    * Constructs an OgManager service.
    *
    * @param \Drupal\Core\Config\ConfigFactoryInterface $config_factory
@@ -99,14 +106,17 @@ class OgAccess implements OgAccessInterface {
    *   The permission manager.
    * @param \Drupal\og\MembershipManagerInterface $membership_manager
    *   The group membership manager.
+   * @param \Drupal\og\OgGroupAudienceHelperInterface $group_audience_helper
+   *   The OG group audience helper.
    */
-  public function __construct(ConfigFactoryInterface $config_factory, AccountProxyInterface $account_proxy, ModuleHandlerInterface $module_handler, GroupTypeManager $group_manager, PermissionManagerInterface $permission_manager, MembershipManagerInterface $membership_manager) {
+  public function __construct(ConfigFactoryInterface $config_factory, AccountProxyInterface $account_proxy, ModuleHandlerInterface $module_handler, GroupTypeManager $group_manager, PermissionManagerInterface $permission_manager, MembershipManagerInterface $membership_manager, OgGroupAudienceHelperInterface $group_audience_helper) {
     $this->configFactory = $config_factory;
     $this->accountProxy = $account_proxy;
     $this->moduleHandler = $module_handler;
     $this->groupTypeManager = $group_manager;
     $this->permissionManager = $permission_manager;
     $this->membershipManager = $membership_manager;
+    $this->groupAudienceHelper = $group_audience_helper;
   }
 
   /**
@@ -174,7 +184,7 @@ class OgAccess implements OgAccessInterface {
     if (!$pre_alter_cache) {
       $permissions = [];
       $user_is_group_admin = FALSE;
-      if ($membership = Og::getMembership($group, $user)) {
+      if ($membership = $this->membershipManager->getMembership($group, $user)) {
         foreach ($membership->getRoles() as $role) {
           // Check for the is_admin flag.
           /** @var \Drupal\og\Entity\OgRole $role */
@@ -186,7 +196,7 @@ class OgAccess implements OgAccessInterface {
           $permissions = array_merge($permissions, $role->getPermissions());
         }
       }
-      elseif (!Og::isMemberBlocked($group, $user)) {
+      elseif (!$this->membershipManager->isMember($group, $user, [OgMembershipInterface::STATE_BLOCKED])) {
         // User is a non-member or has a pending membership.
         /** @var \Drupal\og\Entity\OgRole $role */
         $role = OgRole::loadByGroupAndName($group, OgRoleInterface::ANONYMOUS);
@@ -251,7 +261,7 @@ class OgAccess implements OgAccessInterface {
       }
     }
 
-    $is_group_content = Og::isGroupContent($entity_type_id, $bundle);
+    $is_group_content = $this->groupAudienceHelper->hasGroupAudienceField($entity_type_id, $bundle);
     $cache_tags = $entity_type->getListCacheTags();
 
     // The entity might be a user or a non-user entity.
