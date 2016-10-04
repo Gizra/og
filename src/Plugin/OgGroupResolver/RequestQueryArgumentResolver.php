@@ -7,6 +7,7 @@ use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
 use Drupal\og\GroupTypeManager;
 use Drupal\og\OgGroupResolverBase;
+use Drupal\og\OgResolvedGroupCollectionInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpFoundation\RequestStack;
 
@@ -56,15 +57,6 @@ class RequestQueryArgumentResolver extends OgGroupResolverBase implements Contai
   protected $groupTypeManager;
 
   /**
-   * The resolved group.
-   *
-   * @var \Drupal\Core\Entity\EntityInterface|null|false
-   *   The resolved group, or NULL if no group has been resolved, or FALSE if
-   *   resolution has not yet taken place.
-   */
-  protected $group = FALSE;
-
-  /**
    * Constructs a RequestQueryArgumentResolver.
    *
    * @param array $configuration
@@ -104,21 +96,7 @@ class RequestQueryArgumentResolver extends OgGroupResolverBase implements Contai
   /**
    * {@inheritdoc}
    */
-  public function getGroups() {
-    if ($this->group === FALSE) {
-      $this->resolve();
-    }
-    return $this->group ?: [];
-  }
-
-  /**
-   * Resolve the group from the query arguments.
-   *
-   * The resolved group will be cached locally in $this->group.
-   */
-  protected function resolve() {
-    $this->group = NULL;
-
+  public function resolve(OgResolvedGroupCollectionInterface $collection) {
     // Check if our arguments are present on the request.
     $query = $this->requestStack->getCurrentRequest()->query;
     if ($query->has(self::GROUP_TYPE_ARGUMENT) && $query->has(self::GROUP_ID_ARGUMENT)) {
@@ -130,10 +108,15 @@ class RequestQueryArgumentResolver extends OgGroupResolverBase implements Contai
         return;
       }
 
-      // Load the entity and check if it is a group before setting it.
+      // Load the entity and check if it is a group.
       if ($entity = $storage->load($query->get(self::GROUP_ID_ARGUMENT))) {
         if ($this->groupTypeManager->isGroup($entity->getEntityTypeId(), $entity->bundle())) {
-          $this->group = $entity;
+          // Only add a vote for the group if it already has been discovered by
+          // a previous plugin. This will make sure that users cannot fake a
+          // group context by messing with the query arguments.
+          if ($collection->hasGroup($entity)) {
+            $collection->addGroup($entity);
+          }
         }
       }
     }
