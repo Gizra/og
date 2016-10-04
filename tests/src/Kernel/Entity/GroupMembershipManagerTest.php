@@ -8,7 +8,7 @@ use Drupal\entity_test\Entity\EntityTest;
 use Drupal\node\Entity\Node;
 use Drupal\node\Entity\NodeType;
 use Drupal\og\Og;
-use Drupal\og\OgGroupAudienceHelper;
+use Drupal\og\OgGroupAudienceHelperInterface;
 use Drupal\user\Entity\User;
 
 /**
@@ -116,7 +116,7 @@ class GroupMembershipManagerTest extends KernelTestBase {
           ],
         ],
       ];
-      Og::createField(OgGroupAudienceHelper::DEFAULT_FIELD, 'entity_test', $bundle, $settings);
+      Og::createField(OgGroupAudienceHelperInterface::DEFAULT_FIELD, 'entity_test', $bundle, $settings);
     }
 
     // Create a group content entity that references all four groups.

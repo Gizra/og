@@ -7,7 +7,7 @@ use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\field\Entity\FieldConfig;
 use Drupal\og\Og;
-use Drupal\og\OgGroupAudienceHelper;
+use Drupal\og\OgGroupAudienceHelperInterface;
 
 /**
  * Helper for og_ui_form_alter().
@@ -131,7 +131,7 @@ class BundleFormAlter {
    */
   protected function addGroupContent(array &$form, FormStateInterface $form_state) {
     // Get the stored config from the default group audience field if it exists.
-    $field = FieldConfig::loadByName($this->entityTypeId, $this->bundle, OgGroupAudienceHelper::DEFAULT_FIELD);
+    $field = FieldConfig::loadByName($this->entityTypeId, $this->bundle, OgGroupAudienceHelperInterface::DEFAULT_FIELD);
     $handler_settings = $field ? $field->getSetting('handler_settings') : [];
 
     // Compile a list of group entity types and bundles.

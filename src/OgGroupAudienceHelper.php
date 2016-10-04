@@ -2,71 +2,73 @@
 
 namespace Drupal\og;
 
+use Drupal\Core\Entity\EntityFieldManagerInterface;
+use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Entity\FieldableEntityInterface;
 use Drupal\Core\Field\FieldDefinitionInterface;
 
 /**
  * OG audience field helper methods.
  */
-class OgGroupAudienceHelper {
+class OgGroupAudienceHelper implements OgGroupAudienceHelperInterface {
 
   /**
-   * The default OG audience field name.
-   */
-  const DEFAULT_FIELD = 'og_audience';
-
-  /**
-   * The name of the field type that references non-user entities to groups.
-   */
-  const GROUP_REFERENCE = 'og_standard_reference';
-
-  /**
-   * Return TRUE if field is a group audience type.
+   * The entity type manager.
    *
-   * @param \Drupal\Core\Field\FieldDefinitionInterface $field_definition
-   *   The field definition object.
-   *
-   * @return bool
-   *   TRUE if the field is a group audience type, FALSE otherwise.
+   * @var \Drupal\Core\Entity\EntityTypeManagerInterface
    */
-  public static function isGroupAudienceField(FieldDefinitionInterface $field_definition) {
-    return $field_definition->getType() == OgGroupAudienceHelper::GROUP_REFERENCE;
+  protected $entityTypeManager;
+
+  /**
+   * The entity field manager.
+   *
+   * @var \Drupal\Core\Entity\EntityFieldManagerInterface
+   */
+  protected $entityFieldManager;
+
+  /**
+   * Constructs an OgGroupAudienceHelper object.
+   *
+   * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entity_type_manager
+   *   The entity type manager.
+   * @param \Drupal\Core\Entity\EntityFieldManagerInterface $entity_field_manager
+   *   The entity field manager.
+   */
+  public function __construct(EntityTypeManagerInterface $entity_type_manager, EntityFieldManagerInterface $entity_field_manager) {
+    $this->entityTypeManager = $entity_type_manager;
+    $this->entityFieldManager = $entity_field_manager;
   }
 
   /**
-   * Returns all the group audience fields of a certain bundle.
-   *
-   * @param string $group_content_entity_type_id
-   *   The entity type ID of the group content for which to return audience
-   *   fields.
-   * @param string $group_content_bundle_id
-   *   The bundle name of the group content for which to return audience fields.
-   * @param string $group_entity_type_id
-   *   Filter list to only include fields referencing a specific group type. If
-   *   omitted, all fields will be returned.
-   * @param string $group_bundle_id
-   *   Filter list to only include fields referencing a specific group bundle.
-   *   Fields that do not specify any bundle restrictions at all are also
-   *   included. If omitted, the results will not be filtered by group bundle.
-   *
-   * @return \Drupal\Core\Field\FieldDefinitionInterface[]
-   *   An array of field definitions, keyed by field name; Or an empty array if
-   *   none found.
+   * {@inheritdoc}
    */
-  public static function getAllGroupAudienceFields($group_content_entity_type_id, $group_content_bundle_id, $group_entity_type_id = NULL, $group_bundle_id = NULL) {
+  public function hasGroupAudienceField($entity_type_id, $bundle_id) {
+    return (bool) $this->getAllGroupAudienceFields($entity_type_id, $bundle_id);
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public static function isGroupAudienceField(FieldDefinitionInterface $field_definition) {
+    return $field_definition->getType() == OgGroupAudienceHelperInterface::GROUP_REFERENCE;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getAllGroupAudienceFields($group_content_entity_type_id, $group_content_bundle_id, $group_entity_type_id = NULL, $group_bundle_id = NULL) {
     $return = [];
-    $entity_type = \Drupal::entityTypeManager()->getDefinition($group_content_entity_type_id);
+    $entity_type = $this->entityTypeManager->getDefinition($group_content_entity_type_id);
 
     if (!$entity_type->isSubclassOf(FieldableEntityInterface::class)) {
       // This entity type is not fieldable.
       return [];
     }
 
-    /** @var \Drupal\Core\Field\FieldDefinitionInterface[] $field_definitions */
-    $field_definitions = \Drupal::service('entity_field.manager')->getFieldDefinitions($group_content_entity_type_id, $group_content_bundle_id);
+    $field_definitions = $this->entityFieldManager->getFieldDefinitions($group_content_entity_type_id, $group_content_bundle_id);
 
     foreach ($field_definitions as $field_definition) {
-      if (!static::isGroupAudienceField($field_definition)) {
+      if (!$this->isGroupAudienceField($field_definition)) {
         // Not a group audience field.
         continue;
       }

@@ -3,7 +3,7 @@
 namespace Drupal\Tests\og\Kernel\Field;
 
 use Drupal\KernelTests\KernelTestBase;
-use Drupal\og\OgGroupAudienceHelper;
+use Drupal\og\OgGroupAudienceHelperInterface;
 
 /**
  * Test that formatters for entity reference can be applied to audience fields.
@@ -30,7 +30,7 @@ class AudienceFieldFormatterTest extends KernelTestBase {
       'entity_reference_label',
     ];
 
-    $actual = array_keys($formatter_manager->getOptions(OgGroupAudienceHelper::GROUP_REFERENCE));
+    $actual = array_keys($formatter_manager->getOptions(OgGroupAudienceHelperInterface::GROUP_REFERENCE));
     sort($actual);
     $this->assertEquals($expected, $actual);
   }
