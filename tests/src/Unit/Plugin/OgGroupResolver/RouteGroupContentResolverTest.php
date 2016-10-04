@@ -83,7 +83,7 @@ class RouteGroupContentResolverTest extends OgRouteGroupResolverTestBase {
       $this->routeMatch->reveal(),
       $this->groupTypeManager->reveal(),
       $this->entityTypeManager->reveal(),
-      $this->membershipManager->reveal()
+      $this->membershipManager->reveal(),
     ];
   }
 
