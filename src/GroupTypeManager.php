@@ -189,6 +189,24 @@ class GroupTypeManager {
   }
 
   /**
+   * Checks if the given entity bundle is group content.
+   *
+   * This is provided as a convenient sister method to ::isGroup(). It is a
+   * simple wrapper for OgGroupAudienceHelperInterface::hasGroupAudienceField().
+   *
+   * @param string $entity_type_id
+   *   The entity type ID.
+   * @param string $bundle
+   *   The bundle name.
+   *
+   * @return bool
+   *   TRUE if the entity bundle is group content.
+   */
+  public function isGroupContent($entity_type_id, $bundle) {
+    return $this->groupAudienceHelper->hasGroupAudienceField($entity_type_id, $bundle);
+  }
+
+  /**
    * Returns the group of an entity type.
    *
    * @param string $entity_type_id
