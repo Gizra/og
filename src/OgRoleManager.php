@@ -117,7 +117,7 @@ class OgRoleManager implements OgRoleManagerInterface {
   /**
    * {@inheritdoc}
    */
-  public function loadRolesByBundle($entity_type_id, $bundle) {
+  public function getRolesByBunlde($entity_type_id, $bundle) {
     $properties = [
       'group_type' => $entity_type_id,
       'group_bundle' => $bundle,
