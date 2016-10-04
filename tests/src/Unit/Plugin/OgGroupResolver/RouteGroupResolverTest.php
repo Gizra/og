@@ -3,9 +3,7 @@
 namespace Drupal\Tests\og\Unit\Plugin\OgGroupResolver;
 
 use Drupal\Core\Entity\ContentEntityInterface;
-use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\og\Plugin\OgGroupResolver\RouteGroupResolver;
-use Symfony\Component\Routing\Route;
 
 /**
  * Tests the RouteGroupResolver plugin.
@@ -24,70 +22,6 @@ class RouteGroupResolverTest extends OgRouteGroupResolverTestBase {
    * {@inheritdoc}
    */
   protected $pluginId = 'route_group';
-
-  /**
-   * A list of link templates that belong to our test entities.
-   *
-   * This mocks the data returned by EntityTypeInterface::getLinkTemplates().
-   *
-   * @var array
-   *   A list of link templates, keyed by entity type ID.
-   *
-   * @see \Drupal\Core\Entity\EntityTypeInterface::getLinkTemplates()
-   */
-  protected $linkTemplates = [
-    'node' => [
-      'canonical' => '/node/{node}',
-      'delete-form' => '/node/{node}/delete',
-      'edit-form' => '/node/{node}/edit',
-      'version-history' => '/node/{node}/revisions',
-      'revision' => '/node/{node}/revisions/{node_revision}/view',
-    ],
-    'entity_test' => [
-      'canonical' => '/entity_test/{entity_test}',
-      'add-form' => '/entity_test/add',
-      'edit-form' => '/entity_test/manage/{entity_test}/edit',
-      'delete-form' => '/entity_test/delete/entity_test/{entity_test}',
-    ],
-    'taxonomy_term' => [
-      'canonical' => '/taxonomy/term/{taxonomy_term}',
-      'delete-form' => '/taxonomy/term/{taxonomy_term}/delete',
-      'edit-form' => '/taxonomy/term/{taxonomy_term}/edit',
-    ],
-  ];
-
-  /**
-   * Stores the entity types and bundles of the test entities.
-   *
-   * @var array
-   *   An array of entity metadata, keyed by test entity ID. Each item is an
-   *   array with the following keys:
-   *   - type: The entity type ID.
-   *   - bundle: The entity bundle.
-   */
-  protected $testEntityTypes = [
-    'group' => ['type' => 'node', 'bundle' => 'group'],
-    'group_content' => ['type' => 'entity_test', 'bundle' => 'group_content'],
-    'non_group' => ['type' => 'taxonomy_term', 'bundle' => 'taxonomy_term'],
-  ];
-
-  /**
-   * {@inheritdoc}
-   */
-  public function setUp() {
-    parent::setUp();
-
-    // Prepare mocked group and group content entities as well as an entity that
-    // is neither a group nor group content.
-    foreach ($this->testEntityTypes as $id => $metadata) {
-      $entity = $this->prophesize(ContentEntityInterface::class);
-      // In case this entity is questioned about its identity, it shall
-      // willingly provide the information.
-      $entity->getEntityTypeId()->willReturn($metadata['type']);
-      $entity->bundle()->willReturn($metadata['bundle']);
-      $this->testEntities[$id] = $entity->reveal();
-    }
-  }
 
   /**
    * {@inheritdoc}
@@ -137,98 +71,14 @@ class RouteGroupResolverTest extends OgRouteGroupResolverTestBase {
   }
 
   /**
-   * Adds an expectation that the current path will be retrieved from the route.
-   *
-   * @param string $path
-   *   The path that will be retrieved.
+   * {@inheritdoc}
    */
-  protected function willRetrieveCurrentPathFromRouteMatcher($path) {
-    /** @var \Symfony\Component\Routing\Route|\Prophecy\Prophecy\ObjectProphecy $route */
-    $route = $this->prophesize(Route::class);
-    $route
-      ->getPath()
-      ->willReturn($path)
-      ->shouldBeCalled();
-    $this->routeMatch
-      ->getRouteObject()
-      ->willReturn($route->reveal())
-      ->shouldBeCalled();
-  }
-
-  /**
-   * Adds an expectation that the plugin will retrieve a list of entity paths.
-   *
-   * The plugin need to match the current path to this list of entity paths to
-   * see if we are currently on an entity path of a group or group content
-   * entity.
-   * In order to retrieve the content entity paths, the plugin will have to
-   * request a full list of all entity types, then request the "link templates"
-   * from the content entities.
-   */
-  protected function willRetrieveContentEntityPaths() {
-    // Provide some mocked content entity types.
-    $entity_types = [];
-    foreach (array_keys($this->linkTemplates) as $entity_type_id) {
-      $entity_type = $this->prophesize(EntityTypeInterface::class);
-      // The plugin will need to know if this is a content entity, so we will
-      // provide this information. We are not requiring this to be called since
-      // there are other ways of determining this (e.g. `instanceof`).
-      $entity_type->isSubclassOf(ContentEntityInterface::class)->willReturn(TRUE);
-
-      // The plugin will need to inquire about the link templates that the
-      // entity provides. This should be called.
-      $entity_type->getLinkTemplates()
-        ->willReturn($this->getLinkTemplates($entity_type_id))
-        ->shouldBeCalled();
-      $entity_types[$entity_type_id] = $entity_type->reveal();
-    }
-    $this->entityTypeManager->getDefinitions()
-      ->willReturn($entity_types)
-      ->shouldBeCalled();
-  }
-
-  /**
-   * Adds an expectation that the plugin will (not) retrieve the route object.
-   *
-   * If the current path is an entity path, the plugin should retrieve the
-   * entity from the route so it can check if the entity is a group. If we are
-   * not, then it should not attempt to retrieve it.
-   *
-   * @param string|null $route_object_id
-   *   The ID of the entity that is present on the current route, or NULL if we
-   *   are not on a content entity path. The ID may be any of the ones created
-   *   in the test setup, e.g. 'group', 'group_content', 'non_group'.
-   */
-  protected function mightRetrieveRouteObject($route_object_id) {
-    // The route object should only be retrieved if we are on a content entity
-    // path.
-    if ($route_object_id) {
-      $this->routeMatch->getParameter($this->testEntityTypes[$route_object_id]['type'])
-        ->willReturn($this->testEntities[$route_object_id])
-        ->shouldBeCalled();
-    }
-  }
-
-  /**
-   * Adds an expectation that checks if the route object is a group.
-   *
-   * If the plugin found a content entity on the route then it should check
-   * whether the entity is a group or not. If no content entity was found, it
-   * should not perform this check.
-   *
-   * @param string|null $route_object_id
-   *   The ID of the entity that is present on the current route, or NULL if we
-   *   are not on a content entity path. The ID may be any of the ones created
-   *   in the test setup, e.g. 'group', 'group_content', 'non_group'.
-   */
-  protected function mightCheckIfRouteObjectIsGroup($route_object_id) {
-    if ($route_object_id || TRUE) {
-      $entity_type_id = $this->testEntityTypes[$route_object_id]['type'];
-      $bundle = $this->testEntityTypes[$route_object_id]['bundle'];
-      $this->groupTypeManager->isGroup($entity_type_id, $bundle)
-        ->willReturn($route_object_id === 'group')
-        ->shouldBeCalled();
-    }
+  protected function getTestEntityProperties() {
+    return [
+      'group' => ['type' => 'node', 'bundle' => 'group', 'group' => TRUE],
+      'group_content' => ['type' => 'entity_test', 'bundle' => 'group_content'],
+      'non_group' => ['type' => 'taxonomy_term', 'bundle' => 'taxonomy_term'],
+    ];
   }
 
   /**
@@ -245,23 +95,6 @@ class RouteGroupResolverTest extends OgRouteGroupResolverTestBase {
     return [
       'node' => $this->prophesize(ContentEntityInterface::class),
     ];
-  }
-
-  /**
-   * Returns a set of entity link templates for testing.
-   *
-   * This mimicks the data returned by EntityTypeInterface::getLinkTemplates().
-   *
-   * @param string $entity_type
-   *   The entity type for which to return the link templates.
-   *
-   * @return array
-   *   An array of link templates.
-   *
-   * @see \Drupal\Core\Entity\EntityTypeInterface::getLinkTemplates()
-   */
-  protected function getLinkTemplates($entity_type) {
-    return $this->linkTemplates[$entity_type];
   }
 
   /**
