@@ -17,7 +17,7 @@ use Drupal\user\Entity\User;
  * @group og
  * @coversDefaultClass \Drupal\og\MembershipManager
  */
-class GetGroupsTest extends KernelTestBase {
+class GroupMembershipManagerTest extends KernelTestBase {
 
   /**
    * {@inheritdoc}

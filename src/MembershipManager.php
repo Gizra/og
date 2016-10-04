@@ -189,6 +189,12 @@ class MembershipManager implements MembershipManagerInterface {
       $query = $this->entityTypeManager
         ->getStorage($target_type)
         ->getQuery()
+        // Disable entity access check so fetching the groups related to group
+        // content are not affected by the current user. Furthermore, when
+        // rebuilding node access and the groups are nodes, we should not try to
+        // retrieve node access records which do not exist because the rebuild
+        // process has already erased the grants table.
+        ->accessCheck(FALSE)
         ->condition($entity_type->getKey('id'), $target_ids, 'IN');
 
       // Optionally filter by group bundle.
