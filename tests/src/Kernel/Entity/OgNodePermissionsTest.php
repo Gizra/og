@@ -6,7 +6,7 @@ use Drupal\Component\Utility\Unicode;
 use Drupal\KernelTests\KernelTestBase;
 use Drupal\node\Entity\NodeType;
 use Drupal\og\Og;
-use Drupal\og\OgGroupAudienceHelper;
+use Drupal\og\OgGroupAudienceHelperInterface;
 
 /**
  * Test OG permissions for node entities.
@@ -37,7 +37,7 @@ class OgNodePermissionsTest extends KernelTestBase {
     ]);
 
     $bundle->save();
-    Og::CreateField(OgGroupAudienceHelper::DEFAULT_FIELD, 'node', $bundle->id());
+    Og::CreateField(OgGroupAudienceHelperInterface::DEFAULT_FIELD, 'node', $bundle->id());
 
     $name = $bundle->id();
     $expected = [

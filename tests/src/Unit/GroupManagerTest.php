@@ -12,6 +12,7 @@ use Drupal\Core\State\StateInterface;
 use Drupal\og\Event\GroupCreationEvent;
 use Drupal\og\Event\GroupCreationEventInterface;
 use Drupal\og\GroupTypeManager;
+use Drupal\og\OgGroupAudienceHelperInterface;
 use Drupal\og\PermissionManagerInterface;
 use Drupal\og\OgRoleManagerInterface;
 use Drupal\Tests\UnitTestCase;
@@ -113,6 +114,13 @@ class GroupManagerTest extends UnitTestCase {
   protected $routeBuilder;
 
   /**
+   * The OG group audience helper.
+   *
+   * @var \Drupal\og\OgGroupAudienceHelperInterface|\Prophecy\Prophecy\ObjectProphecy
+   */
+  protected $groupAudienceHelper;
+
+  /**
    * {@inheritdoc}
    */
   public function setUp() {
@@ -128,6 +136,7 @@ class GroupManagerTest extends UnitTestCase {
     $this->permissionManager = $this->prophesize(PermissionManagerInterface::class);
     $this->state = $this->prophesize(StateInterface::class);
     $this->routeBuilder = $this->prophesize(RouteBuilderInterface::class);
+    $this->groupAudienceHelper = $this->prophesize(OgGroupAudienceHelperInterface::class);
   }
 
   /**
@@ -331,7 +340,8 @@ class GroupManagerTest extends UnitTestCase {
       $this->state->reveal(),
       $this->permissionManager->reveal(),
       $this->ogRoleManager->reveal(),
-      $this->routeBuilder->reveal()
+      $this->routeBuilder->reveal(),
+      $this->groupAudienceHelper->reveal()
     );
   }
 

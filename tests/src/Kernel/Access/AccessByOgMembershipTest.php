@@ -10,7 +10,7 @@ use Drupal\node\Entity\NodeType;
 use Drupal\og\Entity\OgMembership;
 use Drupal\og\Entity\OgRole;
 use Drupal\og\Og;
-use Drupal\og\OgGroupAudienceHelper;
+use Drupal\og\OgGroupAudienceHelperInterface;
 use Drupal\og\OgMembershipInterface;
 use Drupal\og\OgRoleInterface;
 use Drupal\simpletest\ContentTypeCreationTrait;
@@ -126,7 +126,7 @@ class AccessByOgMembershipTest extends KernelTestBase {
         ],
       ],
     ];
-    Og::createField(OgGroupAudienceHelper::DEFAULT_FIELD, 'node', 'group_content', $settings);
+    Og::createField(OgGroupAudienceHelperInterface::DEFAULT_FIELD, 'node', 'group_content', $settings);
 
     // Grant both members and non-members permission to edit any group content.
     foreach ([OgRoleInterface::AUTHENTICATED, OgRoleInterface::ANONYMOUS] as $role_name) {
@@ -160,7 +160,7 @@ class AccessByOgMembershipTest extends KernelTestBase {
         'title' => $this->randomString(),
         'type' => 'group_content',
         'uid' => $this->users[$membership_type]->id(),
-        OgGroupAudienceHelper::DEFAULT_FIELD => [['target_id' => $this->group->id()]],
+        OgGroupAudienceHelperInterface::DEFAULT_FIELD => [['target_id' => $this->group->id()]],
       ]);
       $this->groupContent[$membership_type]->save();
     }
