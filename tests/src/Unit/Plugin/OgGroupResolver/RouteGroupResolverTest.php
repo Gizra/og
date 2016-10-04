@@ -111,7 +111,7 @@ class RouteGroupResolverTest extends OgRouteGroupResolverTestBase {
         '/user/logout',
         // There is no entity on this route.
         NULL,
-        // So the plugin should not return anything.
+        // So the plugin should not find anything.
         [],
       ],
       // Test that if we are on the canonical entity page of a group, the
@@ -121,8 +121,7 @@ class RouteGroupResolverTest extends OgRouteGroupResolverTestBase {
         '/node/{node}',
         // The test group is found on the route.
         'group',
-        // The plugin should be able to figure out this is a group, and return
-        // it.
+        // The plugin should be able to figure out this is a group.
         ['group'],
       ],
       // Test that if we are on the delete form of a group, the correct group is
