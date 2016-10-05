@@ -4,11 +4,7 @@ namespace Drupal\Tests\og\Unit\Plugin\OgGroupResolver;
 
 use Drupal\Core\Entity\ContentEntityInterface;
 use Drupal\Core\Entity\EntityTypeInterface;
-use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Routing\RouteMatchInterface;
-use Drupal\og\GroupTypeManager;
-use Drupal\og\MembershipManagerInterface;
-use Drupal\og\OgGroupAudienceHelperInterface;
 use Drupal\og\OgResolvedGroupCollectionInterface;
 use Symfony\Component\Routing\Route;
 
@@ -16,13 +12,6 @@ use Symfony\Component\Routing\Route;
  * Base class for testing OgGroupResolver plugins that depend on the route.
  */
 abstract class OgRouteGroupResolverTestBase extends OgGroupResolverTestBase {
-
-  /**
-   * Mocked test entities.
-   *
-   * @var \Drupal\Core\Entity\ContentEntityInterface[]
-   */
-  protected $testEntities;
 
   /**
    * A list of link templates that belong to entity types used in the tests.
@@ -63,34 +52,6 @@ abstract class OgRouteGroupResolverTestBase extends OgGroupResolverTestBase {
   protected $routeMatch;
 
   /**
-   * The mocked OG group type manager.
-   *
-   * @var \Drupal\og\GroupTypeManager|\Prophecy\Prophecy\ObjectProphecy
-   */
-  protected $groupTypeManager;
-
-  /**
-   * The mocked entity type manager.
-   *
-   * @var \Drupal\Core\Entity\EntityTypeManagerInterface|\Prophecy\Prophecy\ObjectProphecy
-   */
-  protected $entityTypeManager;
-
-  /**
-   * The OG membership manager.
-   *
-   * @var \Drupal\og\MembershipManagerInterface|\Prophecy\Prophecy\ObjectProphecy
-   */
-  protected $membershipManager;
-
-  /**
-   * The OG group audience helper.
-   *
-   * @var \Drupal\og\OgGroupAudienceHelperInterface|\Prophecy\Prophecy\ObjectProphecy
-   */
-  protected $groupAudienceHelper;
-
-  /**
    * {@inheritdoc}
    */
   public function setUp() {
@@ -98,50 +59,6 @@ abstract class OgRouteGroupResolverTestBase extends OgGroupResolverTestBase {
 
     // Instantiate mocks of the classes that the plugins rely on.
     $this->routeMatch = $this->prophesize(RouteMatchInterface::class);
-    $this->groupTypeManager = $this->prophesize(GroupTypeManager::class);
-    $this->entityTypeManager = $this->prophesize(EntityTypeManagerInterface::class);
-    $this->membershipManager = $this->prophesize(MembershipManagerInterface::class);
-    $this->groupAudienceHelper = $this->prophesize(OgGroupAudienceHelperInterface::class);
-
-    // Create mocked test entities.
-    /** @var \Drupal\Core\Entity\ContentEntityInterface[] $test_entities */
-    $test_entities = [];
-    foreach ($this->getTestEntityProperties() as $id => $properties) {
-      $entity_type_id = $properties['type'];
-      $bundle_id = $properties['bundle'];
-      $is_group = !empty($properties['group']);
-      $is_group_content = !empty($properties['group_content']);
-
-      /** @var \Drupal\Core\Entity\ContentEntityInterface|\Prophecy\Prophecy\ObjectProphecy $entity */
-      $entity = $this->prophesize(ContentEntityInterface::class);
-
-      // In case this entity is questioned about its identity, it shall
-      // willingly pony up the requested information.
-      $entity->id()->willReturn($id);
-      $entity->getEntityTypeId()->willReturn($properties['type']);
-      $entity->bundle()->willReturn($properties['bundle']);
-      $test_entities[$id] = $entity->reveal();
-
-      // It is not being tight lipped about whether it is a group or group
-      // content.
-      $this->groupTypeManager->isGroup($entity_type_id, $bundle_id)
-        ->willReturn($is_group);
-      $this->groupAudienceHelper->hasGroupAudienceField($entity_type_id, $bundle_id)
-        ->willReturn($is_group_content);
-
-      // If the entity is group content it will spill the beans on which groups
-      // it belongs to.
-      if ($is_group_content) {
-        $groups = [];
-        foreach ($properties['group_content'] as $group_id) {
-          $group = $test_entities[$group_id];
-          $groups[$group->getEntityTypeId()][$group->id()] = $group;
-        }
-        $this->membershipManager->getGroups($entity)
-          ->willReturn($groups);
-      }
-    }
-    $this->testEntities = $test_entities;
   }
 
   /**
@@ -206,28 +123,6 @@ abstract class OgRouteGroupResolverTestBase extends OgGroupResolverTestBase {
     $plugin = $this->getPluginInstance();
     $plugin->resolve($collection->reveal());
   }
-
-  /**
-   * Returns properties used to create mock test entities.
-   *
-   * This is used to facilitate referring to entities in data providers. Since a
-   * data provider is called before the test setup runs, we cannot return actual
-   * entities in the data provider. Instead the data provider can refer to these
-   * test entities by ID, and the actual entity mocks will be generated in the
-   * test setup.
-   *
-   * The test groups should be declared first, the group content last.
-   *
-   * @return array
-   *   An array of entity metadata, keyed by test entity ID. Each item is an
-   *   array with the following keys:
-   *   - type (required): The entity type ID.
-   *   - bundle (required): The entity bundle.
-   *   - group (optional): Whether or not the entity is a group.
-   *   - group_content (optional): An array containing IDs of groups this group
-   *     content belongs to.
-   */
-  abstract protected function getTestEntityProperties();
 
   /**
    * Returns a set of entity link templates for testing.
