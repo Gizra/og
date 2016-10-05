@@ -43,18 +43,18 @@ class RequestQueryArgumentResolver extends OgGroupResolverBase implements Contai
   protected $requestStack;
 
   /**
-   * The entity type manager.
-   *
-   * @var \Drupal\Core\Entity\EntityTypeManagerInterface
-   */
-  protected $entityTypeManager;
-
-  /**
    * The group type manager.
    *
    * @var \Drupal\og\GroupTypeManager
    */
   protected $groupTypeManager;
+
+  /**
+   * The entity type manager.
+   *
+   * @var \Drupal\Core\Entity\EntityTypeManagerInterface
+   */
+  protected $entityTypeManager;
 
   /**
    * Constructs a RequestQueryArgumentResolver.
