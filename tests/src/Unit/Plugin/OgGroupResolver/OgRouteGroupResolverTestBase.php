@@ -151,9 +151,25 @@ abstract class OgRouteGroupResolverTestBase extends OgGroupResolverTestBase {
    * @dataProvider resolveProvider
    */
   public function testResolve($path = NULL, $route_object_id = NULL, array $expected_added_groups = [], array $expected_removed_groups = []) {
-    // @todo To be more flexible, these expectations should probably be moved to
-    //   a bunch of helper methods, so that individual tests can add them as
-    //   required.
+    if ($path) {
+      // It is expected that the plugin will retrieve the current path from the
+      // route matcher.
+      $this->willRetrieveCurrentPathFromRouteMatcher($path);
+      // It is expected that the plugin will retrieve the full list of content
+      // entity paths, so it can check whether the current path is related to a
+      // content entity.
+      $this->willRetrieveContentEntityPaths();
+    }
+
+    if ($route_object_id) {
+      // The plugin might retrieve the route object. This should only happen if
+      // we are on an actual entity path.
+      $this->mightRetrieveRouteObject($route_object_id);
+      // If a route object is returned the plugin will need to inspect it to
+      // check if it is a group.
+      $this->mightCheckIfRouteObjectIsGroup($route_object_id);
+    }
+
     // Add expectations for the groups that are added and removed by the plugin.
     $test_entities = $this->testEntities;
     foreach ([&$expected_added_groups, &$expected_removed_groups] as &$expected_groups) {

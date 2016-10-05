@@ -25,42 +25,6 @@ class RouteGroupResolverTest extends OgRouteGroupResolverTestBase {
 
   /**
    * {@inheritdoc}
-   *
-   * @param string $path
-   *   The current route path that should be returned by the route matcher.
-   * @param string $route_object_id
-   *   The ID of the entity that is present on the current route, or NULL if we
-   *   are not on a content entity path. The ID may be any of the ones created
-   *   in the test setup and is stored in $this->testEntities.
-   *
-   * @covers ::resolve
-   * @dataProvider resolveProvider
-   */
-  public function testResolve($path = NULL, $route_object_id = NULL, $expected_added_groups = [], $expected_removed_groups = []) {
-    if ($path) {
-      // It is expected that the plugin will retrieve the current path from the
-      // route matcher.
-      $this->willRetrieveCurrentPathFromRouteMatcher($path);
-      // It is expected that the plugin will retrieve the full list of content
-      // entity paths, so it can check whether the current path is related to a
-      // content entity.
-      $this->willRetrieveContentEntityPaths();
-    }
-
-    if ($route_object_id) {
-      // The plugin might retrieve the route object. This should only happen if
-      // we are on an actual entity path.
-      $this->mightRetrieveRouteObject($route_object_id);
-      // If a route object is returned the plugin will need to inspect it to
-      // check if it is a group.
-      $this->mightCheckIfRouteObjectIsGroup($route_object_id);
-    }
-
-    parent::testResolve($path, $route_object_id, $expected_added_groups, $expected_removed_groups);
-  }
-
-  /**
-   * {@inheritdoc}
    */
   protected function getInjectedDependencies() {
     return [
