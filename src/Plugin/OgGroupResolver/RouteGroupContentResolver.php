@@ -94,16 +94,9 @@ class RouteGroupContentResolver extends OgRouteGroupResolverBase {
       $groups = array_reduce($groups, 'array_merge', []);
 
       foreach ($groups as $group) {
-        $collection->addGroup($group);
+        $collection->addGroup($group, ['route']);
       }
     }
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function getCacheContextIds() {
-    return ['route'];
   }
 
 }

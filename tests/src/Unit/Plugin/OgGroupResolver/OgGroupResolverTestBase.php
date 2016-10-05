@@ -51,15 +51,6 @@ abstract class OgGroupResolverTestBase extends UnitTestCase {
   }
 
   /**
-   * Tests if the plugin returns the correct cache context IDs.
-   *
-   * @covers ::getCacheContextIds
-   *
-   * @todo Remove this when the method is removed from the interface.
-   */
-  abstract public function testGetCacheContextIds();
-
-  /**
    * Returns an instance of the plugin under test.
    *
    * @param array $args

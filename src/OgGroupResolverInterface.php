@@ -62,20 +62,4 @@ interface OgGroupResolverInterface {
    */
   public function isPropagationStopped();
 
-  /**
-   * Returns a list of cache contexts that will affect the group resolving.
-   *
-   * This allows a plugin to share which cache contexts are relevant for the
-   * group(s) it has resolved. For example, a plugin may have found a group by
-   * inspecting the current route ('route'), user session ('user'), by checking
-   * the domain name ('site'), or a combination of those.
-   *
-   * @return string[]
-   *   An array of cache context IDs.
-   *
-   * @todo This should probably be removed and handled by adding groups to the
-   *   OgResolvedGroupsCollection.
-   */
-  public function getCacheContextIds();
-
 }

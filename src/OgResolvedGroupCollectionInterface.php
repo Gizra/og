@@ -51,11 +51,13 @@ interface OgResolvedGroupCollectionInterface {
    *
    * @param \Drupal\Core\Entity\ContentEntityInterface $group
    *   The group to add.
+   * @param string[] $cache_contexts
+   *   An optional array of cache contexts to assign to the group.
    * @param int $weight
    *   The weight to assign to this vote. If omitted the default weight will be
    *   used that is set with ::setVoteWeight().
    */
-  public function addGroup(ContentEntityInterface $group, $weight = NULL);
+  public function addGroup(ContentEntityInterface $group, array $cache_contexts = [], $weight = NULL);
 
   /**
    * Returns the groups in the collection.
@@ -65,6 +67,8 @@ interface OgResolvedGroupCollectionInterface {
    *   following keys:
    *   - entity: the group entity.
    *   - votes: an array of votes that have been cast for this entity.
+   *   - cache_contexts: an array of cache contexts that were used to discover
+   *     this group.
    */
   public function getGroups();
 

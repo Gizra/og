@@ -30,11 +30,4 @@ abstract class OgGroupResolverBase extends PluginBase implements OgGroupResolver
     return $this->propagationStopped;
   }
 
-  /**
-   * {@inheritdoc}
-   */
-  public function getCacheContextIds() {
-    return [];
-  }
-
 }

@@ -25,20 +25,13 @@ class RouteGroupResolver extends OgRouteGroupResolverBase {
   public function resolve(OgResolvedGroupCollectionInterface $collection) {
     $entity = $this->getContentEntity();
     if ($entity && $this->groupTypeManager->isGroup($entity->getEntityTypeId(), $entity->bundle())) {
-      $collection->addGroup($entity);
+      $collection->addGroup($entity, ['route']);
 
       // We are on a route that matches an entity path for a group entity. We
       // can conclude with 100% certainty that this group is relevant for the
       // current context. There's no need to keep searching.
       $this->stopPropagation();
     }
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function getCacheContextIds() {
-    return ['route'];
   }
 
 }

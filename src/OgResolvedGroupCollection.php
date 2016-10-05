@@ -26,10 +26,13 @@ class OgResolvedGroupCollection implements OgResolvedGroupCollectionInterface {
   /**
    * {@inheritdoc}
    */
-  public function addGroup(ContentEntityInterface $group, $weight = NULL) {
+  public function addGroup(ContentEntityInterface $group, array $cache_contexts = [], $weight = NULL) {
     $key = $this->generateKey($group);
     $this->groups[$key]['entity'] = $group;
     $this->groups[$key]['votes'][] = $weight !== NULL ? $weight : $this->getVoteWeight();
+    foreach ($cache_contexts as $cache_context) {
+      $this->groups[$key]['cache_contexts'][$cache_context] = $cache_context;
+    }
   }
 
   /**

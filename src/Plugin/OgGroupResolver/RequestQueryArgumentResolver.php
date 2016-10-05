@@ -109,24 +109,18 @@ class RequestQueryArgumentResolver extends OgGroupResolverBase implements Contai
       }
 
       // Load the entity and check if it is a group.
+      /** @var \Drupal\Core\Entity\ContentEntityInterface $entity */
       if ($entity = $storage->load($query->get(self::GROUP_ID_ARGUMENT))) {
         if ($this->groupTypeManager->isGroup($entity->getEntityTypeId(), $entity->bundle())) {
           // Only add a vote for the group if it already has been discovered by
           // a previous plugin. This will make sure that users cannot fake a
           // group context by messing with the query arguments.
           if ($collection->hasGroup($entity)) {
-            $collection->addGroup($entity);
+            $collection->addGroup($entity, ['url']);
           }
         }
       }
     }
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function getCacheContextIds() {
-    return ['url'];
   }
 
 }

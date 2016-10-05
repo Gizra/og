@@ -169,7 +169,7 @@ abstract class OgRouteGroupResolverTestBase extends OgGroupResolverTestBase {
     $collection = $this->prophesize(OgResolvedGroupCollectionInterface::class);
 
     foreach ($expected_added_groups as $expected_added_group) {
-      $collection->addGroup($expected_added_group)->shouldBeCalled();
+      $collection->addGroup($expected_added_group, ['route'])->shouldBeCalled();
     }
 
     foreach ($expected_removed_groups as $expected_removed_group) {
@@ -187,14 +187,6 @@ abstract class OgRouteGroupResolverTestBase extends OgGroupResolverTestBase {
     // Launch the test. Any unmet expectation will cause a failure.
     $plugin = $this->getPluginInstance($this->getInjectedDependencies());
     $plugin->resolve($collection->reveal());
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function testGetCacheContextIds() {
-    $plugin = $this->getPluginInstance();
-    $this->assertEquals(['route'], $plugin->getCacheContextIds());
   }
 
   /**
