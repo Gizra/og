@@ -2,7 +2,6 @@
 
 namespace Drupal\Tests\og\Unit\Plugin\OgGroupResolver;
 
-use Drupal\og\MembershipManagerInterface;
 use Drupal\og\Plugin\OgGroupResolver\RouteGroupContentResolver;
 
 /**
@@ -24,19 +23,10 @@ class RouteGroupContentResolverTest extends OgRouteGroupResolverTestBase {
   protected $pluginId = 'route_group_content';
 
   /**
-   * The OG membership manager.
-   *
-   * @var \Drupal\og\MembershipManagerInterface|\Prophecy\Prophecy\ObjectProphecy
-   */
-  protected $membershipManager;
-
-  /**
    * {@inheritdoc}
    */
   public function setUp() {
     parent::setUp();
-
-    $this->membershipManager = $this->prophesize(MembershipManagerInterface::class);
   }
 
   /**
@@ -84,6 +74,7 @@ class RouteGroupContentResolverTest extends OgRouteGroupResolverTestBase {
       $this->groupTypeManager->reveal(),
       $this->entityTypeManager->reveal(),
       $this->membershipManager->reveal(),
+      $this->groupAudienceHelper->reveal(),
     ];
   }
 
