@@ -94,6 +94,8 @@ abstract class OgRouteGroupResolverTestBase extends OgGroupResolverTestBase {
    * {@inheritdoc}
    */
   public function setUp() {
+    parent::setUp();
+
     // Instantiate mocks of the classes that the plugins rely on.
     $this->routeMatch = $this->prophesize(RouteMatchInterface::class);
     $this->groupTypeManager = $this->prophesize(GroupTypeManager::class);
