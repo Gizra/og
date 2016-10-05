@@ -60,8 +60,11 @@ interface OgResolvedGroupCollectionInterface {
   /**
    * Returns the groups in the collection.
    *
-   * @return \Drupal\Core\Entity\ContentEntityInterface[]
-   *   An array of groups.
+   * @return array
+   *   An array of groups. Each item will be an associative array with the
+   *   following keys:
+   *   - entity: the group entity.
+   *   - votes: an array of votes that have been cast for this entity.
    */
   public function getGroups();
 

@@ -17,13 +17,6 @@ class OgResolvedGroupCollection implements OgResolvedGroupCollectionInterface {
   protected $groups = [];
 
   /**
-   * Keeps track of the number of times a group was proposed by a plugin.
-   *
-   * @var int[][]
-   */
-  protected $votes = [];
-
-  /**
    * The default weight of votes cast by plugins.
    *
    * @var int
@@ -35,8 +28,8 @@ class OgResolvedGroupCollection implements OgResolvedGroupCollectionInterface {
    */
   public function addGroup(ContentEntityInterface $group, $weight = NULL) {
     $key = $this->generateKey($group);
-    $this->groups[$key] = $group;
-    $this->votes[$key][] = $weight !== NULL ? $weight : $this->getVoteWeight();
+    $this->groups[$key]['entity'] = $group;
+    $this->groups[$key]['votes'][] = $weight !== NULL ? $weight : $this->getVoteWeight();
   }
 
   /**
@@ -60,7 +53,6 @@ class OgResolvedGroupCollection implements OgResolvedGroupCollectionInterface {
   public function removeGroup(ContentEntityInterface $group) {
     $key = $this->generateKey($group);
     unset($this->groups[$key]);
-    unset($this->votes[$key]);
   }
 
   /**
