@@ -203,26 +203,8 @@ abstract class OgRouteGroupResolverTestBase extends OgGroupResolverTestBase {
     }
 
     // Launch the test. Any unmet expectation will cause a failure.
-    $plugin = $this->getPluginInstance($this->getInjectedDependencies());
+    $plugin = $this->getPluginInstance();
     $plugin->resolve($collection->reveal());
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  protected function getPluginInstance(array $args = []) {
-    $args = $args ?: $this->getInjectedDependencies();
-    return parent::getPluginInstance($args);
-  }
-
-  /**
-   * Returns the mocked classes that the plugin depends on.
-   *
-   * @return array
-   *   The mocked dependencies.
-   */
-  protected function getInjectedDependencies() {
-    return [];
   }
 
   /**

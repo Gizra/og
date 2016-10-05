@@ -53,14 +53,10 @@ abstract class OgGroupResolverTestBase extends UnitTestCase {
   /**
    * Returns an instance of the plugin under test.
    *
-   * @param array $args
-   *   Optional arguments to pass to the plugin constructor. This excludes the
-   *   arguments $configuration, $plugin_id, $plugin_definition.
-   *
    * @return \Drupal\og\OgGroupResolverInterface
    *   The plugin under test.
    */
-  protected function getPluginInstance(array $args = []) {
+  protected function getPluginInstance() {
     $args = array_merge([
       [],
       $this->pluginId,
@@ -69,8 +65,18 @@ abstract class OgGroupResolverTestBase extends UnitTestCase {
         'class' => $this->className,
         'provider' => 'og',
       ],
-    ], $args);
+    ], $this->getInjectedDependencies());
     return new $this->className(...$args);
+  }
+
+  /**
+   * Returns the mocked classes that the plugin depends on.
+   *
+   * @return array
+   *   The mocked dependencies.
+   */
+  protected function getInjectedDependencies() {
+    return [];
   }
 
 }
