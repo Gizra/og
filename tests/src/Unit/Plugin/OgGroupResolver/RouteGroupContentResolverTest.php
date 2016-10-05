@@ -24,13 +24,6 @@ class RouteGroupContentResolverTest extends OgRouteGroupResolverTestBase {
 
   /**
    * {@inheritdoc}
-   */
-  public function setUp() {
-    parent::setUp();
-  }
-
-  /**
-   * {@inheritdoc}
    *
    * @param string $path
    *   The current route path that should be returned by the route matcher.
