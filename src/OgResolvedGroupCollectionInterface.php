@@ -60,7 +60,7 @@ interface OgResolvedGroupCollectionInterface {
   public function addGroup(ContentEntityInterface $group, array $cache_contexts = [], $weight = NULL);
 
   /**
-   * Returns the groups in the collection.
+   * Returns information about the groups in the collection.
    *
    * @return array
    *   An array of groups. Each item will be an associative array with the
@@ -70,7 +70,7 @@ interface OgResolvedGroupCollectionInterface {
    *   - cache_contexts: an array of cache contexts that were used to discover
    *     this group.
    */
-  public function getGroups();
+  public function getGroupInfo();
 
   /**
    * Removes the given group from the collection.

@@ -46,7 +46,7 @@ class OgResolvedGroupCollection implements OgResolvedGroupCollectionInterface {
   /**
    * {@inheritdoc}
    */
-  public function getGroups() {
+  public function getGroupInfo() {
     return $this->groups;
   }
 
