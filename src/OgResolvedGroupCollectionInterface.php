@@ -112,4 +112,11 @@ interface OgResolvedGroupCollectionInterface {
    */
   public function setVoteWeight($weight);
 
+  /**
+   * Sorts the groups in the collection according to their vote count.
+   *
+   * The weight of each vote is taken into account.
+   */
+  public function sort();
+
 }

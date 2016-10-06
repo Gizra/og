@@ -151,18 +151,9 @@ class OgContext implements ContextProviderInterface {
       }
     }
 
-    // @todo Move this in the collection? Seems to make sense, since the
-    //   collection has knowledge about the groups and votes.
-    // Find the best matching group by iterating over the candidates and return
-    // the one that has the most "votes". If there are multiple candidates with
-    // the same number of votes then the candidate that was resolved by the
-    // plugin(s) with the highest priority will be returned.
-    uasort($collection, function ($a, $b) {
-      if (count($a['votes']) == count($b['votes'])) {
-        return array_sum($a['votes']) < array_sum($b['votes']) ? -1 : 1;
-      }
-      return count($a['votes']) < count($b['votes']) ? -1 : 1;
-    });
+    // Sort the resolved groups and retrieve the first result, this will be the
+    // best candidate.
+    $collection->sort();
 
     // We found the best candidate.
     $candidate = reset($collection);

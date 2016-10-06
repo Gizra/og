@@ -73,6 +73,22 @@ class OgResolvedGroupCollection implements OgResolvedGroupCollectionInterface {
   }
 
   /**
+   * {@inheritdoc}
+   */
+  public function sort() {
+    // Find the best matching group by iterating over the candidates and return
+    // the one that has the most "votes". If there are multiple candidates with
+    // the same number of votes then the candidate that was resolved by the
+    // plugin(s) with the highest priority will be returned.
+    uasort($this->groups, function ($a, $b) {
+      if (count($a['votes']) == count($b['votes'])) {
+        return array_sum($a['votes']) < array_sum($b['votes']) ? -1 : 1;
+      }
+      return count($a['votes']) < count($b['votes']) ? -1 : 1;
+    });
+  }
+
+  /**
    * Generates a key that can be used to identify the given group.
    *
    * @param \Drupal\Core\Entity\ContentEntityInterface $group
