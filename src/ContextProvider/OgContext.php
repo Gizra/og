@@ -13,6 +13,26 @@ use Drupal\og\OgResolvedGroupCollection;
 
 /**
  * Provides the group that best matches the current context.
+ *
+ * There might be several groups that are relevant in the current context, and
+ * this class tries to determine which is the best possible candidate.
+ *
+ * For example, if we are on a page that displays a group content entity that
+ * belongs to two groups, then both groups are relevant in the current
+ * context. We might then decide which group is the better candidate by
+ * looking at a URL query argument or inspecting the user's browsing history
+ * to see if they are coming from a group page.
+ *
+ * This discovery of groups is handled by OgGroupResolver plugins. Each plugin
+ * is responsible for discovering groups in a specific domain (e.g. find all
+ * groups belonging to the current route). The plugins that will be used for
+ * the discovery are configurable; they are listed under the 'group_resolvers'
+ * key in the 'og.settings' config. The plugins are ordered by priority,
+ * meaning that if two groups are relevant to the current context, then the
+ * plugin with the highest priority will decide which group is going to 'win'.
+ *
+ * Developers can customize the group context result by providing their own
+ * plugins and by activating, disabling or reordering the default ones.
  */
 class OgContext implements ContextProviderInterface {
 
@@ -89,31 +109,16 @@ class OgContext implements ContextProviderInterface {
   }
 
   /**
-   * Returns the group which best matches the current context.
+   * Returns information about the group which best matches the current context.
    *
-   * There might be several groups that are relevant in the current context, and
-   * this method tries to determine which is the best possible candidate.
-   *
-   * For example, if we are on a page that displays a group content entity that
-   * belongs to two groups, then both groups are relevant in the current
-   * context. We might then decide which group is the better candidate by
-   * looking at a URL query argument or inspecting the user's browsing history
-   * to see if they are coming from a group page.
-   *
-   * This discovery of groups is handled by OgGroupResolver plugins. Each plugin
-   * is responsible for discovering groups in a specific domain (e.g. find all
-   * groups belonging to the current route). The plugins that will be used for
-   * the discovery are configurable; they are listed under the 'group_resolvers'
-   * key in the 'og.settings' config. The plugins are ordered by priority,
-   * meaning that if two groups are relevant to the current context, then the
-   * plugin with the highest priority will decide which group is going to 'win'.
-   *
-   * Developers can customize the group context result by providing their own
-   * plugins and by activating, disabling or reordering the default ones.
-   *
-   * @return \Drupal\Core\Entity\EntityInterface|null
-   *   The group entity which is most relevant in the current context, or NULL
-   *   if no relevant group was found.
+   * @return array|NULL
+   *   An associative array with information about the chosen candidate. It has
+   *   the following keys:
+   *   - entity: the group entity.
+   *   - votes: an array of votes that have been cast for this entity.
+   *   - cache_contexts: an array of cache contexts that were used to discover
+   *     this group.
+   *   If no group was found in the current context, NULL is returned.
    *
    * @see \Drupal\og\OgGroupResolverInterface
    */
