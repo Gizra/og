@@ -111,7 +111,7 @@ class OgContext implements ContextProviderInterface {
   /**
    * Returns information about the group which best matches the current context.
    *
-   * @return array|NULL
+   * @return array|null
    *   An associative array with information about the chosen candidate. It has
    *   the following keys:
    *   - entity: the group entity.
