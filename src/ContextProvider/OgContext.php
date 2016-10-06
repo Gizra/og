@@ -33,13 +33,6 @@ class OgContext implements ContextProviderInterface {
   protected $configFactory;
 
   /**
-   * IDs of cache contexts that are relevant for the current group context.
-   *
-   * @var string[]
-   */
-  protected $cacheContextIds = [];
-
-  /**
    * Constructs a new OgContext.
    *
    * @param \Drupal\Component\Plugin\PluginManagerInterface $plugin_manager
@@ -82,11 +75,14 @@ class OgContext implements ContextProviderInterface {
    */
   protected function getOgContext() {
     $context_definition = new ContextDefinition('entity', $this->t('Active group'), FALSE);
-    $context = new Context($context_definition, $this->getBestCandidate());
+    $candidate = $this->getBestCandidate();
+    $group = !empty($candidate['entity']) ? $candidate['entity'] : NULL;
+    $context = new Context($context_definition, $group);
 
     $cacheability = new CacheableMetadata();
-    $cacheability->setCacheContexts($this->cacheContextIds);
-
+    if (!empty($candidate['cache_contexts'])) {
+      $cacheability->setCacheContexts($candidate['cache_contexts']);
+    }
     $context->addCacheableDependency($cacheability);
 
     return $context;
@@ -154,35 +150,13 @@ class OgContext implements ContextProviderInterface {
     // Sort the resolved groups and retrieve the first result, this will be the
     // best candidate.
     $collection->sort();
+    $group_info = $collection->getGroupInfo();
 
-    // We found the best candidate.
-    $candidate = reset($collection);
-
-    if (empty($candidate)) {
-      return NULL;
+    if (!empty($group_info)) {
+      return reset($group_info);
     }
 
-    // Compile the cache contexts that were used by the plugins that voted for
-    // our chosen candidate.
-    foreach (array_keys($candidate['votes']) as $plugin_id) {
-      $this->addCacheContextIds($plugins[$plugin_id]->getCacheContextIds());
-    };
-
-    return $candidate['entity'];
-  }
-
-  /**
-   * Adds a list of cache context IDs to be included in the context object.
-   *
-   * @param string[] $contexts
-   *   An array of cache context IDs.
-   */
-  protected function addCacheContextIds($contexts) {
-    foreach ($contexts as $context) {
-      if (!in_array($context, $this->cacheContextIds)) {
-        $this->cacheContextIds[] = $context;
-      }
-    }
+    return NULL;
   }
 
 }
