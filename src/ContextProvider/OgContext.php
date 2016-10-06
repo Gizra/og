@@ -151,18 +151,6 @@ class OgContext implements ContextProviderInterface {
       }
     }
 
-    // @todo This should be moved to a plugin.
-    // Filter out inappropriate results.
-    array_filter($collection, function (array $candidate) {
-      // Filter out results that are not accessible by the current user.
-      return $candidate['entity']->access('view');
-    });
-
-    // @todo This should be handled in the collection.
-    // Since we have filtered the results by the current user, we need to add
-    // the user as a cache context.
-    $this->addCacheContextIds(['user']);
-
     // @todo Move this in the collection? Seems to make sense, since the
     //   collection has knowledge about the groups and votes.
     // Find the best matching group by iterating over the candidates and return
