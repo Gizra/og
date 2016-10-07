@@ -156,9 +156,7 @@ abstract class OgGroupResolverTestBase extends UnitTestCase {
    *   - group_content (optional): An array containing IDs of groups this group
    *     content belongs to.
    */
-  protected function getTestEntityProperties() {
-    return [];
-  }
+  abstract protected function getTestEntityProperties();
 
   /**
    * Returns an instance of the plugin under test.
