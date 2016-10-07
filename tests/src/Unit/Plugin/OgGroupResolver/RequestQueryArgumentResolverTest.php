@@ -13,7 +13,7 @@ use Symfony\Component\HttpFoundation\RequestStack;
  * Tests the RequestQueryArgumentResolver plugin.
  *
  * @group og
- * @coversDefaultClass \Drupal\og\Plugin\OgGroupResolver\RouteGroupContentResolver
+ * @coversDefaultClass \Drupal\og\Plugin\OgGroupResolver\RequestQueryArgumentResolver
  */
 class RequestQueryArgumentResolverTest extends OgGroupResolverTestBase {
 
