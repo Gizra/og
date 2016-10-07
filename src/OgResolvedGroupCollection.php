@@ -12,9 +12,15 @@ class OgResolvedGroupCollection implements OgResolvedGroupCollectionInterface {
   /**
    * A collection of groups that were resolved by OgGroupResolver plugins.
    *
-   * @var \Drupal\Core\Entity\EntityInterface[]
+   * @var array
+   *   An array of group information. Each item will be an associative array
+   *   with the following keys:
+   *   - entity: the group entity.
+   *   - votes: an array of votes that have been cast for this entity.
+   *   - cache_contexts: an array of cache contexts that were used to discover
+   *     this group.
    */
-  protected $groups = [];
+  protected $groupInfo = [];
 
   /**
    * The default weight of votes cast by plugins.
@@ -28,10 +34,10 @@ class OgResolvedGroupCollection implements OgResolvedGroupCollectionInterface {
    */
   public function addGroup(ContentEntityInterface $group, array $cache_contexts = [], $weight = NULL) {
     $key = $this->generateKey($group);
-    $this->groups[$key]['entity'] = $group;
-    $this->groups[$key]['votes'][] = $weight !== NULL ? $weight : $this->getVoteWeight();
+    $this->groupInfo[$key]['entity'] = $group;
+    $this->groupInfo[$key]['votes'][] = $weight !== NULL ? $weight : $this->getVoteWeight();
     foreach ($cache_contexts as $cache_context) {
-      $this->groups[$key]['cache_contexts'][$cache_context] = $cache_context;
+      $this->groupInfo[$key]['cache_contexts'][$cache_context] = $cache_context;
     }
   }
 
@@ -40,14 +46,14 @@ class OgResolvedGroupCollection implements OgResolvedGroupCollectionInterface {
    */
   public function hasGroup(ContentEntityInterface $group) {
     $key = $this->generateKey($group);
-    return array_key_exists($key, $this->groups);
+    return array_key_exists($key, $this->groupInfo);
   }
 
   /**
    * {@inheritdoc}
    */
   public function getGroupInfo() {
-    return $this->groups;
+    return $this->groupInfo;
   }
 
   /**
@@ -55,7 +61,7 @@ class OgResolvedGroupCollection implements OgResolvedGroupCollectionInterface {
    */
   public function removeGroup(ContentEntityInterface $group) {
     $key = $this->generateKey($group);
-    unset($this->groups[$key]);
+    unset($this->groupInfo[$key]);
   }
 
   /**
@@ -80,7 +86,7 @@ class OgResolvedGroupCollection implements OgResolvedGroupCollectionInterface {
     // the one that has the most "votes". If there are multiple candidates with
     // the same number of votes then the candidate that was resolved by the
     // plugin(s) with the highest priority will be returned.
-    uasort($this->groups, function ($a, $b) {
+    uasort($this->groupInfo, function ($a, $b) {
       if (count($a['votes']) == count($b['votes'])) {
         return array_sum($a['votes']) < array_sum($b['votes']) ? -1 : 1;
       }
