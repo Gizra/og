@@ -86,14 +86,7 @@ abstract class OgGroupResolverTestBase extends UnitTestCase {
       $is_group = !empty($properties['group']);
       $is_group_content = !empty($properties['group_content']);
 
-      /** @var \Drupal\Core\Entity\ContentEntityInterface|\Prophecy\Prophecy\ObjectProphecy $entity */
-      $entity = $this->prophesize(ContentEntityInterface::class);
-
-      // In case this entity is questioned about its identity, it shall
-      // willingly pony up the requested information.
-      $entity->id()->willReturn($id);
-      $entity->getEntityTypeId()->willReturn($properties['type']);
-      $entity->bundle()->willReturn($properties['bundle']);
+      $entity = $this->createMockedEntity($id, $properties);
       $test_entities[$id] = $entity->reveal();
 
       // It is not being tight lipped about whether it is a group or group
@@ -194,6 +187,33 @@ abstract class OgGroupResolverTestBase extends UnitTestCase {
    */
   protected function getInjectedDependencies() {
     return [];
+  }
+
+  /**
+   * Creates a mocked content entity to use in the test.
+   *
+   * @param string $id
+   *   The entity ID to assign to the mocked entity.
+   * @param array $properties
+   *   An associative array of properties to assign to the mocked entity, with
+   *   the following keys:
+   *   - type: The entity type.
+   *   - bundle: The entity bundle.
+   *
+   * @return \Drupal\Core\Entity\ContentEntityInterface|\Prophecy\Prophecy\ObjectProphecy
+   *   The mocked entity.
+   */
+  protected function createMockedEntity($id, array $properties) {
+    /** @var \Drupal\Core\Entity\ContentEntityInterface|\Prophecy\Prophecy\ObjectProphecy $entity */
+    $entity = $this->prophesize(ContentEntityInterface::class);
+
+    // In case this entity is questioned about its identity, it shall
+    // willingly pony up the requested information.
+    $entity->id()->willReturn($id);
+    $entity->getEntityTypeId()->willReturn($properties['type']);
+    $entity->bundle()->willReturn($properties['bundle']);
+
+    return $entity;
   }
 
 }
