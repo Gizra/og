@@ -2,12 +2,8 @@
 
 namespace Drupal\Tests\og\Unit\Plugin\OgGroupResolver;
 
-use Drupal\Core\Entity\EntityStorageInterface;
 use Drupal\og\OgResolvedGroupCollectionInterface;
-use Drupal\og\Plugin\OgGroupResolver\RequestQueryArgumentResolver;
 use Drupal\og\Plugin\OgGroupResolver\UserGroupAccessResolver;
-use Symfony\Component\HttpFoundation\ParameterBag;
-use Symfony\Component\HttpFoundation\Request;
 
 /**
  * Tests the UserGroupAccessResolver plugin.
