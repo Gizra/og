@@ -10,7 +10,6 @@
         "source": "https://cgit.drupalcode.org/og"
     },
     "require-dev": {
-        "drupal/coder": "^8.2",
-        "drupal/console": "^0.11.3"
+        "drupal/coder": "~8.2"
     }
 }
