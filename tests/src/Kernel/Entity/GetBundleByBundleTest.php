@@ -6,7 +6,7 @@ use Drupal\KernelTests\KernelTestBase;
 use Drupal\block_content\Entity\BlockContentType;
 use Drupal\node\Entity\NodeType;
 use Drupal\og\Og;
-use Drupal\og\OgGroupAudienceHelper;
+use Drupal\og\OgGroupAudienceHelperInterface;
 
 /**
  * Tests retrieving group content bundles by group bundles and vice versa.
@@ -142,7 +142,7 @@ class GetBundleByBundleTest extends KernelTestBase {
                 ],
               ];
             }
-            Og::createField(OgGroupAudienceHelper::DEFAULT_FIELD, $group_content_entity_type_id, $group_content_bundle_id, $settings);
+            Og::createField(OgGroupAudienceHelperInterface::DEFAULT_FIELD, $group_content_entity_type_id, $group_content_bundle_id, $settings);
           }
         }
       }

@@ -7,7 +7,7 @@ use Drupal\field\Entity\FieldConfig;
 use Drupal\node\Entity\NodeType;
 use Drupal\KernelTests\KernelTestBase;
 use Drupal\og\Og;
-use Drupal\og\OgGroupAudienceHelper;
+use Drupal\og\OgGroupAudienceHelperInterface;
 
 /**
  * Testing field definition overrides.
@@ -67,7 +67,7 @@ class FieldCreateTest extends KernelTestBase {
   public function testValidFields() {
     // Simple create, for all the fields defined by OG core.
     $field_names = array(
-      OgGroupAudienceHelper::DEFAULT_FIELD,
+      OgGroupAudienceHelperInterface::DEFAULT_FIELD,
       OG_DEFAULT_ACCESS_FIELD,
     );
 
@@ -79,12 +79,12 @@ class FieldCreateTest extends KernelTestBase {
 
     // Override the field config.
     $bundle = $this->bundles[1];
-    Og::CreateField(OgGroupAudienceHelper::DEFAULT_FIELD, 'node', $bundle, ['field_config' => ['label' => 'Other groups dummy']]);
-    $this->assertEquals(FieldConfig::loadByName('node', $bundle, OgGroupAudienceHelper::DEFAULT_FIELD)->label(), 'Other groups dummy');
+    Og::CreateField(OgGroupAudienceHelperInterface::DEFAULT_FIELD, 'node', $bundle, ['field_config' => ['label' => 'Other groups dummy']]);
+    $this->assertEquals(FieldConfig::loadByName('node', $bundle, OgGroupAudienceHelperInterface::DEFAULT_FIELD)->label(), 'Other groups dummy');
 
     // Override the field storage config.
     $bundle = $this->bundles[2];
-    Og::CreateField(OgGroupAudienceHelper::DEFAULT_FIELD, 'node', $bundle, ['field_name' => 'override_name']);
+    Og::CreateField(OgGroupAudienceHelperInterface::DEFAULT_FIELD, 'node', $bundle, ['field_name' => 'override_name']);
     $this->assertNotNull(FieldConfig::loadByName('node', $bundle, 'override_name')->id());
 
     // Field that can be added only to certain entities.

@@ -8,7 +8,7 @@ use Drupal\node\Entity\Node;
 use Drupal\node\Entity\NodeType;
 use Drupal\KernelTests\KernelTestBase;
 use Drupal\og\Og;
-use Drupal\og\OgGroupAudienceHelper;
+use Drupal\og\OgGroupAudienceHelperInterface;
 use Drupal\user\Entity\User;
 
 /**
@@ -105,7 +105,7 @@ class SelectionHandlerTest extends KernelTestBase {
     Og::groupTypeManager()->addGroup('node', $this->groupBundle);
 
     // Add og audience field to group content.
-    $this->fieldDefinition = Og::createField(OgGroupAudienceHelper::DEFAULT_FIELD, 'node', $this->groupContentBundle);
+    $this->fieldDefinition = Og::createField(OgGroupAudienceHelperInterface::DEFAULT_FIELD, 'node', $this->groupContentBundle);
 
     // Get the storage of the field.
     $this->selectionHandler = Og::getSelectionHandler($this->fieldDefinition, ['handler_settings' => ['field_mode' => 'default']]);
