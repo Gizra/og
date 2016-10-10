@@ -75,6 +75,9 @@ class OgResolvedGroupCollection implements OgResolvedGroupCollectionInterface {
    * {@inheritdoc}
    */
   public function setVoteWeight($weight) {
+    if (!is_int($weight)) {
+      throw new \InvalidArgumentException('Vote weight should be an integer.');
+    }
     $this->voteWeight = $weight;
   }
 
