@@ -25,7 +25,15 @@ interface OgAdminRoutesEventInterface {
    * @param array $routes_info
    *   The routes info array.
    */
-  public function setRoutes(array $routes_info);
+  public function setRoutesInfo(array $routes_info);
+
+  /**
+   * Get routes info.
+   *
+   * @return array $routes_info
+   *   The routes info array.
+   */
+  public function getRoutesInfo();
 
   /**
    * Get routes.
