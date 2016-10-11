@@ -45,7 +45,7 @@ class DrupalConsoleAddFieldTest extends KernelTestBase {
   }
 
   /**
-   * Tests creating membership for an un-saved group.
+   * Testing creation of og audience field using Drupal Console.
    */
   public function testNewGroup() {
     $helper = new HelperSet();

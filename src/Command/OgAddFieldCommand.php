@@ -68,9 +68,9 @@ class OgAddFieldCommand extends Command {
       ->setDescription('Attach OG field to entities')
       ->addOption('field_id', '', InputArgument::OPTIONAL, 'Field ID')
       ->addOption('field_name', '', InputArgument::OPTIONAL, 'Field name')
-      ->addOption('entity_type', '', InputArgument::OPTIONAL, 'The entity type. i.e node, user, taxonomy_term')
+      ->addOption('entity_type', '', InputArgument::OPTIONAL, 'The entity type ID (for example node, user, taxonomy_term)')
       ->addOption('bundle', '', InputArgument::OPTIONAL, 'The bundle name')
-      ->addOption('target_entity', '', InputArgument::OPTIONAL, 'The referenced entity type. i.e node, user, taxonomy_term');
+      ->addOption('target_entity', '', InputArgument::OPTIONAL, 'The entity type ID (for example node, user, taxonomy_term)');
   }
 
   /**
