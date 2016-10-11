@@ -33,6 +33,9 @@ class OgResolvedGroupCollection implements OgResolvedGroupCollectionInterface {
    * {@inheritdoc}
    */
   public function addGroup(ContentEntityInterface $group, array $cache_contexts = [], $weight = NULL) {
+    if ($weight !== NULL && !is_int($weight)) {
+      throw new \InvalidArgumentException('Vote weight should be an integer.');
+    }
     $key = $this->generateKey($group);
     $this->groupInfo[$key]['entity'] = $group;
     $this->groupInfo[$key]['votes'][] = $weight !== NULL ? $weight : $this->getVoteWeight();
