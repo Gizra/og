@@ -45,6 +45,6 @@ services:
     parent: default_plugin_manager
   og.add_field:
     class: Drupal\og\Command\OgAddFieldCommand
-    arguments: []
+    arguments: ['@entity_type.bundle.info', '@entity_type.repository', '@plugin.manager.og.fields']
     tags:
       - { name: drupal.command }

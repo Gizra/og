@@ -2,7 +2,10 @@
 
 namespace Drupal\og\Command;
 
+use Drupal\Core\Entity\EntityTypeBundleInfo;
+use Drupal\Core\Entity\EntityTypeRepository;
 use Drupal\og\Og;
+use Drupal\og\OgFieldsPluginManager;
 use Drupal\og\Plugin\OgFields\AudienceField;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
@@ -17,8 +20,43 @@ use Drupal\Console\Style\DrupalStyle;
  */
 class OgAddFieldCommand extends Command {
 
-  public function __construct($name) {
-    parent::__construct($name);
+  /**
+   * OG plugin manager.
+   *
+   * @var OgFieldsPluginManager
+   */
+  protected $ogFieldsPluginManager;
+
+  /**
+   * Bundle info service.
+   *
+   * @var EntityTypeBundleInfo
+   */
+  protected $bundleInfo;
+
+  /**
+   * Entity type repository service.
+   *
+   * @var EntityTypeRepository
+   */
+  protected $entityTypeRepository;
+
+  /**
+   * Constructor.
+   *
+   * @param \Drupal\Core\Entity\EntityTypeBundleInfo $bundle_info
+   *   The bundle info service.
+   * @param \Drupal\Core\Entity\EntityTypeRepository $entity_type_repository
+   *   The type repository service.
+   * @param \Drupal\og\OgFieldsPluginManager $og_field_plugin_manager
+   *   The OG plugin manager.
+   */
+  public function __construct(EntityTypeBundleInfo $bundle_info, EntityTypeRepository $entity_type_repository, OgFieldsPluginManager $og_field_plugin_manager) {
+    parent::__construct();
+
+    $this->bundleInfo = $bundle_info;
+    $this->entityTypeRepository = $entity_type_repository;
+    $this->ogFieldsPluginManager = $og_field_plugin_manager;
   }
 
   /**
@@ -63,7 +101,7 @@ class OgAddFieldCommand extends Command {
     }
 
     if (!$input->getOption('bundle')) {
-      $bundles = \Drupal::service('entity_type.bundle.info')->getBundleInfo($entity_type);
+      $bundles = $this->bundleInfo->getBundleInfo($entity_type);
       $input->setOption('bundle', $io->choiceNoList(
         $this->getDefinition()->getOption('bundle')->getDescription(),
         array_keys($bundles)
@@ -108,7 +146,7 @@ class OgAddFieldCommand extends Command {
     return array_map(function ($item) {
       return $item['id'];
     },
-    $this->getOgPluginManager()->getDefinitions());
+    $this->ogFieldsPluginManager->getDefinitions());
   }
 
   /**
@@ -118,20 +156,10 @@ class OgAddFieldCommand extends Command {
    *   List of entity IDs.
    */
   protected function getEntityTypes() {
-    $groups = \Drupal::service('entity_type.repository')->getEntityTypeLabels(TRUE);
+    $groups = $this->entityTypeRepository->getEntityTypeLabels(TRUE);
     return array_map(function ($item) {
       return $item->render();
     }, $groups['Content']);
-  }
-
-  /**
-   * Return OG plugin manager.
-   *
-   * @return \Drupal\og\OgFieldsPluginManager
-   *   OG plugin manager instance.
-   */
-  protected function getOgPluginManager() {
-    return \Drupal::getContainer()->get('plugin.manager.og.fields');
   }
 
   /**
@@ -144,7 +172,7 @@ class OgAddFieldCommand extends Command {
    *   True or false if the field is an audience or not.
    */
   protected function fieldIsAudienceField($field_id) {
-    return $this->getOgPluginManager()->createInstance($field_id) instanceof AudienceField;
+    return $this->ogFieldsPluginManager->createInstance($field_id) instanceof AudienceField;
   }
 
 }
