@@ -30,7 +30,7 @@ interface OgAdminRoutesEventInterface {
   /**
    * Get routes info.
    *
-   * @return array $routes_info
+   * @return array
    *   The routes info array.
    */
   public function getRoutesInfo();
