@@ -4,8 +4,6 @@ namespace Drupal\Tests\og\Kernel\Console;
 
 use Drupal\KernelTests\KernelTestBase;
 use Drupal\node\Entity\NodeType;
-use Drupal\og\Command\OgAddFieldCommand;
-use Drupal\og\OgGroupAudienceHelper;
 use Symfony\Component\Console\Tester\CommandTester;
 use Symfony\Component\Console\Helper\HelperSet;
 
