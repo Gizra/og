@@ -121,8 +121,9 @@ class OgResolvedGroupCollectionTest extends UnitTestCase {
    *   - cache_contexts: an array of cache_contexts to associate with the group.
    *     To omit associating cache contexts, set to an empty array.
    *   - weight: an integer representing the vote weight. Set to NULL to omit.
-   * @param int $expected_group_count
-   *   The expected number of groups that votes have been cast for.
+   * @param array $expected_groups
+   *   The groups that are expected to be present after all votes are added,
+   *   ordered by ranking.
    *
    * @covers ::getGroupInfo
    *
@@ -130,7 +131,7 @@ class OgResolvedGroupCollectionTest extends UnitTestCase {
    *
    * @see testAddGroup()
    */
-  public function testGetGroupInfo($votes, $expected_group_count) {
+  public function testGetGroupInfo($votes, array $expected_groups) {
     $collection = new OgResolvedGroupCollection();
 
     foreach ($votes as $vote) {
@@ -140,7 +141,7 @@ class OgResolvedGroupCollectionTest extends UnitTestCase {
     $info = $collection->getGroupInfo();
 
     // Check that the expected number of groups have been added.
-    $this->assertEquals($expected_group_count, count($info));
+    $this->assertEquals(count($expected_groups), count($info));
   }
 
   /**
@@ -225,12 +226,40 @@ class OgResolvedGroupCollectionTest extends UnitTestCase {
   /**
    * Tests if the groups can be correctly sorted according to the cast votes.
    *
+   * @param array $votes
+   *   An array of associative arrays representing voting information, with the
+   *   following keys:
+   *   - group: the ID of the group to add a vote for.
+   *   - cache_contexts: an array of cache_contexts to associate with the group.
+   *     To omit associating cache contexts, set to an empty array.
+   *   - weight: an integer representing the vote weight. Set to NULL to omit.
+   * @param array $expected_groups
+   *   The groups that are expected to be present after all votes are added,
+   *   ordered by ranking.
+   *
    * @covers ::sort
    *
    * @dataProvider groupVotesProvider
+   *
+   * @see testAddGroup()
    */
-  public function testSort() {
-    $this->markTestIncomplete();
+  public function testSort($votes, array $expected_groups) {
+    $collection = new OgResolvedGroupCollection();
+
+    // Cast all votes.
+    foreach ($votes as $vote) {
+      $collection->addGroup($this->groups[$vote['group']], $vote['cache_contexts'], $vote['weight']);
+    }
+
+    // Check that the groups can be correctly sorted.
+    $collection->sort();
+    $info = $collection->getGroupInfo();
+
+    $actual_groups = array_values(array_map(function ($group_info) {
+      return $group_info['entity']->id();
+    }, $info));
+
+    $this->assertEquals($expected_groups, $actual_groups);
   }
 
   /**
@@ -307,12 +336,16 @@ class OgResolvedGroupCollectionTest extends UnitTestCase {
    * Provides data for testing the retrieval of group information.
    *
    * @return array
-   *   An array of associative arrays representing voting information, with the
-   *   following keys:
-   *   - group: the ID of the group to add a vote for.
-   *   - cache_contexts: an array of cache_contexts to associate with the group.
-   *     To omit associating cache contexts, set to an empty array.
-   *   - weight: an integer representing the vote weight. Set to NULL to omit.
+   *   An array of test data, each item an array with these two values:
+   *   - An associative array representing voting information, with the
+   *     following keys:
+   *     - group: the ID of the group to add a vote for.
+   *     - cache_contexts: an array of cache_contexts to associate with the
+   *       group. To omit associating cache contexts, set to an empty array.
+   *     - weight: an integer representing the vote weight. Set to NULL to omit.
+   *   - An array containing the IDs of the groups that are expected to be
+   *     present in the collection after all votes are added, in the order they
+   *     are expected to be according to their votes.
    */
   public function groupVotesProvider() {
     return [
@@ -326,8 +359,9 @@ class OgResolvedGroupCollectionTest extends UnitTestCase {
           ],
         ],
         // There is one group.
-        1,
+        ['node-0'],
       ],
+
       // 3 votes for the same group.
       [
         [
@@ -348,15 +382,16 @@ class OgResolvedGroupCollectionTest extends UnitTestCase {
           ],
         ],
         // There is one group.
-        1,
+        ['entity_test-0'],
       ],
-      // 5 votes for 3 different groups.
+
+      // A 'typical' test case with 5 votes for 3 different groups.
       [
         [
           [
             'group' => 'taxonomy_term-1',
             'cache_contexts' => [],
-            'weight' => 100,
+            'weight' => NULL,
           ],
           [
             'group' => 'block_content-0',
@@ -371,16 +406,164 @@ class OgResolvedGroupCollectionTest extends UnitTestCase {
           [
             'group' => 'block_content-0',
             'cache_contexts' => ['route', 'user'],
-            'weight' => NULL,
+            'weight' => -1,
           ],
           [
             'group' => 'taxonomy_term-1',
             'cache_contexts' => [],
+            'weight' => -2,
+          ],
+        ],
+        // The resulting groups in the collection, ordered by votes and weight.
+        [
+          // 2 votes, total weight -1.
+          'block_content-0',
+          // 2 votes, total weight -2.
+          'taxonomy_term-1',
+          // 1 vote.
+          'node-1',
+        ],
+      ],
+
+      // Groups with more votes should rank higher than groups with fewer votes,
+      // regardless of the vote weight.
+      [
+        [
+          [
+            'group' => 'taxonomy_term-0',
+            'cache_contexts' => ['route'],
+            'weight' => 100,
+          ],
+          [
+            'group' => 'block_content-0',
+            'cache_contexts' => ['user'],
+            'weight' => NULL,
+          ],
+          [
+            'group' => 'block_content-1',
+            'cache_contexts' => [],
+            'weight' => 99999,
+          ],
+          [
+            'group' => 'taxonomy_term-0',
+            'cache_contexts' => [],
+            'weight' => -300,
+          ],
+          [
+            'group' => 'block_content-0',
+            'cache_contexts' => ['route', 'user'],
+            'weight' => NULL,
+          ],
+          [
+            'group' => 'taxonomy_term-0',
+            'cache_contexts' => [],
             'weight' => -3,
           ],
         ],
-        // Votes have been cast for 3 groups.
-        3,
+        [
+          'taxonomy_term-0',
+          'block_content-0',
+          'block_content-1',
+        ],
+      ],
+
+      // If multiple groups have the same number of votes, then the ones with
+      // higher vote weights should be ranked higher.
+      [
+        [
+          [
+            'group' => 'entity_test-0',
+            'cache_contexts' => ['user'],
+            'weight' => 10,
+          ],
+          [
+            'group' => 'block_content-0',
+            'cache_contexts' => ['route', 'user'],
+            'weight' => NULL,
+          ],
+          [
+            'group' => 'node-1',
+            'cache_contexts' => [],
+            'weight' => 99999,
+          ],
+          [
+            'group' => 'taxonomy_term-1',
+            'cache_contexts' => ['url'],
+            'weight' => 123,
+          ],
+          [
+            'group' => 'taxonomy_term-1',
+            'cache_contexts' => [],
+            'weight' => 0,
+          ],
+          [
+            'group' => 'entity_test-0',
+            'cache_contexts' => [],
+            'weight' => -3,
+          ],
+          [
+            'group' => 'block_content-0',
+            'cache_contexts' => ['route'],
+            'weight' => -1,
+          ],
+          [
+            'group' => 'node-1',
+            'cache_contexts' => [],
+            'weight' => -8,
+          ],
+        ],
+        [
+          'node-1',
+          'taxonomy_term-1',
+          'entity_test-0',
+          'block_content-0',
+        ],
+      ],
+
+      // If multiple groups have the same number of votes, and the same vote
+      // weight, they should remain in the order their votes were originally
+      // cast.
+      [
+        [
+          [
+            'group' => 'node-1',
+            'cache_contexts' => [],
+            'weight' => -1,
+          ],
+          [
+            'group' => 'entity_test-0',
+            'cache_contexts' => [],
+            'weight' => -1,
+          ],
+          [
+            'group' => 'taxonomy_term-0',
+            'cache_contexts' => [],
+            'weight' => -1,
+          ],
+          [
+            'group' => 'node-0',
+            'cache_contexts' => [],
+            'weight' => -1,
+          ],
+          [
+            'group' => 'block_content-1',
+            'cache_contexts' => [],
+            'weight' => -1,
+          ],
+          [
+            'group' => 'entity_test-1',
+            'cache_contexts' => [],
+            'weight' => -1,
+          ],
+        ],
+        [
+          'node-1',
+          'entity_test-0',
+          'taxonomy_term-0',
+          'node-0',
+          'block_content-1',
+          'entity_test-1',
+        ],
       ],
 
     ];

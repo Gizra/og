@@ -94,9 +94,9 @@ class OgResolvedGroupCollection implements OgResolvedGroupCollectionInterface {
     // plugin(s) with the highest priority will be returned.
     uasort($this->groupInfo, function ($a, $b) {
       if (count($a['votes']) == count($b['votes'])) {
-        return array_sum($a['votes']) < array_sum($b['votes']) ? -1 : 1;
+        return array_sum($a['votes']) < array_sum($b['votes']) ? 1 : -1;
       }
-      return count($a['votes']) < count($b['votes']) ? -1 : 1;
+      return count($a['votes']) < count($b['votes']) ? 1 : -1;
     });
   }
 
