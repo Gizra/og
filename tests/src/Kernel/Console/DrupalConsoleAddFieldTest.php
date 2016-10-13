@@ -8,7 +8,7 @@ use Symfony\Component\Console\Tester\CommandTester;
 use Symfony\Component\Console\Helper\HelperSet;
 
 /**
- * Tests create membership helper function.
+ * Tests CLI integration for fields creation.
  *
  * @group og
  * @coversDefaultClass \Drupal\og\Og
@@ -45,7 +45,7 @@ class DrupalConsoleAddFieldTest extends KernelTestBase {
   }
 
   /**
-   * Testing creation of og audience field using Drupal Console.
+   * Tests creating group audience fields through the command line interface.
    */
   public function testNewGroup() {
     $helper = new HelperSet();

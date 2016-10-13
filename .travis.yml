@@ -52,6 +52,11 @@ before_script:
 
   # Download Drupal console so we can run the test for it. Skip this for the
   # coding standards test.
+
+  # When downloading DrupalConsole using Composer an old version is supplied.
+  # Sepficing the correct version and the versions of DrupalComposer dependancy
+  # will fix the problem for now. Need to be removed when https://goo.gl/i6rVhT
+  # will be merged.
   - test ${TEST_SUITE} == "PHP_CodeSniffer" || composer require symfony/dom-crawler:~2.8.11 drupal/console-core:~1.0.0-rc5 drupal/console:~1.0.0-rc5 --working-dir=$DRUPAL_DIR
 
   # Install Composer dependencies for core. Skip this for the coding standards test.

@@ -2,8 +2,8 @@
 
 namespace Drupal\og\Command;
 
-use Drupal\Core\Entity\EntityTypeBundleInfo;
-use Drupal\Core\Entity\EntityTypeRepository;
+use Drupal\Core\Entity\EntityTypeBundleInfoInterface;
+use Drupal\Core\Entity\EntityTypeRepositoryInterface;
 use Drupal\og\Og;
 use Drupal\og\OgFieldsPluginManager;
 use Drupal\og\Plugin\OgFields\AudienceField;
@@ -23,35 +23,35 @@ class OgAddFieldCommand extends Command {
   /**
    * OG plugin manager.
    *
-   * @var OgFieldsPluginManager
+   * @var \Drupal\og\OgFieldsPluginManager
    */
   protected $ogFieldsPluginManager;
 
   /**
    * Bundle info service.
    *
-   * @var EntityTypeBundleInfo
+   * @var \Drupal\Core\Entity\EntityTypeBundleInfoInterface
    */
   protected $bundleInfo;
 
   /**
    * Entity type repository service.
    *
-   * @var EntityTypeRepository
+   * @var \Drupal\Core\Entity\EntityTypeRepositoryInterface
    */
   protected $entityTypeRepository;
 
   /**
    * Constructor.
    *
-   * @param \Drupal\Core\Entity\EntityTypeBundleInfo $bundle_info
+   * @param \Drupal\Core\Entity\EntityTypeBundleInfoInterface $bundle_info
    *   The bundle info service.
-   * @param \Drupal\Core\Entity\EntityTypeRepository $entity_type_repository
+   * @param \Drupal\Core\Entity\EntityTypeRepositoryInterface $entity_type_repository
    *   The type repository service.
    * @param \Drupal\og\OgFieldsPluginManager $og_field_plugin_manager
    *   The OG plugin manager.
    */
-  public function __construct(EntityTypeBundleInfo $bundle_info, EntityTypeRepository $entity_type_repository, OgFieldsPluginManager $og_field_plugin_manager) {
+  public function __construct(EntityTypeBundleInfoInterface $bundle_info, EntityTypeRepositoryInterface $entity_type_repository, OgFieldsPluginManager $og_field_plugin_manager) {
     parent::__construct();
 
     $this->bundleInfo = $bundle_info;
