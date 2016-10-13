@@ -349,8 +349,8 @@ class OgResolvedGroupCollectionTest extends UnitTestCase {
    */
   public function groupVotesProvider() {
     return [
+      // A simple vote for a group.
       [
-        // A simple vote for a group.
         [
           [
             'group' => 'node-0',
@@ -519,53 +519,6 @@ class OgResolvedGroupCollectionTest extends UnitTestCase {
           'block_content-0',
         ],
       ],
-
-      // If multiple groups have the same number of votes, and the same vote
-      // weight, they should remain in the order their votes were originally
-      // cast.
-      [
-        [
-          [
-            'group' => 'node-1',
-            'cache_contexts' => [],
-            'weight' => -1,
-          ],
-          [
-            'group' => 'entity_test-0',
-            'cache_contexts' => [],
-            'weight' => -1,
-          ],
-          [
-            'group' => 'taxonomy_term-0',
-            'cache_contexts' => [],
-            'weight' => -1,
-          ],
-          [
-            'group' => 'node-0',
-            'cache_contexts' => [],
-            'weight' => -1,
-          ],
-          [
-            'group' => 'block_content-1',
-            'cache_contexts' => [],
-            'weight' => -1,
-          ],
-          [
-            'group' => 'entity_test-1',
-            'cache_contexts' => [],
-            'weight' => -1,
-          ],
-        ],
-        [
-          'node-1',
-          'entity_test-0',
-          'taxonomy_term-0',
-          'node-0',
-          'block_content-1',
-          'entity_test-1',
-        ],
-      ],
-
     ];
   }
 
