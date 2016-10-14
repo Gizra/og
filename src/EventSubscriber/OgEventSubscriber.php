@@ -349,22 +349,21 @@ class OgEventSubscriber implements EventSubscriberInterface {
    *   The OG admin routes event object.
    */
   public function provideOgAdminRoutes(OgAdminRoutesEventInterface $event) {
-    $routes_info = [
-      'members' => [
-        'controller' => '\Drupal\og\Controller\OgAdminMembersController::membersList',
-        'title' => 'Members',
-        'description' => 'Manage members',
-        'path' => 'members',
-        'requirements' => [
-          '_permission' => 'administer group',
-          // Views module must be enabled.
-          '_module_dependencies' => 'views',
-        ],
+    $routes_info = $event->getRoutesInfo();
 
+    $routes_info['members'] = [
+      'controller' => '\Drupal\og\Controller\OgAdminMembersController::membersList',
+      'title' => 'Members',
+      'description' => 'Manage members',
+      'path' => 'members',
+      'requirements' => [
+        '_og_user_access_group' => 'administer group',
+        // Views module must be enabled.
+        '_module_dependencies' => 'views',
       ],
     ];
 
-    $event->setRoutes($routes_info);
+    $event->setRoutesInfo($routes_info);
   }
 
 }
