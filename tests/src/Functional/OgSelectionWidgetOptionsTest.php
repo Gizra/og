@@ -76,9 +76,11 @@ class OgSelectionWidgetOptionsTest extends BrowserTestBase {
   public function setUp() {
     parent::setUp();
 
-    // Setting content types.
-    NodeType::create(['type' => 'group'])->save();
-    Og::addGroup('node', 'group');
+    // Create group node types.
+    NodeType::create(['type' => 'group1'])->save();
+    NodeType::create(['type' => 'group2'])->save();
+    Og::addGroup('node', 'group1');
+    Og::addGroup('node', 'group2');
 
     NodeType::create(['type' => 'group_content'])->save();
 
@@ -99,14 +101,14 @@ class OgSelectionWidgetOptionsTest extends BrowserTestBase {
 
     // Create groups.
     $this->group1 = Node::create([
-      'type' => 'group',
+      'type' => 'group1',
       'title' => $this->randomString(),
       'uid' => $this->groupOwnerUser->id(),
     ]);
     $this->group1->save();
 
     $this->group2 = Node::create([
-      'type' => 'group',
+      'type' => 'group2',
       'title' => $this->randomString(),
       'uid' => $this->groupOwnerUser->id(),
     ]);
@@ -131,9 +133,6 @@ class OgSelectionWidgetOptionsTest extends BrowserTestBase {
     $this->drupalGet('node/add/group_content');
     $this->assertSession()->statusCodeEquals(403);
 
-    $this->assertSession()->optionNotExists('Groups audience', $this->group1->label());
-    $this->assertSession()->optionNotExists('Groups audience', $this->group2->label());
-
     // Grant create permission for the first group.
     $role = OgRole::getRole($this->group1->getEntityTypeId(), $this->group1->bundle(), OgRoleInterface::AUTHENTICATED);
     $role
@@ -143,10 +142,11 @@ class OgSelectionWidgetOptionsTest extends BrowserTestBase {
     $this->drupalGet('node/add/group_content');
     $this->assertSession()->statusCodeEquals(200);
 
+    $this->assertSession()->optionExists('Groups audience', '_none');
     $this->assertSession()->optionExists('Groups audience', $this->group1->label());
     $this->assertSession()->optionNotExists('Groups audience', $this->group2->label());
 
-    // Verify the group owner..
+    // Verify the group owner.
     $this->drupalLogin($this->groupOwnerUser);
     $this->drupalGet('node/add/group_content');
     $this->assertSession()->optionExists('Groups audience', $this->group1->label());
