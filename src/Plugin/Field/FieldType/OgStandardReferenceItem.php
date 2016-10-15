@@ -10,8 +10,8 @@ use Drupal\Core\Form\FormStateInterface;
  *
  * @FieldType(
  *   id = "og_standard_reference",
- *   label = @Translation("OG membership reference"),
- *   description = @Translation("An entity field containing an OG membership reference for a non-user entity."),
+ *   label = @Translation("OG reference"),
+ *   description = @Translation("An entity field containing an OG reference for a non-user entity."),
  *   category = @Translation("Reference"),
  *   no_ui = TRUE,
  *   default_widget = "entity_reference_autocomplete",
@@ -21,15 +21,5 @@ use Drupal\Core\Form\FormStateInterface;
  * )
  */
 class OgStandardReferenceItem extends EntityReferenceItem {
-
-  /**
-   * {@inheritdoc}
-   */
-  public static function defaultFieldSettings() {
-    $settings = parent::defaultFieldSettings();
-    $settings['access_override'] = FALSE;
-
-    return $settings;
-  }
 
 }
