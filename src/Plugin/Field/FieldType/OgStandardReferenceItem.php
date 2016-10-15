@@ -13,7 +13,7 @@ use Drupal\Core\Field\Plugin\Field\FieldType\EntityReferenceItem;
  *   description = @Translation("An entity field containing an OG reference for a non-user entity."),
  *   category = @Translation("Reference"),
  *   no_ui = TRUE,
- *   default_widget = "entity_reference_autocomplete",
+ *   default_widget = "options_select",
  *   default_formatter = "entity_reference_label",
  *   list_class = "\Drupal\Core\Field\EntityReferenceFieldItemList",
  *   constraints = {"ValidOgMembershipReference" = {}}

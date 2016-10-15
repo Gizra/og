@@ -332,10 +332,12 @@ class OgMembership extends ContentEntityBase implements OgMembershipInterface {
       }
     }
 
+    $uid = $this->get('uid')->target_id;
+
     // Check for an existing membership.
     $query = \Drupal::entityQuery('og_membership');
     $query
-      ->condition('uid', $this->get('uid')->target_id)
+      ->condition('uid', $uid)
       ->condition('entity_id', $this->get('entity_id')->value)
       ->condition('entity_type', $this->get('entity_type')->value);
 
@@ -350,7 +352,7 @@ class OgMembership extends ContentEntityBase implements OgMembershipInterface {
       ->execute();
 
     if ($count) {
-      throw new \LogicException(sprintf('An OG membership already exists for group of entity-type %s and ID: %s', $entity_type_id, $this->getGroup()->id()));
+      throw new \LogicException(sprintf('An OG membership already exists for user ID %d and group of entity-type %s and ID %s', $uid, $entity_type_id, $this->getGroup()->id()));
     }
 
     parent::preSave($storage);
