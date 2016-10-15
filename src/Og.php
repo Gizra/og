@@ -388,12 +388,21 @@ class Og {
       throw new \Exception("The field $field_name is not a group audience field.");
     }
 
+    $entity_type_id = $field_definition->getTargetEntityTypeId();
+    $definition = \Drupal::entityTypeManager()->getDefinition($entity_type_id);
+
+    $values = [];
+    if ($bundle_key = $definition->getKey('bundle')) {
+      $values[$bundle_key] = $field_definition->getTargetBundle();
+    }
+
+    $entity = \Drupal::entityTypeManager()->getStorage($entity_type_id)->create($values);
+
     $options = [
       'target_type' => $field_definition->getFieldStorageDefinition()->getSetting('target_type'),
       'handler' => $field_definition->getSetting('handler'),
       'handler_settings' => $field_definition->getSetting('handler_settings'),
-      'entity_type_id' => $field_definition->getTargetEntityTypeId(),
-      'bundle' => $field_definition->getTargetBundle(),
+      'entity' => $entity,
     ];
 
     return \Drupal::service('plugin.manager.entity_reference_selection')->createInstance('og:default', $options);

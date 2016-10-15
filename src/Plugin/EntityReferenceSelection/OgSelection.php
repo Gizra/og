@@ -89,15 +89,14 @@ class OgSelection extends DefaultSelection {
     $og_access = \Drupal::service('og.access');
 
     if (empty($this->configuration['entity'])) {
-      $entity_type_id = $this->configuration['entity_type_id'];
-      $bundle = $this->configuration['bundle'];
+      // @todo: Find out why we have this scenario.
+      return $query;
     }
-    else {
-      /** @var \Drupal\Core\Entity\EntityInterface $entity */
-      $entity = $this->configuration['entity'];
-      $entity_type_id = $entity->getEntityTypeId();
-      $bundle = $entity->bundle();
-    }
+
+    /** @var \Drupal\Core\Entity\EntityInterface $entity */
+    $entity = $this->configuration['entity'];
+    $entity_type_id = $entity->getEntityTypeId();
+    $bundle = $entity->bundle();
 
     $ids = [];
     foreach ($this->getUserGroups() as $group) {
