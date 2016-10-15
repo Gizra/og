@@ -4,6 +4,7 @@ namespace Drupal\Tests\og\Functional;
 
 use Drupal\node\Entity\Node;
 use Drupal\node\Entity\NodeType;
+use Drupal\og\Entity\OgMembership;
 use Drupal\og\Entity\OgRole;
 use Drupal\og\Og;
 use Drupal\og\OgGroupAudienceHelper;
@@ -63,6 +64,13 @@ class OgSelectionWidgetOptionsTest extends BrowserTestBase {
   protected $groupAdministratorUser;
 
   /**
+   * A non-member user.
+   *
+   * @var \Drupal\user\Entity\User
+   */
+  protected $nonMemberUser;
+
+  /**
    * {@inheritdoc}
    */
   public function setUp() {
@@ -70,31 +78,24 @@ class OgSelectionWidgetOptionsTest extends BrowserTestBase {
 
     // Setting content types.
     NodeType::create(['type' => 'group'])->save();
+    Og::addGroup('node', 'group');
+
     NodeType::create(['type' => 'group_content'])->save();
 
-    // Setting up groups and group content relations.
+    // Use a select list widget for the audience field, so it's easier to get
+    // all the values.
     $settings = [
       'form_display' => [
-        'type' => 'options_buttons',
+        'type' => 'options_select',
       ],
     ];
-    Og::addGroup('node', 'group');
     Og::createField(OgGroupAudienceHelper::DEFAULT_FIELD, 'node', 'group_content', $settings);
 
-    // Creating users.
-    $this->groupMemberUser = $this->drupalCreateUser([
-      'access content',
-      'create group_content content',
-    ]);
-
-    $this->groupOwnerUser = $this->drupalCreateUser([
-      'create group_content content',
-    ]);
-
-    $this->groupAdministratorUser = $this->drupalCreateUser([
-      'administer group',
-      'create group_content content',
-    ]);
+    // Create users.
+    $this->groupMemberUser = $this->drupalCreateUser();
+    $this->groupOwnerUser = $this->drupalCreateUser();
+    $this->groupAdministratorUser = $this->drupalCreateUser(['administer group']);
+    $this->nonMemberUser = $this->drupalCreateUser();
 
     // Create groups.
     $this->group1 = Node::create([
@@ -110,45 +111,52 @@ class OgSelectionWidgetOptionsTest extends BrowserTestBase {
       'uid' => $this->groupOwnerUser->id(),
     ]);
     $this->group2->save();
+
+    // Add member to group.
+    Og::createMembership($this->group1, $this->groupMemberUser)->save();
+    Og::createMembership($this->group2, $this->groupMemberUser)->save();
   }
 
   /**
-   * Tests adding groups, and node access.
+   * Tests the group audience widgets shows correct values.
    */
-  public function testFields() {
+  public function testNonRequiredAudienceField() {
+    // Non member user.
+    $this->drupalLogin($this->nonMemberUser);
+    $this->drupalGet('node/add/group_content');
+    $this->assertSession()->statusCodeEquals(403);
+
+    // Group member without create permissions.
     $this->drupalLogin($this->groupMemberUser);
     $this->drupalGet('node/add/group_content');
+    $this->assertSession()->statusCodeEquals(403);
 
-    // Verify the user can't see the groups in the selection handler.
-    $this->assertSession()->pageTextNotContains($this->group1->label());
-    $this->assertSession()->pageTextNotContains($this->group2->label());
+    $this->assertSession()->optionNotExists('Groups audience', $this->group1->label());
+    $this->assertSession()->optionNotExists('Groups audience', $this->group2->label());
 
-    // Assign the permission.
+    // Grant create permission for the first group.
     $role = OgRole::getRole($this->group1->getEntityTypeId(), $this->group1->bundle(), OgRoleInterface::AUTHENTICATED);
     $role
       ->grantPermission('create node group_content')
       ->save();
 
-    Og::createMembership($this->group1, $this->groupMemberUser)
-      ->addRole($role)
-      ->save();
-
-    // Verify the user can reference to the group.
     $this->drupalGet('node/add/group_content');
-    $this->assertSession()->pageTextContains($this->group1->label());
-    $this->assertSession()->pageTextNotContains($this->group2->label());
+    $this->assertSession()->statusCodeEquals(200);
 
-    // Verify the group can reference to all the groups.
+    $this->assertSession()->optionExists('Groups audience', $this->group1->label());
+    $this->assertSession()->optionNotExists('Groups audience', $this->group2->label());
+
+    // Verify the group owner..
     $this->drupalLogin($this->groupOwnerUser);
     $this->drupalGet('node/add/group_content');
-    $this->assertSession()->pageTextContains($this->group1->label());
-    $this->assertSession()->pageTextContains($this->group2->label());
+    $this->assertSession()->optionExists('Groups audience', $this->group1->label());
+    $this->assertSession()->optionExists('Groups audience', $this->group2->label());
 
-    // Verify the groups administrator can reference to all the groups.
+    // Verify the site-wide administrator.
     $this->drupalLogin($this->groupAdministratorUser);
     $this->drupalGet('node/add/group_content');
-    $this->assertSession()->pageTextContains($this->group1->label());
-    $this->assertSession()->pageTextContains($this->group2->label());
+    $this->assertSession()->optionExists('Groups audience', $this->group1->label());
+    $this->assertSession()->optionExists('Groups audience', $this->group2->label());
   }
 
 }
