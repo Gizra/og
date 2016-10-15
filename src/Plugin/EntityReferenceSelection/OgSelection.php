@@ -142,18 +142,17 @@ class OgSelection extends DefaultSelection {
     // Filter out the bundles that are not groups.
     $entity_type_id = $this->configuration['target_type'];
     $entity_type = $this->entityManager->getDefinition($entity_type_id);
-    $bundles = $this->entityManager->getBundleInfo($entity_type_id);
+    $bundles_info = $this->entityManager->getBundleInfo($entity_type_id);
 
     if ($entity_type->hasKey('bundle')) {
 
-    }
+      foreach (Og::groupTypeManager()->getAllGroupBundles($entity_type_id) as $bundle) {
+        $bundle_options[$bundle] = $bundles_info[$bundle]['label'];
+      }
 
-    foreach (Og::groupTypeManager()->getAllGroupBundles($entity_type_id) as $bundle) {
-      $bundle_options[$bundle] = $bundles[$bundle]['label'];
+      natsort($bundle_options);
+      $form['target_bundles']['#options'] = $bundle_options;
     }
-
-    natsort($bundle_options);
-    $form['target_bundles']['#options'] = $bundle_options;
 
     return $form;
   }
