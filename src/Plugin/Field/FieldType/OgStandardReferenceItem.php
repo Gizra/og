@@ -32,21 +32,4 @@ class OgStandardReferenceItem extends EntityReferenceItem {
     return $settings;
   }
 
-  /**
-   * {@inheritdoc}
-   */
-  public function fieldSettingsForm(array $form, FormStateInterface $form_state) {
-    $form = parent::fieldSettingsForm($form, $form_state);
-
-    // Field access settings.
-    $form['access_override'] = [
-      '#title' => $this->t('Allow entity access to control field access'),
-      '#description' => $this->t('By default, the <em>administer group</em> permission is required to directly edit this field. Selecting this option will allow access to anybody with access to edit the entity.'),
-      '#type' => 'checkbox',
-      '#default_value' => $this->getSetting('access_override'),
-    ];
-
-    return $form;
-  }
-
 }
