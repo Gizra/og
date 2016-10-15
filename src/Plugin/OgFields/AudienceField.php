@@ -59,13 +59,9 @@ class AudienceField extends OgFieldBase implements OgFieldsInterface {
    * {@inheritdoc}
    */
   public function getFormDisplayDefinition(array $values = []) {
+    // @todo: isn't it taken from the definition in OgStandardReferenceItem?
     $values += [
-      'type' => 'entity_reference_autocomplete',
-      'settings' => [
-        'match_operator' => 'CONTAINS',
-        'size' => 60,
-        'placeholder' => '',
-      ],
+      'type' => 'options_select',
     ];
 
     return $values;
