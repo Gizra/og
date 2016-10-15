@@ -20,9 +20,6 @@ use Drupal\simpletest\NodeCreationTrait;
  */
 class OgSelectionWidgetOptionsTest extends BrowserTestBase {
 
-  use ContentTypeCreationTrait;
-  use NodeCreationTrait;
-
   /**
    * {@inheritdoc}
    */
