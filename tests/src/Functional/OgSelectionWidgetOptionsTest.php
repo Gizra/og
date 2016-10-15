@@ -102,17 +102,19 @@ class OgSelectionWidgetOptionsTest extends BrowserTestBase {
     // Create groups.
     $this->group1 = Node::create([
       'type' => 'group1',
-      'title' => $this->randomString(),
+      'title' => 'group1',
       'uid' => $this->groupOwnerUser->id(),
     ]);
     $this->group1->save();
 
     $this->group2 = Node::create([
       'type' => 'group2',
-      'title' => $this->randomString(),
+      'title' => 'group2',
       'uid' => $this->groupOwnerUser->id(),
     ]);
     $this->group2->save();
+
+    // @todo: Add unpublished node.
 
     // Add member to group.
     Og::createMembership($this->group1, $this->groupMemberUser)->save();
@@ -140,19 +142,17 @@ class OgSelectionWidgetOptionsTest extends BrowserTestBase {
       ->save();
 
     $this->drupalGet('node/add/group_content');
-    $this->assertSession()->statusCodeEquals(200);
-
     $this->assertSession()->optionExists('Groups audience', '_none');
     $this->assertSession()->optionExists('Groups audience', $this->group1->label());
     $this->assertSession()->optionNotExists('Groups audience', $this->group2->label());
 
-    // Verify the group owner.
+    // Group owner.
     $this->drupalLogin($this->groupOwnerUser);
     $this->drupalGet('node/add/group_content');
     $this->assertSession()->optionExists('Groups audience', $this->group1->label());
     $this->assertSession()->optionExists('Groups audience', $this->group2->label());
 
-    // Verify the site-wide administrator.
+    // Site-wide administrator.
     $this->drupalLogin($this->groupAdministratorUser);
     $this->drupalGet('node/add/group_content');
     $this->assertSession()->optionExists('Groups audience', $this->group1->label());
