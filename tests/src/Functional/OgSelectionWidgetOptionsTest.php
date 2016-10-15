@@ -74,10 +74,10 @@ class OgSelectionWidgetOptionsTest extends BrowserTestBase {
     parent::setUp();
 
     // Create group node types.
-    NodeType::create(['type' => 'group1'])->save();
-    NodeType::create(['type' => 'group2'])->save();
-    Og::addGroup('node', 'group1');
-    Og::addGroup('node', 'group2');
+    NodeType::create(['type' => 'group_type1'])->save();
+    NodeType::create(['type' => 'group_type2'])->save();
+    Og::addGroup('node', 'group_type1');
+    Og::addGroup('node', 'group_type2');
 
     NodeType::create(['type' => 'group_content'])->save();
 
@@ -98,14 +98,14 @@ class OgSelectionWidgetOptionsTest extends BrowserTestBase {
 
     // Create groups.
     $this->group1 = Node::create([
-      'type' => 'group1',
+      'type' => 'group_type1',
       'title' => 'group1',
       'uid' => $this->groupOwnerUser->id(),
     ]);
     $this->group1->save();
 
     $this->group2 = Node::create([
-      'type' => 'group2',
+      'type' => 'group_type2',
       'title' => 'group2',
       'uid' => $this->groupOwnerUser->id(),
     ]);
