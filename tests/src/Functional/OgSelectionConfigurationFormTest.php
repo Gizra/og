@@ -27,56 +27,28 @@ class OgSelectionConfigurationFormTest extends BrowserTestBase {
   ];
 
   /**
-   * A non-group node type.
-   *
-   * @var \Drupal\node\Entity\NodeType
-   */
-  protected $nonGroupType;
-
-  /**
-   * A group node type.
-   *
-   * @var \Drupal\node\Entity\NodeType
-   */
-  protected $groupType1;
-
-  /**
-   * A group node type.
-   *
-   * @var \Drupal\node\Entity\NodeType
-   */
-  protected $groupType2;
-
-  /**
-   * A group-content node type.
-   *
-   * @var \Drupal\node\Entity\NodeType
-   */
-  protected $groupContentType;
-
-  /**
    * {@inheritdoc}
    */
   protected function setUp() {
     parent::setUp();
 
     // Add node types.
-    $this->nonGroupType = NodeType::create([
+    NodeType::create([
       'type' => 'non_group',
       'name' => 'non_group',
     ])->save();
 
-    $this->groupType1 = NodeType::create([
+    NodeType::create([
       'type' => 'group_type1',
       'name' => 'group_type1',
     ])->save();
 
-    $this->groupType2 = NodeType::create([
+    NodeType::create([
       'type' => 'group_type2',
       'name' => 'group_type2',
     ])->save();
 
-    $this->groupContentType = NodeType::create([
+    NodeType::create([
       'type' => 'group_content',
       'name' => 'group_content',
     ])->save();
@@ -97,6 +69,8 @@ class OgSelectionConfigurationFormTest extends BrowserTestBase {
     $this->drupalLogin($user);
 
     $this->drupalGet('admin/structure/types/manage/group_content/fields/node.group_content.og_audience');
+
+    debug($this->getSession()->getPage()->getHtml());
 
     $this->assertSession()->fieldExists('settings[handler_settings][target_bundles][group_type1]');
     $this->assertSession()->fieldExists('settings[handler_settings][target_bundles][group_type2]');
