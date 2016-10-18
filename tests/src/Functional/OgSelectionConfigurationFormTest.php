@@ -60,6 +60,7 @@ class OgSelectionConfigurationFormTest extends BrowserTestBase {
   protected function setUp() {
     parent::setUp();
 
+    // Add node types.
     $this->nonGroupType = NodeType::create([
       'type' => 'group_type1',
       'name' => 'group_type1',
@@ -95,13 +96,14 @@ class OgSelectionConfigurationFormTest extends BrowserTestBase {
     $user = $this->drupalCreateUser(['administer content types', 'administer node fields']);
     $this->drupalLogin($user);
 
-    $this->drupalGet('admin/structure/types/manage/group_content');
-
     $this->drupalGet('admin/structure/types/manage/group_content/fields/node.group_content.og_audience');
 
     $this->assertSession()->fieldExists('settings[handler_settings][target_bundles][group_type1]');
     $this->assertSession()->fieldExists('settings[handler_settings][target_bundles][group_type2]');
+
+    // Assert non-group and group-content don't appear.
     $this->assertSession()->fieldNotExists('settings[handler_settings][target_bundles][non_group]');
+    $this->assertSession()->fieldNotExists('settings[handler_settings][target_bundles][group_content]');
   }
 
 }
