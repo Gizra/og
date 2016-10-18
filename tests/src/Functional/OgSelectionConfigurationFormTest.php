@@ -71,7 +71,7 @@ class OgSelectionConfigurationFormTest extends BrowserTestBase {
     $this->drupalGet('admin/structure/types/manage/group_content/fields');
     $this->assertSession()->statusCodeEquals(200);
 
-    $this->clickLink('Edit field settings');
+    $this->drupalGet('admin/structure/types/manage/group_content/fields/node.group_content.og_audience');
     $this->assertSession()->statusCodeEquals(200);
 
     $this->assertSession()->fieldExists('settings[handler_settings][target_bundles][group_type1]');
