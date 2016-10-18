@@ -13,6 +13,7 @@ case "$1" in
     *)
         ln -s $MODULE_DIR $DRUPAL_DIR/modules/og
         cd $DRUPAL_DIR
+        drush en field_ui -y
         ./vendor/bin/phpunit -c ./core/phpunit.xml.dist $MODULE_DIR/tests/src/Functional/OgSelectionConfigurationFormTest.php
         exit $?
 esac
