@@ -73,15 +73,6 @@ class OgSelectionConfigurationFormTest extends BrowserTestBase {
     $this->assertSession()->statusCodeEquals(200);
 
     $this->drupalGet('admin/structure/types/manage/group_content/fields/node.group_content.og_audience');
-
-    $params = [
-      'node_type' => 'article',
-      'field_config' => 'node.group_content.og_audience',
-    ];
-    $url = Url::fromRoute('entity.field_config.node_field_edit_form', $params);
-    $this->assertTrue($url->access($user));
-    debug($url->toString());
-
     $this->assertSession()->statusCodeEquals(200);
 
     $this->assertSession()->fieldExists('settings[handler_settings][target_bundles][group_type1]');
