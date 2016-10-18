@@ -71,6 +71,8 @@ class OgSelectionConfigurationFormTest extends BrowserTestBase {
     $this->drupalGet('admin/structure/types/manage/group_content');
     $this->assertSession()->statusCodeEquals(200);
 
+    $this->assertTrue(\Drupal::moduleHandler()->moduleExists('field_ui'));
+
     debug($this->getSession()->getPage()->getHtml());
 
     $this->drupalGet('admin/structure/types/manage/group_content/fields/node.group_content.og_audience');
