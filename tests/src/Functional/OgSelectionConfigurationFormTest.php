@@ -62,18 +62,18 @@ class OgSelectionConfigurationFormTest extends BrowserTestBase {
 
     // Add node types.
     $this->nonGroupType = NodeType::create([
+      'type' => 'non_group',
+      'name' => 'non_group',
+    ])->save();
+
+    $this->groupType1 = NodeType::create([
       'type' => 'group_type1',
       'name' => 'group_type1',
     ])->save();
 
-    $this->groupType1 = NodeType::create([
+    $this->groupType2 = NodeType::create([
       'type' => 'group_type2',
       'name' => 'group_type2',
-    ])->save();
-
-    $this->groupType2 = NodeType::create([
-      'type' => 'non_group',
-      'name' => 'non_group',
     ])->save();
 
     $this->groupContentType = NodeType::create([
