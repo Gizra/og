@@ -68,15 +68,11 @@ class OgSelectionConfigurationFormTest extends BrowserTestBase {
     $user = $this->drupalCreateUser(['administer content types', 'administer node fields']);
     $this->drupalLogin($user);
 
-    $this->drupalGet('admin/structure/types/manage/group_content');
-    $this->assertSession()->statusCodeEquals(200);
+    $this->container->get('router.builder')->setRebuildNeeded();
 
-    $this->assertTrue(\Drupal::moduleHandler()->moduleExists('field_ui'));
 
     $this->drupalGet('admin/structure/types/manage/group_content/fields/node.group_content.og_audience');
     $this->assertSession()->statusCodeEquals(200);
-
-    debug($this->getSession()->getPage()->getHtml());
 
     $this->assertSession()->fieldExists('settings[handler_settings][target_bundles][group_type1]');
     $this->assertSession()->fieldExists('settings[handler_settings][target_bundles][group_type2]');
