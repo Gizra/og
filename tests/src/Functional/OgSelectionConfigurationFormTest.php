@@ -98,8 +98,8 @@ class OgSelectionConfigurationFormTest extends BrowserTestBase {
 
     $this->drupalGet('admin/structure/types/manage/group_content/fields/node.group_content.og_audience');
 
-    $this->assertSession()->fieldExists('group_type1');
-    $this->assertSession()->fieldExists('group_type2');
+    $this->assertSession()->fieldExists('settings[handler_settings][target_bundles][group_type1]');
+    $this->assertSession()->fieldExists('settings[handler_settings][target_bundles][group_type2]');
 
     // Assert non-group and group-content don't appear.
     $this->assertSession()->fieldNotExists('settings[handler_settings][target_bundles][non_group]');
