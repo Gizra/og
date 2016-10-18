@@ -79,7 +79,7 @@ class OgSelectionConfigurationFormTest extends BrowserTestBase {
       'field_config' => 'node.group_content.og_audience',
     ];
     $url = Url::fromRoute('entity.field_config.node_field_edit_form', $params);
-    $this->assertTrue($url->access());
+    $this->assertTrue($url->access($user));
     debug($url->toString());
 
     $this->assertSession()->statusCodeEquals(200);
