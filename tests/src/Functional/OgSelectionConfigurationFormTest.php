@@ -66,11 +66,8 @@ class OgSelectionConfigurationFormTest extends BrowserTestBase {
    * @covers ::buildConfigurationForm
    */
   public function testConfigurationForm() {
-    $user = $this->drupalCreateUser(['administer content types', 'administer node fields']);
+    $user = $this->drupalCreateUser([], NULL, TRUE);
     $this->drupalLogin($user);
-
-    $this->drupalGet('admin/structure/types/manage/group_content/fields');
-    $this->assertSession()->statusCodeEquals(200);
 
     $this->drupalGet('admin/structure/types/manage/group_content/fields/node.group_content.og_audience');
     $this->assertSession()->statusCodeEquals(200);
