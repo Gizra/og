@@ -8,6 +8,7 @@ use Drupal\og\Entity\OgRole;
 use Drupal\og\Og;
 use Drupal\og\OgGroupAudienceHelper;
 use Drupal\og\OgRoleInterface;
+use Drupal\simpletest\ContentTypeCreationTrait;
 use Drupal\Tests\BrowserTestBase;
 
 /**
@@ -16,6 +17,8 @@ use Drupal\Tests\BrowserTestBase;
  * @group og
  */
 class OgSelectionWidgetOptionsTest extends BrowserTestBase {
+
+  use ContentTypeCreationTrait;
 
   /**
    * {@inheritdoc}
@@ -79,16 +82,8 @@ class OgSelectionWidgetOptionsTest extends BrowserTestBase {
     parent::setUp();
 
     // Create group node types.
-    NodeType::create([
-      'type' => 'group_type1',
-      'name' => 'group_type1',
-
-    ])->save();
-
-    NodeType::create([
-      'type' => 'group_type2',
-      'name' => 'group_type2',
-    ])->save();
+    $this->createContentType(['type' => 'group_type1']);
+    $this->createContentType(['type' => 'group_type2']);
 
     Og::addGroup('node', 'group_type1');
     Og::addGroup('node', 'group_type2');

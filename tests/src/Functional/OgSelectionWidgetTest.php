@@ -2,8 +2,8 @@
 
 namespace Drupal\Tests\og\Functional;
 
-use Drupal\block_content\Entity\BlockContent;
-use Drupal\block_content\Entity\BlockContentType;
+use Drupal\entity_test\Entity\EntityTestBundle;
+use Drupal\entity_test\Entity\EntityTestWithBundle;
 use Drupal\node\Entity\Node;
 use Drupal\og\Og;
 use Drupal\og\OgGroupAudienceHelperInterface;
@@ -24,7 +24,7 @@ class OgSelectionWidgetTest extends BrowserTestBase {
   /**
    * {@inheritdoc}
    */
-  public static $modules = ['block_content', 'node', 'og'];
+  public static $modules = ['block_content', 'node', 'og', 'entity_test'];
 
   /**
    * {@inheritdoc}
@@ -32,11 +32,12 @@ class OgSelectionWidgetTest extends BrowserTestBase {
   public function setUp() {
     parent::setUp();
 
-    // Create a "group" bundle on the Custom Block entity type and turn it into
-    // a group. Note we're not using the Entity Test entity for this since it
-    // does not have real support for multiple bundles.
-    BlockContentType::create(['type' => 'group']);
-    Og::groupTypeManager()->addGroup('block_content', 'group');
+    EntityTestBundle::create([
+      'id' => 'group_type',
+      'label' => 'group_type',
+    ])->save();
+
+    Og::groupTypeManager()->addGroup('entity_test_with_bundle', 'group_type');
 
     // Add a group audience field to the "post" node type, turning it into a
     // group content type.
@@ -44,7 +45,7 @@ class OgSelectionWidgetTest extends BrowserTestBase {
     $settings = [
       'field_storage_config' => [
         'settings' => [
-          'target_type' => 'block_content',
+          'target_type' => 'entity_test_with_bundle',
         ],
       ],
     ];
@@ -55,34 +56,27 @@ class OgSelectionWidgetTest extends BrowserTestBase {
    * Tests adding groups, and node access.
    */
   public function testFields() {
-    $admin_user = $this->drupalCreateUser([
+    $user = $this->drupalCreateUser([
       'administer group',
       'access content',
       'create post content',
     ]);
-    $group_owner = $this->drupalCreateUser([
-      'access content',
-      'create post content',
-    ]);
 
-    // Create a group content type owned by the group owner.
-    $values = [
-      'type' => 'group',
-      'uid' => $group_owner->id(),
-    ];
-    $group = BlockContent::create($values);
+    $group = EntityTestWithBundle::create([
+      'type' => 'group_type',
+      'name' => $this->randomMachineName(),
+    ]);
     $group->save();
 
     // Log in as administrator.
-    $this->drupalLogin($admin_user);
-
-    $field = 'og_audience[0][target_id]';
+    $this->drupalLogin($user);
 
     // Create a new post in the group by using the given field in the UI.
     $edit = [
       'title[0][value]' => $this->randomMachineName(),
-      $field => "group ({$group->id()})",
+      'og_audience[]' => $group->id(),
     ];
+
     $this->drupalGet('node/add/post');
     $this->submitForm($edit, 'Save');
     $this->assertSession()->statusCodeEquals(200);
@@ -102,8 +96,8 @@ class OgSelectionWidgetTest extends BrowserTestBase {
 
     // Check that the post references the group correctly.
     $reference_list = $post->get(OgGroupAudienceHelperInterface::DEFAULT_FIELD);
-    $this->assertEquals(1, $reference_list->count(), "There is 1 reference after adding a group to the '$field' field.");
-    $this->assertEquals($group->id(), $reference_list->first()->getValue()['target_id'], "The '$field' field references the correct group.");
+    $this->assertEquals(1, $reference_list->count(), "There is 1 reference after adding a group to the audience field.");
+    $this->assertEquals($group->id(), $reference_list->first()->getValue()['target_id'], "The audience field references the correct group.");
   }
 
 }
