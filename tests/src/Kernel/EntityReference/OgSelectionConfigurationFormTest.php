@@ -39,7 +39,7 @@ class OgSelectionConfigurationFormTest extends KernelTestBase {
     parent::setUp();
 
     $this->installEntitySchema('user');
-    $this->installEntitySchema('entity_test');
+    $this->installEntitySchema('entity_test_with_bundle');
     $this->installSchema('system', 'sequences');
 
     EntityTestBundle::create([

@@ -78,6 +78,12 @@ class OgSelection extends DefaultSelection {
     }
 
     $user = User::load(\Drupal::currentUser()->id());
+
+    if (!$user) {
+      // @todo: What to do with anonymous user?
+      return $query;
+    }
+
     if ($user->hasPermission('administer group')) {
       // User can see all the groups.
       return $query;
