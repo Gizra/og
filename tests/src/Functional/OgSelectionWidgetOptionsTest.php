@@ -71,8 +71,17 @@ class OgSelectionWidgetOptionsTest extends BrowserTestBase {
     parent::setUp();
 
     // Create group node types.
-    NodeType::create(['type' => 'group_type1'])->save();
-    NodeType::create(['type' => 'group_type2'])->save();
+    NodeType::create([
+      'type' => 'group_type1',
+      'name' => 'group_type1',
+
+    ])->save();
+
+    NodeType::create([
+      'type' => 'group_type2',
+      'name' => 'group_type2',
+    ])->save();
+
     Og::addGroup('node', 'group_type1');
     Og::addGroup('node', 'group_type2');
 
@@ -143,6 +152,7 @@ class OgSelectionWidgetOptionsTest extends BrowserTestBase {
     // Group owner.
     $this->drupalLogin($this->groupOwnerUser);
     $this->drupalGet('node/add/group_content');
+
     $this->assertSession()->optionExists('Groups audience', $this->group1->label());
     $this->assertSession()->optionExists('Groups audience', $this->group2->label());
 
