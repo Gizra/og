@@ -1,11 +1,13 @@
 <?php
 
-namespace Drupal\Tests\og\Functional;
+
+namespace Drupal\Tests\og\Kernel\EntityReference;
+
 
 use Drupal\node\Entity\NodeType;
+use Drupal\KernelTests\KernelTestBase;
 use Drupal\og\Og;
 use Drupal\og\OgGroupAudienceHelper;
-use Drupal\Tests\BrowserTestBase;
 
 /**
  * Tests the field settings configuration form for the OG audience field.
@@ -13,7 +15,7 @@ use Drupal\Tests\BrowserTestBase;
  * @group og
  * @coversDefaultClass \Drupal\og\Plugin\EntityReferenceSelection\OgSelection
  */
-class OgSelectionConfigurationFormTest extends BrowserTestBase {
+class OgSelectionConfigurationFormTest extends KernelTestBase {
 
   /**
    * {@inheritdoc}
@@ -21,7 +23,6 @@ class OgSelectionConfigurationFormTest extends BrowserTestBase {
   public static $modules = [
     'field',
     'field_ui',
-    'node',
     'og',
     'system',
   ];
@@ -65,18 +66,23 @@ class OgSelectionConfigurationFormTest extends BrowserTestBase {
    * @covers ::buildConfigurationForm
    */
   public function testConfigurationForm() {
-    $user = $this->drupalCreateUser(['access content', 'administer content types', 'administer node fields', 'administer node form display', 'bypass node access']);
-    $this->drupalLogin($user);
+    $entity_type_id = 'field_config';
+    $operation = 'edit';
+    $form_object = \Drupal::entityManager()->getFormObject($entity_type_id, $operation);
 
-    $this->drupalGet('admin/structure/types/manage/group_content/fields/node.group_content.og_audience');
-    $this->assertSession()->statusCodeEquals(200);
+    $entity = FieldConfig::loadByName('node', 'group_content', 'og_audience');
+    $form_object->setEntity($entity);
 
-    $this->assertSession()->fieldExists('settings[handler_settings][target_bundles][group_type1]');
-    $this->assertSession()->fieldExists('settings[handler_settings][target_bundles][group_type2]');
+    $form_state = new FormState();
 
-    // Assert non-group and group-content don't appear.
-    $this->assertSession()->fieldNotExists('settings[handler_settings][target_bundles][non_group]');
-    $this->assertSession()->fieldNotExists('settings[handler_settings][target_bundles][group_content]');
+    $form = \Drupal::formBuilder()->buildForm($form_object, $form_state);
+    print_r($form['settings']['handler']['handler_settings']['target_bundles']['#options']);
+
+    $options = array_keys($form['settings']['handler']['handler_settings']['target_bundles']['#options']);
+    sort($options);
+
+
+    $this->assertEquals(['group_type1', 'group_type2'], $options);
   }
 
 }
