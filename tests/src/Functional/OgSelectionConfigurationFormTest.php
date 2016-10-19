@@ -2,7 +2,6 @@
 
 namespace Drupal\Tests\og\Functional;
 
-use Drupal\Core\Url;
 use Drupal\node\Entity\NodeType;
 use Drupal\og\Og;
 use Drupal\og\OgGroupAudienceHelper;
