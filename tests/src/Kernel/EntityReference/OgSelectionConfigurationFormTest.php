@@ -6,6 +6,7 @@ namespace Drupal\Tests\og\Kernel\EntityReference;
 
 use Drupal\Core\Form\FormState;
 use Drupal\entity_test\Entity\EntityTest;
+use Drupal\entity_test\Entity\EntityTestBundle;
 use Drupal\field\Entity\FieldConfig;
 use Drupal\KernelTests\KernelTestBase;
 use Drupal\og\Og;
@@ -41,38 +42,38 @@ class OgSelectionConfigurationFormTest extends KernelTestBase {
     $this->installEntitySchema('entity_test');
     $this->installSchema('system', 'sequences');
 
-    // Add node types.
-    EntityTest::create([
-      'type' => 'non_group',
-      'name' => 'non_group',
+    EntityTestBundle::create([
+      'id' => 'non_group',
+      'label' => 'non_group',
     ])->save();
 
-    EntityTest::create([
-      'type' => 'group_type1',
-      'name' => 'group_type1',
+    EntityTestBundle::create([
+      'id' => 'group_type1',
+      'label' => 'group_type1',
     ])->save();
 
-    EntityTest::create([
-      'type' => 'group_type2',
-      'name' => 'group_type2',
+    EntityTestBundle::create([
+      'id' => 'group_type2',
+      'label' => 'group_type2',
     ])->save();
 
-    EntityTest::create([
-      'type' => 'group_content',
-      'name' => 'group_content',
+    EntityTestBundle::create([
+      'id' => 'group_content',
+      'label' => 'group_content',
     ])->save();
 
-    Og::addGroup('entity_test', 'group_type1');
-    Og::addGroup('entity_test', 'group_type2');
+
+    Og::addGroup('entity_test_with_bundle', 'group_type1');
+    Og::addGroup('entity_test_with_bundle', 'group_type2');
 
     $settings = [
       'field_storage_config' => [
         'settings' => [
-          'target_type' => 'entity_test',
+          'target_type' => 'entity_test_with_bundle',
         ],
       ],
     ];
-    Og::createField(OgGroupAudienceHelper::DEFAULT_FIELD, 'entity_test', 'group_content', $settings);
+    Og::createField(OgGroupAudienceHelper::DEFAULT_FIELD, 'entity_test_with_bundle', 'group_content', $settings);
   }
 
   /**
@@ -83,13 +84,12 @@ class OgSelectionConfigurationFormTest extends KernelTestBase {
   public function testConfigurationForm() {
     $form_object = \Drupal::entityManager()->getFormObject('field_config', 'edit');
 
-    $entity = FieldConfig::loadByName('entity_test', 'group_content', OgGroupAudienceHelper::DEFAULT_FIELD);
+    $entity = FieldConfig::loadByName('entity_test_with_bundle', 'group_content', OgGroupAudienceHelper::DEFAULT_FIELD);
     $form_object->setEntity($entity);
 
     $form_state = new FormState();
 
     $form = \Drupal::formBuilder()->buildForm($form_object, $form_state);
-    print_r($form['settings']['handler']['handler_settings']['target_bundles']['#options']);
 
     $options = array_keys($form['settings']['handler']['handler_settings']['target_bundles']['#options']);
     sort($options);
