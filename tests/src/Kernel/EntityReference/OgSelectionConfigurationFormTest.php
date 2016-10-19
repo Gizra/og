@@ -1,11 +1,8 @@
 <?php
 
-
 namespace Drupal\Tests\og\Kernel\EntityReference;
 
-
 use Drupal\Core\Form\FormState;
-use Drupal\entity_test\Entity\EntityTest;
 use Drupal\entity_test\Entity\EntityTestBundle;
 use Drupal\field\Entity\FieldConfig;
 use Drupal\KernelTests\KernelTestBase;
@@ -61,7 +58,6 @@ class OgSelectionConfigurationFormTest extends KernelTestBase {
       'id' => 'group_content',
       'label' => 'group_content',
     ])->save();
-
 
     Og::addGroup('entity_test_with_bundle', 'group_type1');
     Og::addGroup('entity_test_with_bundle', 'group_type2');
