@@ -23,18 +23,26 @@ class OgSelectionWidgetOptionsTest extends BrowserTestBase {
   public static $modules = ['node', 'og'];
 
   /**
-   * A group object.
+   * A group node.
    *
    * @var \Drupal\node\Entity\Node
    */
   protected $group1;
 
   /**
-   * A group object.
+   * A group node.
    *
    * @var \Drupal\node\Entity\Node
    */
   protected $group2;
+
+
+  /**
+   * An unpublished group node.
+   *
+   * @var \Drupal\node\Entity\Node
+   */
+  protected $unpublishedGroup;
 
   /**
    * Demo user.
@@ -117,7 +125,13 @@ class OgSelectionWidgetOptionsTest extends BrowserTestBase {
     ]);
     $this->group2->save();
 
-    // @todo: Add unpublished node.
+    $this->unpublishedGroup = Node::create([
+      'type' => 'group_type2',
+      'title' => 'unpublished group',
+      'uid' => $this->groupOwnerUser->id(),
+      'status' => NODE_NOT_PUBLISHED,
+    ]);
+    $this->unpublishedGroup->save();
 
     // Add member to group.
     Og::createMembership($this->group1, $this->groupMemberUser)->save();
@@ -155,12 +169,14 @@ class OgSelectionWidgetOptionsTest extends BrowserTestBase {
 
     $this->assertSession()->optionExists('Groups audience', $this->group1->label());
     $this->assertSession()->optionExists('Groups audience', $this->group2->label());
+    $this->assertSession()->optionNotExists('Groups audience', $this->unpublishedGroup->label());
 
     // Site-wide administrator.
     $this->drupalLogin($this->groupAdministratorUser);
     $this->drupalGet('node/add/group_content');
     $this->assertSession()->optionExists('Groups audience', $this->group1->label());
     $this->assertSession()->optionExists('Groups audience', $this->group2->label());
+    $this->assertSession()->optionNotExists('Groups audience', $this->unpublishedGroup->label());
   }
 
 }
