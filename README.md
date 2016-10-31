@@ -172,29 +172,20 @@ provide a quick way to get started with Organic groups.
 
 ## TESTS
 
-Run the tests with Docker on an official 8.1-apache image.
-0. MySQL:
-```shell
-docker run --name some-mysql -e MYSQL_ROOT_PASSWORD=root -d mysql
-docker inspect some-mysql | grep IPAddress
-```
-0-1. Drupal:
-```
-docker run --name some-drupal --link some-mysql:mysql -p 8080:80 -d drupal:8.1-apache
-```
+Run the tests with Docker.
 
 1. Build the image
-```shell
-docker build -t og .
-```
+  ```shell
+  docker build -t og .
+  ```
 2. From inside the project directory run the image
-```shell
-docker run --name og-con --volume `pwd`:/var/www/html --link some-mysql:mysql -p 8080:80 -d og
-```
+  ```shell
+  docker run --name og-con --volume `pwd`:/var/www/html -p 8080:80 -d og
+  ```
 3. OPTIONAL: If you want to get in the container terminal:
-```shell
-docker exec -it og-con bash
-```
+  ```shell
+  docker exec -it og-con bash
+  ```
 
 ## FAQ
 
