@@ -34,4 +34,5 @@ class OgAddGroupCommand extends Command {
 
     $io->info('You added the group. A good job indeed.');
   }
+
 }
