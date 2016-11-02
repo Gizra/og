@@ -50,7 +50,7 @@ services:
       - { name: drupal.command }
   og.og_add_group:
     class: Drupal\og\Command\OgAddGroupCommand
-    arguments: []
+    arguments: ['@entity_type.bundle.info', '@entity_type.repository', '@og.group_type_manager']
     tags:
       - { name: drupal.command }
 
