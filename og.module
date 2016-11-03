@@ -1799,7 +1799,7 @@ function og_membership_label($og_membership) {
  */
 function og_membership_access($op, $entity, $account = NULL, $entity_type = 'og_membership') {
   // No-end user needs access to this entity, so restrict it to admins.
-  return user_access('administer group');
+  return og_user_access($entity->group_type, $entity->gid, 'administer group');
 }
 
 
