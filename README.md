@@ -170,6 +170,13 @@ provide a quick way to get started with Organic groups.
 \Drupal\og\Og::createField(\Drupal\og\OgGroupAudienceHelper::DEFAULT_FIELD, 'node', 'article');
 ```
 
+## DRUPAL CONSOLE INTEGRATION
+The Drupal 8 branch integrates with Drupal Console to do actions which used by
+developers only. The supported actions are:
+* Attaching OG fields to entities
+
+**Please notice:** You need to install DrupalConsole 1.0.0-RC5 and above.
+
 ## FAQ
 
 Q: How should I update from Drupal 6?
