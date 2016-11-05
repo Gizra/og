@@ -131,12 +131,15 @@ class OgContextTest extends UnitTestCase {
    * @param string|false $expected_context
    *   The ID of the entity that is expected to be provided as group context, or
    *   FALSE if no context should be returned.
+   * @param string[] $expected_cache_contexts
+   *   An array of cache context IDs which are expected to be returned as
+   *   cacheability metadata.
    *
    * @covers ::getRuntimeContexts
    *
    * @dataProvider getRuntimeContextsProvider
    */
-  public function testGetRuntimeContexts(array $unqualified_context_ids, array $group_resolvers, $expected_context) {
+  public function testGetRuntimeContexts(array $unqualified_context_ids, array $group_resolvers, $expected_context, array $expected_cache_contexts) {
     // Make the test entities available in the local scope so we can use it in
     // anonymous functions.
     $entities = $this->entities;
@@ -162,7 +165,9 @@ class OgContextTest extends UnitTestCase {
           /** @var \Drupal\og\OgResolvedGroupCollectionInterface $collection */
           $collection = $args[0];
           foreach ($group_resolver['candidates'] as $candidate) {
-            $collection->addGroup($entities[$candidate]);
+            $entity = $entities[$candidate['entity']];
+            $cache_contexts = $candidate['cache_contexts'];
+            $collection->addGroup($entity, $cache_contexts);
           }
         });
       $this->pluginManager->createInstance($id)
@@ -193,8 +198,15 @@ class OgContextTest extends UnitTestCase {
       $this->assertEquals([], $result);
     }
     else {
+      // Check that the 'og' context is populated.
+      $this->assertNotEmpty($result['og']);
+
+      // Check that the correct group is set as the context value.
       $this->assertEquals($expected_context_entity, $result['og']->getContextData()->getValue());
-      // @todo Test the cacheability metadata.
+
+      // Check that the correct cache context IDs are set as cacheability
+      // metadata.
+      $this->assertEquals($expected_cache_contexts, array_values($result['og']->getCacheContexts()));
     }
 
   }
@@ -217,6 +229,8 @@ class OgContextTest extends UnitTestCase {
         [],
         // Nothing should be returned.
         FALSE,
+        // Cache contexts are not relevant for this test.
+        [],
       ],
       // "Normal" test case: a single group was found in context. For this test
       // we simulate that a single group of type 'node' was found.
@@ -225,10 +239,21 @@ class OgContextTest extends UnitTestCase {
         ['node', 'og'],
         // Simulate 1 group resolver that returns 1 result.
         [
-          'route_group' => ['candidates' => ['node-0']],
+          'route_group' => [
+            'candidates' => [
+              [
+                'entity' => 'node-0',
+                'cache_contexts' => ['route'],
+              ],
+            ],
+          ],
         ],
-        // The group of type 'node' was found.
+        // It is expected that the group of type 'node' will be returned as
+        // group context.
         'node-0',
+        // The cache context of the group will be returned as cacheability
+        // metadata.
+        ['route'],
       ],
     ];
   }
