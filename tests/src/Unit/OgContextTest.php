@@ -288,6 +288,101 @@ class OgContextTest extends UnitTestCase {
         'block_content-0',
         ['route'],
       ],
+
+      // Three group resolver plugins which all return different groups, but one
+      // of them is returned by two plugins. This should win and have its cache
+      // tags merged.
+      [
+        ['domain', 'user', 'og'],
+        [
+          'route_group' => [
+            'candidates' => [
+              [
+                'entity' => 'node-1',
+                'cache_contexts' => ['route'],
+              ],
+            ],
+          ],
+          'request_query_argument' => [
+            'candidates' => [
+              [
+                'entity' => 'entity_test-1',
+                'cache_contexts' => ['route'],
+              ],
+              [
+                'entity' => 'node-0',
+                'cache_contexts' => ['url'],
+              ],
+              [
+                'entity' => 'block_content-1',
+                'cache_contexts' => ['url'],
+              ],
+            ],
+          ],
+          'user_access' => [
+            'candidates' => [
+              [
+                'entity' => 'block_content-0',
+                'cache_contexts' => ['user'],
+              ],
+              [
+                'entity' => 'block_content-1',
+                'cache_contexts' => ['user'],
+              ],
+            ],
+          ],
+        ],
+        'block_content-1',
+        ['url', 'user'],
+      ],
+
+      // The same test case as the previous one, but now the first plugin
+      // stops propagation. The results from the other plugins should be
+      // ignored.
+      [
+        ['domain', 'user', 'og'],
+        [
+          'route_group' => [
+            'candidates' => [
+              [
+                'entity' => 'node-1',
+                'cache_contexts' => ['route'],
+              ],
+            ],
+            'stop_propagation' => TRUE,
+          ],
+          'request_query_argument' => [
+            'candidates' => [
+              [
+                'entity' => 'entity_test-1',
+                'cache_contexts' => ['route'],
+              ],
+              [
+                'entity' => 'node-0',
+                'cache_contexts' => ['url'],
+              ],
+              [
+                'entity' => 'block_content-1',
+                'cache_contexts' => ['url'],
+              ],
+            ],
+          ],
+          'user_access' => [
+            'candidates' => [
+              [
+                'entity' => 'block_content-0',
+                'cache_contexts' => ['user'],
+              ],
+              [
+                'entity' => 'block_content-1',
+                'cache_contexts' => ['user'],
+              ],
+            ],
+          ],
+        ],
+        'node-1',
+        ['route'],
+      ],
     ];
   }
 
