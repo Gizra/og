@@ -82,7 +82,8 @@ class OgContextTest extends UnitTestCase {
     // value on it, the Context object will use the typed data manager service
     // to get a DataDefinition object, which is an abstracted representation of
     // the data. Mock the method calls that are used during creation of this
-    // DataDefinition object. In the case of OgContext this will return an entity.
+    // DataDefinition object. In the case of OgContext this will return an
+    // entity.
     $this->dataDefinition->setLabel(Argument::any())->willReturn($this->dataDefinition);
     $this->dataDefinition->setDescription(Argument::any())->willReturn($this->dataDefinition);
     $this->dataDefinition->setRequired(Argument::any())->willReturn($this->dataDefinition);
@@ -126,7 +127,7 @@ class OgContextTest extends UnitTestCase {
    *   - candidates: an array of group context candidates that the plugin adds
    *     to the collection of resolved groups.
    *   - stop_propagation: whether or not the plugin declares that the search
-   *     for further groups is over. Defaults to FALSE;
+   *     for further groups is over. Defaults to FALSE.
    * @param string|false $expected_context
    *   The ID of the entity that is expected to be provided as group context, or
    *   FALSE if no context should be returned.
@@ -228,7 +229,7 @@ class OgContextTest extends UnitTestCase {
         ],
         // The group of type 'node' was found.
         'node-0',
-      ]
+      ],
     ];
   }
 
