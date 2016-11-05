@@ -109,6 +109,11 @@ class OgContextTest extends UnitTestCase {
       for ($i = 0; $i < 2; $i++) {
         $id = "$type-$i";
         $entity = $this->prophesize(ContentEntityInterface::class);
+        $entity->id()->willReturn($id);
+        $entity->getEntityTypeId()->willReturn($type);
+        $entity->getCacheContexts()->willReturn([]);
+        $entity->getCacheTags()->willReturn([]);
+        $entity->getCacheMaxAge()->willReturn(0);
         $this->entities[$id] = $entity->reveal();
       }
     }
@@ -232,6 +237,7 @@ class OgContextTest extends UnitTestCase {
         // Cache contexts are not relevant for this test.
         [],
       ],
+
       // "Normal" test case: a single group was found in context. For this test
       // we simulate that a single group of type 'node' was found.
       [
@@ -253,6 +259,33 @@ class OgContextTest extends UnitTestCase {
         'node-0',
         // The cache context of the group will be returned as cacheability
         // metadata.
+        ['route'],
+      ],
+
+      // Two group resolver plugins which each return a single result. The
+      // result and cache contexts from the first plugin should be taken because
+      // it has higher priority.
+      [
+        ['og', 'user'],
+        [
+          'route_group' => [
+            'candidates' => [
+              [
+                'entity' => 'block_content-0',
+                'cache_contexts' => ['route'],
+              ],
+            ],
+          ],
+          'user_access' => [
+            'candidates' => [
+              [
+                'entity' => 'entity_test-0',
+                'cache_contexts' => ['user'],
+              ],
+            ],
+          ],
+        ],
+        'block_content-0',
         ['route'],
       ],
     ];
