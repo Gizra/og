@@ -3,8 +3,6 @@
 # Get the current travis branch.
 set branch_name $env(PULL_REQUEST_BRANCH)
 
-echo $branch_name
-
 # State MySQL service.
 service mysql start
 
