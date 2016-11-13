@@ -134,7 +134,7 @@ Run the tests with Docker.
   ```
 2. From inside the project directory run the image
   ```shell
-  docker run --name og-con --volume `pwd`:/var/www/html/og -p 8080:80 -d og
+  docker run --name og-con -p 8080:80 -d og
   ```
 3. OPTIONAL: If you want to get in the container terminal:
   ```shell

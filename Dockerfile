@@ -1,11 +1,13 @@
 FROM drupal:7-apache
 ENV DEBIAN_FRONTEND noninteractive
+ENV TRAVIS_PULL_REQUEST_BRANCH=$TRAVIS_PULL_REQUEST_BRANCH
 
 # Install MySQL and start.
 RUN apt-get update
 RUN apt-get install -y \
 	mysql-server \
-  mysql-client
+  mysql-client \
+	git
 RUN apt-get clean
 
 # Install composer.
@@ -14,6 +16,6 @@ RUN mv composer.phar /usr/local/bin/composer
 
 COPY ./start.sh /var/www/html/start.sh
 RUN chmod +x /var/www/html/start.sh
-#ENTRYPOINT ["/var/www/html/start.sh"]
+ENTRYPOINT ["/var/www/html/start.sh"]
 
 EXPOSE 80 3306 22
