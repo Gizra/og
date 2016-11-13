@@ -7,6 +7,5 @@ services:
 before_script:
   # navigate out of module directory to prevent blown stack by recursive module lookup
   - docker build -t og .
-  - echo $TRAVIS_PULL_REQUEST_BRANCH
 
-script: docker run --name og-con -p 8080:80 -d og
+script: docker run --name og-con -e BRANCH=$TRAVIS_PULL_REQUEST -p 8080:80 -d og

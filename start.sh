@@ -1,5 +1,8 @@
 #!/usr/bin/env bash
 
+# Get the current travis branch.
+set branch_name $env(PULL_REQUEST_BRANCH)
+
 # State MySQL service.
 service mysql start
 
@@ -12,7 +15,7 @@ drush si standard --account-name=admin --account-pass=admin --db-url=mysql://roo
 
 # Install the module.
 cd sites/all/modules/
-git clone https://github.com/Gizra/og.git --branch $TRAVIS_PULL_REQUEST_BRANCH --depth 1
+git clone https://github.com/Gizra/og.git --branch $branch_name --depth 1
 drush en -y og
 
 # Run the tests.
