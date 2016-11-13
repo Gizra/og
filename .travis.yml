@@ -1,9 +1,6 @@
 sudo: required
 language: php
 
-php:
-  - 5.3
-
 services:
   - docker
 
