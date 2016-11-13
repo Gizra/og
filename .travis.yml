@@ -1,12 +1,11 @@
+sudo: required
 language: php
 
 php:
   - 5.3
 
-mysql:
-  database: drupal
-  username: root
-  encoding: utf8
+services:
+  - docker
 
 before_script:
   # navigate out of module directory to prevent blown stack by recursive module lookup
