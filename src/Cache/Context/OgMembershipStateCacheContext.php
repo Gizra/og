@@ -4,9 +4,8 @@ namespace Drupal\og\Cache\Context;
 
 use Drupal\Core\Cache\CacheableMetadata;
 use Drupal\Core\Cache\Context\CacheContextInterface;
-use Drupal\Core\Routing\RouteMatchInterface;
+use Drupal\Core\Plugin\Context\ContextProviderInterface;
 use Drupal\Core\Session\AccountInterface;
-use Drupal\og\GroupTypeManager;
 use Drupal\og\MembershipManagerInterface;
 use Drupal\og\OgMembershipInterface;
 
@@ -22,15 +21,6 @@ class OgMembershipStateCacheContext implements CacheContextInterface {
    */
   const NO_CONTEXT = 'none';
 
-
-  /**
-   * The group type manager service.
-   *
-   * @var \Drupal\og\GroupTypeManager
-   */
-  protected $groupTypeManager;
-
-
   /**
    * The membership manager service.
    *
@@ -39,11 +29,11 @@ class OgMembershipStateCacheContext implements CacheContextInterface {
   protected $membershipManager;
 
   /**
-   * The route match service.
+   * The OG context provider.
    *
-   * @var \Drupal\Core\Routing\RouteMatchInterface
+   * @var \Drupal\Core\Plugin\Context\ContextProviderInterface
    */
-  protected $routeMatch;
+  protected $ogContext;
 
   /**
    * The current user.
@@ -57,17 +47,14 @@ class OgMembershipStateCacheContext implements CacheContextInterface {
    *
    * @param \Drupal\Core\Session\AccountInterface $user
    *   The current user.
-   * @param \Drupal\Core\Routing\RouteMatchInterface $route_match
-   *   The current route match service.
-   * @param \Drupal\og\GroupTypeManager $group_type_manager
-   *   The group type manager service.
+   * @param \Drupal\Core\Plugin\Context\ContextProviderInterface $og_context
+   *   The OG context provider.
    * @param \Drupal\og\MembershipManagerInterface $membership_manager
    *   The membership manager service.
    */
-  public function __construct(AccountInterface $user, RouteMatchInterface $route_match, GroupTypeManager $group_type_manager, MembershipManagerInterface $membership_manager) {
+  public function __construct(AccountInterface $user, ContextProviderInterface $og_context, MembershipManagerInterface $membership_manager) {
     $this->user = $user;
-    $this->routeMatch = $route_match;
-    $this->groupTypeManager = $group_type_manager;
+    $this->ogContext = $og_context;
     $this->membershipManager = $membership_manager;
   }
 
@@ -82,25 +69,15 @@ class OgMembershipStateCacheContext implements CacheContextInterface {
    * {@inheritdoc}
    */
   public function getContext() {
-    if (!$route_contexts = $this->routeMatch->getRouteObject()->getOption('parameters')) {
-      // No "parameters" defined in the route.
+    // Do not provide a cache context if there are no groups in the current
+    // context.
+    $contexts = $this->ogContext->getRuntimeContexts(['og']);
+    if (empty($contexts['og'])) {
       return self::NO_CONTEXT;
     }
 
-    if (!$entity_type_ids = array_keys($this->groupTypeManager->getAllGroupBundles())) {
-      // No group entities.
-      return self::NO_CONTEXT;
-    }
+    $group = $contexts['og']->getContextData()->getValue();
 
-    if (!$entity_type_ids = array_intersect(array_keys($route_contexts), $entity_type_ids)) {
-      // No parameters that match the group entities.
-      return self::NO_CONTEXT;
-    }
-
-    // Take just the first entity type ID.
-    $entity_type_id = reset($entity_type_ids);
-
-    $group = $this->routeMatch->getParameter($entity_type_id);
     $states = [
       OgMembershipInterface::STATE_ACTIVE,
       OgMembershipInterface::STATE_PENDING,

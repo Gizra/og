@@ -6,7 +6,7 @@ services:
       - { name: access_check, applies_to: _og_user_access_group }
   cache_context.og_membership_state:
     class: 'Drupal\og\Cache\Context\OgMembershipStateCacheContext'
-    arguments: ['@current_user', '@current_route_match', '@og.group_type_manager', '@og.membership_manager']
+    arguments: ['@current_user', '@og.context', '@og.membership_manager']
     tags:
       - { name: 'cache.context'}
   og.access:

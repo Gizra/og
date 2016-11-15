@@ -3,14 +3,14 @@
 namespace Drupal\Tests\og\Unit;
 
 use Drupal\Core\Entity\EntityInterface;
-use Drupal\Core\Routing\RouteMatchInterface;
+use Drupal\Core\Plugin\Context\ContextInterface;
+use Drupal\Core\Plugin\Context\ContextProviderInterface;
 use Drupal\Core\Session\AccountInterface;
+use Drupal\Core\TypedData\TypedDataInterface;
 use Drupal\og\Cache\Context\OgMembershipStateCacheContext;
-use Drupal\og\GroupTypeManager;
 use Drupal\og\MembershipManagerInterface;
 use Drupal\og\OgMembershipInterface;
 use Drupal\Tests\UnitTestCase;
-use Symfony\Component\Routing\Route;
 
 /**
  * Tests OG membership state cache context.
@@ -19,21 +19,6 @@ use Symfony\Component\Routing\Route;
  * @coversDefaultClass \Drupal\og\Cache\Context\OgMembershipStateCacheContext
  */
 class OgMembershipStateCacheContextTest extends UnitTestCase {
-
-
-  /**
-   * The entity type ID.
-   *
-   * @var string
-   */
-  protected $entityTypeId;
-
-  /**
-   * The group type manager service.
-   *
-   * @var \Drupal\og\GroupTypeManager|\Prophecy\Prophecy\ObjectProphecy
-   */
-  protected $groupTypeManager;
 
   /**
    * The OG membership entity.
@@ -50,18 +35,11 @@ class OgMembershipStateCacheContextTest extends UnitTestCase {
   protected $membershipManager;
 
   /**
-   * The route service.
+   * The mocked OG context service.
    *
-   * @var \Symfony\Component\Routing\Route|\Prophecy\Prophecy\ObjectProphecy
+   * @var \Drupal\Core\Plugin\Context\ContextProviderInterface|\Prophecy\Prophecy\ObjectProphecy
    */
-  protected $route;
-
-  /**
-   * The route match service.
-   *
-   * @var \Drupal\Core\Routing\RouteMatchInterface|\Prophecy\Prophecy\ObjectProphecy
-   */
-  protected $routeMatch;
+  protected $ogContext;
 
   /**
    * The current user.
@@ -69,20 +47,6 @@ class OgMembershipStateCacheContextTest extends UnitTestCase {
    * @var \Drupal\Core\Session\AccountInterface|\Prophecy\Prophecy\ObjectProphecy
    */
   protected $user;
-
-  /**
-   * The group entity type IDs.
-   *
-   * @var array
-   */
-  protected $groupEntities;
-
-  /**
-   * Array with the route parameters.
-   *
-   * @var array
-   */
-  protected $parameters;
 
   /**
    * The group entity.
@@ -96,98 +60,24 @@ class OgMembershipStateCacheContextTest extends UnitTestCase {
    */
   public function setUp() {
     $this->user = $this->prophesize(AccountInterface::class);
-    $this->routeMatch = $this->prophesize(RouteMatchInterface::class);
+    $this->ogContext = $this->prophesize(ContextProviderInterface::class);
 
     $this->group = $this->prophesize(EntityInterface::class);
-    $this->groupTypeManager = $this->prophesize(GroupTypeManager::class);
 
     $this->membership = $this->prophesize(OgMembershipInterface::class);
     $this->membershipManager = $this->prophesize(MembershipManagerInterface::class);
-
-    $this->route = $this->prophesize(Route::class);
-
-    $this->entityTypeId = $this->randomMachineName();
-
-    $this->groupEntities = [
-      $this->entityTypeId => [$this->randomMachineName()],
-      $this->randomMachineName() => [$this->randomMachineName()],
-    ];
-
-    $this->parameters = [
-      $this->entityTypeId => [$this->randomMachineName()],
-      $this->randomMachineName() => [$this->randomMachineName()],
-    ];
   }
 
   /**
-   * Tests getting context of a route with no parameters.
+   * Tests getting cache context when there is no matching group on the route.
    *
    * @covers ::getContext
    */
-  public function testRouteWithNoParameters() {
+  public function testNoGroupOnRoute() {
     $this
-      ->routeMatch
-      ->getRouteObject()
-      ->willReturn($this->route->reveal());
-
-    $this
-      ->route
-      ->getOption('parameters')
-      ->willReturn(NULL);
-
-    $result = $this->getContextResult();
-    $this->assertEquals(OgMembershipStateCacheContext::NO_CONTEXT, $result);
-  }
-
-  /**
-   * Tests getting context when there are no group entities defined.
-   *
-   * @covers ::getContext
-   */
-  public function testNoGroupEntities() {
-    $this
-      ->routeMatch
-      ->getRouteObject()
-      ->willReturn($this->route->reveal());
-
-    $this
-      ->route
-      ->getOption('parameters')
-      ->willReturn($this->parameters);
-
-    $this
-      ->groupTypeManager
-      ->getAllGroupBundles()
+      ->ogContext
+      ->getRuntimeContexts(['og'])
       ->willReturn([]);
-
-    $result = $this->getContextResult();
-    $this->assertEquals(OgMembershipStateCacheContext::NO_CONTEXT, $result);
-  }
-
-  /**
-   * Tests getting context when there are matching group entities in the route.
-   *
-   * @covers ::getContext
-   */
-  public function testNoGroupAndRouteParametersIntersection() {
-    $this
-      ->routeMatch
-      ->getRouteObject()
-      ->willReturn($this->route->reveal());
-
-    $this
-      ->route
-      ->getOption('parameters')
-      ->willReturn($this->parameters);
-
-    $group_entities = [
-      $this->randomMachineName() => [$this->randomMachineName()],
-    ];
-
-    $this
-      ->groupTypeManager
-      ->getAllGroupBundles()
-      ->willReturn($group_entities);
 
     $result = $this->getContextResult();
     $this->assertEquals(OgMembershipStateCacheContext::NO_CONTEXT, $result);
@@ -199,83 +89,22 @@ class OgMembershipStateCacheContextTest extends UnitTestCase {
    * @covers ::getContext
    */
   public function testNoMembership() {
-    $this
-      ->routeMatch
-      ->getRouteObject()
-      ->willReturn($this->route->reveal());
-
-    $this
-      ->route
-      ->getOption('parameters')
-      ->willReturn($this->parameters);
-
-    $this
-      ->groupTypeManager
-      ->getAllGroupBundles()
-      ->willReturn($this->groupEntities);
-
-    $this
-      ->routeMatch
-      ->getParameter($this->entityTypeId)
-      ->willReturn($this->group->reveal());
-
-    $states = [
-      OgMembershipInterface::STATE_ACTIVE,
-      OgMembershipInterface::STATE_PENDING,
-      OgMembershipInterface::STATE_BLOCKED,
-    ];
-
-    $this
-      ->membershipManager
-      ->getMembership($this->group->reveal(), $this->user->reveal(), $states)
-      ->willReturn(FALSE);
+    $this->expectGroupContext();
+    $this->expectMembership(FALSE);
 
     $result = $this->getContextResult();
     $this->assertEquals(OgMembershipStateCacheContext::NO_CONTEXT, $result);
   }
 
   /**
-   * Tests user with no membership.
+   * Tests user that is a member with different states.
    *
    * @covers ::getContext
    * @dataProvider membershipProvider
    */
   public function testMembership($state) {
-    $this
-      ->routeMatch
-      ->getRouteObject()
-      ->willReturn($this->route->reveal());
-
-    $this
-      ->route
-      ->getOption('parameters')
-      ->willReturn($this->parameters);
-
-    $this
-      ->groupTypeManager
-      ->getAllGroupBundles()
-      ->willReturn($this->groupEntities);
-
-    $this
-      ->routeMatch
-      ->getParameter($this->entityTypeId)
-      ->willReturn($this->group->reveal());
-
-    $states = [
-      OgMembershipInterface::STATE_ACTIVE,
-      OgMembershipInterface::STATE_PENDING,
-      OgMembershipInterface::STATE_BLOCKED,
-    ];
-
-    $this
-      ->membershipManager
-      ->getMembership($this->group->reveal(), $this->user->reveal(), $states)
-      ->willReturn($this->membership->reveal());
-
-    $this
-      ->membership
-      ->getState()
-      ->willReturn($state);
+    $this->expectGroupContext();
+    $this->expectMembership($state);
 
     $result = $this->getContextResult();
     $this->assertEquals($state, $result);
@@ -302,8 +131,55 @@ class OgMembershipStateCacheContextTest extends UnitTestCase {
    *   The context result.
    */
   protected function getContextResult() {
-    $cache_context = new OgMembershipStateCacheContext($this->user->reveal(), $this->routeMatch->reveal(), $this->groupTypeManager->reveal(), $this->membershipManager->reveal());
+    $cache_context = new OgMembershipStateCacheContext($this->user->reveal(), $this->ogContext->reveal(), $this->membershipManager->reveal());
     return $cache_context->getContext();
+  }
+
+  /**
+   * Sets an expectation that OgContext will return the test group.
+   */
+  protected function expectGroupContext() {
+    // OgContext::getRuntimeContexts() will be called and is expected to return
+    // a Context object. This actual group is held in a typed data object and
+    // can be retrieved by calling Context::getContextData()->getValue().
+    $context_data = $this->prophesize(TypedDataInterface::class);
+    $context_data->getValue()
+      ->willReturn($this->group->reveal());
+    $context = $this->prophesize(ContextInterface::class);
+    $context->getContextData()
+      ->willReturn($context_data->reveal());
+    $this
+      ->ogContext
+      ->getRuntimeContexts(['og'])
+      ->willReturn(['og' => $context->reveal()]);
+  }
+
+  /**
+   * Sets an expectation that the current user has the given membership state.
+   *
+   * @param string|false $state
+   *   The membership state, or FALSE if the user is not a member.
+   */
+  protected function expectMembership($state) {
+    // If the user is a member, it is expected that the membership state will be
+    // retrieved.
+    if ($state) {
+      $this->membership->getState()
+        ->willReturn($state);
+      $state = $this->membership;
+    }
+
+    // It is expected that the user membership will be retrieved, of any
+    // possible membership state.
+    $states = [
+      OgMembershipInterface::STATE_ACTIVE,
+      OgMembershipInterface::STATE_PENDING,
+      OgMembershipInterface::STATE_BLOCKED,
+    ];
+
+    $this->membershipManager
+      ->getMembership($this->group->reveal(), $this->user->reveal(), $states)
+      ->willReturn($state);
   }
 
 }
