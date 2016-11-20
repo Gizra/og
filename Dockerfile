@@ -16,6 +16,6 @@ RUN mv composer.phar /usr/local/bin/composer
 
 COPY ./start.sh /var/www/html/start.sh
 RUN chmod +x /var/www/html/start.sh
-#ENTRYPOINT ["/var/www/html/start.sh"]
+ENTRYPOINT ["/var/www/html/start.sh"]
 
 EXPOSE 80 3306 22
