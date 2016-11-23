@@ -71,6 +71,16 @@ function og_entity_predelete(EntityInterface $entity) {
 }
 
 /**
+ * Implements hook_entity_delete().
+ */
+function og_entity_delete(EntityInterface $entity) {
+  // Clear static caches after a group or group content entity is deleted.
+  if (Og::isGroup($entity->getEntityTypeId(), $entity->bundle()) || Og::isGroupContent($entity->getEntityTypeId(), $entity->bundle())) {
+    Og::invalidateCache();
+  }
+}
+
+/**
  * Implements hook_entity_access().
  */
 function og_entity_access(EntityInterface $entity, $operation, AccountInterface $account) {
