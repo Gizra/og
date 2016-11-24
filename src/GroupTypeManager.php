@@ -233,6 +233,35 @@ class GroupTypeManager {
   }
 
   /**
+   * Returns a list of all group content bundles keyed by entity type.
+   *
+   * This will return a simple list of group content bundles. If you need
+   * information about the relations between groups and group content bundles
+   * then use getGroupRelationMap() instead.
+   *
+   * @param string $entity_type_id
+   *   Optional entity type ID to filter the bundles by. If omitted bundles of
+   *   all entity types will be returned.
+   *
+   * @return array
+   *   An array of group content bundle IDs. If the $entity_type_id parameter is
+   *   omitted this will be an associative array keyed by entity type ID.
+   *
+   * @see \Drupal\og\GroupTypeManager::getGroupRelationMap()
+   */
+  public function getAllGroupContentBundles($entity_type_id = NULL) {
+    $bundles = [];
+    foreach ($this->getGroupRelationMap() as $group_entity_type_id => $group_bundle_ids) {
+      foreach ($group_bundle_ids as $group_content_entity_type_ids) {
+        foreach ($group_content_entity_type_ids as $group_content_entity_type_id => $group_content_bundle_ids) {
+          $bundles[$group_content_entity_type_id] = array_merge(isset($bundles[$group_content_entity_type_id]) ? $bundles[$group_content_entity_type_id] : [], $group_content_bundle_ids);
+        }
+      }
+    }
+    return !empty($entity_type_id) ? $bundles[$entity_type_id] : $bundles;
+  }
+
+  /**
    * Returns all group bundles that are referenced by the given group content.
    *
    * @param string $group_content_entity_type_id

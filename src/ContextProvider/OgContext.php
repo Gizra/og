@@ -5,10 +5,12 @@ namespace Drupal\og\ContextProvider;
 use Drupal\Component\Plugin\PluginManagerInterface;
 use Drupal\Core\Cache\CacheableMetadata;
 use Drupal\Core\Config\ConfigFactoryInterface;
+use Drupal\Core\Entity\ContentEntityInterface;
 use Drupal\Core\Plugin\Context\Context;
 use Drupal\Core\Plugin\Context\ContextDefinition;
 use Drupal\Core\Plugin\Context\ContextProviderInterface;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
+use Drupal\og\OgContextInterface;
 use Drupal\og\OgResolvedGroupCollection;
 
 /**
@@ -34,7 +36,7 @@ use Drupal\og\OgResolvedGroupCollection;
  * Developers can customize the group context result by providing their own
  * plugins and by activating, disabling or reordering the default ones.
  */
-class OgContext implements ContextProviderInterface {
+class OgContext implements OgContextInterface, ContextProviderInterface {
 
   use StringTranslationTrait;
 
@@ -162,6 +164,18 @@ class OgContext implements ContextProviderInterface {
     }
 
     return NULL;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getGroup() {
+    $contexts = $this->getRuntimeContexts(['og']);
+    if (!empty($contexts['og']) && $group = $contexts['og']->getContextValue()) {
+      if ($group instanceof ContentEntityInterface) {
+        return $group;
+      }
+    }
   }
 
 }
