@@ -36,7 +36,6 @@ class Group extends ArgumentDefaultPluginBase implements CacheableDependencyInte
    *   The plugin_id for the plugin instance.
    * @param mixed $plugin_definition
    *   The plugin implementation definition.
-   *
    * @param \Drupal\Core\Plugin\Context\ContextProviderInterface $og_context
    *   The OG context provider.
    */
@@ -79,11 +78,9 @@ class Group extends ArgumentDefaultPluginBase implements CacheableDependencyInte
    * {@inheritdoc}
    */
   public function getArgument() {
-    $contexts = $this->ogContext->getRuntimeContexts(['og']);
-    if (!empty($contexts['og']) && $group = $contexts['og']->getContextValue()) {
-      if ($group instanceof ContentEntityInterface) {
-        return $group->id();
-      }
+    $group = $this->getGroup();
+    if ($group instanceof ContentEntityInterface) {
+      return $group->id();
     }
   }
 
@@ -103,5 +100,31 @@ class Group extends ArgumentDefaultPluginBase implements CacheableDependencyInte
     return [];
   }
 
-}
+  /**
+   * {@inheritdoc}
+   */
+  public function getCacheTags() {
+    $group = $this->getGroup();
+    if ($group instanceof ContentEntityInterface) {
+      $tag = $group->getEntityTypeId() . ':' . $group->id();
+      return Cache::buildTags('og-group-content', [$tag]);
+    }
+    return [];
+  }
 
+  /**
+   * Returns the group that is relevant in the current context.
+   *
+   * @return \Drupal\Core\Entity\ContentEntityInterface|null
+   *   The group, or NULL if no group is found.
+   */
+  protected function getGroup() {
+    $contexts = $this->ogContext->getRuntimeContexts(['og']);
+    if (!empty($contexts['og']) && $group = $contexts['og']->getContextValue()) {
+      if ($group instanceof ContentEntityInterface) {
+        return $group;
+      }
+    }
+  }
+
+}
