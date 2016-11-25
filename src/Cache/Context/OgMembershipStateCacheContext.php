@@ -4,9 +4,9 @@ namespace Drupal\og\Cache\Context;
 
 use Drupal\Core\Cache\CacheableMetadata;
 use Drupal\Core\Cache\Context\CacheContextInterface;
-use Drupal\Core\Plugin\Context\ContextProviderInterface;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\og\MembershipManagerInterface;
+use Drupal\og\OgContextInterface;
 use Drupal\og\OgMembershipInterface;
 
 /**
@@ -31,7 +31,7 @@ class OgMembershipStateCacheContext implements CacheContextInterface {
   /**
    * The OG context provider.
    *
-   * @var \Drupal\Core\Plugin\Context\ContextProviderInterface
+   * @var \Drupal\og\OgContextInterface
    */
   protected $ogContext;
 
@@ -47,12 +47,12 @@ class OgMembershipStateCacheContext implements CacheContextInterface {
    *
    * @param \Drupal\Core\Session\AccountInterface $user
    *   The current user.
-   * @param \Drupal\Core\Plugin\Context\ContextProviderInterface $og_context
+   * @param \Drupal\og\OgContextInterface $og_context
    *   The OG context provider.
    * @param \Drupal\og\MembershipManagerInterface $membership_manager
    *   The membership manager service.
    */
-  public function __construct(AccountInterface $user, ContextProviderInterface $og_context, MembershipManagerInterface $membership_manager) {
+  public function __construct(AccountInterface $user, OgContextInterface $og_context, MembershipManagerInterface $membership_manager) {
     $this->user = $user;
     $this->ogContext = $og_context;
     $this->membershipManager = $membership_manager;
@@ -69,14 +69,12 @@ class OgMembershipStateCacheContext implements CacheContextInterface {
    * {@inheritdoc}
    */
   public function getContext() {
-    // Do not provide a cache context if there are no groups in the current
+    // Do not provide a cache context if there is no group in the current
     // context.
-    $contexts = $this->ogContext->getRuntimeContexts(['og']);
-    if (empty($contexts['og'])) {
+    $group = $this->ogContext->getGroup();
+    if (empty($group)) {
       return self::NO_CONTEXT;
     }
-
-    $group = $contexts['og']->getContextData()->getValue();
 
     $states = [
       OgMembershipInterface::STATE_ACTIVE,
