@@ -3,12 +3,10 @@
 namespace Drupal\Tests\og\Unit;
 
 use Drupal\Core\Entity\EntityInterface;
-use Drupal\Core\Plugin\Context\ContextInterface;
-use Drupal\Core\Plugin\Context\ContextProviderInterface;
 use Drupal\Core\Session\AccountInterface;
-use Drupal\Core\TypedData\TypedDataInterface;
 use Drupal\og\Cache\Context\OgMembershipStateCacheContext;
 use Drupal\og\MembershipManagerInterface;
+use Drupal\og\OgContextInterface;
 use Drupal\og\OgMembershipInterface;
 use Drupal\Tests\UnitTestCase;
 
@@ -37,7 +35,7 @@ class OgMembershipStateCacheContextTest extends UnitTestCase {
   /**
    * The mocked OG context service.
    *
-   * @var \Drupal\Core\Plugin\Context\ContextProviderInterface|\Prophecy\Prophecy\ObjectProphecy
+   * @var \Drupal\og\OgContextInterface|\Prophecy\Prophecy\ObjectProphecy
    */
   protected $ogContext;
 
@@ -60,7 +58,7 @@ class OgMembershipStateCacheContextTest extends UnitTestCase {
    */
   public function setUp() {
     $this->user = $this->prophesize(AccountInterface::class);
-    $this->ogContext = $this->prophesize(ContextProviderInterface::class);
+    $this->ogContext = $this->prophesize(OgContextInterface::class);
 
     $this->group = $this->prophesize(EntityInterface::class);
 
@@ -76,8 +74,8 @@ class OgMembershipStateCacheContextTest extends UnitTestCase {
   public function testNoGroupOnRoute() {
     $this
       ->ogContext
-      ->getRuntimeContexts(['og'])
-      ->willReturn([]);
+      ->getGroup()
+      ->willReturn(NULL);
 
     $result = $this->getContextResult();
     $this->assertEquals(OgMembershipStateCacheContext::NO_CONTEXT, $result);
@@ -139,19 +137,12 @@ class OgMembershipStateCacheContextTest extends UnitTestCase {
    * Sets an expectation that OgContext will return the test group.
    */
   protected function expectGroupContext() {
-    // OgContext::getRuntimeContexts() will be called and is expected to return
-    // a Context object. This actual group is held in a typed data object and
-    // can be retrieved by calling Context::getContextData()->getValue().
-    $context_data = $this->prophesize(TypedDataInterface::class);
-    $context_data->getValue()
-      ->willReturn($this->group->reveal());
-    $context = $this->prophesize(ContextInterface::class);
-    $context->getContextData()
-      ->willReturn($context_data->reveal());
+    // OgContext::getGroup() will be called and is expected to return the test
+    // group.
     $this
       ->ogContext
-      ->getRuntimeContexts(['og'])
-      ->willReturn(['og' => $context->reveal()]);
+      ->getGroup()
+      ->willReturn($this->group->reveal());
   }
 
   /**
