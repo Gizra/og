@@ -69,7 +69,7 @@ class OgSelectionWidgetAutoCompleteTest extends BrowserTestBase {
     parent::setUp();
 
     // Create group node types.
-    $this->createContentType(['type' => 'group_type2']);
+    $this->createContentType(['type' => 'group_type']);
     Og::addGroup('node', 'group_type');
 
     NodeType::create(['type' => 'group_content'])->save();
@@ -84,24 +84,23 @@ class OgSelectionWidgetAutoCompleteTest extends BrowserTestBase {
     Og::createField(OgGroupAudienceHelper::DEFAULT_FIELD, 'node', 'group_content', $settings);
 
     // Create users.
-    $this->user1Group = $this->drupalCreateUser();
-    $this->user2Group = $this->drupalCreateUser();
+    $this->user1 = $this->drupalCreateUser();
+    $this->user2 = $this->drupalCreateUser();
 
     // Create groups.
     $this->user1Group = Node::create([
       'type' => 'group_type',
       'title' => 'group1',
-      'uid' => $this->$this->user1Group->id(),
+      'uid' => $this->user1Group->id(),
     ]);
     $this->user1Group->save();
 
     $this->user2Group = Node::create([
-      'type' => 'group_type2',
+      'type' => 'group_type',
       'title' => 'group2',
       'uid' => $this->user2Group->id(),
     ]);
     $this->user2Group->save();
-
   }
 
   /**
