@@ -32,14 +32,14 @@ class OgSelectionWidgetAutoCompleteTest extends BrowserTestBase {
    *
    * @var \Drupal\node\Entity\Node
    */
-  protected $user1Group;
+  protected $group1;
 
   /**
    * A group node for user 2.
    *
    * @var \Drupal\node\Entity\Node
    */
-  protected $user2Group;
+  protected $group2;
 
   /**
    * Group owner.
@@ -78,7 +78,7 @@ class OgSelectionWidgetAutoCompleteTest extends BrowserTestBase {
     // all the values.
     $settings = [
       'form_display' => [
-        'type' => 'options_select',
+        'type' => 'entity_reference_autocomplete',
       ],
     ];
     Og::createField(OgGroupAudienceHelper::DEFAULT_FIELD, 'node', 'group_content', $settings);
@@ -88,19 +88,29 @@ class OgSelectionWidgetAutoCompleteTest extends BrowserTestBase {
     $this->user2 = $this->drupalCreateUser();
 
     // Create groups.
-    $this->user1Group = Node::create([
+    $this->group1 = Node::create([
       'type' => 'group_type',
       'title' => 'group1',
-      'uid' => $this->user1Group->id(),
+      'uid' => $this->user1->id(),
     ]);
-    $this->user1Group->save();
+    $this->group1->save();
 
-    $this->user2Group = Node::create([
+    $this->group2 = Node::create([
       'type' => 'group_type',
       'title' => 'group2',
-      'uid' => $this->user2Group->id(),
+      'uid' => $this->user2->id(),
     ]);
-    $this->user2Group->save();
+    $this->group2->save();
+
+    // Adding to the member role the appropriate permission.
+    $this->role = OgRole::create();
+    $this->role
+      ->setId('authenticated')
+      ->setName(OgRole::AUTHENTICATED)
+      ->setGroupType('node')
+      ->setGroupBundle('group')
+      ->grantPermission('create group_content content')
+      ->save();
   }
 
   /**
@@ -112,11 +122,27 @@ class OgSelectionWidgetAutoCompleteTest extends BrowserTestBase {
     // Verify the user can reference group content to a groups which he owns.
     $edit = [
       'title[0][value]' => $this->randomMachineName(),
-      'og_audience[0][target_id]' => $this->user1Group->label() . ' (' . $this->user1Group->id() . ')',
+      'og_audience[0][target_id]' => $this->group1->label() . ' (' . $this->group2->id() . ')',
     ];
 
     $this->drupalGet('node/add/group_content');
     $this->submitForm($edit, 'Save');
+    $this->assertSession()->pageTextContains('You are not allowed to post content in the group ' . $this->group2->label());
+
+    // Add the member to the group.
+    Og::createMembership($this->group2, $this->user1)->addRole($this->role)->save();
+
+    $this->drupalLogin($this->user1);
+    // Testing the user can add group content after being a member of the group.
+    $edit = [
+      'title[0][value]' => $this->randomMachineName(),
+      'og_audience[0][target_id]' => $this->group1->label() . ' (' . $this->group2->id() . ')',
+    ];
+
+    $this->drupalGet('node/add/group_content');
+    $this->submitForm($edit, 'Save');
+    print_r($this->getSession()->getPage()->getContent());
+
   }
 
 }
