@@ -208,9 +208,7 @@ class RecentGroupContentBlock extends BlockBase implements ContainerFactoryPlugi
   public function getCacheContexts() {
     // The block varies by user because of the access check on the query that
     // retrieves the group content.
-    // @todo Vary by group context instead of URL when the cache context based
-    //   on OgContext is ready.
-    return Cache::mergeContexts(parent::getCacheContexts(), ['user', 'url']);
+    return Cache::mergeContexts(parent::getCacheContexts(), ['user', 'og_group_context']);
   }
 
   /**
