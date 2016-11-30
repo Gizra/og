@@ -4,6 +4,11 @@ services:
     arguments: ['@entity_type.manager', '@og.access']
     tags:
       - { name: access_check, applies_to: _og_user_access_group }
+  cache_context.og_group_context:
+    class: 'Drupal\og\Cache\Context\OgGroupContextCacheContext'
+    arguments: ['@og.context']
+    tags:
+      - { name: 'cache.context'}
   cache_context.og_membership_state:
     class: 'Drupal\og\Cache\Context\OgMembershipStateCacheContext'
     arguments: ['@current_user', '@og.context', '@og.membership_manager']
