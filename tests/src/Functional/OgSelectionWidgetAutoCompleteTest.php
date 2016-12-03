@@ -105,8 +105,8 @@ class OgSelectionWidgetAutoCompleteTest extends BrowserTestBase {
     // Adding to the member role the appropriate permission.
     $this->role = OgRole::create();
     $this->role
-      ->setId('authenticated')
-      ->setName(OgRole::AUTHENTICATED)
+      ->setName('content_editor')
+      ->setLabel('Content group editor')
       ->setGroupType('node')
       ->setGroupBundle('group')
       ->grantPermission('create group_content content')
