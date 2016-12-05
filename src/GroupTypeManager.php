@@ -239,17 +239,13 @@ class GroupTypeManager {
    * information about the relations between groups and group content bundles
    * then use getGroupRelationMap() instead.
    *
-   * @param string $entity_type_id
-   *   Optional entity type ID to filter the bundles by. If omitted bundles of
-   *   all entity types will be returned.
-   *
    * @return array
-   *   An array of group content bundle IDs. If the $entity_type_id parameter is
-   *   omitted this will be an associative array keyed by entity type ID.
+   *   An associative array of group content bundle IDs, keyed by entity type
+   *   ID.
    *
    * @see \Drupal\og\GroupTypeManager::getGroupRelationMap()
    */
-  public function getAllGroupContentBundles($entity_type_id = NULL) {
+  public function getAllGroupContentBundles() {
     $bundles = [];
     foreach ($this->getGroupRelationMap() as $group_entity_type_id => $group_bundle_ids) {
       foreach ($group_bundle_ids as $group_content_entity_type_ids) {
@@ -258,7 +254,34 @@ class GroupTypeManager {
         }
       }
     }
-    return !empty($entity_type_id) ? $bundles[$entity_type_id] : $bundles;
+    return $bundles;
+  }
+
+  /**
+   * Returns a list of all group content bundles filtered by entity type.
+   *
+   * This will return a simple list of group content bundles. If you need
+   * information about the relations between groups and group content bundles
+   * then use getGroupRelationMap() instead.
+   *
+   * @param string $entity_type_id
+   *   Entity type ID to filter the bundles by.
+   *
+   * @return array
+   *   An array of group content bundle IDs.
+   *
+   * @throws \InvalidArgumentException
+   *   Thrown when the passed in entity type ID does not have any group content
+   *   bundles defined.
+   *
+   * @see \Drupal\og\GroupTypeManager::getGroupRelationMap()
+   */
+  public function getAllGroupContentBundlesByEntityType($entity_type_id) {
+    $bundles = $this->getAllGroupContentBundles();
+    if (!isset($bundles[$entity_type_id])) {
+      throw new \InvalidArgumentException("The '$entity_type_id' entity type has no group content bundles.");
+    }
+    return $bundles[$entity_type_id];
   }
 
   /**
