@@ -114,6 +114,7 @@ class RecentGroupContentBlock extends BlockBase implements ContainerFactoryPlugi
     return [
       'entity_type' => $entity_type_default,
       'bundles' => $bundle_defaults,
+      'count' => 5,
     ];
   }
 
@@ -154,6 +155,14 @@ class RecentGroupContentBlock extends BlockBase implements ContainerFactoryPlugi
 
     $form['entity_type']['#options'] = $entity_type_options;
 
+    $range = range(2, 20);
+    $form['count'] = array(
+      '#type' => 'select',
+      '#title' => $this->t('Number of results to show'),
+      '#default_value' => $this->configuration['count'],
+      '#options' => array_combine($range, $range),
+    );
+
     return $form;
   }
 
@@ -161,8 +170,9 @@ class RecentGroupContentBlock extends BlockBase implements ContainerFactoryPlugi
    * {@inheritdoc}
    */
   public function blockSubmit($form, FormStateInterface $form_state) {
-    $this->configuration['entity_type'] = $form_state->getValue('entity_type');
-    $this->configuration['bundles'] = $form_state->getValue('bundles');
+    foreach (['entity_type', 'bundles', 'count'] as $setting) {
+      $this->configuration[$setting] = $form_state->getValue($setting);
+    }
   }
 
   /**
@@ -252,8 +262,7 @@ class RecentGroupContentBlock extends BlockBase implements ContainerFactoryPlugi
         // @todo Add support for entity types that use a different column name
         //   for the created date.
         ->sort('created', 'DESC')
-        // @todo Make the number of results configurable.
-        ->range(0, 5)
+        ->range(0, $this->configuration['count'])
         ->execute();
 
       $ids = array_merge($ids, $results);
