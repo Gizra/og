@@ -38,9 +38,9 @@ abstract class OgCacheContextTestBase extends UnitTestCase {
   /**
    * Tests the result of the cache context service with active context objects.
    *
-   * This is the 'normal' test case. The service will be able to retrieve data
-   * from the active context, and will be able to provide a relevant cache
-   * context string in accordance with the provided data.
+   * This tests the most common use case: the service retrieves data from the
+   * active context, and will be able to provide a relevant cache context string
+   * in accordance with the provided data.
    *
    * @param mixed $context
    *   Data used to set up the expectations of the context objects. See

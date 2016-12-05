@@ -54,7 +54,7 @@ class RecentGroupContentBlock extends BlockBase implements ContainerFactoryPlugi
   protected $entityTypeBundleInfo;
 
   /**
-   * Constructs a CollectionContentBlock object.
+   * Constructs a RecentGroupContentBlock object.
    *
    * @param array $configuration
    *   A configuration array containing information about the plugin instance.
@@ -68,7 +68,7 @@ class RecentGroupContentBlock extends BlockBase implements ContainerFactoryPlugi
    *   The entity type manager.
    * @param \Drupal\og\GroupTypeManager $group_type_manager
    *   The OG group type manager.
-   * @param EntityTypeBundleInfoInterface $entity_type_bundle_info
+   * @param \Drupal\Core\Entity\EntityTypeBundleInfoInterface $entity_type_bundle_info
    *   The bundle info service.
    */
   public function __construct(array $configuration, $plugin_id, $plugin_definition, OgContextInterface $og_context, EntityTypeManagerInterface $entity_type_manager, GroupTypeManager $group_type_manager, EntityTypeBundleInfoInterface $entity_type_bundle_info) {
