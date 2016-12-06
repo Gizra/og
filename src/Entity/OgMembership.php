@@ -70,7 +70,8 @@ use Drupal\og\OgRoleInterface;
  *       "subscribe" = "Drupal\og\Form\GroupSubscribeForm",
  *       "unsubscribe" = "Drupal\og\Form\GroupUnsubscribeConfirmForm",
  *     },
- *   }
+ *   },
+ *   field_ui_base_route = "entity.og_membership_type.edit_form"
  * )
  */
 class OgMembership extends ContentEntityBase implements OgMembershipInterface {
