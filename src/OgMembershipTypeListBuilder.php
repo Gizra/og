@@ -3,7 +3,6 @@
 namespace Drupal\og;
 
 use Drupal\Core\Config\Entity\ConfigEntityListBuilder;
-use Drupal\Core\Url;
 use Drupal\Core\Entity\EntityInterface;
 
 /**
