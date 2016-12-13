@@ -709,6 +709,10 @@ function og_field_delete_instance($instance) {
 function og_field_attach_form($entity_type, $entity, &$form, &$form_state, $langcode) {
   list(,, $bundle) = entity_extract_ids($entity_type, $entity);
 
+  if (!isset($form['#entity'])) {
+    $form['#entity'] = $entity;
+  }
+
   if (og_get_group_audience_fields($entity_type, $bundle)) {
     $form['#validate'][] = 'og_form_group_reference_validate';
   }
