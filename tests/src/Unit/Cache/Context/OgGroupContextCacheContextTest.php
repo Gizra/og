@@ -10,7 +10,7 @@ use Drupal\og\Cache\Context\OgGroupContextCacheContext;
  * @group og
  * @coversDefaultClass \Drupal\og\Cache\Context\OgMembershipStateCacheContext
  */
-class OgGroupContextCacheContextTest extends OgCacheContextTestBase {
+class OgGroupContextCacheContextTest extends OgContextCacheContextTestBase {
 
   /**
    * Tests getting cache context when there is no matching group on the route.
