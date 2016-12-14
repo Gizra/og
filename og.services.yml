@@ -14,6 +14,11 @@ services:
     arguments: ['@current_user', '@og.context', '@og.membership_manager']
     tags:
       - { name: 'cache.context'}
+  cache_context.og_role:
+    class: 'Drupal\og\Cache\Context\OgRoleCacheContext'
+    arguments: ['@current_user', '@og.membership_manager', '@private_key']
+    tags:
+      - { name: 'cache.context'}
   og.access:
     class: Drupal\og\OgAccess
     arguments: ['@config.factory', '@current_user', '@module_handler', '@og.group_type_manager', '@og.permission_manager', '@og.membership_manager', '@og.group_audience_helper']
