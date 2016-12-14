@@ -63,7 +63,7 @@ interface MembershipManagerInterface {
    * @param array $states
    *   (optional) Array with the state to return. Defaults to active.
    *
-   * @return \Drupal\og\Entity\OgMembership[]
+   * @return \Drupal\og\OgMembershipInterface[]
    *   An array of OgMembership entities, keyed by ID.
    */
   public function getMemberships(AccountInterface $user, array $states = [OgMembershipInterface::STATE_ACTIVE]);
@@ -78,7 +78,7 @@ interface MembershipManagerInterface {
    * @param array $states
    *   (optional) Array with the state to return. Defaults to active.
    *
-   * @return \Drupal\og\Entity\OgMembership|null
+   * @return \Drupal\og\OgMembershipInterface|null
    *   The OgMembership entity. NULL will be returned if no membership is
    *   available that matches the passed in $states.
    */
@@ -94,7 +94,7 @@ interface MembershipManagerInterface {
    * @param string $membership_type
    *   (optional) The membership type. Defaults to OG_MEMBERSHIP_TYPE_DEFAULT.
    *
-   * @return \Drupal\og\Entity\OgMembership
+   * @return \Drupal\og\OgMembershipInterface
    *   The unsaved membership object.
    */
   public function createMembership(EntityInterface $group, AccountInterface $user, $membership_type = OgMembershipInterface::TYPE_DEFAULT);
