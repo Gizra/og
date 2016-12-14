@@ -53,7 +53,7 @@ class DefaultRoleEventTest extends UnitTestCase {
    *
    * @dataProvider defaultRoleProvider
    */
-  public function testGetRole($roles) {
+  public function testGetRole(array $roles) {
     $this->expectOgRoleCreation($roles);
 
     $this->defaultRoleEvent->setRoles($roles);
@@ -74,7 +74,7 @@ class DefaultRoleEventTest extends UnitTestCase {
    *
    * @dataProvider defaultRoleProvider
    */
-  public function testGetRoles($roles) {
+  public function testGetRoles(array $roles) {
     $this->expectOgRoleCreation($roles);
 
     $this->defaultRoleEvent->setRoles($roles);
@@ -97,7 +97,7 @@ class DefaultRoleEventTest extends UnitTestCase {
    *
    * @dataProvider defaultRoleProvider
    */
-  public function testAddRole($roles) {
+  public function testAddRole(array $roles) {
     $this->expectOgRoleCreation($roles);
 
     foreach ($roles as $name => $role) {
@@ -126,7 +126,7 @@ class DefaultRoleEventTest extends UnitTestCase {
    *
    * @dataProvider defaultRoleProvider
    */
-  public function testAddRoles($roles) {
+  public function testAddRoles(array $roles) {
     $this->expectOgRoleCreation($roles);
 
     $this->defaultRoleEvent->addRoles($roles);
@@ -149,7 +149,7 @@ class DefaultRoleEventTest extends UnitTestCase {
    *
    * @dataProvider defaultRoleProvider
    */
-  public function testSetRole($roles) {
+  public function testSetRole(array $roles) {
     $this->expectOgRoleCreation($roles);
 
     foreach ($roles as $name => $role) {
@@ -173,7 +173,7 @@ class DefaultRoleEventTest extends UnitTestCase {
    *
    * @dataProvider defaultRoleProvider
    */
-  public function testDeleteRole($roles) {
+  public function testDeleteRole(array $roles) {
     $this->expectOgRoleCreation($roles);
 
     $this->defaultRoleEvent->setRoles($roles);
@@ -195,7 +195,7 @@ class DefaultRoleEventTest extends UnitTestCase {
    *
    * @dataProvider defaultRoleProvider
    */
-  public function testHasRole($roles) {
+  public function testHasRole(array $roles) {
     $this->expectOgRoleCreation($roles);
 
     foreach ($roles as $name => $role) {
@@ -215,7 +215,7 @@ class DefaultRoleEventTest extends UnitTestCase {
    *
    * @dataProvider defaultRoleProvider
    */
-  public function testOffsetGet($roles) {
+  public function testOffsetGet(array $roles) {
     $this->expectOgRoleCreation($roles);
 
     $this->defaultRoleEvent->setRoles($roles);
@@ -235,7 +235,7 @@ class DefaultRoleEventTest extends UnitTestCase {
    *
    * @dataProvider defaultRoleProvider
    */
-  public function testOffsetSet($roles) {
+  public function testOffsetSet(array $roles) {
     $this->expectOgRoleCreation($roles);
 
     foreach ($roles as $name => $role) {
@@ -255,7 +255,7 @@ class DefaultRoleEventTest extends UnitTestCase {
    *
    * @dataProvider defaultRoleProvider
    */
-  public function testOffsetUnset($roles) {
+  public function testOffsetUnset(array $roles) {
     $this->expectOgRoleCreation($roles);
 
     $this->defaultRoleEvent->setRoles($roles);
@@ -277,7 +277,7 @@ class DefaultRoleEventTest extends UnitTestCase {
    *
    * @dataProvider defaultRoleProvider
    */
-  public function testOffsetExists($roles) {
+  public function testOffsetExists(array $roles) {
     $this->expectOgRoleCreation($roles);
 
     foreach ($roles as $name => $role) {
@@ -297,7 +297,7 @@ class DefaultRoleEventTest extends UnitTestCase {
    *
    * @dataProvider defaultRoleProvider
    */
-  public function testIteratorAggregate($roles) {
+  public function testIteratorAggregate(array $roles) {
     $this->expectOgRoleCreation($roles);
 
     $this->defaultRoleEvent->setRoles($roles);
@@ -321,7 +321,7 @@ class DefaultRoleEventTest extends UnitTestCase {
    *
    * @dataProvider invalidDefaultRoleProvider
    */
-  public function testAddInvalidRole($invalid_roles) {
+  public function testAddInvalidRole(array $invalid_roles) {
     $this->expectOgRoleCreation($invalid_roles);
 
     try {
@@ -348,7 +348,7 @@ class DefaultRoleEventTest extends UnitTestCase {
    * @dataProvider invalidDefaultRoleProvider
    * @expectedException \InvalidArgumentException
    */
-  public function testAddInvalidRoles($invalid_roles) {
+  public function testAddInvalidRoles(array $invalid_roles) {
     $this->expectOgRoleCreation($invalid_roles);
 
     $this->defaultRoleEvent->addRoles($invalid_roles);
@@ -366,7 +366,7 @@ class DefaultRoleEventTest extends UnitTestCase {
    * @dataProvider invalidDefaultRoleProvider
    * @expectedException \InvalidArgumentException
    */
-  public function testSetInvalidRole($invalid_roles) {
+  public function testSetInvalidRole(array $invalid_roles) {
     $this->expectOgRoleCreation($invalid_roles);
 
     foreach ($invalid_roles as $name => $invalid_role) {
@@ -385,7 +385,7 @@ class DefaultRoleEventTest extends UnitTestCase {
    * @dataProvider invalidDefaultRoleProvider
    * @expectedException \InvalidArgumentException
    */
-  public function testSetInvalidRoles($invalid_roles) {
+  public function testSetInvalidRoles(array $invalid_roles) {
     $this->expectOgRoleCreation($invalid_roles);
 
     $this->defaultRoleEvent->setRoles($invalid_roles);
@@ -402,7 +402,7 @@ class DefaultRoleEventTest extends UnitTestCase {
    * @dataProvider invalidDefaultRoleProvider
    * @expectedException \InvalidArgumentException
    */
-  public function testInvalidOffsetSet($invalid_roles) {
+  public function testInvalidOffsetSet(array $invalid_roles) {
     $this->expectOgRoleCreation($invalid_roles);
 
     foreach ($invalid_roles as $name => $invalid_role) {
