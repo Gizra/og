@@ -107,6 +107,31 @@ class OgMembershipTest extends KernelTestBase {
   }
 
   /**
+   * Tests getting an ogMembership from the static cache.
+   */
+  public function testMembershipStaticCache() {
+    // Create a second bundle and add as a group.
+    $another_group = EntityTest::create([
+      'type' => Unicode::strtolower($this->randomMachineName()),
+      'name' => $this->randomString(),
+    ]);
+    $another_group->save();
+    Og::groupTypeManager()->addGroup('entity_test', $another_group->bundle());
+
+    $membership = Og::createMembership($this->group, $this->user);
+    $membership->save();
+    // Load the membership to instantiate the membership static cache.
+    $membership = Og::getMembership($this->group, $this->user);
+    $this->assertInstanceOf(OgMembership::class, $membership);
+
+    // Create another membership for the given user on the same request.
+    $membership = Og::createMembership($another_group, $this->user);
+    $membership->save();
+    $membership = Og::getMembership($another_group, $this->user);
+    $this->assertInstanceOf(OgMembership::class, $membership);
+  }
+
+  /**
    * Tests exceptions are thrown when trying to save a membership with no user.
    *
    * @covers ::preSave
