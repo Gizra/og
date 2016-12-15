@@ -131,7 +131,7 @@ class OgResolvedGroupCollectionTest extends UnitTestCase {
    *
    * @see testAddGroup()
    */
-  public function testGetGroupInfo($votes, array $expected_groups) {
+  public function testGetGroupInfo(array $votes, array $expected_groups) {
     $collection = new OgResolvedGroupCollection();
 
     foreach ($votes as $vote) {
@@ -243,7 +243,7 @@ class OgResolvedGroupCollectionTest extends UnitTestCase {
    *
    * @see testAddGroup()
    */
-  public function testSort($votes, array $expected_groups) {
+  public function testSort(array $votes, array $expected_groups) {
     $collection = new OgResolvedGroupCollection();
 
     // Cast all votes.

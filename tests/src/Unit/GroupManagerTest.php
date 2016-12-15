@@ -351,7 +351,7 @@ class GroupManagerTest extends UnitTestCase {
    * @param array $groups
    *   The expected group map that will be returned by the mocked config.
    */
-  protected function expectGroupMapRetrieval($groups = []) {
+  protected function expectGroupMapRetrieval(array $groups = []) {
     $this->configFactory->get('og.settings')
       ->willReturn($this->config->reveal())
       ->shouldBeCalled();

@@ -41,7 +41,7 @@ class UserGroupAccessResolverTest extends OgGroupResolverTestBase {
    * @covers ::resolve
    * @dataProvider resolveProvider
    */
-  public function testResolve($previously_added_groups = [], $expected_added_groups = [], $expected_removed_groups = []) {
+  public function testResolve(array $previously_added_groups = [], array $expected_added_groups = [], array $expected_removed_groups = []) {
     // Construct a collection of groups that were discovered by other plugins.
     /** @var \Drupal\og\OgResolvedGroupCollectionInterface|\Prophecy\Prophecy\ObjectProphecy $collection */
     $collection = $this->prophesize(OgResolvedGroupCollectionInterface::class);
