@@ -54,7 +54,7 @@ class RequestQueryArgumentResolverTest extends OgGroupResolverTestBase {
    * @param array $previously_added_groups
    *   An array of test entity IDs that were added to the collection by plugins
    *   that ran previously.
-   * @param array $expected_added_group
+   * @param string $expected_added_group
    *   The group that is expected to be added by the plugin. If left empty it is
    *   explicitly expected that the plugin will not add any group to the
    *   collection.
@@ -62,7 +62,7 @@ class RequestQueryArgumentResolverTest extends OgGroupResolverTestBase {
    * @covers ::resolve
    * @dataProvider resolveProvider
    */
-  public function testResolve($group_type = NULL, $group_id = NULL, $previously_added_groups = [], $expected_added_group = NULL) {
+  public function testResolve($group_type = NULL, $group_id = NULL, array $previously_added_groups = [], $expected_added_group = NULL) {
     // It is expected that the plugin will retrieve the current request from the
     // request stack.
     $request = $this->prophesize(Request::class)->reveal();

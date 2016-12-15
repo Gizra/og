@@ -201,7 +201,7 @@ interface MembershipManagerInterface {
    *   TRUE if the entity (e.g. the user or node) belongs to a group with
    *   a certain state.
    */
-  public function isMember(EntityInterface $group, AccountInterface $user, $states = [OgMembershipInterface::STATE_ACTIVE]);
+  public function isMember(EntityInterface $group, AccountInterface $user, array $states = [OgMembershipInterface::STATE_ACTIVE]);
 
   /**
    * Returns whether a user belongs to a group with a pending status.
