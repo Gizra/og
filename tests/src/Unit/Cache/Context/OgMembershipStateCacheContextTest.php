@@ -13,7 +13,7 @@ use Drupal\og\OgMembershipInterface;
  * @group og
  * @coversDefaultClass \Drupal\og\Cache\Context\OgMembershipStateCacheContext
  */
-class OgMembershipStateCacheContextTest extends OgCacheContextTestBase {
+class OgMembershipStateCacheContextTest extends OgContextCacheContextTestBase {
 
   /**
    * The OG membership entity.

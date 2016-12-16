@@ -5,12 +5,12 @@ namespace Drupal\Tests\og\Unit\Cache\Context;
 use Drupal\og\Cache\Context\OgGroupContextCacheContext;
 
 /**
- * Tests OG membership state cache context.
+ * Tests the OG group context cache context.
  *
  * @group og
- * @coversDefaultClass \Drupal\og\Cache\Context\OgMembershipStateCacheContext
+ * @coversDefaultClass \Drupal\og\Cache\Context\OgGroupContextCacheContext
  */
-class OgGroupContextCacheContextTest extends OgCacheContextTestBase {
+class OgGroupContextCacheContextTest extends OgContextCacheContextTestBase {
 
   /**
    * Tests getting cache context when there is no matching group on the route.
