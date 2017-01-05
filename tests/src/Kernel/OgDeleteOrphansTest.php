@@ -48,7 +48,7 @@ class OgDeleteOrphansTest extends KernelTestBase {
    *
    * @var \Drupal\Core\Entity\EntityInterface
    */
-  protected $group_content;
+  protected $groupContent;
 
   /**
    * {@inheritdoc}
@@ -97,12 +97,12 @@ class OgDeleteOrphansTest extends KernelTestBase {
     $this->group->save();
 
     // Create a group content item.
-    $this->group_content = Node::create([
+    $this->groupContent = Node::create([
       'title' => $this->randomString(),
       'type' => $group_content_bundle,
       OgGroupAudienceHelperInterface::DEFAULT_FIELD => [['target_id' => $this->group->id()]],
     ]);
-    $this->group_content->save();
+    $this->groupContent->save();
   }
 
   /**
@@ -163,7 +163,7 @@ class OgDeleteOrphansTest extends KernelTestBase {
     }
 
     // Verify the group content is deleted.
-    $this->assertNull(Node::load($this->group_content->id()), 'The orphaned node is deleted.');
+    $this->assertNull(Node::load($this->groupContent->id()), 'The orphaned node is deleted.');
 
     // Verify that the user membership is now deleted.
     $this->assertUserMembershipCount(0);
