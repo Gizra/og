@@ -67,14 +67,34 @@ use Drupal\user\EntityOwnerInterface;
  *   },
  *   handlers = {
  *     "views_data" = "Drupal\og\OgMembershipViewsData",
+ *     "list_builder" = "Drupal\Core\Entity\EntityListBuilder",
+ *     "view_builder" = "Drupal\Core\Entity\EntityViewBuilder",
  *     "form" = {
  *       "subscribe" = "Drupal\og\Form\GroupSubscribeForm",
  *       "unsubscribe" = "Drupal\og\Form\GroupUnsubscribeConfirmForm",
+ *       "add" = "Drupal\og\Form\OgMembershipForm",
+ *       "edit" = "Drupal\og\Form\OgMembershipForm",
+ *       "delete" = "Drupal\og\Form\OgMembershipDeleteForm",
  *     },
+ *   },
+ *   links = {
+ *     "edit-form" = "/group/{entity_type_id}/{group}/admin/membership/{og_membership}/edit",
+ *     "delete-form" = "/group/{entity_type_id}/{group}/admin/membership/{og_membership}/delete",
+ *     "canonical" = "/group/{entity_type_id}/{group}/admin/membership/{og_membership}"
  *   }
  * )
  */
 class OgMembership extends ContentEntityBase implements OgMembershipInterface {
+
+  /**
+   * {@inheritdoc}
+   */
+  protected function urlRouteParameters($rel) {
+    $uri_route_parameters = parent::urlRouteParameters($rel);
+    $uri_route_parameters['entity_type_id'] = $this->getGroupEntityType();
+    $uri_route_parameters['group'] = $this->getGroupId();
+    return $uri_route_parameters;
+  }
 
   /**
    * {@inheritdoc}
@@ -358,7 +378,19 @@ class OgMembership extends ContentEntityBase implements OgMembershipInterface {
     $fields['uid'] = BaseFieldDefinition::create('entity_reference')
       ->setLabel(t('Member User ID'))
       ->setDescription(t('The user ID of the member.'))
-      ->setSetting('target_type', 'user');
+      ->setSetting('target_type', 'user')
+      ->setDisplayOptions('form', [
+        'type' => 'entity_reference_autocomplete',
+        'weight' => -1,
+        'settings' => [
+          'match_operator' => 'CONTAINS',
+          'size' => '60',
+          'placeholder' => '',
+        ],
+      ])
+      ->setDisplayConfigurable('view', TRUE)
+      ->setDisplayConfigurable('form', TRUE)
+      ->setRequired(TRUE);
 
     $fields['entity_type'] = BaseFieldDefinition::create('string')
       ->setLabel(t('Group entity type'))
@@ -381,12 +413,14 @@ class OgMembership extends ContentEntityBase implements OgMembershipInterface {
       ->setLabel(t('Roles'))
       ->setDescription(t('The OG roles related to an OG membership entity.'))
       ->setCardinality(FieldStorageDefinitionInterface::CARDINALITY_UNLIMITED)
-      ->setDisplayOptions('view', [
-        'label' => 'hidden',
-        'type' => 'entity_reference_label',
+      ->setDisplayOptions('form', [
+        'type' => 'options_buttons',
         'weight' => 0,
       ])
       ->setSetting('target_type', 'og_role');
+      ->setSetting('handler', 'og:og_role')
+      ->setDisplayConfigurable('view', TRUE)
+      ->setDisplayConfigurable('form', TRUE);
 
     $fields['created'] = BaseFieldDefinition::create('created')
       ->setLabel(t('Create'))
