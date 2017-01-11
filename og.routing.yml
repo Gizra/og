@@ -43,3 +43,28 @@ og.remove_multiple_roles_confirm:
     _form: '\Drupal\og\Form\OgRemoveMultipleRolesForm'
   requirements:
     _custom_access: '\Drupal\og\Form\OgRemoveMultipleRolesForm::access'
+
+entity.og_membership.canonical:
+  path: 'group/{entity_type_id}/{group}/admin/membership/{og_membership}'
+  defaults:
+    _title: 'Membership'
+    _entity_view: 'og_membership.full'
+  requirements:
+    _permission: 'administer group'
+  options:
+    parameters:
+      type: entity:{entity_type_id}
+
+entity.og_membership.edit_form:
+  path: 'group/{entity_type_id}/{group}/admin/membership/{og_membership}/edit'
+  defaults:
+    _entity_form: 'og_membership.edit'
+  requirements:
+    _permission: 'administer group'
+
+entity.og_membership.delete_form:
+  path: 'group/{entity_type_id}/{group}/admin/membership/{og_membership}/delete'
+  defaults:
+    _entity_form: 'og_membership.delete'
+  requirements:
+    _permission: 'administer group'

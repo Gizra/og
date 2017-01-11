@@ -363,6 +363,25 @@ class OgEventSubscriber implements EventSubscriberInterface {
       ],
     ];
 
+    $routes_info['add_membership'] = [
+      'controller' => '\Drupal\og\Controller\OgAdminMembersController::addMember',
+      'title' => 'Add members',
+      'path' => 'membership/add/{membership_type}',
+      'defaults' => [
+        'membership_type' => 'default',
+      ],
+      'requirements' => [
+        '_og_user_access_group' => 'administer group',
+      ],
+      'options' => [
+        'parameters' => [
+          'membership_type' => [
+            'type' => 'entity:og_membership_type',
+          ],
+        ],
+      ],
+    ];
+
     $event->setRoutesInfo($routes_info);
   }
 
