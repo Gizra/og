@@ -11,5 +11,8 @@
     },
     "require-dev": {
         "drupal/coder": "~8.2"
+    },
+    "require": {
+        "drupal/console": "@dev"
     }
 }
