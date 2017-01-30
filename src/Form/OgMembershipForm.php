@@ -18,11 +18,14 @@ class OgMembershipForm extends ContentEntityForm {
   public function form(array $form, FormStateInterface $form_state) {
     $form = parent::form($form, $form_state);
 
+    /** @var \Drupal\og\Entity\OgMembership $entity */
     $entity = $this->getEntity();
+    /** @var \Drupal\Core\Entity\ContentEntityInterface $group */
+    $group = $entity->getGroup();
 
-    $form['#title'] = $this->t('Add member to %group', ['%group' => $entity->getGroup()->label()]);
+    $form['#title'] = $this->t('Add member to %group', ['%group' => $group->label()]);
     $form['entity_type'] = ['#value' => $entity->getEntityType()->id()];
-    $form['entity_id'] = ['#value' => $entity->getGroup()->id()];
+    $form['entity_id'] = ['#value' => $group->id()];
 
     if ($entity->getType() != 'default') {
       $form['membership_type'] = [
@@ -34,7 +37,7 @@ class OgMembershipForm extends ContentEntityForm {
     }
 
     if ($this->operation == 'edit') {
-      $form['#title'] = $this->t('Edit membership in %group', ['%group' => $entity->getGroup()->label()]);
+      $form['#title'] = $this->t('Edit membership in %group', ['%group' => $group->label()]);
       $form['uid']['#access'] = FALSE;
       $form['member'] = [
         '#title' => t('Member name'),
@@ -43,6 +46,11 @@ class OgMembershipForm extends ContentEntityForm {
         '#weight' => -10,
       ];
     }
+
+    // Require the 'manage members' permission to be able to edit roles.
+    $form['roles']['#access'] = \Drupal::service('og.access')
+      ->userAccess($group, 'manage members')
+      ->isAllowed();
 
     return $form;
   }
