@@ -3,3 +3,9 @@ og_membership.add:
   title: 'Add a member'
   appears_on:
     - entity.node.og_admin_routes.members
+
+og_membership.type_add:
+  route_name: og_membership.type_add
+  title: 'Add membership type'
+  appears_on:
+    - entity.og_membership_type.collection

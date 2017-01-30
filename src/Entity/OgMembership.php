@@ -81,7 +81,8 @@ use Drupal\user\EntityOwnerInterface;
  *     "edit-form" = "/group/{entity_type_id}/{group}/admin/members/{og_membership}/edit",
  *     "delete-form" = "/group/{entity_type_id}/{group}/admin/members/{og_membership}/delete",
  *     "canonical" = "/group/{entity_type_id}/{group}/admin/members/{og_membership}"
- *   }
+ *   },
+ *   field_ui_base_route = "entity.og_membership_type.edit_form"
  * )
  */
 class OgMembership extends ContentEntityBase implements OgMembershipInterface {

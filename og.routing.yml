@@ -68,3 +68,35 @@ entity.og_membership.delete_form:
     _entity_form: 'og_membership.delete'
   requirements:
     _entity_access: 'og_membership.delete'
+
+entity.og_membership_type.collection:
+  path: '/admin/structure/membership-types'
+  defaults:
+    _entity_list: 'og_membership_type'
+    _title: 'Membership types'
+  requirements:
+    _permission: 'administer group'
+
+entity.og_membership_type.edit_form:
+  path: '/admin/structure/membership-types/manage/{og_membership_type}'
+  defaults:
+    _entity_form: 'og_membership_type.edit'
+  requirements:
+    _permission: 'administer group'
+
+
+entity.og_membership_type.delete_form:
+  path: '/admin/structure/membership-types/manage/{og_membership_type}/delete'
+  defaults:
+    _entity_form: 'og_membership_type.delete'
+    _title: 'Delete'
+  requirements:
+    _entity_access: 'og_membership_type.delete'
+
+og_membership.type_add:
+  path: '/admin/structure/membership-types/add'
+  defaults:
+    _entity_form: 'og_membership_type.add'
+    _title: 'Add membership type'
+  requirements:
+    _permission: 'administer group'

@@ -20,6 +20,16 @@ use Drupal\og\OgMembershipTypeInterface;
  * @ConfigEntityType(
  *   id = "og_membership_type",
  *   label = @Translation("OG membership type"),
+ *   handlers = {
+ *     "access" = "Drupal\Core\Entity\EntityAccessControlHandler",
+ *     "form" = {
+ *       "add" = "Drupal\og\Form\OgMembershipTypeForm",
+ *       "edit" = "Drupal\og\Form\OgMembershipTypeForm",
+ *       "delete" = "Drupal\Core\Entity\EntityDeleteForm"
+ *     },
+ *     "list_builder" = "Drupal\og\OgMembershipTypeListBuilder"
+ *   },
+ *   admin_permission = "administer group",
  *   config_prefix = "og_membership_type",
  *   bundle_of = "og_membership",
  *   entity_keys = {
@@ -30,6 +40,11 @@ use Drupal\og\OgMembershipTypeInterface;
  *     "type",
  *     "name",
  *     "description"
+ *   },
+ *   links = {
+ *     "edit-form" = "/admin/structure/membership-types/manage/{membership_type}",
+ *     "delete-form" = "/admin/structure/membership-types/manage/{membership_type}/delete",
+ *     "collection" = "/admin/structure/membership-types",
  *   }
  * )
  */
