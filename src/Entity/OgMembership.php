@@ -78,9 +78,9 @@ use Drupal\user\EntityOwnerInterface;
  *     },
  *   },
  *   links = {
- *     "edit-form" = "/group/{entity_type_id}/{group}/admin/membership/{og_membership}/edit",
- *     "delete-form" = "/group/{entity_type_id}/{group}/admin/membership/{og_membership}/delete",
- *     "canonical" = "/group/{entity_type_id}/{group}/admin/membership/{og_membership}"
+ *     "edit-form" = "/group/{entity_type_id}/{group}/admin/members/{og_membership}/edit",
+ *     "delete-form" = "/group/{entity_type_id}/{group}/admin/members/{og_membership}/delete",
+ *     "canonical" = "/group/{entity_type_id}/{group}/admin/members/{og_membership}"
  *   }
  * )
  */
@@ -384,7 +384,7 @@ class OgMembership extends ContentEntityBase implements OgMembershipInterface {
         'weight' => -1,
         'settings' => [
           'match_operator' => 'CONTAINS',
-          'size' => '60',
+          'size' => 60,
           'placeholder' => '',
         ],
       ])

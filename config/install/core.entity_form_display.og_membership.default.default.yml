@@ -18,4 +18,17 @@ content:
       rows: 2
       placeholder: ''
     third_party_settings: {  }
+  roles:
+    type: options_buttons
+    weight: 0
+    settings: {  }
+    third_party_settings: {  }
+  uid:
+    type: entity_reference_autocomplete
+    weight: -1
+    settings:
+      match_operator: CONTAINS
+      size: 60
+      placeholder: ''
+    third_party_settings: {  }
 hidden: {  }
