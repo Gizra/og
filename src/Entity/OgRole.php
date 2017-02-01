@@ -234,7 +234,6 @@ class OgRole extends Role implements OgRoleInterface {
   public static function loadByGroupAndName(EntityInterface $group, $name) {
     $role_id = "{$group->getEntityTypeId()}-{$group->bundle()}-$name";
     return self::load($role_id);
->>>>>>> 8.x-1.x
   }
 
   /**
