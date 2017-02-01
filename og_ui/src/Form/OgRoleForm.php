@@ -33,6 +33,21 @@ class OgRoleForm extends EntityForm {
       '#maxlength' => 64,
       '#description' => $this->t('The name for this role. Example: "Moderator", "Editorial board", "Site architect".'),
     ];
+    $form['name'] = array(
+      '#type' => 'machine_name',
+      '#default_value' => $entity->id(),
+      '#required' => TRUE,
+      '#disabled' => !$entity->isNew(),
+      '#size' => 30,
+      '#maxlength' => 64,
+      '#machine_name' => array(
+        'exists' => ['\Drupal\og_uid\Entity\OgRole', 'load'],
+      ),
+    );
+    $form['weight'] = array(
+      '#type' => 'value',
+      '#value' => $entity->getWeight(),
+    );
 
     return parent::form($form, $form_state, $entity);
   }
@@ -45,6 +60,7 @@ class OgRoleForm extends EntityForm {
 
     // Prevent leading and trailing spaces in role names.
     $entity->set('label', trim($entity->label()));
+    $entity->set('name', trim($entity->get('name')));
     $status = $entity->save();
 
     $edit_link = $this->entity->link($this->t('Edit'));
@@ -75,6 +91,20 @@ class OgRoleForm extends EntityForm {
   public function editRoleTitleCallback(OgRole $og_role) {
     return $this->t('Edit OG role %label', [
       '%label' => $og_role->getLabel(),
+    ]);
+  }
+
+  /**
+   * @param string $bundle
+   *   Entity type bundle.
+   *
+   * @return \Drupal\Core\StringTranslation\TranslatableMarkup
+   *   An object that, when cast to a string, returns the translated title
+   *   callback.
+   */
+  public function addRoleTitleCallback($bundle) {
+    return $this->t('Create %bundle OG role', [
+      '%bundle' => $bundle,
     ]);
   }
 
