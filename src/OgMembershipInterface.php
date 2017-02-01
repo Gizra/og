@@ -82,7 +82,7 @@ interface OgMembershipInterface extends ContentEntityInterface {
   /**
    * Gets the membership's owner.
    *
-   * @return \Drupal\Core\Session\AccountInterface $user
+   * @return \Drupal\Core\Session\AccountInterface
    *   The user object referenced by the membership.
    */
   public function getUser();
@@ -101,7 +101,7 @@ interface OgMembershipInterface extends ContentEntityInterface {
   /**
    * Gets the group associated with the membership.
    *
-   * @return \Drupal\Core\Entity\EntityInterface $group
+   * @return \Drupal\Core\Entity\EntityInterface
    *   The group object which the membership reference to.
    */
   public function getGroup();
@@ -206,5 +206,29 @@ interface OgMembershipInterface extends ContentEntityInterface {
    *   TRUE if the user has permission.
    */
   public function hasPermission($permission);
+
+  /**
+   * Returns TRUE if the OG membership is active.
+   *
+   * @return bool
+   *   TRUE if the OG membership is active, false otherwise.
+   */
+  public function isActive();
+
+  /**
+   * Returns TRUE if the OG membership is pending.
+   *
+   * @return bool
+   *   TRUE if the OG membership is pending, false otherwise.
+   */
+  public function isPending();
+
+  /**
+   * Returns TRUE if the OG membership is blocked.
+   *
+   * @return bool
+   *   TRUE if the OG membership is blocked, false otherwise.
+   */
+  public function isBlocked();
 
 }

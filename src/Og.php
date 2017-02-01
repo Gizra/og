@@ -8,7 +8,6 @@ use Drupal\Core\Field\FieldDefinitionInterface;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\field\Entity\FieldConfig;
 use Drupal\field\Entity\FieldStorageConfig;
-use Drupal\og\Entity\OgRole;
 
 /**
  * A static helper class for OG.
@@ -123,7 +122,7 @@ class Og {
     $view_display->save();
 
     // Refresh the group manager data, we have added a group type.
-    static::groupManager()->resetGroupRelationMap();
+    static::groupTypeManager()->resetGroupRelationMap();
 
     return $field_definition;
   }
@@ -196,10 +195,9 @@ class Og {
    *   Defaults to active memberships.
    *
    * @return bool
-   *   TRUE if the entity (e.g. the user or node) belongs to a group with
-   *   a certain state.
+   *   TRUE if the user belongs to a group with a certain state.
    */
-  public static function isMember(EntityInterface $group, AccountInterface $user, $states = [OgMembershipInterface::STATE_ACTIVE]) {
+  public static function isMember(EntityInterface $group, AccountInterface $user, array $states = [OgMembershipInterface::STATE_ACTIVE]) {
     /** @var \Drupal\og\MembershipManagerInterface $membership_manager */
     $membership_manager = \Drupal::service('og.membership_manager');
     return $membership_manager->isMember($group, $user, $states);
@@ -251,13 +249,13 @@ class Og {
    *   True or false if the given entity is group.
    */
   public static function isGroup($entity_type_id, $bundle_id) {
-    return static::groupManager()->isGroup($entity_type_id, $bundle_id);
+    return static::groupTypeManager()->isGroup($entity_type_id, $bundle_id);
   }
 
   /**
    * Check if the given entity type and bundle is a group content.
    *
-   * This is just a convenience wrapper around Og::getAllGroupAudienceFields().
+   * This works by checking if the bundle has one or more group audience fields.
    *
    * @param string $entity_type_id
    *   The entity type.
@@ -268,7 +266,7 @@ class Og {
    *   True or false if the given entity is group content.
    */
   public static function isGroupContent($entity_type_id, $bundle_id) {
-    return (bool) OgGroupAudienceHelper::getAllGroupAudienceFields($entity_type_id, $bundle_id);
+    return \Drupal::service('og.group_audience_helper')->hasGroupAudienceField($entity_type_id, $bundle_id);
   }
 
   /**
@@ -280,7 +278,7 @@ class Og {
    *   The bundle name.
    */
   public static function addGroup($entity_type_id, $bundle_id) {
-    static::groupManager()->addGroup($entity_type_id, $bundle_id);
+    static::groupTypeManager()->addGroup($entity_type_id, $bundle_id);
   }
 
   /**
@@ -295,45 +293,18 @@ class Og {
    *   True or false if the action succeeded.
    */
   public static function removeGroup($entity_type_id, $bundle_id) {
-    return static::groupManager()->removeGroup($entity_type_id, $bundle_id);
+    return static::groupTypeManager()->removeGroup($entity_type_id, $bundle_id);
   }
 
   /**
    * Returns the group manager instance.
    *
-   * @return \Drupal\og\GroupManager
+   * @return \Drupal\og\GroupTypeManager
    *   Returns the group manager.
    */
-  public static function groupManager() {
+  public static function groupTypeManager() {
     // @todo store static reference for this?
-    return \Drupal::service('og.group.manager');
-  }
-
-  /**
-   * Get a role by the group's bundle and role name.
-   *
-   * @param string $entity_type_id
-   *   The group entity type ID.
-   * @param string $bundle
-   *   The group bundle name.
-   * @param string $role_name
-   *   The role name.
-   *
-   * @return \Drupal\og\OgRoleInterface|null
-   *   The OG role object, or NULL if a matching role was not found.
-   */
-  public static function getRole($entity_type_id, $bundle, $role_name) {
-    return OgRole::load($entity_type_id . '-' . $bundle . '-' . $role_name);
-  }
-
-  /**
-   * Return the og permission handler instance.
-   *
-   * @return \Drupal\og\OgPermissionHandler
-   *   Returns the OG permissions handler.
-   */
-  public static function permissionHandler() {
-    return \Drupal::service('og.permissions');
+    return \Drupal::service('og.group_type_manager');
   }
 
   /**
@@ -381,11 +352,12 @@ class Og {
    * @param string $plugin_id
    *   The plugin ID, which is also the default field name.
    *
-   * @throws \Exception
-   *
    * @return OgFieldBase|bool
    *   An array with the field storage config and field config definitions, or
    *   FALSE if none found.
+   *
+   * @throws \Exception
+   *   Thrown when the requested plugin is not valid.
    */
   protected static function getFieldBaseDefinition($plugin_id) {
     /** @var OgFieldsPluginManager $plugin_manager */
@@ -409,9 +381,11 @@ class Og {
    *   Returns the OG selection handler.
    *
    * @throws \Exception
+   *   Thrown when the passed in field definition is not of a group audience
+   *   field.
    */
   public static function getSelectionHandler(FieldDefinitionInterface $field_definition, array $options = []) {
-    if (!OgGroupAudienceHelper::isGroupAudienceField($field_definition)) {
+    if (!\Drupal::service('og.group_audience_helper')->isGroupAudienceField($field_definition)) {
       $field_name = $field_definition->getName();
       throw new \Exception("The field $field_name is not an audience field.");
     }

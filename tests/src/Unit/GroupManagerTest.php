@@ -7,10 +7,12 @@ use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Entity\EntityStorageInterface;
 use Drupal\Core\Entity\EntityTypeBundleInfoInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
+use Drupal\Core\Routing\RouteBuilderInterface;
 use Drupal\Core\State\StateInterface;
 use Drupal\og\Event\GroupCreationEvent;
 use Drupal\og\Event\GroupCreationEventInterface;
-use Drupal\og\GroupManager;
+use Drupal\og\GroupTypeManager;
+use Drupal\og\OgGroupAudienceHelperInterface;
 use Drupal\og\PermissionManagerInterface;
 use Drupal\og\OgRoleManagerInterface;
 use Drupal\Tests\UnitTestCase;
@@ -23,7 +25,7 @@ use Symfony\Component\EventDispatcher\EventDispatcherInterface;
  * Tests the group manager.
  *
  * @group og
- * @coversDefaultClass \Drupal\og\GroupManager
+ * @coversDefaultClass \Drupal\og\GroupTypeManager
  */
 class GroupManagerTest extends UnitTestCase {
 
@@ -105,6 +107,20 @@ class GroupManagerTest extends UnitTestCase {
   protected $ogRoleManager;
 
   /**
+   * The route builder service used in the test.
+   *
+   * @var \Drupal\Core\Routing\RouteBuilderInterface|\Prophecy\Prophecy\ObjectProphecy
+   */
+  protected $routeBuilder;
+
+  /**
+   * The OG group audience helper.
+   *
+   * @var \Drupal\og\OgGroupAudienceHelperInterface|\Prophecy\Prophecy\ObjectProphecy
+   */
+  protected $groupAudienceHelper;
+
+  /**
    * {@inheritdoc}
    */
   public function setUp() {
@@ -119,6 +135,8 @@ class GroupManagerTest extends UnitTestCase {
     $this->permissionEvent = $this->prophesize(PermissionEventInterface::class);
     $this->permissionManager = $this->prophesize(PermissionManagerInterface::class);
     $this->state = $this->prophesize(StateInterface::class);
+    $this->routeBuilder = $this->prophesize(RouteBuilderInterface::class);
+    $this->groupAudienceHelper = $this->prophesize(OgGroupAudienceHelperInterface::class);
   }
 
   /**
@@ -130,7 +148,7 @@ class GroupManagerTest extends UnitTestCase {
     // Just creating an instance should be lightweight, no methods should be
     // called.
     $group_manager = $this->createGroupManager();
-    $this->assertInstanceOf(GroupManager::class, $group_manager);
+    $this->assertInstanceOf(GroupTypeManager::class, $group_manager);
   }
 
   /**
@@ -305,7 +323,7 @@ class GroupManagerTest extends UnitTestCase {
   /**
    * Creates a group manager instance with a mock config factory.
    *
-   * @return \Drupal\og\GroupManager
+   * @return \Drupal\og\GroupTypeManager
    *   Returns the group manager.
    */
   protected function createGroupManager() {
@@ -314,14 +332,16 @@ class GroupManagerTest extends UnitTestCase {
       ->willReturn($this->entityStorage->reveal())
       ->shouldBeCalled();
 
-    return new GroupManager(
+    return new GroupTypeManager(
       $this->configFactory->reveal(),
       $this->entityTypeManager->reveal(),
       $this->entityTypeBundleInfo->reveal(),
       $this->eventDispatcher->reveal(),
       $this->state->reveal(),
       $this->permissionManager->reveal(),
-      $this->ogRoleManager->reveal()
+      $this->ogRoleManager->reveal(),
+      $this->routeBuilder->reveal(),
+      $this->groupAudienceHelper->reveal()
     );
   }
 
@@ -331,7 +351,7 @@ class GroupManagerTest extends UnitTestCase {
    * @param array $groups
    *   The expected group map that will be returned by the mocked config.
    */
-  protected function expectGroupMapRetrieval($groups = []) {
+  protected function expectGroupMapRetrieval(array $groups = []) {
     $this->configFactory->get('og.settings')
       ->willReturn($this->config->reveal())
       ->shouldBeCalled();

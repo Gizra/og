@@ -8,6 +8,7 @@ use Drupal\KernelTests\KernelTestBase;
 use Drupal\og\Entity\OgMembership;
 use Drupal\og\Og;
 use Drupal\og\OgMembershipInterface;
+use Drupal\og\OgRoleInterface;
 use Drupal\user\Entity\User;
 use Drupal\user\UserInterface;
 
@@ -75,7 +76,7 @@ class OgMembershipTest extends KernelTestBase {
     $this->group = $group;
 
     // Add that as a group.
-    Og::groupManager()->addGroup('entity_test', $group->bundle());
+    Og::groupTypeManager()->addGroup('entity_test', $group->bundle());
 
     // Create test user.
     $user = User::create(['name' => $this->randomString()]);
@@ -103,6 +104,31 @@ class OgMembershipTest extends KernelTestBase {
 
     $this->assertInstanceOf(UserInterface::class, $membership->getUser());
     $this->assertEquals($this->user->id(), $membership->getUser()->id());
+  }
+
+  /**
+   * Tests getting an ogMembership from the static cache.
+   */
+  public function testMembershipStaticCache() {
+    // Create a second bundle and add as a group.
+    $another_group = EntityTest::create([
+      'type' => Unicode::strtolower($this->randomMachineName()),
+      'name' => $this->randomString(),
+    ]);
+    $another_group->save();
+    Og::groupTypeManager()->addGroup('entity_test', $another_group->bundle());
+
+    $membership = Og::createMembership($this->group, $this->user);
+    $membership->save();
+    // Load the membership to instantiate the membership static cache.
+    $membership = Og::getMembership($this->group, $this->user);
+    $this->assertInstanceOf(OgMembership::class, $membership);
+
+    // Create another membership for the given user on the same request.
+    $membership = Og::createMembership($another_group, $this->user);
+    $membership->save();
+    $membership = Og::getMembership($another_group, $this->user);
+    $this->assertInstanceOf(OgMembership::class, $membership);
   }
 
   /**
@@ -149,6 +175,104 @@ class OgMembershipTest extends KernelTestBase {
     /** @var OgMembershipInterface $membership */
     $membership = Og::createMembership($non_group, $this->user);
     $membership->save();
+  }
+
+  /**
+   * Tests saving an existing membership.
+   *
+   * @covers ::preSave
+   * @expectedException \Drupal\Core\Entity\EntityStorageException
+   */
+  public function testSaveExistingMembership() {
+    $group = EntityTest::create([
+      'type' => Unicode::strtolower($this->randomMachineName()),
+      'name' => $this->randomString(),
+    ]);
+
+    $group->save();
+
+    Og::groupTypeManager()->addGroup('entity_test', $group->bundle());
+
+    /** @var OgMembershipInterface $membership */
+    $membership1 = Og::createMembership($group, $this->user);
+    $membership1->save();
+
+    $membership2 = Og::createMembership($group, $this->user);
+    $membership2->save();
+  }
+
+  /**
+   * Tests re-saving a membership.
+   *
+   * @covers ::preSave
+   */
+  public function testSaveSameMembershipTwice() {
+    $group = EntityTest::create([
+      'type' => Unicode::strtolower($this->randomMachineName()),
+      'name' => $this->randomString(),
+    ]);
+
+    $group->save();
+
+    Og::groupTypeManager()->addGroup('entity_test', $group->bundle());
+
+    /** @var OgMembershipInterface $membership */
+    $membership = Og::createMembership($group, $this->user);
+    $membership->save();
+
+    // Block membership and save.
+    $membership->setState(OgMembershipInterface::STATE_BLOCKED);
+    $membership->save();
+  }
+
+  /**
+   * Tests boolean check for states.
+   *
+   * @covers ::isActive
+   * @covers ::isPending
+   * @covers ::isBlocked
+   * @dataProvider statesProvider
+   */
+  public function testGetSetState($state, $method) {
+    $membership = Og::createMembership($this->group, $this->user);
+    $membership->setState($state)->save();
+
+    $membership = $this->entityTypeManager->getStorage('og_membership')->loadUnchanged($membership->id());
+
+    $this->assertEquals($state, $membership->getState());
+    $this->assertTrue($membership->$method());
+  }
+
+  /**
+   * Tests that membership has "member" role when roles are retrieved.
+   *
+   * @covers ::getRoles
+   */
+  public function testMemberRole() {
+    $membership = Og::createMembership($this->group, $this->user);
+    $membership->setState(OgMembershipInterface::STATE_ACTIVE)->save();
+
+    $membership = $this->entityTypeManager->getStorage('og_membership')->loadUnchanged($membership->id());
+
+    $roles = $membership->getRoles();
+    $role = current($roles);
+
+    $this->assertEquals(1, count($roles));
+    $this->assertEquals(OgRoleInterface::AUTHENTICATED, $role->getName());
+  }
+
+  /**
+   * Provides test data to check states.
+   *
+   * @return array
+   *   Array with the state names and the method to check their flags.
+   */
+  public function statesProvider() {
+    return [
+      [OgMembershipInterface::STATE_ACTIVE, 'isActive'],
+      [OgMembershipInterface::STATE_PENDING, 'isPending'],
+      [OgMembershipInterface::STATE_BLOCKED, 'isBlocked'],
+    ];
   }
 
 }

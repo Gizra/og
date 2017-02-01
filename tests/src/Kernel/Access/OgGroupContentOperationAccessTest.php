@@ -10,7 +10,7 @@ use Drupal\node\Entity\NodeType;
 use Drupal\og\Entity\OgMembership;
 use Drupal\og\Entity\OgRole;
 use Drupal\og\Og;
-use Drupal\og\OgGroupAudienceHelper;
+use Drupal\og\OgGroupAudienceHelperInterface;
 use Drupal\og\OgMembershipInterface;
 use Drupal\og\OgRoleInterface;
 use Drupal\user\Entity\User;
@@ -108,7 +108,7 @@ class OgGroupContentOperationAccessTest extends KernelTestBase {
     $this->users['group_owner']->save();
 
     // Declare that the test entity is a group type.
-    Og::groupManager()->addGroup('entity_test', $this->groupBundle);
+    Og::groupTypeManager()->addGroup('entity_test', $this->groupBundle);
 
     // Create the test group.
     $this->group = EntityTest::create([
@@ -209,14 +209,14 @@ class OgGroupContentOperationAccessTest extends KernelTestBase {
         ],
       ],
     ];
-    Og::createField(OgGroupAudienceHelper::DEFAULT_FIELD, 'comment', 'newsletter', $settings);
+    Og::createField(OgGroupAudienceHelperInterface::DEFAULT_FIELD, 'comment', 'newsletter', $settings);
 
     // Create an 'article' group content type.
     NodeType::create([
       'type' => 'article',
       'name' => 'Article',
     ])->save();
-    Og::createField(OgGroupAudienceHelper::DEFAULT_FIELD, 'node', 'article', $settings);
+    Og::createField(OgGroupAudienceHelperInterface::DEFAULT_FIELD, 'node', 'article', $settings);
 
     // Create a group content entity owned by each test user, for both the
     // 'newsletter' and 'article' bundles.
@@ -237,7 +237,7 @@ class OgGroupContentOperationAccessTest extends KernelTestBase {
             $values = [
               'title' => $this->randomString(),
               'type' => $bundle_id,
-              OgGroupAudienceHelper::DEFAULT_FIELD => [['target_id' => $this->group->id()]],
+              OgGroupAudienceHelperInterface::DEFAULT_FIELD => [['target_id' => $this->group->id()]],
             ];
             break;
 
@@ -247,7 +247,7 @@ class OgGroupContentOperationAccessTest extends KernelTestBase {
               'comment_type' => $bundle_id,
               'entity_id' => $this->group->id(),
               'entity_type' => 'entity_test',
-              OgGroupAudienceHelper::DEFAULT_FIELD => [['target_id' => $this->group->id()]],
+              OgGroupAudienceHelperInterface::DEFAULT_FIELD => [['target_id' => $this->group->id()]],
             ];
             break;
         }

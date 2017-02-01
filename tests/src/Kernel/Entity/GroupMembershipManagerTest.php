@@ -8,7 +8,7 @@ use Drupal\entity_test\Entity\EntityTest;
 use Drupal\node\Entity\Node;
 use Drupal\node\Entity\NodeType;
 use Drupal\og\Og;
-use Drupal\og\OgGroupAudienceHelper;
+use Drupal\og\OgGroupAudienceHelperInterface;
 use Drupal\user\Entity\User;
 
 /**
@@ -17,7 +17,7 @@ use Drupal\user\Entity\User;
  * @group og
  * @coversDefaultClass \Drupal\og\MembershipManager
  */
-class GetGroupsTest extends KernelTestBase {
+class GroupMembershipManagerTest extends KernelTestBase {
 
   /**
    * {@inheritdoc}
@@ -80,7 +80,7 @@ class GetGroupsTest extends KernelTestBase {
         'name' => $this->randomString(),
         'type' => $bundle,
       ])->save();
-      Og::groupManager()->addGroup('node', $bundle);
+      Og::groupTypeManager()->addGroup('node', $bundle);
 
       $group = Node::create([
         'title' => $this->randomString(),
@@ -93,7 +93,7 @@ class GetGroupsTest extends KernelTestBase {
       // The Entity Test entity doesn't have 'real' bundles, so we don't need to
       // create one, we can just add the group to the fake bundle.
       $bundle = "entity_test_$i";
-      Og::groupManager()->addGroup('entity_test', $bundle);
+      Og::groupTypeManager()->addGroup('entity_test', $bundle);
 
       $group = EntityTest::create([
         'type' => $bundle,
@@ -116,7 +116,7 @@ class GetGroupsTest extends KernelTestBase {
           ],
         ],
       ];
-      Og::createField(OgGroupAudienceHelper::DEFAULT_FIELD, 'entity_test', $bundle, $settings);
+      Og::createField(OgGroupAudienceHelperInterface::DEFAULT_FIELD, 'entity_test', $bundle, $settings);
     }
 
     // Create a group content entity that references all four groups.

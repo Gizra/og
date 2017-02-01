@@ -6,7 +6,7 @@ use Drupal\Component\Utility\Unicode;
 use Drupal\entity_test\Entity\EntityTestStringId;
 use Drupal\KernelTests\KernelTestBase;
 use Drupal\og\Og;
-use Drupal\og\OgGroupAudienceHelper;
+use Drupal\og\OgGroupAudienceHelperInterface;
 
 /**
  * Checks that groups with string IDs can be referenced.
@@ -74,12 +74,12 @@ class ReferenceStringIdTest extends KernelTestBase {
     $this->group = $group;
 
     // Let OG mark the group entity type as a group.
-    Og::groupManager()->addGroup('entity_test_string_id', $this->bundles[0]);
+    Og::groupTypeManager()->addGroup('entity_test_string_id', $this->bundles[0]);
 
     // Add a group audience field to the second bundle, this will turn it into a
     // group content type.
     $this->fieldName = strtolower($this->randomMachineName());
-    Og::CreateField(OgGroupAudienceHelper::DEFAULT_FIELD, 'entity_test_string_id', $this->bundles[1], [
+    Og::CreateField(OgGroupAudienceHelperInterface::DEFAULT_FIELD, 'entity_test_string_id', $this->bundles[1], [
       'field_name' => $this->fieldName,
     ]);
   }

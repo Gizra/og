@@ -65,10 +65,15 @@ class OgSelection extends DefaultSelection {
     // bundle defined as group.
     $query = $this->getSelectionHandler()->buildEntityQuery($match, $match_operator);
     $target_type = $this->configuration['target_type'];
-    $entityDefinition = \Drupal::entityTypeManager()->getDefinition($target_type);
+    $definition = \Drupal::entityTypeManager()->getDefinition($target_type);
 
-    if ($bundle_key = $entityDefinition->getKey('bundle')) {
-      $bundles = Og::groupManager()->getAllGroupBundles($target_type);
+    if ($bundle_key = $definition->getKey('bundle')) {
+      $bundles = Og::groupTypeManager()->getAllGroupBundles($target_type);
+
+      if (!$bundles) {
+        // If there are no bundles defined, we can return early.
+        return $query;
+      }
       $query->condition($bundle_key, $bundles, 'IN');
     }
 
@@ -77,10 +82,10 @@ class OgSelection extends DefaultSelection {
       return $query;
     }
 
-    $identifier_key = $entityDefinition->getKey('id');
+    $identifier_key = $definition->getKey('id');
 
     $ids = [];
-    if ($this->configuration['handler_settings']['field_mode'] == 'admin') {
+    if (!empty($this->configuration['handler_settings']['field_mode']) && $this->configuration['handler_settings']['field_mode'] == 'admin') {
       // Don't include the groups, the user doesn't have create permission.
       foreach ($user_groups as $delta => $group) {
         $ids[] = $group->id();
@@ -111,7 +116,7 @@ class OgSelection extends DefaultSelection {
   /**
    * Return all the user's groups.
    *
-   * @return ContentEntityInterface[]
+   * @return \Drupal\Core\Entity\ContentEntityInterface[]
    *   Array with the user's group, or an empty array if none found.
    */
   protected function getUserGroups() {

@@ -192,7 +192,9 @@ class OgMembership extends ContentEntityBase implements OgMembershipInterface {
    */
   public function getRoles() {
     // Add the member role.
-    $roles[] = Og::getRole($this->getGroupEntityType(), $this->getGroup()->bundle(), OgRoleInterface::AUTHENTICATED);
+    $roles = [
+      OgRole::getRole($this->getGroupEntityType(), $this->getGroup()->bundle(), OgRoleInterface::AUTHENTICATED),
+    ];
     $roles = array_merge($roles, $this->get('roles')->referencedEntities());
     return $roles;
   }
@@ -201,6 +203,9 @@ class OgMembership extends ContentEntityBase implements OgMembershipInterface {
    * {@inheritdoc}
    */
   public function setRoles(array $roles = []) {
+    $roles = array_filter($roles, function (OgRole $role) {
+      return !($role->getName() == OgRoleInterface::AUTHENTICATED);
+    });
     $role_ids = array_map(function (OgRole $role) {
       return $role->id();
     }, $roles);
@@ -224,11 +229,11 @@ class OgMembership extends ContentEntityBase implements OgMembershipInterface {
    */
   public function hasPermission($permission) {
     // Blocked users do not have any permissions.
-    if ($this->getState() === OgMembershipInterface::STATE_BLOCKED) {
+    if ($this->isBlocked()) {
       return FALSE;
     }
 
-    return array_filter($this->getRoles(), function (OgRole $role) use ($permission) {
+    return (bool) array_filter($this->getRoles(), function (OgRole $role) use ($permission) {
       return $role->hasPermission($permission);
     });
   }
@@ -265,7 +270,7 @@ class OgMembership extends ContentEntityBase implements OgMembershipInterface {
       ->setDescription(t('The entity type of the group.'));
 
     $fields['entity_id'] = BaseFieldDefinition::create('string')
-      ->setLabel(t('Group entity id.'))
+      ->setLabel(t('Group entity id'))
       ->setDescription(t("The entity ID of the group."));
 
     $fields['state'] = BaseFieldDefinition::create('string')
@@ -281,7 +286,7 @@ class OgMembership extends ContentEntityBase implements OgMembershipInterface {
 
     $fields['created'] = BaseFieldDefinition::create('created')
       ->setLabel(t('Create'))
-      ->setDescription(t('The Unix timestamp when the group content was created.'));
+      ->setDescription(t('The Unix timestamp when the membership was created.'));
 
     $fields['language'] = BaseFieldDefinition::create('language')
       ->setLabel(t('Language'))
@@ -298,8 +303,8 @@ class OgMembership extends ContentEntityBase implements OgMembershipInterface {
     // This will watch actual empty values and '0'.
     if (!$this->get('uid')->target_id) {
       // Throw a generic logic exception as this will likely get caught in
-      // \Drupal\Core\Entity\Sql\SqlContentEntityStorage::save and turned in an
-      // EntityStorageException anyway.
+      // \Drupal\Core\Entity\Sql\SqlContentEntityStorage::save and turned into
+      // an EntityStorageException anyway.
       throw new \LogicException('OG membership can not be created for an empty or anonymous user.');
     }
 
@@ -319,6 +324,38 @@ class OgMembership extends ContentEntityBase implements OgMembershipInterface {
       throw new \LogicException(sprintf('Entity type %s with ID %s is not an OG group.', $entity_type_id, $group->id()));
     }
 
+    // Make sure we don't save non-member or member role with a membership.
+    foreach ($this->getRoles() as $role) {
+      /** @var \Drupal\og\Entity\OgRole $role */
+      if ($role->getName() == OgRoleInterface::ANONYMOUS) {
+        throw new \LogicException('Cannot save an OgMembership with reference to a non-member role.');
+      }
+      elseif ($role->getName() == OgRoleInterface::AUTHENTICATED) {
+        $this->revokeRole($role);
+      }
+    }
+
+    // Check for an existing membership.
+    $query = \Drupal::entityQuery('og_membership');
+    $query
+      ->condition('uid', $this->get('uid')->target_id)
+      ->condition('entity_id', $this->get('entity_id')->value)
+      ->condition('entity_type', $this->get('entity_type')->value);
+
+    if (!$this->isNew()) {
+      // Filter out this membership.
+      $query->condition('id', $this->id(), '<>');
+    }
+
+    $count = $query
+      ->range(0, 1)
+      ->count()
+      ->execute();
+
+    if ($count) {
+      throw new \LogicException(sprintf('An OG membership already exists for group of entity-type %s and ID: %s', $entity_type_id, $this->getGroup()->id()));
+    }
+
     parent::preSave($storage);
   }
 
@@ -332,6 +369,9 @@ class OgMembership extends ContentEntityBase implements OgMembershipInterface {
     Og::reset();
     \Drupal::service('og.access')->reset();
 
+    // Invalidate the group membership manager.
+    \Drupal::service('og.membership_manager')->reset();
+
     return $result;
   }
 
@@ -342,6 +382,27 @@ class OgMembership extends ContentEntityBase implements OgMembershipInterface {
     // Use the default membership type by default.
     $values += ['type' => OgMembershipInterface::TYPE_DEFAULT];
     return parent::create($values);
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function isActive() {
+    return $this->getState() === OgMembershipInterface::STATE_ACTIVE;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function isPending() {
+    return $this->getState() === OgMembershipInterface::STATE_PENDING;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function isBlocked() {
+    return $this->getState() === OgMembershipInterface::STATE_BLOCKED;
   }
 
 }

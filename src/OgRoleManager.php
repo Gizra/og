@@ -34,7 +34,7 @@ class OgRoleManager implements OgRoleManagerInterface {
   protected $permissionManager;
 
   /**
-   * Constructs an GroupManager object.
+   * Constructs an OgRoleManager object.
    *
    * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entity_type_manager
    *   The entity type manager.
@@ -112,6 +112,17 @@ class OgRoleManager implements OgRoleManagerInterface {
     }
 
     return $roles;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getRolesByBundle($entity_type_id, $bundle) {
+    $properties = [
+      'group_type' => $entity_type_id,
+      'group_bundle' => $bundle,
+    ];
+    return $this->ogRoleStorage->loadByProperties($properties);
   }
 
   /**

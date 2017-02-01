@@ -102,7 +102,7 @@ class GetUserGroupsTest extends KernelTestBase {
     $this->user3->save();
 
     // Define the group content as group.
-    Og::groupManager()->addGroup('entity_test', $this->groupBundle);
+    Og::groupTypeManager()->addGroup('entity_test', $this->groupBundle);
 
     // Create a group and associate with user 1.
     $this->group1 = EntityTest::create([

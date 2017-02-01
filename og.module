@@ -5,18 +5,17 @@
  * Enable users to create and manage groups with roles and permissions.
  */
 
-use Drupal\user\UserInterface;
 use Drupal\Core\Access\AccessResult;
+use Drupal\Core\Cache\Cache;
 use Drupal\Core\Entity\ContentEntityInterface;
 use Drupal\Core\Entity\EntityInterface;
-use Drupal\Core\Field\FieldDefinitionInterface;
-use Drupal\Core\Field\FieldItemListInterface;
+use Drupal\Core\Entity\EntityTypeInterface;
+use Drupal\Core\Field\BaseFieldDefinition;
 use Drupal\Core\Session\AccountInterface;
-use Drupal\og\Entity\OgMembership;
 use Drupal\og\Og;
-use Drupal\og\OgGroupAudienceHelper;
-use Drupal\og\OgMembershipInterface;
+use Drupal\og\OgGroupAudienceHelperInterface;
 use Drupal\user\EntityOwnerInterface;
+use Drupal\user\UserInterface;
 
 /**
  * Group default roles and permissions field.
@@ -29,6 +28,9 @@ define('OG_DEFAULT_ACCESS_FIELD', 'og_roles_permissions');
  * Subscribe the group manager.
  */
 function og_entity_insert(EntityInterface $entity) {
+  // Invalidate cache tags if new group content is created.
+  og_invalidate_group_content_cache_tags($entity);
+
   if (!Og::isGroup($entity->getEntityTypeId(), $entity->bundle())) {
     // Not a group entity.
     return;
@@ -45,6 +47,14 @@ function og_entity_insert(EntityInterface $entity) {
 
   $membership = Og::createMembership($entity, $entity->getOwner());
   $membership->save();
+}
+
+/**
+ * Implements hook_entity_update().
+ */
+function og_entity_update(EntityInterface $entity) {
+  // Invalidate cache tags if a group or group content entity is updated.
+  og_invalidate_group_content_cache_tags($entity);
 }
 
 /**
@@ -69,6 +79,19 @@ function og_entity_predelete(EntityInterface $entity) {
   if ($entity instanceof UserInterface) {
     // @todo Delete memberships when deleting users.
     // @see https://github.com/amitaibu/og/issues/176
+  }
+}
+
+/**
+ * Implements hook_entity_delete().
+ */
+function og_entity_delete(EntityInterface $entity) {
+  // Invalidate cache tags after a group or group content entity is deleted.
+  og_invalidate_group_content_cache_tags($entity);
+
+  // Clear static caches after a group or group content entity is deleted.
+  if (Og::isGroup($entity->getEntityTypeId(), $entity->bundle()) || Og::isGroupContent($entity->getEntityTypeId(), $entity->bundle())) {
+    Og::invalidateCache();
   }
 }
 
@@ -130,13 +153,10 @@ function og_entity_create_access(AccountInterface $account, array $context, $bun
     return $access_result;
   }
 
-  if ($entity_type_id == 'node') {
-    $node_access_strict = \Drupal::config('og.settings')->get('node_access_strict');
-
-    if (!$node_access_strict && $account->hasPermission("create $bundle content")) {
-      // The user has the core permission and strict node access is not set.
-      return AccessResult::neutral();
-    }
+  $node_access_strict = \Drupal::config('og.settings')->get('node_access_strict');
+  if ($entity_type_id == 'node' && !$node_access_strict && $account->hasPermission("create $bundle content")) {
+    // The user has the core permission and strict node access is not set.
+    return AccessResult::neutral();
   }
 
   // We can't check if user has create permissions, as there is no group
@@ -150,14 +170,14 @@ function og_entity_create_access(AccountInterface $account, array $context, $bun
   $field_definitions = \Drupal::service('entity_field.manager')->getFieldDefinitions($entity_type_id, $bundle);
   foreach ($field_definitions as $field_name => $field_definition) {
     /** @var \Drupal\Core\Field\FieldDefinitionInterface $field_definition */
-    if (!OgGroupAudienceHelper::isGroupAudienceField($field_definition)) {
+    if (!\Drupal::service('og.group_audience_helper')->isGroupAudienceField($field_definition)) {
       continue;
     }
 
     $handler = Og::getSelectionHandler($field_definition);
 
     if ($handler->getReferenceableEntities()) {
-      return Accessresult::neutral();
+      return AccessResult::neutral();
     }
 
     // Allow users to create content outside of groups, if none of the
@@ -167,6 +187,45 @@ function og_entity_create_access(AccountInterface $account, array $context, $bun
 
   // Otherwise, ignore or deny based on whether strict entity access is set.
   return $required ? AccessResult::forbiddenIf($node_access_strict) : AccessResult::neutral();
+}
+
+/**
+ * Implements hook_entity_bundle_field_info().
+ *
+ * Add a read only property to group entities as a group flag.
+ */
+function og_entity_bundle_field_info(EntityTypeInterface $entity_type, $bundle, array $base_field_definitions) {
+  if (!Og::isGroup($entity_type->id(), $bundle)) {
+    // Not a group type.
+    return NULL;
+  }
+
+  $fields = [];
+  $fields['og_group'] = BaseFieldDefinition::create('og_group')
+    ->setLabel(t('OG Group'))
+    ->setComputed(TRUE)
+    ->setTranslatable(FALSE)
+    ->setDefaultValue(TRUE)
+    ->setReadOnly(TRUE);
+
+  return $fields;
+}
+
+/**
+ * Implements hook_entity_bundle_field_info_alter().
+ *
+ * Set the default field formatter of fields of type OG group.
+ */
+function og_entity_bundle_field_info_alter(&$fields, EntityTypeInterface $entity_type, $bundle) {
+  if (!isset($fields['og_group'])) {
+    // No OG group fields.
+    return;
+  }
+
+  $fields['og_group']->setDisplayOptions('view', [
+    'weight' => 0,
+    'type' => 'og_group_subscribe',
+  ])->setDisplayConfigurable('view', TRUE);
 }
 
 /**
@@ -181,6 +240,53 @@ function og_field_formatter_info_alter(array &$info) {
       continue;
     }
 
-    $info[$key]['field_types'][] = OgGroupAudienceHelper::GROUP_REFERENCE;
+    $info[$key]['field_types'][] = OgGroupAudienceHelperInterface::GROUP_REFERENCE;
+  }
+}
+
+/**
+ * Implements hook_field_widget_info_alter().
+ */
+function og_field_widget_info_alter(array &$info) {
+  $info['options_buttons']['field_types'][] = OgGroupAudienceHelperInterface::GROUP_REFERENCE;
+}
+
+/**
+ * Implements hook_entity_type_alter().
+ *
+ * Add link template to groups. We add it to all the entity types, and later on
+ * return the correct access, depending if the bundle is indeed a group and
+ * accessible. We do not filter here the entity type by groups, so whenever
+ * GroupTypeManager::addGroup is called, it's enough to mark route to be rebuilt
+ * via RouteBuilder::setRebuildNeeded.
+ */
+function og_entity_type_alter(array &$entity_types) {
+  /** @var \Drupal\Core\Entity\EntityTypeInterface $entity_type */
+  foreach ($entity_types as $entity_type_id => $entity_type) {
+    $entity_type->setLinkTemplate('og-admin-routes', "/group/$entity_type_id/{{$entity_type_id}}/admin");
+  }
+}
+
+/**
+ * Invalidates group content cache tags for the groups this entity belongs to.
+ *
+ * @param \Drupal\Core\Entity\EntityInterface $entity
+ *   The group content entity that is being created, changed or deleted and is
+ *   the direct cause for the need to invalidate cached group content.
+ */
+function og_invalidate_group_content_cache_tags(EntityInterface $entity) {
+  // If group content is created or updated, invalidate the group content cache
+  // tags for each of the groups this group content belongs to. This allows
+  // group listings to be cached effectively. Also invalidate the tags if the
+  // group itself changes. The cache tag format is
+  // 'og-group-content:{group entity type}:{group entity id}'.
+  if (Og::isGroup($entity->getEntityTypeId(), $entity->bundle()) || Og::isGroupContent($entity->getEntityTypeId(), $entity->bundle())) {
+    $tags = [];
+    foreach (\Drupal::service('og.membership_manager')->getGroupIds($entity) as $entity_type => $ids) {
+      foreach ($ids as $id) {
+        $tags[] = "$entity_type:$id";
+      }
+    }
+    Cache::invalidateTags(Cache::buildTags('og-group-content', $tags));
   }
 }

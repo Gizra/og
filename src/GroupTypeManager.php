@@ -5,6 +5,7 @@ namespace Drupal\og;
 use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Entity\EntityTypeBundleInfoInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
+use Drupal\Core\Routing\RouteBuilderInterface;
 use Drupal\Core\State\StateInterface;
 use Drupal\og\Event\GroupCreationEvent;
 use Drupal\og\Event\GroupCreationEventInterface;
@@ -13,7 +14,7 @@ use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 /**
  * A manager to keep track of which entity type/bundles are OG group enabled.
  */
-class GroupManager {
+class GroupTypeManager {
 
   /**
    * The key used to identify the cached version of the group relation map.
@@ -91,9 +92,10 @@ class GroupManager {
    * Do not access this property directly, use $this->getGroupRelationMap()
    * instead.
    *
-   * @var array $groupRelationMap
-   *   An associative array representing group and group content relations, in
-   *   the following format:
+   * @var array
+   *   An associative array representing group and group content relations.
+   *
+   * This mapping is in the following format:
    * @code
    *   [
    *     'group_entity_type_id' => [
@@ -123,7 +125,21 @@ class GroupManager {
   protected $ogRoleManager;
 
   /**
-   * Constructs an GroupManager object.
+   * The route builder service.
+   *
+   * @var \Drupal\Core\Routing\RouteBuilderInterface
+   */
+  protected $routeBuilder;
+
+  /**
+   * The OG group audience helper.
+   *
+   * @var \Drupal\og\OgGroupAudienceHelperInterface
+   */
+  protected $groupAudienceHelper;
+
+  /**
+   * Constructs a GroupTypeManager object.
    *
    * @param \Drupal\Core\Config\ConfigFactoryInterface $config_factory
    *   The config factory.
@@ -139,8 +155,12 @@ class GroupManager {
    *   The OG permission manager.
    * @param \Drupal\og\OgRoleManagerInterface $og_role_manager
    *   The OG role manager.
+   * @param \Drupal\Core\Routing\RouteBuilderInterface $route_builder
+   *   The route builder service.
+   * @param \Drupal\og\OgGroupAudienceHelperInterface $group_audience_helper
+   *   The OG group audience helper.
    */
-  public function __construct(ConfigFactoryInterface $config_factory, EntityTypeManagerInterface $entity_type_manager, EntityTypeBundleInfoInterface $entity_type_bundle_info, EventDispatcherInterface $event_dispatcher, StateInterface $state, PermissionManagerInterface $permission_manager, OgRoleManagerInterface $og_role_manager) {
+  public function __construct(ConfigFactoryInterface $config_factory, EntityTypeManagerInterface $entity_type_manager, EntityTypeBundleInfoInterface $entity_type_bundle_info, EventDispatcherInterface $event_dispatcher, StateInterface $state, PermissionManagerInterface $permission_manager, OgRoleManagerInterface $og_role_manager, RouteBuilderInterface $route_builder, OgGroupAudienceHelperInterface $group_audience_helper) {
     $this->configFactory = $config_factory;
     $this->ogRoleStorage = $entity_type_manager->getStorage('og_role');
     $this->entityTypeBundleInfo = $entity_type_bundle_info;
@@ -148,6 +168,8 @@ class GroupManager {
     $this->state = $state;
     $this->permissionManager = $permission_manager;
     $this->ogRoleManager = $og_role_manager;
+    $this->routeBuilder = $route_builder;
+    $this->groupAudienceHelper = $group_audience_helper;
   }
 
   /**
@@ -164,6 +186,24 @@ class GroupManager {
   public function isGroup($entity_type_id, $bundle) {
     $group_map = $this->getGroupMap();
     return isset($group_map[$entity_type_id]) && in_array($bundle, $group_map[$entity_type_id]);
+  }
+
+  /**
+   * Checks if the given entity bundle is group content.
+   *
+   * This is provided as a convenient sister method to ::isGroup(). It is a
+   * simple wrapper for OgGroupAudienceHelperInterface::hasGroupAudienceField().
+   *
+   * @param string $entity_type_id
+   *   The entity type ID.
+   * @param string $bundle
+   *   The bundle name.
+   *
+   * @return bool
+   *   TRUE if the entity bundle is group content.
+   */
+  public function isGroupContent($entity_type_id, $bundle) {
+    return $this->groupAudienceHelper->hasGroupAudienceField($entity_type_id, $bundle);
   }
 
   /**
@@ -193,6 +233,58 @@ class GroupManager {
   }
 
   /**
+   * Returns a list of all group content bundles keyed by entity type.
+   *
+   * This will return a simple list of group content bundles. If you need
+   * information about the relations between groups and group content bundles
+   * then use getGroupRelationMap() instead.
+   *
+   * @return array
+   *   An associative array of group content bundle IDs, keyed by entity type
+   *   ID.
+   *
+   * @see \Drupal\og\GroupTypeManager::getGroupRelationMap()
+   */
+  public function getAllGroupContentBundles() {
+    $bundles = [];
+    foreach ($this->getGroupRelationMap() as $group_entity_type_id => $group_bundle_ids) {
+      foreach ($group_bundle_ids as $group_content_entity_type_ids) {
+        foreach ($group_content_entity_type_ids as $group_content_entity_type_id => $group_content_bundle_ids) {
+          $bundles[$group_content_entity_type_id] = array_merge(isset($bundles[$group_content_entity_type_id]) ? $bundles[$group_content_entity_type_id] : [], $group_content_bundle_ids);
+        }
+      }
+    }
+    return $bundles;
+  }
+
+  /**
+   * Returns a list of all group content bundles filtered by entity type.
+   *
+   * This will return a simple list of group content bundles. If you need
+   * information about the relations between groups and group content bundles
+   * then use getGroupRelationMap() instead.
+   *
+   * @param string $entity_type_id
+   *   Entity type ID to filter the bundles by.
+   *
+   * @return array
+   *   An array of group content bundle IDs.
+   *
+   * @throws \InvalidArgumentException
+   *   Thrown when the passed in entity type ID does not have any group content
+   *   bundles defined.
+   *
+   * @see \Drupal\og\GroupTypeManager::getGroupRelationMap()
+   */
+  public function getAllGroupContentBundlesByEntityType($entity_type_id) {
+    $bundles = $this->getAllGroupContentBundles();
+    if (!isset($bundles[$entity_type_id])) {
+      throw new \InvalidArgumentException("The '$entity_type_id' entity type has no group content bundles.");
+    }
+    return $bundles[$entity_type_id];
+  }
+
+  /**
    * Returns all group bundles that are referenced by the given group content.
    *
    * @param string $group_content_entity_type_id
@@ -208,7 +300,7 @@ class GroupManager {
   public function getGroupBundleIdsByGroupContentBundle($group_content_entity_type_id, $group_content_bundle_id) {
     $bundles = [];
 
-    foreach (OgGroupAudienceHelper::getAllGroupAudienceFields($group_content_entity_type_id, $group_content_bundle_id) as $field) {
+    foreach ($this->groupAudienceHelper->getAllGroupAudienceFields($group_content_entity_type_id, $group_content_bundle_id) as $field) {
       $group_entity_type_id = $field->getSetting('target_type');
       $handler_settings = $field->getSetting('handler_settings');
       $group_bundle_ids = !empty($handler_settings['target_bundles']) ? $handler_settings['target_bundles'] : [];
@@ -278,6 +370,9 @@ class GroupManager {
 
     $this->ogRoleManager->createPerBundleRoles($entity_type_id, $bundle_id);
     $this->refreshGroupMap();
+
+    // Routes will need to be rebuilt.
+    $this->routeBuilder->setRebuildNeeded();
   }
 
   /**
@@ -305,6 +400,9 @@ class GroupManager {
       $this->ogRoleManager->removeRoles($entity_type_id, $bundle_id);
 
       $this->resetGroupMap();
+
+      // Routes will need to be rebuilt.
+      $this->routeBuilder->setRebuildNeeded();
     }
   }
 
@@ -342,7 +440,7 @@ class GroupManager {
    * @return array
    *   The group map.
    */
-  protected function getGroupMap() {
+  public function getGroupMap() {
     if (empty($this->groupMap)) {
       $this->refreshGroupMap();
     }

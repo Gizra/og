@@ -6,7 +6,7 @@ use Drupal\KernelTests\KernelTestBase;
 use Drupal\node\Entity\Node;
 use Drupal\node\Entity\NodeType;
 use Drupal\og\Og;
-use Drupal\og\OgGroupAudienceHelper;
+use Drupal\og\OgGroupAudienceHelperInterface;
 use Drupal\simpletest\ContentTypeCreationTrait;
 use Drupal\simpletest\NodeCreationTrait;
 use Drupal\user\Entity\Role;
@@ -67,7 +67,7 @@ class EntityCreateAccessTest extends KernelTestBase {
       'name' => $this->randomString(),
     ]);
     $this->groupType->save();
-    Og::groupManager()->addGroup('node', 'group');
+    Og::groupTypeManager()->addGroup('node', 'group');
 
     // Add a group audience field to the "post" node type, turning it into a
     // group content type.
@@ -76,7 +76,7 @@ class EntityCreateAccessTest extends KernelTestBase {
       'name' => $this->randomString(),
     ]);
     $this->groupContentType->save();
-    Og::createField(OgGroupAudienceHelper::DEFAULT_FIELD, 'node', 'post');
+    Og::createField(OgGroupAudienceHelperInterface::DEFAULT_FIELD, 'node', 'post');
   }
 
   /**

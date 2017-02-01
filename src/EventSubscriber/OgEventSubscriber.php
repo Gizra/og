@@ -6,6 +6,7 @@ use Drupal\Core\Entity\EntityTypeBundleInfoInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
 use Drupal\og\Event\DefaultRoleEventInterface;
+use Drupal\og\Event\OgAdminRoutesEventInterface;
 use Drupal\og\Event\PermissionEventInterface;
 use Drupal\og\GroupContentOperationPermission;
 use Drupal\og\GroupPermission;
@@ -72,6 +73,7 @@ class OgEventSubscriber implements EventSubscriberInterface {
         ['provideDefaultNodePermissions'],
       ],
       DefaultRoleEventInterface::EVENT_NAME => [['provideDefaultRoles']],
+      OgAdminRoutesEventInterface::EVENT_NAME => [['provideOgAdminRoutes']],
     ];
   }
 
@@ -109,13 +111,6 @@ class OgEventSubscriber implements EventSubscriberInterface {
         'description' => t('Allow non-members to join a group without an approval from group administrators.'),
         'roles' => [OgRoleInterface::ANONYMOUS],
         'default roles' => [],
-      ]),
-      new GroupPermission([
-        'name' => 'unsubscribe',
-        'title' => t('Unsubscribe from group'),
-        'description' => t('Allow members to unsubscribe themselves from a group, removing their membership.'),
-        'roles' => [OgRoleInterface::AUTHENTICATED],
-        'default roles' => [OgRoleInterface::AUTHENTICATED],
       ]),
       new GroupPermission([
         'name' => 'approve and deny subscription',
@@ -345,6 +340,30 @@ class OgEventSubscriber implements EventSubscriberInterface {
     }
 
     return $permissions;
+  }
+
+  /**
+   * Provide OG admin routes.
+   *
+   * @param \Drupal\og\Event\OgAdminRoutesEventInterface $event
+   *   The OG admin routes event object.
+   */
+  public function provideOgAdminRoutes(OgAdminRoutesEventInterface $event) {
+    $routes_info = $event->getRoutesInfo();
+
+    $routes_info['members'] = [
+      'controller' => '\Drupal\og\Controller\OgAdminMembersController::membersList',
+      'title' => 'Members',
+      'description' => 'Manage members',
+      'path' => 'members',
+      'requirements' => [
+        '_og_user_access_group' => 'administer group',
+        // Views module must be enabled.
+        '_module_dependencies' => 'views',
+      ],
+    ];
+
+    $event->setRoutesInfo($routes_info);
   }
 
 }

@@ -6,7 +6,7 @@ use Drupal\block_content\Entity\BlockContent;
 use Drupal\block_content\Entity\BlockContentType;
 use Drupal\node\Entity\Node;
 use Drupal\og\Og;
-use Drupal\og\OgGroupAudienceHelper;
+use Drupal\og\OgGroupAudienceHelperInterface;
 use Drupal\simpletest\BrowserTestBase;
 use Drupal\simpletest\ContentTypeCreationTrait;
 use Drupal\simpletest\NodeCreationTrait;
@@ -36,7 +36,7 @@ class OgComplexWidgetTest extends BrowserTestBase {
     // a group. Note we're not using the Entity Test entity for this since it
     // does not have real support for multiple bundles.
     BlockContentType::create(['type' => 'group']);
-    Og::groupManager()->addGroup('block_content', 'group');
+    Og::groupTypeManager()->addGroup('block_content', 'group');
 
     // Add a group audience field to the "post" node type, turning it into a
     // group content type.
@@ -48,7 +48,7 @@ class OgComplexWidgetTest extends BrowserTestBase {
         ],
       ],
     ];
-    Og::createField(OgGroupAudienceHelper::DEFAULT_FIELD, 'node', 'post', $settings);
+    Og::createField(OgGroupAudienceHelperInterface::DEFAULT_FIELD, 'node', 'post', $settings);
   }
 
   /**
@@ -102,7 +102,7 @@ class OgComplexWidgetTest extends BrowserTestBase {
 
     // Check that the post references the group correctly.
     /** @var OgMembershipReferenceItemList $reference_list */
-    $reference_list = $post->get(OgGroupAudienceHelper::DEFAULT_FIELD);
+    $reference_list = $post->get(OgGroupAudienceHelperInterface::DEFAULT_FIELD);
     $this->assertEquals(1, $reference_list->count(), "There is 1 reference after adding a group to the '$field' field.");
     $this->assertEquals($group->id(), $reference_list->first()->getValue()['target_id'], "The '$field' field references the correct group.");
   }

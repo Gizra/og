@@ -66,7 +66,7 @@ class GetMembershipsTest extends KernelTestBase {
         'name' => $this->randomString(),
         'type' => $bundle,
       ])->save();
-      Og::groupManager()->addGroup('node', $bundle);
+      Og::groupTypeManager()->addGroup('node', $bundle);
 
       $group = Node::create([
         'title' => $this->randomString(),

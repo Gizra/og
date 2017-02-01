@@ -82,7 +82,7 @@ class GroupUpdateTest extends BrowserTestBase {
   public function setUpContentEntity() {
     // Create a node bundle called 'content_group' and make it an Og group.
     $this->createContentType(['type' => 'content_group']);
-    Og::groupManager()->addGroup('node', 'content_group');
+    Og::groupTypeManager()->addGroup('node', 'content_group');
 
     // Create a role with only the 'update group' permission.
     $content_editor_role = OgRole::create();
@@ -118,7 +118,7 @@ class GroupUpdateTest extends BrowserTestBase {
     // Create an entity_test bundle called 'entity_group' and make it
     // an Og group.
     entity_test_create_bundle('entity_group');
-    Og::groupManager()->addGroup('entity_test', 'entity_group');
+    Og::groupTypeManager()->addGroup('entity_test', 'entity_group');
 
     // Create a role with only the 'update group' permission.
     $entity_editor_role = OgRole::create();

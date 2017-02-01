@@ -9,6 +9,7 @@ use Drupal\Core\Entity\EntityStorageInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\og\MembershipManager;
+use Drupal\og\OgGroupAudienceHelperInterface;
 use Drupal\og\OgMembershipInterface;
 use Drupal\Tests\UnitTestCase;
 use Prophecy\Argument;
@@ -34,6 +35,13 @@ class CreateMembershipTest extends UnitTestCase {
    * @var \Drupal\Core\Entity\EntityTypeManagerInterface|\Prophecy\Prophecy\ObjectProphecy
    */
   protected $entityTypeManager;
+
+  /**
+   * The OG group audience helper.
+   *
+   * @var \Drupal\og\OgGroupAudienceHelperInterface|\Prophecy\Prophecy\ObjectProphecy
+   */
+  protected $groupAudienceHelper;
 
   /**
    * The entity storage prophecy used in the test.
@@ -89,6 +97,7 @@ class CreateMembershipTest extends UnitTestCase {
     $this->entityStorage = $this->prophesize(EntityStorageInterface::class);
     $this->entityManager = $this->prophesize(EntityManagerInterface::class);
     $this->entityTypeManager = $this->prophesize(EntityTypeManagerInterface::class);
+    $this->groupAudienceHelper = $this->prophesize(OgGroupAudienceHelperInterface::class);
 
     $this->entityManager->getStorage('og_membership')
       ->willReturn($this->entityStorage->reveal());
@@ -128,7 +137,7 @@ class CreateMembershipTest extends UnitTestCase {
    * @covers ::createMembership
    */
   public function testNewGroup() {
-    $membership_manager = new MembershipManager($this->entityTypeManager->reveal());
+    $membership_manager = new MembershipManager($this->entityTypeManager->reveal(), $this->groupAudienceHelper->reveal());
     $membership = $membership_manager->createMembership($this->group->reveal(), $this->user->reveal());
     $this->assertInstanceOf(OgMembershipInterface::class, $membership);
   }

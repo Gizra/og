@@ -5,7 +5,7 @@ namespace Drupal\og\Plugin\OgFields;
 use Drupal\Core\Field\FieldStorageDefinitionInterface;
 use Drupal\og\OgFieldBase;
 use Drupal\og\OgFieldsInterface;
-use Drupal\og\OgGroupAudienceHelper;
+use Drupal\og\OgGroupAudienceHelperInterface;
 
 /**
  * Determine to which groups this group content is assigned to.
@@ -31,7 +31,7 @@ class AudienceField extends OgFieldBase implements OgFieldsInterface {
       'settings' => [
         'target_type' => $this->getEntityType(),
       ],
-      'type' => OgGroupAudienceHelper::GROUP_REFERENCE,
+      'type' => OgGroupAudienceHelperInterface::GROUP_REFERENCE,
     ];
 
     return parent::getFieldStorageBaseDefinition($values);
@@ -52,7 +52,6 @@ class AudienceField extends OgFieldBase implements OgFieldsInterface {
     ];
 
     return parent::getFieldBaseDefinition($values);
-
   }
 
   /**

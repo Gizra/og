@@ -69,7 +69,7 @@ class OgMembershipRoleReferenceTest extends KernelTestBase {
       'name' => $this->randomString(),
     ])->save();
 
-    Og::groupManager()->addGroup('node', $group_bundle);
+    Og::groupTypeManager()->addGroup('node', $group_bundle);
 
     $this->user = User::create(['name' => $this->randomString()]);
     $this->user->save();
@@ -106,7 +106,7 @@ class OgMembershipRoleReferenceTest extends KernelTestBase {
     $group_member->save();
 
     /** @var OgMembership $membership */
-    $membership = Og::createMembership($this->group, $this->user);
+    $membership = Og::getMembership($this->group, $this->user);
     $membership
       // Assign only the content editor role for now.
       ->setRoles([$content_editor])

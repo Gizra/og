@@ -1,0 +1,2 @@
+og.og_admin_routes:
+  deriver: \Drupal\og\Plugin\Derivative\OgLocalTask

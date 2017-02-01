@@ -1,6 +1,6 @@
 <?php
 
-namespace Drupal\Tests\og\Kernel;
+namespace Drupal\Tests\og\Kernel\Access;
 
 use Drupal\KernelTests\KernelTestBase;
 use Drupal\block_content\Entity\BlockContent;
@@ -9,7 +9,7 @@ use Drupal\node\Entity\Node;
 use Drupal\node\Entity\NodeType;
 use Drupal\og\Entity\OgMembership;
 use Drupal\og\Og;
-use Drupal\og\OgGroupAudienceHelper;
+use Drupal\og\OgGroupAudienceHelperInterface;
 use Drupal\og\OgMembershipInterface;
 use Drupal\user\Entity\Role;
 use Drupal\user\Entity\User;
@@ -119,7 +119,7 @@ class OgAccessHookTest extends KernelTestBase {
     // a group. Note we're not using the Entity Test entity for this since it
     // does not have real support for multiple bundles.
     BlockContentType::create(['type' => 'group']);
-    Og::groupManager()->addGroup('block_content', 'group');
+    Og::groupTypeManager()->addGroup('block_content', 'group');
 
     // Create a group.
     $this->group = BlockContent::create([
@@ -142,7 +142,7 @@ class OgAccessHookTest extends KernelTestBase {
         ],
       ],
     ];
-    Og::createField(OgGroupAudienceHelper::DEFAULT_FIELD, 'node', 'group_content', $settings);
+    Og::createField(OgGroupAudienceHelperInterface::DEFAULT_FIELD, 'node', 'group_content', $settings);
 
     // Grant members permission to edit their own content.
     /** @var \Drupal\og\Entity\OgRole $role */
@@ -172,7 +172,7 @@ class OgAccessHookTest extends KernelTestBase {
         'title' => $this->randomString(),
         'type' => 'group_content',
         'uid' => $this->users[$membership_type]->id(),
-        OgGroupAudienceHelper::DEFAULT_FIELD => [['target_id' => $this->group->id()]],
+        OgGroupAudienceHelperInterface::DEFAULT_FIELD => [['target_id' => $this->group->id()]],
       ]);
       $this->groupContent[$membership_type]->save();
     }

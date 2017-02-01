@@ -6,7 +6,7 @@ use Drupal\Component\Utility\Unicode;
 use Drupal\entity_test\Entity\EntityTest;
 use Drupal\KernelTests\KernelTestBase;
 use Drupal\og\Og;
-use Drupal\og\OgGroupAudienceHelper;
+use Drupal\og\OgGroupAudienceHelperInterface;
 
 /**
  * Tests OgStandardReferenceItem class.
@@ -50,14 +50,14 @@ class OgStandardReferenceItemTest extends KernelTestBase {
     }
     for ($i = 0; $i < 2; $i++) {
       $bundle = $this->bundles[$i];
-      Og::groupManager()->addGroup('entity_test', $bundle);
+      Og::groupTypeManager()->addGroup('entity_test', $bundle);
       $group = EntityTest::create(['type' => $bundle]);
       $group->save();
       $this->groups[] = $group;
     }
     $this->fieldName = strtolower($this->randomMachineName());
 
-    Og::CreateField(OgGroupAudienceHelper::DEFAULT_FIELD, 'entity_test', $this->bundles[2], ['field_name' => $this->fieldName]);
+    Og::CreateField(OgGroupAudienceHelperInterface::DEFAULT_FIELD, 'entity_test', $this->bundles[2], ['field_name' => $this->fieldName]);
   }
 
   /**
