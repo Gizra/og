@@ -16,13 +16,12 @@ class OgMembershipForm extends ContentEntityForm {
    * {@inheritdoc}
    */
   public function form(array $form, FormStateInterface $form_state) {
-    $form = parent::form($form, $form_state);
-
     /** @var \Drupal\og\Entity\OgMembership $entity */
     $entity = $this->getEntity();
     /** @var \Drupal\Core\Entity\ContentEntityInterface $group */
     $group = $entity->getGroup();
 
+    $form = parent::form($form, $form_state);
     $form['#title'] = $this->t('Add member to %group', ['%group' => $group->label()]);
     $form['entity_type'] = ['#value' => $entity->getEntityType()->id()];
     $form['entity_id'] = ['#value' => $group->id()];
@@ -53,6 +52,39 @@ class OgMembershipForm extends ContentEntityForm {
       ->isAllowed();
 
     return $form;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function save(array $form, FormStateInterface $form_state) {
+    $membership = $this->entity;
+    $insert = $membership->isNew();
+    $membership->save();
+
+    $membership_link = $membership->link($this->t('View'));
+
+    $context = [
+      '@membership_type' => $membership->getType(),
+      '@uid' => $membership->getUser()->id(),
+      '@group_type' => $membership->getGroupEntityType(),
+      '@gid' => $membership->getGroupId(),
+      'link' => $membership_link,
+    ];
+
+    $t_args = array(
+      '%user' => $membership->getUser()->link(),
+      '%group' => $membership->getGroup()->link(),
+    );
+
+    if ($insert) {
+      $this->logger('og')->notice('OG Membership: added the @membership_type membership for the use uid @uid to the group of the entity-type @group_type and ID @gid.', $context);
+      drupal_set_message($this->t('Added %user to %group.', $t_args));
+      return;
+    }
+
+    $this->logger('og')->notice('OG Membership: updated the @membership_type membership for the use uid @uid to the group of the entity-type @group_type and ID @gid.', $context);
+    drupal_set_message($this->t('Updated the membership for %user to %group.', $t_args));
   }
 
 }

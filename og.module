@@ -176,8 +176,13 @@ function og_entity_access(EntityInterface $entity, $operation, AccountInterface 
 /**
  * Implements hook_ENTITY_TYPE_access().
  */
-function og_og_membership_access(EntityInterface $entity, $operation, AccountInterface $account) {
+function og_og_membership_access(OgMembershipInterface $entity, $operation, AccountInterface $account) {
   $group = $entity->getGroup();
+
+  // Do not allow deleting the group owner's membership.
+  if (($operation === 'delete') && ($group instanceof EntityOwnerInterface) && ($group->getOwnerId() == $entity->getUser()->id())) {
+    return AccessResult::forbidden();
+  }
 
   // If the user has permission to administer all groups, allow access.
   if ($account->hasPermission('administer group')) {
