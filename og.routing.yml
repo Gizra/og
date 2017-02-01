@@ -55,6 +55,18 @@ entity.og_membership.canonical:
     parameters:
       type: entity:{entity_type_id}
 
+entity.og_membership.add_form:
+  path: 'group/{entity_type_id}/{group}/admin/members/add/{membership_type}'
+  defaults:
+    _controller: '\Drupal\og\Controller\OgAdminMembersController::addForm'
+    _title: 'Add member'
+  requirements:
+    _og_user_access_group: 'administer group|manage members|add user'
+  options:
+    parameters:
+      membership_type:
+        type: entity:og_membership_type
+
 entity.og_membership.edit_form:
   path: 'group/{entity_type_id}/{group}/admin/members/{og_membership}/edit'
   defaults:

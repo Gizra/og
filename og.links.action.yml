@@ -1,5 +1,5 @@
 og_membership.add:
-  route_name: entity.node.og_admin_routes.add_membership
+  route_name: entity.node.og_admin_routes.add_membership_page
   title: 'Add a member'
   appears_on:
     - entity.node.og_admin_routes.members
