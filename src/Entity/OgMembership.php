@@ -381,6 +381,8 @@ class OgMembership extends ContentEntityBase implements OgMembershipInterface {
       ->setLabel(t('Member User ID'))
       ->setDescription(t('The user ID of the member.'))
       ->setSetting('target_type', 'user')
+      ->setSetting('handler', 'og:user')
+      ->setConstraints(['UniqueOgMembership' => []])
       ->setDisplayOptions('form', [
         'type' => 'entity_reference_autocomplete',
         'weight' => -1,
@@ -415,12 +417,13 @@ class OgMembership extends ContentEntityBase implements OgMembershipInterface {
       ->setLabel(t('Roles'))
       ->setDescription(t('The OG roles related to an OG membership entity.'))
       ->setCardinality(FieldStorageDefinitionInterface::CARDINALITY_UNLIMITED)
+      ->setSetting('target_type', 'og_role')
+      ->setSetting('handler', 'og:og_role')
+      ->setConstraints(['ValidOgRole' => []])
       ->setDisplayOptions('form', [
         'type' => 'options_buttons',
         'weight' => 0,
       ])
-      ->setSetting('target_type', 'og_role');
-      ->setSetting('handler', 'og:og_role')
       ->setDisplayConfigurable('view', TRUE)
       ->setDisplayConfigurable('form', TRUE);
 
