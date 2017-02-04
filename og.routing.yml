@@ -112,3 +112,14 @@ og_membership.type_add:
     _title: 'Add membership type'
   requirements:
     _permission: 'administer group'
+
+og.entity_autocomplete:
+  path: '/group/{entity_type_id}/{group}/autocomplete/{target_type}/{selection_handler}/{selection_settings_key}'
+  defaults:
+    _controller: '\Drupal\og\Controller\OgAutocompleteController:handleAutocomplete'
+  requirements:
+    _access: 'TRUE'
+  options:
+    parameters:
+      group:
+        type: entity:{entity_type_id}

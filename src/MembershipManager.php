@@ -134,6 +134,45 @@ class MembershipManager implements MembershipManagerInterface {
   /**
    * {@inheritdoc}
    */
+  public function getGroupMemberships(EntityInterface $group, array $states = [OgMembershipInterface::STATE_ACTIVE]) {
+    // Get a string identifier of the states, so we can retrieve it from cache.
+    sort($states);
+    $states_identifier = implode('|', array_unique($states));
+
+    $identifier = [
+      __METHOD__,
+      $group->id(),
+      $states_identifier,
+    ];
+    $identifier = implode(':', $identifier);
+
+    // Return cached result if it exists.
+    if (isset($this->cache[$identifier])) {
+      return $this->cache[$identifier];
+    }
+
+    $query = $this->entityTypeManager
+      ->getStorage('og_membership')
+      ->getQuery()
+      ->condition('entity_id', $group->id());
+
+    if ($states) {
+      $query->condition('state', $states, 'IN');
+    }
+
+    $results = $query->execute();
+
+    /** @var \Drupal\og\Entity\OgMembership[] $memberships */
+    $this->cache[$identifier] = $this->entityTypeManager
+      ->getStorage('og_membership')
+      ->loadMultiple($results);
+
+    return $this->cache[$identifier];
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   public function createMembership(EntityInterface $group, AccountInterface $user, $membership_type = OgMembershipInterface::TYPE_DEFAULT) {
     /** @var \Drupal\user\UserInterface|\Drupal\Core\Session\AccountInterface $user */
     /** @var \Drupal\og\OgMembershipInterface $membership */

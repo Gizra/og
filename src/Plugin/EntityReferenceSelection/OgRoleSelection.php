@@ -35,7 +35,7 @@ class OgRoleSelection extends DefaultSelection {
   protected function buildEntityQuery($match = NULL, $match_operator = 'CONTAINS') {
     $query = parent::buildEntityQuery($match, $match_operator);
 
-    $entity = $this->configuration['entity'];
+    $entity = isset($this->configuration['entity']) ? $this->configuration['entity'] : NULL;
     // The entity does not always exist, for example during validation.
     // @todo figure out how to always add the full conditions, especially if
     // this can be abused to reference incompatible roles.
