@@ -3,14 +3,11 @@
 namespace Drupal\og\Plugin\EntityReferenceSelection;
 
 use Drupal\Core\Database\Connection;
-use Drupal\Core\Database\Query\SelectInterface;
 use Drupal\Core\Entity\EntityManagerInterface;
 use Drupal\Core\Entity\Plugin\EntityReferenceSelection\DefaultSelection;
 use Drupal\Core\Extension\ModuleHandlerInterface;
-use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\og\MembershipManagerInterface;
-use Drupal\user\RoleInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
@@ -91,10 +88,11 @@ class OgUserSelection extends DefaultSelection {
       $container->get('og.membership_manager')
     );
   }
+
   /**
    * Get the selection handler of the field.
    *
-   * @return DefaultSelection
+   * @return Drupal\Core\Entity\Plugin\EntityReferenceSelection\DefaultSelection
    *   Returns the selection handler.
    */
   public function getSelectionHandler() {
@@ -124,6 +122,10 @@ class OgUserSelection extends DefaultSelection {
       $query->condition('status', 1);
     }
 
+    // @todo implement an easier, more consistent way to get the group type. At
+    // the moment, this works either for checkboxes or OG Autocomplete widget
+    // types on entities that have a getGroup() method. It also does not work
+    // properly every time; for example during validation.
     $group = NULL;
     if (isset($this->configuration['entity'])) {
       $entity = $this->configuration['entity'];
@@ -133,8 +135,7 @@ class OgUserSelection extends DefaultSelection {
     if (isset($this->configuration['handler_settings']['group'])) {
       $group = $this->configuration['handler_settings']['group'];
     }
-    // The entity does not always exist, for example during validation.
-    // @todo figure out how to always add the full conditions.
+
     if ($group === NULL) {
       return $query;
     }

@@ -44,6 +44,18 @@ og.remove_multiple_roles_confirm:
   requirements:
     _custom_access: '\Drupal\og\Form\OgRemoveMultipleRolesForm::access'
 
+og.entity_autocomplete:
+  path: '/group/{entity_type_id}/{group}/autocomplete/{target_type}/{selection_handler}/{selection_settings_key}'
+  defaults:
+    _controller: '\Drupal\og\Controller\OgAutocompleteController:handleAutocomplete'
+  requirements:
+    _access: 'TRUE'
+  options:
+    parameters:
+      group:
+        type: entity:{entity_type_id}
+
+# OG Membership entity routes
 entity.og_membership.canonical:
   path: 'group/{entity_type_id}/{group}/admin/members/{og_membership}'
   defaults:
@@ -61,11 +73,10 @@ entity.og_membership.add_form:
     _controller: '\Drupal\og\Controller\OgAdminMembersController::addForm'
     _title: 'Add member'
   requirements:
-    _og_user_access_group: 'administer group|manage members|add user'
+    _og_membership_add_access: 'TRUE'
   options:
     parameters:
-      membership_type:
-        type: entity:og_membership_type
+      type: entity:{entity_type_id}
 
 entity.og_membership.edit_form:
   path: 'group/{entity_type_id}/{group}/admin/members/{og_membership}/edit'
@@ -81,6 +92,7 @@ entity.og_membership.delete_form:
   requirements:
     _entity_access: 'og_membership.delete'
 
+# OG Membership type entity routes
 entity.og_membership_type.collection:
   path: '/admin/structure/membership-types'
   defaults:
@@ -94,8 +106,7 @@ entity.og_membership_type.edit_form:
   defaults:
     _entity_form: 'og_membership_type.edit'
   requirements:
-    _permission: 'administer group'
-
+    _entity_access: 'administer group'
 
 entity.og_membership_type.delete_form:
   path: '/admin/structure/membership-types/manage/{og_membership_type}/delete'
@@ -112,14 +123,3 @@ og_membership.type_add:
     _title: 'Add membership type'
   requirements:
     _permission: 'administer group'
-
-og.entity_autocomplete:
-  path: '/group/{entity_type_id}/{group}/autocomplete/{target_type}/{selection_handler}/{selection_settings_key}'
-  defaults:
-    _controller: '\Drupal\og\Controller\OgAutocompleteController:handleAutocomplete'
-  requirements:
-    _access: 'TRUE'
-  options:
-    parameters:
-      group:
-        type: entity:{entity_type_id}

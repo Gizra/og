@@ -3,6 +3,7 @@
 namespace Drupal\og\Entity;
 
 use Drupal\Core\Config\Entity\ConfigEntityBase;
+use Drupal\field\Entity\FieldConfig;
 use Drupal\og\OgMembershipTypeInterface;
 
 /**
@@ -60,6 +61,37 @@ class OgMembershipType extends ConfigEntityBase implements OgMembershipTypeInter
    */
   public function id() {
     return $this->type;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function save() {
+    $status = parent::save();
+
+    if ($status === SAVED_NEW) {
+      FieldConfig::create([
+        'field_name' => 'og_membership_request',
+        'entity_type' => 'og_membership',
+        'bundle' => $this->id(),
+        'label' => 'Request Membership',
+        'description' => 'Explain the motivation for your request to join this group.',
+        'translatable' => TRUE,
+        'settings' => [],
+      ])->save();
+    }
+
+    return $status;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function delete() {
+    if ($this->id() === 'default') {
+      throw \Exception("The default OG membership type cannot be deleted.");
+    }
+    parent::delete();
   }
 
 }

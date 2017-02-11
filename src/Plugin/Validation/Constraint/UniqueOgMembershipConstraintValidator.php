@@ -2,7 +2,6 @@
 
 namespace Drupal\og\Plugin\Validation\Constraint;
 
-use Drupal\og\Og;
 use Symfony\Component\Validator\Constraint;
 use Symfony\Component\Validator\ConstraintValidator;
 

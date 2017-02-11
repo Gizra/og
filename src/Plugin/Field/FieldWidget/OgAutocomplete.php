@@ -2,20 +2,13 @@
 
 namespace Drupal\og\Plugin\Field\FieldWidget;
 
-
 use Symfony\Component\Validator\ConstraintViolationInterface;
-use Drupal\Component\Utility\Html;
-use Drupal\Core\Entity\EntityInterface;
-use Drupal\Core\Field\FieldFilteredMarkup;
 use Drupal\Core\Field\FieldItemListInterface;
-use Drupal\Core\Field\FieldStorageDefinitionInterface;
 use Drupal\Core\Field\Plugin\Field\FieldWidget\EntityReferenceAutocompleteWidget;
 use Drupal\Core\Form\FormStateInterface;
-use Drupal\og\OgAccess;
-use Drupal\user\Entity\User;
 
 /**
- * Plugin implementation of the 'entity_reference autocomplete' widget.
+ * Plugin implementation of the 'og_autocomplete' widget.
  *
  * @FieldWidget(
  *   id = "og_autocomplete",
@@ -45,9 +38,11 @@ class OgAutocomplete extends EntityReferenceAutocompleteWidget {
     return $element;
   }
 
+  /**
+   * {@inheritdoc}
+   */
   public function errorElement(array $element, ConstraintViolationInterface $error, array $form, FormStateInterface $form_state) {
     return $element;
   }
-
 
 }

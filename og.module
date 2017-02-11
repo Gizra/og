@@ -17,6 +17,7 @@ use Drupal\og\Entity\OgRole;
 use Drupal\og\Og;
 use Drupal\og\OgGroupAudienceHelperInterface;
 use Drupal\og\OgMembershipInterface;
+use Drupal\og\OgMembershipTypeInterface;
 use Drupal\og\OgRoleInterface;
 use Drupal\system\Entity\Action;
 use Drupal\user\EntityOwnerInterface;
@@ -176,11 +177,9 @@ function og_entity_access(EntityInterface $entity, $operation, AccountInterface 
 /**
  * Implements hook_ENTITY_TYPE_access().
  */
-function og_og_membership_access(OgMembershipInterface $entity, $operation, AccountInterface $account) {
-  $group = $entity->getGroup();
-
-  // Do not allow deleting the group owner's membership.
-  if (($operation === 'delete') && ($group instanceof EntityOwnerInterface) && ($group->getOwnerId() == $entity->getUser()->id())) {
+function og_og_membership_type_access(OgMembershipTypeInterface $entity, $operation, AccountInterface $account) {
+  // Do not allow deleting the default membership type.
+  if (($operation === 'delete') && ($entity->id() === 'default')) {
     return AccessResult::forbidden();
   }
 
@@ -189,10 +188,7 @@ function og_og_membership_access(OgMembershipInterface $entity, $operation, Acco
     return AccessResult::allowed();
   }
 
-  // Someone with the manage members permission should be able to do pretty much
-  // anything with memberships.
-  // @TODO: if this turns out to be untrue, do some operation checking.
-  return \Drupal::service('og.access')->userAccess($group, 'manage members', $account);
+  return AccessResult::forbidden();
 }
 
 /**
@@ -245,30 +241,6 @@ function og_entity_create_access(AccountInterface $account, array $context, $bun
 
   // Otherwise, ignore or deny based on whether strict entity access is set.
   return $required ? AccessResult::forbiddenIf($node_access_strict) : AccessResult::neutral();
-}
-
-/**
- * Implements hook_ENTITY_TYPE_entity_create_access().
- */
-function og_og_membership_create_access(AccountInterface $account, array $context, $bundle) {
-  // If the user has permission to administer all groups, allow access.
-  if ($account->hasPermission('administer group')) {
-    return AccessResult::allowed();
-  }
-
-  $group = $entity->getGroup();
-
-  // If we don't have a group, we can't really determine access other than
-  // checking global account permissions.
-  if ($group === NULL) {
-    return AccessResult::neutral();
-  }
-
-  $add_users = \Drupal::service('og.access')->userAccess($group, 'add user', $account);
-  if ($add_users->isAllowed()) {
-    return $add_users;
-  }
-  return \Drupal::service('og.access')->userAccess($group, 'manage members', $account);
 }
 
 /**

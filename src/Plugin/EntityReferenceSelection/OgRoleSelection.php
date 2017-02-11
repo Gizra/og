@@ -35,18 +35,26 @@ class OgRoleSelection extends DefaultSelection {
   protected function buildEntityQuery($match = NULL, $match_operator = 'CONTAINS') {
     $query = parent::buildEntityQuery($match, $match_operator);
 
-    $entity = isset($this->configuration['entity']) ? $this->configuration['entity'] : NULL;
-    // The entity does not always exist, for example during validation.
-    // @todo figure out how to always add the full conditions, especially if
-    // this can be abused to reference incompatible roles.
-    if (is_null($entity)) {
+    // @todo implement an easier, more consistent way to get the group type. At
+    // the moment, this works either for checkboxes or OG Autocomplete widget
+    // types on entities that have a getGroup() method. It also does not work
+    // properly every time; for example during validation.
+    $group = NULL;
+    if (isset($this->configuration['entity'])) {
+      $entity = $this->configuration['entity'];
+      $group = is_callable([$entity, 'getGroup']) ? $entity->getGroup() : NULL;
+    }
+
+    if (isset($this->configuration['handler_settings']['group'])) {
+      $group = $this->configuration['handler_settings']['group'];
+    }
+
+    if ($group === NULL) {
       return $query;
     }
 
-    $group_type = $entity->getGroupEntityType();
-    $group_bundle = $entity->getGroup()->bundle();
-    $query->condition('group_type', $group_type, '=');
-    $query->condition('group_bundle', $group_bundle, '=');
+    $query->condition('group_type', $group->getEntityTypeId(), '=');
+    $query->condition('group_bundle', $group->bundle(), '=');
     $query->condition($query->orConditionGroup()
       ->condition('role_type', NULL, 'IS NULL')
       ->condition('role_type', 'required', '<>'));

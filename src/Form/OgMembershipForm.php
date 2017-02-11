@@ -72,10 +72,10 @@ class OgMembershipForm extends ContentEntityForm {
       'link' => $membership_link,
     ];
 
-    $t_args = array(
+    $t_args = [
       '%user' => $membership->getUser()->link(),
       '%group' => $membership->getGroup()->link(),
-    );
+    ];
 
     if ($insert) {
       $this->logger('og')->notice('OG Membership: added the @membership_type membership for the use uid @uid to the group of the entity-type @group_type and ID @gid.', $context);

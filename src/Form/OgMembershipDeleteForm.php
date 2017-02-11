@@ -3,7 +3,6 @@
 namespace Drupal\og\Form;
 
 use Drupal\Core\Entity\ContentEntityDeleteForm;
-use Drupal\Core\Form\FormStateInterface;
 
 /**
  * Provides a form for deleting a node.

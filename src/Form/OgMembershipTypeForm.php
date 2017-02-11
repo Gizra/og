@@ -9,7 +9,7 @@ use Drupal\Core\Form\FormStateInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
- * Form handler for og membership type forms.
+ * Form handler for OG membership type forms.
  */
 class OgMembershipTypeForm extends BundleEntityFormBase {
 
@@ -50,28 +50,28 @@ class OgMembershipTypeForm extends BundleEntityFormBase {
       $form['#title'] = $this->t('Add membership type');
     }
     else {
-      $form['#title'] = $this->t('Edit %label membership type', array('%label' => $type->label()));
+      $form['#title'] = $this->t('Edit %label membership type', ['%label' => $type->label()]);
     }
 
-    $form['name'] = array(
+    $form['name'] = [
       '#title' => $this->t('Name'),
       '#type' => 'textfield',
       '#default_value' => $type->label(),
       '#description' => $this->t('The human-readable name of this membership type.'),
       '#required' => TRUE,
       '#size' => 30,
-    );
+    ];
 
-    $form['type'] = array(
+    $form['type'] = [
       '#type' => 'machine_name',
       '#default_value' => $type->id(),
       '#maxlength' => EntityTypeInterface::BUNDLE_MAX_LENGTH,
-      '#machine_name' => array(
+      '#machine_name' => [
         'exists' => ['Drupal\og\Entity\OgMembershipType', 'load'],
-        'source' => array('name'),
-      ),
+        'source' => ['name'],
+      ],
       '#description' => $this->t('A unique machine-readable name for this membership type. It must only contain lowercase letters, numbers, and underscores.'),
-    );
+    ];
     return $this->protectBundleIdElement($form);
   }
 
@@ -94,7 +94,7 @@ class OgMembershipTypeForm extends BundleEntityFormBase {
     $id = trim($form_state->getValue('type'));
     // '0' is invalid, since elsewhere we check it using empty().
     if ($id == '0') {
-      $form_state->setErrorByName('type', $this->t("Invalid machine-readable name. Enter a name other than %invalid.", array('%invalid' => $id)));
+      $form_state->setErrorByName('type', $this->t("Invalid machine-readable name. Enter a name other than %invalid.", ['%invalid' => $id]));
     }
   }
 
@@ -108,18 +108,16 @@ class OgMembershipTypeForm extends BundleEntityFormBase {
 
     $status = $type->save();
 
-    $t_args = array('%name' => $type->label());
+    $t_args = ['%name' => $type->label()];
 
     if ($status == SAVED_UPDATED) {
       drupal_set_message($this->t('The membership type %name has been updated.', $t_args));
     }
     elseif ($status == SAVED_NEW) {
       drupal_set_message($this->t('The membership type %name has been added.', $t_args));
-      $context = array_merge($t_args, array('link' => $type->link($this->t('View'), 'collection')));
+      $context = array_merge($t_args, ['link' => $type->link($this->t('View'), 'collection')]);
       $this->logger('og')->notice('Added membership type %name.', $context);
     }
-
-    $fields = $this->entityManager->getFieldDefinitions('og_membership', $type->id());
 
     $this->entityManager->clearCachedFieldDefinitions();
     $form_state->setRedirectUrl($type->urlInfo('collection'));

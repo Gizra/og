@@ -67,6 +67,7 @@ use Drupal\user\EntityOwnerInterface;
  *     "bundle" = "type",
  *   },
  *   handlers = {
+ *     "access" = "Drupal\og\OgMembershipAccessControlHandler",
  *     "views_data" = "Drupal\og\OgMembershipViewsData",
  *     "list_builder" = "Drupal\Core\Entity\EntityListBuilder",
  *     "view_builder" = "Drupal\Core\Entity\EntityViewBuilder",
@@ -384,7 +385,7 @@ class OgMembership extends ContentEntityBase implements OgMembershipInterface {
       ->setSetting('handler', 'og:user')
       ->setConstraints(['UniqueOgMembership' => []])
       ->setDisplayOptions('form', [
-        'type' => 'entity_reference_autocomplete',
+        'type' => 'og_autocomplete',
         'weight' => -1,
         'settings' => [
           'match_operator' => 'CONTAINS',
