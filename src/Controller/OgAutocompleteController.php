@@ -5,6 +5,7 @@ namespace Drupal\og\Controller;
 use Drupal\Component\Utility\Crypt;
 use Drupal\Component\Utility\Tags;
 use Drupal\Component\Utility\Unicode;
+use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Controller\ControllerBase;
 use Drupal\Core\Entity\EntityAutocompleteMatcher;
 use Drupal\Core\KeyValueStore\KeyValueStoreInterface;
@@ -78,8 +79,8 @@ class OgAutocompleteController extends ControllerBase {
    *   Thrown if the selection settings key is not found in the key/value store
    *   or if it does not match the stored data.
    */
-  public function handleAutocomplete(Request $request, $group, $target_type, $selection_handler, $selection_settings_key) {
-    $matches = array();
+  public function handleAutocomplete(Request $request, EntityInterface $group, $target_type, $selection_handler, $selection_settings_key) {
+    $matches = [];
     // Get the typed string from the URL, if it exists.
     if ($input = $request->query->get('q')) {
       $typed_string = Tags::explode($input);

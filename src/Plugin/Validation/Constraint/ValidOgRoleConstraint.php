@@ -5,8 +5,7 @@ namespace Drupal\og\Plugin\Validation\Constraint;
 use Symfony\Component\Validator\Constraint;
 
 /**
- * @todo
- *
+ * Ensures that a valid OG role for the group entity type/bundle is selected.
  *
  * @Constraint(
  *   id = "ValidOgRole",

@@ -3,17 +3,12 @@
 namespace Drupal\og\Element;
 
 use Drupal\Component\Utility\Crypt;
-use Drupal\Component\Utility\Tags;
 use Drupal\Core\Entity\Element\EntityAutocomplete;
-use Drupal\Core\Entity\EntityInterface;
-use Drupal\Core\Entity\EntityReferenceSelection\SelectionInterface;
-use Drupal\Core\Entity\EntityReferenceSelection\SelectionWithAutocreateInterface;
 use Drupal\Core\Form\FormStateInterface;
-use Drupal\Core\Render\Element\Textfield;
 use Drupal\Core\Site\Settings;
 
 /**
- * @todo
+ * Provides an entity autocomplete with OG group context.
  *
  * The #default_value accepted by this element is either an entity object or an
  * array of entity objects.
@@ -22,6 +17,9 @@ use Drupal\Core\Site\Settings;
  */
 class OgAutocomplete extends EntityAutocomplete {
 
+  /**
+   * {@inheritdoc}
+   */
   public static function processEntityAutocomplete(array &$element, FormStateInterface $form_state, array &$complete_form) {
     // Nothing to do if there is no target entity type.
     if (empty($element['#target_type'])) {
@@ -49,13 +47,13 @@ class OgAutocomplete extends EntityAutocomplete {
     }
 
     $element['#autocomplete_route_name'] = 'og.entity_autocomplete';
-    $element['#autocomplete_route_parameters'] = array(
+    $element['#autocomplete_route_parameters'] = [
       'target_type' => $element['#target_type'],
       'selection_handler' => $element['#selection_handler'],
       'selection_settings_key' => $selection_settings_key,
       'entity_type_id' => $element['#og_group']->getEntityTypeId(),
       'group' => $element['#og_group']->id(),
-    );
+    ];
 
     return $element;
   }

@@ -367,9 +367,8 @@ class OgEventSubscriber implements EventSubscriberInterface {
       'controller' => '\Drupal\og\Controller\OgAdminMembersController::addPage',
       'title' => 'Add member',
       'path' => 'members/add',
-      // @TODO switch to an entity create access callback once it works better.
       'requirements' => [
-        '_og_user_access_group' => 'administer group|manage members|add user',
+        '_og_membership_add_access' => 'TRUE',
       ],
     ];
 

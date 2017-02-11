@@ -193,3 +193,18 @@ condition.plugin.og_group_type:
       type: sequence
       sequence:
         type: string
+
+# Copied and adapted from core.entity.schema.yml
+field.widget.settings.og_autocomplete:
+  type: mapping
+  label: 'OG context based entity reference autocomplete with display format settings'
+  mapping:
+    match_operator:
+      type: string
+      label: 'Autocomplete matching'
+    size:
+      type: integer
+      label: 'Size of textfield'
+    placeholder:
+      type: label
+      label: 'Placeholder'
