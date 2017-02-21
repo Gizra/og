@@ -6,6 +6,7 @@ namespace Drupal\og_ui\Form;
 use Drupal\Core\Entity\EntityForm;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\og\Entity\OgRole;
+use Drupal\og\OgRoleInterface;
 
 /**
  * Form to add or edit an OG role.
@@ -48,6 +49,11 @@ class OgRoleForm extends EntityForm {
       '#type' => 'value',
       '#value' => $entity->getWeight(),
     );
+
+    $form['role_type'] = [
+      '#type' => 'value',
+      '#value' => OgRoleInterface::ROLE_TYPE_STANDARD,
+    ];
 
     return parent::form($form, $form_state, $entity);
   }
