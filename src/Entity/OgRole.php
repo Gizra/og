@@ -152,6 +152,13 @@ class OgRole extends Role implements OgRoleInterface {
   /**
    * {@inheritdoc}
    */
+  public function isLocked() {
+    return $this->get('role_type') !== OgRoleInterface::ROLE_TYPE_STANDARD;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   public function getName() {
     // If the name is not set yet, try to derive it from the ID.
     if (empty($this->name) && $this->id() && $this->getGroupType() && $this->getGroupBundle()) {
