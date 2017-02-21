@@ -63,6 +63,16 @@ entity.og_role.edit_form:
     # _entity_access: og_role.update
     _permission: 'administer group'
 
+entity.og_role.delete_form:
+  path: 'admin/config/group/role/{og_role}/delete'
+  defaults:
+    _entity_form: og_role.delete
+    _title_callback: '\Drupal\og_ui\Form\OgRoleForm::editRoleTitleCallback'
+  requirements:
+    # Todo: This should become a dedicated permission:
+    # _entity_access: og_role.delete
+    _permission: 'administer group'
+
 og_ui.permissions_overview:
   path: 'admin/config/group/permissions/{entity_type}/{bundle}'
   defaults:
