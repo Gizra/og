@@ -16,10 +16,17 @@ use Drupal\user\Entity\Role;
  * @ConfigEntityType(
  *   id = "og_role",
  *   label = @Translation("OG role"),
+ *   label_singular = @Translation("OG role"),
+ *   label_plural = @Translation("OG roles"),
+ *   label_count = @PluralTranslation(
+ *     singular = "@count OG role",
+ *     plural = "@count OG roles"
+ *   ),
  *   handlers = {
  *     "form" = {
  *       "default" = "Drupal\og_ui\Form\OgRoleForm",
- *       "delete" = "Drupal\Core\Entity\EntityDeleteForm"
+ *       "delete" = "Drupal\og_ui\Form\OgRoleDeleteForm",
+ *       "edit" = "Drupal\og_ui\Form\OgRoleForm",
  *     }
  *   },
  *   static_cache = TRUE,
