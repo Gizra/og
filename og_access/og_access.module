@@ -151,3 +151,58 @@ function og_access_node_access_records(NodeInterface $node) {
 
   return !empty($grants) ? $grants : [];
 }
+
+/**
+ * Implements hook_entity_insert().
+ */
+function og_access_entity_insert(EntityInterface $entity) {
+  og_access_entity_type_save($entity);
+}
+
+/**
+ * Implements hook_entity_update().
+ */
+function og_access_entity_update(EntityInterface $entity) {
+  og_access_entity_type_save($entity);
+}
+
+/**
+ * Adds/removes the group and group content access fields.
+ *
+ * @param \Drupal\Core\Entity\EntityInterface $entity
+ *   The entity object.
+ */
+function og_access_entity_type_save(EntityInterface $entity) {
+  if (!$entity instanceof ConfigEntityBundleBase || !isset($entity->og_is_group)) {
+    return;
+  }
+
+  $bundle = $entity->id();
+  $definition = \Drupal::entityTypeManager()->getDefinition($entity->getEntityTypeId());
+  $entity_type_id = $definition->getBundleOf();
+
+  // Add/remove the group itself.
+  $is_group = Og::isGroup($entity_type_id, $bundle);
+  if ($entity->og_is_group != $is_group) {
+    if ($entity->og_is_group) {
+      Og::createField(OG_ACCESS_FIELD, $entity_type_id, $bundle);
+    }
+    elseif ($field = FieldConfig::loadByName($entity_type_id, $bundle, OG_ACCESS_FIELD)) {
+      $field->delete();
+      return;
+    }
+  }
+
+  // Add remove the relevant field.
+  $is_group_content = Og::isGroupContent($entity_type_id, $bundle);
+  if ($entity->og_group_content_bundle != $is_group_content) {
+    if ($entity->og_group_content_bundle) {
+      Og::createField(OG_CONTENT_ACCESS_FIELD, $entity_type_id, $bundle);
+    }
+    elseif ($field = FieldConfig::loadByName($entity_type_id, $bundle, OG_CONTENT_ACCESS_FIELD)) {
+      $field->delete();
+      return;
+    }
+  }
+
+}
