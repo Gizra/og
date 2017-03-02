@@ -1,0 +1,149 @@
+<?php
+
+/**
+ * @file
+ * Enable access control for private and public groups and group content.
+ *
+ * @TODO handle visibility change
+ * @TODO set group content visibility default to that of the group
+ * @TODO move grants/access to service
+ */
+
+use Drupal\Core\Session\AccountInterface;
+use Drupal\node\NodeInterface;
+use Drupal\og\Og;
+
+/**
+ * The access realm of group member.
+ */
+define('OG_ACCESS_REALM', 'og_access');
+
+/**
+ * Group public access field.
+ */
+define('OG_ACCESS_FIELD', 'group_access');
+
+/**
+ * Group public access field.
+ */
+define('OG_CONTENT_ACCESS_FIELD', 'group_content_access');
+
+/**
+ * Public group/group content access.
+ */
+define('OG_ACCESS_PUBLIC', 0);
+
+/**
+ * Private group/group content access.
+ */
+define('OG_ACCESS_PRIVATE', 1);
+
+/**
+ * Implements hook_node_grants().
+ */
+function og_access_node_grants(AccountInterface $account, $op) {
+  if ($op != 'view') {
+    return [];
+  }
+
+  /** @var \Drupal\og\MembershipManager $membership_manager */
+  $membership_manager = \Drupal::service('og.membership_manager');
+  if ($groups = $membership_manager->getUserGroups($account)) {
+    foreach ($groups as $group_type => $entity_groups) {
+      /** @var \Drupal\core\Entity\EntityInterface $group */
+      foreach ($entity_groups as $group) {
+        $realm = OG_ACCESS_REALM . ':' . $group_type;
+        $grants[$realm][] = $group->id();
+      }
+    }
+  }
+
+  return !empty($grants) ? $grants : [];
+}
+
+/**
+ * Implements hook_node_access_records().
+ */
+function og_access_node_access_records(NodeInterface $node) {
+  if (empty($node->status)) {
+    // Node is unpublished, so we don't allow every group member to see it.
+    return [];
+  }
+
+  // The group IDs, that in case access is granted, will be recorded.
+  $gids = [];
+
+  if (Og::isGroup('node', $node->getType()) &&
+      $node->hasField(OG_ACCESS_FIELD) &&
+      !empty($node->{OG_ACCESS_FIELD}) && $node->{OG_ACCESS_FIELD}->value) {
+    // Private group.
+    $gids['node'][] = $node->id();
+  }
+
+  if (!empty($node->get(OG_CONTENT_ACCESS_FIELD))) {
+    $content_access = $node->get(OG_CONTENT_ACCESS_FIELD)->value;
+  }
+  else {
+    $content_access = OG_ACCESS_PUBLIC;
+  }
+
+  switch ($content_access) {
+    case OG_ACCESS_PUBLIC:
+      // Skip non-group content nodes.
+      if (!Og::isGroupContent('node', $node->getType())) {
+        break;
+      }
+
+      $has_private = FALSE;
+      /** @var \Drupal\og\OgGroupAudienceHelper $audience_helper */
+      $audience_helper = \Drupal::service('og.group_audience_helper');
+      foreach ($audience_helper->getAllGroupAudienceFields('node', $node->getType()) as $field_name => $field) {
+        foreach ($node->get($field_name)->referencedEntities() as $group) {
+          $list_gids[$group->getType][] = $group->id();
+
+          if ($has_private) {
+            // We already know we have a private group, so we can avoid
+            // re-checking it.
+            continue;
+          }
+
+          if (!empty($group->get(OG_ACCESS_FIELD)) &&
+              $group->get(OG_ACCESS_FIELD)->value) {
+            $has_private = TRUE;
+          }
+        }
+      }
+      if ($has_private) {
+        $gids = array_merge_recursive($gids, $list_gids);
+      }
+      break;
+
+    case OG_ACCESS_PRIVATE:
+      $list_gids = [];
+      /** @var \Drupal\og\OgGroupAudienceHelper $audience_helper */
+      $audience_helper = \Drupal::service('og.group_audience_helper');
+      foreach ($audience_helper->getAllGroupAudienceFields('node', $node->getType()) as $field_name => $field) {
+        foreach ($node->get($field_name)->referencedEntities() as $group) {
+          $list_gids[$group->getType][] = $group->id();
+        }
+      }
+
+      $gids = array_merge_recursive($gids, $list_gids);
+      break;
+  }
+
+  foreach ($gids as $group_type => $values) {
+    foreach ($values as $gid) {
+      $grants[] = [
+        'realm' => OG_ACCESS_REALM . ':' . $group_type,
+        'gid' => $gid,
+        'grant_view' => 1,
+        'grant_update' => 0,
+        'grant_delete' => 0,
+      ];
+    }
+  }
+
+
+  return !empty($grants) ? $grants : [];
+}
