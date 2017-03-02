@@ -7,12 +7,12 @@ use Drupal\og\OgFieldBase;
 use Drupal\og\OgFieldsInterface;
 
 /**
- * Determine if group should use default roles and permissions.
+ * Determine the group content visibility.
  *
  * @OgFields(
  *  id = OG_CONTENT_ACCESS_FIELD,
  *  type = "node",
- *  description = @Translation("Determine access to the group.")
+ *  description = @Translation("Determine the group content visibility.")
  * )
  */
 class OgContentAccessField extends OgFieldBase implements OgFieldsInterface {
@@ -31,7 +31,6 @@ class OgContentAccessField extends OgFieldBase implements OgFieldsInterface {
         'allowed_values_function' => '',
       ],
       'type' => 'list_integer',
-      'locked' => TRUE,
     ];
 
     return parent::getFieldStorageBaseDefinition($values);
@@ -43,9 +42,9 @@ class OgContentAccessField extends OgFieldBase implements OgFieldsInterface {
   public function getFieldBaseDefinition(array $values = []) {
     $values += [
       'default_value' => [0 => ['value' => 0]],
-      'description' => $this->t('Determine access to the group.'),
+      'description' => $this->t('Determine the group content visibility.'),
       'display_label' => TRUE,
-      'label' => $this->t('Group visibility'),
+      'label' => $this->t('Group content visibility'),
       'required' => TRUE,
     ];
 

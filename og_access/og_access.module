@@ -9,7 +9,10 @@
  * @TODO move grants/access to service
  */
 
+use Drupal\Core\Config\Entity\ConfigEntityBundleBase;
+use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Session\AccountInterface;
+use Drupal\field\Entity\FieldConfig;
 use Drupal\node\NodeInterface;
 use Drupal\og\Og;
 
@@ -80,7 +83,8 @@ function og_access_node_access_records(NodeInterface $node) {
     $gids['node'][] = $node->id();
   }
 
-  if (!empty($node->get(OG_CONTENT_ACCESS_FIELD))) {
+  if ($node->hasField(OG_CONTENT_ACCESS_FIELD) &&
+      !empty($node->get(OG_CONTENT_ACCESS_FIELD))) {
     $content_access = $node->get(OG_CONTENT_ACCESS_FIELD)->value;
   }
   else {
@@ -107,7 +111,7 @@ function og_access_node_access_records(NodeInterface $node) {
             continue;
           }
 
-          if (!empty($group->get(OG_ACCESS_FIELD)) &&
+          if ($group->hasField(OG_ACCESS_FIELD) && !empty($group->get(OG_ACCESS_FIELD)) &&
               $group->get(OG_ACCESS_FIELD)->value) {
             $has_private = TRUE;
           }

@@ -7,10 +7,12 @@ use Drupal\og\Og;
  * Install/update/uninstall hook implementations.
  */
 
+/**
+ * Implements hook_install().
+ */
 function og_access_install() {
   /** @var \Drupal\og\GroupTypeManager $group_type_manager */
   $group_type_manager = \Drupal::service('og.group_type_manager');
-
   $groups = $group_type_manager->getAllGroupBundles('node');
 
   foreach ($groups as $group) {
