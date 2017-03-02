@@ -25,23 +25,23 @@ class RemoveOgMembershipRole extends ChangeOgMembershipRoleBase {
     }
     $rid = $this->configuration['rid'];
     $roles = $member->getRoles();
+    $apply = FALSE;
     /** @var \Drupal\og\Entity\OgRole $role */
-    foreach ($roles as $role) {
+    foreach ($roles as $index => $role) {
       if ($rid == $role->id()) {
-        return;
+        unset($roles[$index]);
+        $apply = TRUE;
       }
     }
-    $role = OgRole::load($rid);
 
-    if (!$role) {
-      throw new \Exception('Unknown role ' . $rid);
-    }
     // Skip removing the role from the user if they already don't have it.
     // For efficiency manually save the original account before applying
     // any changes.
-    $member->original = clone $member;
-    $member->removeRole($rid);
-    $member->save();
+    if ($apply) {
+      $member->original = clone $member;
+      $member->setRoles($roles);
+      $member->save();
+    }
   }
 
 }
