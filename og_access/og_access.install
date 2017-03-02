@@ -1,0 +1,24 @@
+<?php
+
+use Drupal\og\Og;
+
+/**
+ * @file
+ * Install/update/uninstall hook implementations.
+ */
+
+function og_access_install() {
+  /** @var \Drupal\og\GroupTypeManager $group_type_manager */
+  $group_type_manager = \Drupal::service('og.group_type_manager');
+
+  $groups = $group_type_manager->getAllGroupBundles('node');
+
+  foreach ($groups as $group) {
+    Og::createField(OG_ACCESS_FIELD, 'node', $group);
+  }
+
+  $group_content_bundles = $group_type_manager->getAllGroupContentBundlesByEntityType('node');
+  foreach ($group_content_bundles as $bundle) {
+    Og::createField(OG_CONTENT_ACCESS_FIELD, 'node', $bundle);
+  }
+}
