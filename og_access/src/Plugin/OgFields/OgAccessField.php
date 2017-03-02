@@ -31,7 +31,6 @@ class OgAccessField extends OgFieldBase implements OgFieldsInterface {
         'allowed_values_function' => '',
       ],
       'type' => 'list_integer',
-      'locked' => TRUE,
     ];
 
     return parent::getFieldStorageBaseDefinition($values);
