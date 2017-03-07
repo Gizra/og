@@ -77,14 +77,16 @@ og_ui.permissions_overview:
   path: 'admin/config/group/permissions/{entity_type}/{bundle}'
   defaults:
     _form: '\Drupal\og_ui\Form\OgPermissionsForm'
-    _title: '@todo - create title callback'
+    _title_callback: '\Drupal\og_ui\Form\OgPermissionsForm::titleCallback'
   requirements:
     _permission: 'administer group'
 
+# Todo: the {og_role} parameter could use being the simple form
+#       i.e. administrator instead of entity_type-bundle-role
 og_ui.permissions_edit_form:
-  path: 'admin/config/group/permission/{og_role}/edit'
+  path: 'admin/config/group/permissions/{entity_type}/{bundle}/{og_role}'
   defaults:
-    _form: '\Drupal\og_ui\Form\OgPermissionsEditForm'
-    _title_callback: '\Drupal\og_ui\Form\OgPermissionsEditForm::titleCallback'
+    _form: '\Drupal\og_ui\Form\OgRolePermissionsForm'
+    _title_callback: '\Drupal\og_ui\Form\OgRolePermissionsForm::titleCallback'
   requirements:
     _permission: 'administer group'
