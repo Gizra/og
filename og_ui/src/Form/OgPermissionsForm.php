@@ -126,7 +126,10 @@ class OgPermissionsForm extends FormBase {
   /**
    * {@inheritdoc}
    *
-   * @param \Drupal\og\Entity\OgRole $group_role
+   * @param string $entity_type
+   *   The group entity type id.
+   * @param string $bundle
+   *   The group bundle id.
    */
   public function buildForm(array $form, FormStateInterface $form_state, $entity_type = '', $bundle = '') {
     // Render the link for hiding descriptions.
@@ -165,13 +168,13 @@ class OgPermissionsForm extends FormBase {
     ];
 
     foreach ($permissions_by_provider as $provider => $permissions) {
-      // Module name.
+      // Provider.
       $form['permissions'][$provider] = [
         [
         '#wrapper_attributes' => [
           'colspan' => count($roles) + 1,
           'class' => ['module'],
-          'id' => 'module-' . $provider,
+          'id' => 'provider-' . $provider,
         ],
         '#markup' => $provider,
         ],
@@ -179,7 +182,6 @@ class OgPermissionsForm extends FormBase {
 
       /** @var \Drupal\og\Permission $permission */
       foreach ($permissions as $perm => $permission) {
-
         // Fill in default values for the permission.
         $perm_item = [
           'title' => $permission->getTitle(),
@@ -195,6 +197,7 @@ class OgPermissionsForm extends FormBase {
             'title' => $perm_item['title'],
           ],
         ];
+
         // Show the permission description.
         if (!$hide_descriptions) {
           $form['permissions'][$perm]['description']['#context']['description'] = $perm_item['description'];
@@ -203,7 +206,7 @@ class OgPermissionsForm extends FormBase {
         foreach ($roles as $rid => $role) {
           list(,, $rid_simple) = explode('-', $rid, 3);
 
-          // The roles variable indicates which roles the permission applies to.
+          // The roles property indicates which roles the permission applies to.
           $permission_applies = TRUE;
           if (property_exists($permission, 'roles')) {
             $target_roles = $permission->get('roles');
@@ -222,8 +225,9 @@ class OgPermissionsForm extends FormBase {
               '#attributes' => ['class' => ['rid-' . $rid, 'js-rid-' . $rid]],
               '#parents' => [$rid, $perm],
             ];
-            // Show a column of disabled but checked checkboxes.
 
+            // Show a column of disabled but checked checkboxes.
+            // Only applies to admins or default roles.
             if ($roles[$rid]->get('is_admin') ||
                 in_array($rid_simple, $permission->getDefaultRoles())) {
               $form['permissions'][$perm][$rid]['#disabled'] = TRUE;

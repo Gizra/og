@@ -87,6 +87,6 @@ og_ui.permissions_edit_form:
   path: 'admin/config/group/permissions/{entity_type}/{bundle}/{og_role}'
   defaults:
     _form: '\Drupal\og_ui\Form\OgRolePermissionsForm'
-    _title_callback: '\Drupal\og_ui\Form\OgRolePermissionsForm::titleCallback'
+    _title_callback: '\Drupal\og_ui\Form\OgRolePermissionsForm::rolePermissionTitleCallback'
   requirements:
     _permission: 'administer group'
