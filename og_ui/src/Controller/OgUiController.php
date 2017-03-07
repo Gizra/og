@@ -182,8 +182,11 @@ class OgUiController extends ControllerBase {
       }
 
       // Add the edit permissions link.
+      // @TODO investigate using a clean id string (id() is "node-bundle-rid")
       $columns[] = [
         'data' => Link::createFromRoute($this->t('Edit permissions'), 'og_ui.permissions_edit_form', [
+          'entity_type' => $entity_type,
+          'bundle' => $bundle,
           'og_role' => $role->id(),
         ]),
       ];
