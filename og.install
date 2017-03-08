@@ -332,7 +332,7 @@ function og_schema() {
         'length' => 255,
         'not null' => TRUE,
         'default' => '',
-        'description' => "The name of the field holding the group ID, the OG membership is associated with.",
+        'description' => "The name of the field holding the group ID, the OG memebership is associated with.",
       ),
       'language' => array(
         'description' => 'The {languages}.language of this membership.',
@@ -1008,7 +1008,7 @@ function og_update_7200() {
     'length' => 255,
     'not null' => TRUE,
     'default' => '',
-    'description' => "The name of the field holding the group ID, the OG membership is associated with.",
+    'description' => "The name of the field holding the group ID, the OG memebership is associated with.",
   );
   db_add_field('og_membership', 'field_name', $column);
 
