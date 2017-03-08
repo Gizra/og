@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Overview of the group memberships (e.g. group manager, total memebrs).
+ * Overview of the group memberships (e.g. group manager, total members).
  */
 class og_ui_handler_area_og_membership_overview extends views_handler_area {
 
