@@ -38,8 +38,4 @@ class OgRoleController extends ControllerBase implements ContainerInjectionInter
     return $build;
   }
 
-  public function addGroupRole(Entity $entity) {
-
-  }
-
 }

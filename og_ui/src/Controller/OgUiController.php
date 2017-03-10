@@ -8,7 +8,10 @@ use Drupal\Core\Controller\ControllerBase;
 use Drupal\Core\Entity\EntityTypeBundleInfoInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Link;
+<<<<<<< HEAD
 use Drupal\og\GroupTypeManagerInterface;
+=======
+>>>>>>> Linting
 use Drupal\og\Og;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
@@ -153,16 +156,14 @@ class OgUiController extends ControllerBase {
       // Add the edit role link if the role is editable.
       if (!$role->isLocked()) {
         $operations = [];
-        // if ($role->access('update') && $role->hasLinkTemplate('edit-form')) {
-        if ($role->hasLinkTemplate('edit-form')) {
+        if ($role->access('update') && $role->hasLinkTemplate('edit-form')) {
           $operations['edit'] = [
             'title' => $this->t('Edit role'),
             'weight' => 10,
             'url' => $role->urlInfo('edit-form'),
           ];
         }
-        //if ($role->access('delete') && $role->hasLinkTemplate('delete-form')) {
-        if ($role->hasLinkTemplate('delete-form')) {
+        if ($role->access('delete') && $role->hasLinkTemplate('delete-form')) {
           $operations['delete'] = [
             'title' => $this->t('Delete role'),
             'weight' => 100,
@@ -214,6 +215,7 @@ class OgUiController extends ControllerBase {
    *   The group bundle.
    *
    * @return \Drupal\Core\StringTranslation\TranslatableMarkup
+   *   The roles overview page title.
    */
   public function rolesOverviewPageTitleCallback($entity_type, $bundle) {
     return $this->t('OG @type - @bundle roles', [
