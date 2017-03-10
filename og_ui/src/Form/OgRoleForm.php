@@ -41,14 +41,14 @@ class OgRoleForm extends EntityForm {
       '#disabled' => !$entity->isNew(),
       '#size' => 30,
       '#maxlength' => 64,
-      '#machine_name' => array(
-        'exists' => ['\Drupal\og_uid\Entity\OgRole', 'load'],
-      ),
+      '#machine_name' => [
+        'exists' => ['\Drupal\og_ui\Entity\OgRole', 'load'],
+      ],
     );
-    $form['weight'] = array(
+    $form['weight'] = [
       '#type' => 'value',
       '#value' => $entity->getWeight(),
-    );
+    ];
 
     $form['role_type'] = [
       '#type' => 'value',
