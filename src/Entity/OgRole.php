@@ -23,12 +23,14 @@ use Drupal\user\Entity\Role;
  *     plural = "@count OG roles"
  *   ),
  *   handlers = {
+ *     "access" = "Drupal\og\OgRoleAccessControlHandler",
  *     "form" = {
  *       "default" = "Drupal\og_ui\Form\OgRoleForm",
  *       "delete" = "Drupal\og_ui\Form\OgRoleDeleteForm",
  *       "edit" = "Drupal\og_ui\Form\OgRoleForm",
  *     }
  *   },
+ *   admin_permission = "administer group",
  *   static_cache = TRUE,
  *   entity_keys = {
  *     "id" = "id",
