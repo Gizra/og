@@ -19,7 +19,8 @@ class OgRoleAccessControlHandler extends EntityAccessControlHandler {
    */
   protected function checkAccess(EntityInterface $entity, $operation, AccountInterface $account) {
     if ($operation == 'delete') {
-      if ($entity->id() == OgRoleInterface::ANONYMOUS || $entity->id() == OgRoleInterface::AUTHENTICATED) {
+      list(, , $id) = explode('-', $entity->id(), 3);
+      if (in_array($id, [OgRoleInterface::ANONYMOUS, OgRoleInterface::AUTHENTICATED, OgRoleInterface::ADMINISTRATOR])) {
         return AccessResult::forbidden();
       }
     }
