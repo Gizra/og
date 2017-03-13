@@ -68,7 +68,7 @@ function og_access_node_grants(AccountInterface $account, $op) {
  * Implements hook_node_access_records().
  */
 function og_access_node_access_records(NodeInterface $node) {
-  if (empty($node->status)) {
+  if (!$node->isPublished()) {
     // Node is unpublished, so we don't allow every group member to see it.
     return [];
   }
@@ -181,7 +181,7 @@ function og_access_entity_type_save(EntityInterface $entity) {
   $definition = \Drupal::entityTypeManager()->getDefinition($entity->getEntityTypeId());
   $entity_type_id = $definition->getBundleOf();
 
-  // Add/remove the group itself.
+  // Add/remove on the group itself.
   $is_group = Og::isGroup($entity_type_id, $bundle);
   if ($entity->og_is_group != $is_group) {
     if ($entity->og_is_group) {
