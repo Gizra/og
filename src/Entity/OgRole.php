@@ -28,7 +28,11 @@ use Drupal\user\Entity\Role;
  *       "default" = "Drupal\og_ui\Form\OgRoleForm",
  *       "delete" = "Drupal\og_ui\Form\OgRoleDeleteForm",
  *       "edit" = "Drupal\og_ui\Form\OgRoleForm",
- *     }
+ *     },
+ *     "route_provider" = {
+ *       "html" = "Drupal\og\Entity\OgRoleRouteProvider",
+ *     },
+ *    "list_builder" = "Drupal\og\Entity\OgRoleListBuilder",
  *   },
  *   admin_permission = "administer group",
  *   static_cache = TRUE,
@@ -38,10 +42,10 @@ use Drupal\user\Entity\Role;
  *     "weight" = "weight"
  *   },
  *   links = {
- *     "delete-form" = "/admin/config/group/role/{og_role}/delete",
+ *     "add-form" = "/admin/config/group/role/{entity_type}/{bundle}/add",
  *     "edit-form" = "/admin/config/group/role/{og_role}/edit",
- *     "edit-permissions-form" = "/admin/config/group/permission/{og_role}/edit",
- *     "collection" = "/admin/config/group/roles",
+ *     "delete-form" = "/admin/config/group/role/{og_role}/delete",
+ *     "collection" = "/admin/config/group/roles/{entity_type_id}/{bundle}",
  *   },
  *   config_export = {
  *     "id",

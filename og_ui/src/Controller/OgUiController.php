@@ -90,7 +90,7 @@ class OgUiController extends ControllerBase {
           ],
           [
             'data' => Link::createFromRoute($action, 'og_ui.' . $type . '_overview', [
-              'entity_type' => $entity_type,
+              'entity_type_id' => $entity_type,
               'bundle' => $bundle,
             ]),
           ],
@@ -119,90 +119,6 @@ class OgUiController extends ControllerBase {
    */
   public function rolesPermissionsOverviewTitleCallback($type) {
     return $this->t('OG @type overview', ['@type' => $type]);
-  }
-
-  /**
-   * Returns the OG role overview page for a given entity type and bundle.
-   *
-   * @param string $entity_type
-   *   The entity type for which to show the OG roles.
-   * @param string $bundle
-   *   The bundle for which to show the OG roles.
-   *
-   * @return array
-   *   The overview as a render array.
-   */
-  public function rolesOverviewPage($entity_type = '', $bundle = '') {
-    // Return a 404 error when this is not a group.
-    if (!Og::isGroup($entity_type, $bundle)) {
-      throw new NotFoundHttpException();
-    }
-
-    $rows = [];
-
-    $properties = [
-      'group_type' => $entity_type,
-      'group_bundle' => $bundle,
-    ];
-    /** @var \Drupal\og\Entity\OgRole $role */
-    foreach ($this->entityTypeManager->getStorage('og_role')->loadByProperties($properties) as $role) {
-      // Add the role name cell.
-      $columns = [['data' => $role->getLabel()]];
-      $operations = [];
-      $edit_permissions = [
-        'title' => $this->t('Edit permissions'),
-        'weight' => 10,
-        'url' => Url::fromRoute('og_ui.permissions_edit_form', [
-          'entity_type' => $entity_type,
-          'bundle' => $bundle,
-          'og_role' => $role->id(),
-        ]),
-      ];
-
-      // Add the edit role link if the role is editable.
-      if (!$role->isLocked()) {
-        if ($role->access('update') && $role->hasLinkTemplate('edit-form')) {
-          $operations['edit'] = [
-            'title' => $this->t('Edit role'),
-            'weight' => 10,
-            'url' => $role->urlInfo('edit-form'),
-          ];
-        }
-
-        $operations['permissions'] = $edit_permissions;
-        if ($role->access('delete') && $role->hasLinkTemplate('delete-form')) {
-          $operations['delete'] = [
-            'title' => $this->t('Delete role'),
-            'weight' => 100,
-            'url' => $role->urlInfo('delete-form'),
-          ];
-        }
-      }
-      else {
-        // Add the edit permissions link.
-        // @TODO investigate using a clean id string (id() is "node-bundle-rid").
-        $operations['permissions'] = $edit_permissions;
-      }
-
-      $columns[] = [
-        'data' => [
-          '#type' => 'operations',
-          '#links' => $operations,
-        ],
-      ];
-
-      $rows[] = $columns;
-    }
-
-    return [
-      '#theme' => 'table',
-      '#header' => [
-        $this->t('Role name'),
-        ['data' => $this->t('Operations')],
-      ],
-      '#rows' => $rows,
-      '#empty' => $this->t('No roles available.'),
-    ];
   }
 
   /**

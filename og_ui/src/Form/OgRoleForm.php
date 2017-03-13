@@ -40,7 +40,7 @@ class OgRoleForm extends EntityForm {
       // The actual role id is <ENTITY TYPE>-<BUNDLE>-<ID>
       // Given the machine_name constraints, we go back to ID here
       // as the full id is assembled in OgRole::save().
-      list($entity_type, , $role_id) = explode('-', $og_role->id(), 3);
+      list(, , $role_id) = explode('-', $og_role->id(), 3);
     }
 
     $form['name'] = [

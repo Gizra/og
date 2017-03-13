@@ -26,10 +26,9 @@ og_ui.roles_permissions_overview:
     type: '^(roles|permissions)$'
 
 og_ui.roles_overview:
-  path: 'admin/config/group/roles/{entity_type}/{bundle}'
+  path: 'admin/config/group/roles/{entity_type_id}/{bundle}'
   defaults:
-    _controller: '\Drupal\og_ui\Controller\OgUiController::rolesOverviewPage'
-    _title_callback: '\Drupal\og_ui\Controller\OgUiController::rolesOverviewPageTitleCallback'
+    _entity_list: 'og_role'
   requirements:
     _permission: 'administer group'
 
