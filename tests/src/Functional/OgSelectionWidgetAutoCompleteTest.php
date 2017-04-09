@@ -7,9 +7,6 @@ use Drupal\node\Entity\NodeType;
 use Drupal\og\Entity\OgRole;
 use Drupal\og\Og;
 use Drupal\og\OgGroupAudienceHelper;
-use Drupal\og\OgRoleInterface;
-use Drupal\og\OgRoleManager;
-use Drupal\og\OgRoleManagerInterface;
 use Drupal\simpletest\ContentTypeCreationTrait;
 use Drupal\Tests\BrowserTestBase;
 
@@ -63,6 +60,13 @@ class OgSelectionWidgetAutoCompleteTest extends BrowserTestBase {
   protected $roleManager;
 
   /**
+   * The role of the user.
+   *
+   * @var \Drupal\og\OgRoleInterface
+   */
+  protected $role;
+
+  /**
    * {@inheritdoc}
    */
   public function setUp() {
@@ -110,6 +114,8 @@ class OgSelectionWidgetAutoCompleteTest extends BrowserTestBase {
       ->setGroupType('node')
       ->setGroupBundle('group')
       ->grantPermission('create group_content content')
+      ->grantPermission('create node group_content')
+      ->grantPermission('create')
       ->save();
   }
 
@@ -130,6 +136,7 @@ class OgSelectionWidgetAutoCompleteTest extends BrowserTestBase {
     $this->assertSession()->pageTextContains('You are not allowed to post content in the group ' . $this->group2->label());
 
     // Add the member to the group.
+
     Og::createMembership($this->group2, $this->user1)->addRole($this->role)->save();
 
     $this->drupalLogin($this->user1);
@@ -141,7 +148,7 @@ class OgSelectionWidgetAutoCompleteTest extends BrowserTestBase {
 
     $this->drupalGet('node/add/group_content');
     $this->submitForm($edit, 'Save');
-    print_r($this->getSession()->getPage()->getContent());
+    $this->assertSession()->pageTextContains($edit['title[0][value]'] . ' has been created.');
 
   }
 
