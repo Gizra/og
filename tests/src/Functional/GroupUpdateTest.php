@@ -167,7 +167,7 @@ class GroupUpdateTest extends BrowserTestBase {
    * Data provider for ::testUpdateAccess()
    *
    * @return array
-   *    The names of the variables that will be tested.
+   *   The names of the variables that will be tested.
    */
   public function ogUpdateAccessProvider() {
     return [

@@ -88,35 +88,35 @@ class OgEntityAccessTest extends KernelTestBase {
   /**
    * The OG role that has the permission we check for.
    *
-   * @var OgRole
+   * @var \Drupal\og\Entity\OgRole
    */
   protected $ogRoleWithPermission;
 
   /**
    * The OG role that has the permission we check for.
    *
-   * @var OgRole
+   * @var \Drupal\og\Entity\OgRole
    */
   protected $ogRoleWithPermission2;
 
   /**
    * The OG role that has the special permission 'update group'.
    *
-   * @var OgRole
+   * @var \Drupal\og\Entity\OgRole
    */
   protected $ogRoleWithUpdatePermission;
 
   /**
    * The OG role that doesn't have the permission we check for.
    *
-   * @var OgRole
+   * @var \Drupal\og\Entity\OgRole
    */
   protected $ogRoleWithoutPermission;
 
   /**
    * The OG role that doesn't have the permission we check for.
    *
-   * @var OgRole
+   * @var \Drupal\og\Entity\OgRole
    */
   protected $ogAdminRole;
 
@@ -227,7 +227,7 @@ class OgEntityAccessTest extends KernelTestBase {
       ->setIsAdmin(TRUE)
       ->save();
 
-    /** @var OgMembership $membership */
+    /** @var \Drupal\og\OgMembership $membership */
     $membership = Og::createMembership($this->group1, $this->user1);
     $membership
       ->addRole($this->ogRoleWithPermission)
@@ -261,7 +261,7 @@ class OgEntityAccessTest extends KernelTestBase {
    * Test access to an arbitrary permission.
    */
   public function testAccess() {
-    /** @var OgAccessInterface $og_access */
+    /** @var \Drupal\og\OgAccessInterface $og_access */
     $og_access = $this->container->get('og.access');
 
     // A member user.
@@ -279,7 +279,7 @@ class OgEntityAccessTest extends KernelTestBase {
     $this->assertTrue($og_access->userAccess($this->group1, 'some_perm', $this->user3)->isForbidden());
 
     // Allow the permission to a non-member user.
-    /** @var OgRole $role */
+    /** @var \Drupal\og\Entity\OgRole $role */
     $role = OgRole::loadByGroupAndName($this->group1, OgRoleInterface::ANONYMOUS);
     $role
       ->grantPermission('some_perm')

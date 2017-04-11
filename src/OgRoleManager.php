@@ -38,7 +38,7 @@ class OgRoleManager implements OgRoleManagerInterface {
    *
    * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entity_type_manager
    *   The entity type manager.
-   * @param EventDispatcherInterface $event_dispatcher
+   * @param \Symfony\Component\EventDispatcher\EventDispatcherInterface $event_dispatcher
    *   The event dispatcher.
    * @param \Drupal\og\PermissionManagerInterface $permission_manager
    *   The OG permission manager.

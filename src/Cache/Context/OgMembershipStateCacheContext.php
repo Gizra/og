@@ -82,7 +82,7 @@ class OgMembershipStateCacheContext implements CacheContextInterface {
       OgMembershipInterface::STATE_BLOCKED,
     ];
 
-    /** @var OgMembershipInterface $membership */
+    /** @var \Drupal\og\OgMembershipInterface $membership */
     $membership = $this->membershipManager->getMembership($group, $this->user, $states);
     return $membership ? $membership->getState() : self::NO_CONTEXT;
   }
