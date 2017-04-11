@@ -22,7 +22,7 @@ class Simple extends OgDeleteOrphansBase {
   public function register(EntityInterface $entity) {
     parent::register($entity);
     // Delete the orphans on the fly.
-    $this->process();
+    drupal_register_shutdown_function([$this, 'process']);
   }
 
   /**
