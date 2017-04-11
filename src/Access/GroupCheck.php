@@ -64,8 +64,8 @@ class GroupCheck implements AccessInterface {
    * @param string $entity_type_id
    *   (optional) The entity type ID.
    * @param string $entity_id
-   *   (optional) TGroupCheck.phphe entity ID. If the ID is not sent, the access
-   *   method will try to extract it from the route matcher.
+   *   The entity ID. If the ID is not sent, the access method will try to
+   *   extract it from the route matcher.
    *
    * @return \Drupal\Core\Access\AccessResultInterface
    *   The access result.
