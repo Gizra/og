@@ -282,6 +282,8 @@ class OgComplex extends EntityReferenceAutocompleteWidget {
    *   added in the end of the list.
    * @param \Drupal\Core\Entity\EntityInterface|null $entity
    *   The entity object.
+   * @param int $weight_delta
+   *   The delta of the item.
    *
    * @return array
    *   A single entity reference input.

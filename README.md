@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/Gizra/og.svg?branch=8.x-1.x)](https://travis-ci.org/Gizra/og)
+![Status](https://travis-ci.org/Gizra/og.svg?branch=8.x-1.x)
 
 ## DESCRIPTION
 
@@ -111,16 +111,17 @@ provide a quick way to get started with Organic groups.
    will notice that these options have the same look and feel as Drupal core in
    matters relating to management of roles and permissions.
 9. You can enable your privileged users to subscribe to a group by providing a
-   'Subscribe' link. (Subscribing is the act of associating a user with a group.)
+   'Subscribe' link. (Subscribing is the act of associating a user with a 
+    group.)
    To show this subscribe link:
    9.1 Make sure you have the Group UI module enabled
-   9.2 Go to admin/config/group/permissions and make sure that the "Subscribe user to group"
-       permission is given to the appropriate user-roles.
+   9.2 Go to admin/config/group/permissions and make sure that the "Subscribe 
+       user to group" permission is given to the appropriate user-roles.
    9.3 Navigate to the "manage display" tab of your content type
       (admin/structure/types/manage/group/display)
        and choose the Group subscription format for the Group type field.
-   9.4 Back in the group view you will now notice a 'Subscribe' link (If you are the
-       group administrator it will say "You are the group manager").
+   9.4 Back in the group view you will now notice a 'Subscribe' link (If you are 
+       the group administrator it will say "You are the group manager").
 10. In order to associate other entities with group or group content, navigate
     to Organic Groups field settings", in admin/config/group/fields.
 11. In order to define default permissions for groups that are newly created or
@@ -167,7 +168,8 @@ provide a quick way to get started with Organic groups.
 \Drupal\og\Og::groupTypeManager()->addGroup('node', 'page');
 
 // Add og audience field to "Article" node type, thus making is a group content.
-\Drupal\og\Og::createField(\Drupal\og\OgGroupAudienceHelper::DEFAULT_FIELD, 'node', 'article');
+$field = \Drupal\og\OgGroupAudienceHelper::DEFAULT_FIELD, 'node', 'article');
+\Drupal\og\Og::createField($field);
 ```
 
 ## DRUPAL CONSOLE INTEGRATION
