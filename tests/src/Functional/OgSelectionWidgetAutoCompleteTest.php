@@ -113,9 +113,7 @@ class OgSelectionWidgetAutoCompleteTest extends BrowserTestBase {
       ->setLabel('Content group editor')
       ->setGroupType('node')
       ->setGroupBundle('group')
-      ->grantPermission('create group_content content')
       ->grantPermission('create node group_content')
-      ->grantPermission('create')
       ->save();
   }
 

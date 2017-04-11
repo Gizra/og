@@ -3,6 +3,7 @@
 namespace Drupal\og\Plugin\Validation\Constraint;
 
 use Drupal\Core\Access\AccessResult;
+use Drupal\Core\Entity\ContentEntityInterface;
 use Drupal\og\Og;
 use Symfony\Component\Validator\Constraint;
 use Symfony\Component\Validator\ConstraintValidator;
@@ -21,24 +22,27 @@ class ValidOgMembershipReferenceConstraintValidator extends ConstraintValidator 
       return;
     }
 
-    $entity = \Drupal::entityTypeManager()
+    $group = \Drupal::entityTypeManager()
       ->getStorage($value->getFieldDefinition()->getFieldStorageDefinition()->getSetting('target_type'))
       ->load($value->get('target_id')->getValue());
 
-    if (!$entity) {
-      // Entity with that entity ID does not exists. This could happen if a
-      // stale entity is passed for validation.
+    if (!$group) {
+      // Entity with that group ID does not exists. This could happen if a
+      // stale group is passed for validation.
       return;
     }
 
-    $params['%label'] = $entity->label();
+    $params['%label'] = $group->label();
 
-    if (!Og::isGroup($entity->getEntityTypeId(), $entity->bundle())) {
+    if (!Og::isGroup($group->getEntityTypeId(), $group->bundle())) {
       $this->context->addViolation($constraint->NotValidGroup, $params);
     }
 
+    /** @var ContentEntityInterface $entity */
+    $entity = $this->context->getRoot()->getValue();
+
     /** @var AccessResult $access */
-    $access = \Drupal::service('og.access')->userAccessEntity('create', $entity, \Drupal::currentUser()->getAccount());
+    $access = \Drupal::service('og.access')->userAccessEntity('create ' . $entity->getEntityTypeId() . ' ' . $entity->bundle(), $group, \Drupal::currentUser()->getAccount());
 
     if ($access->isForbidden()) {
       $this->context->addViolation($constraint->NotAllowedToPostInGroup, $params);
