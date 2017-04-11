@@ -203,6 +203,9 @@ class OgMembership extends ContentEntityBase implements OgMembershipInterface {
    * {@inheritdoc}
    */
   public function setRoles(array $roles = []) {
+    $roles = array_filter($roles, function (OgRole $role) {
+      return !($role->getName() == OgRoleInterface::AUTHENTICATED);
+    });
     $role_ids = array_map(function (OgRole $role) {
       return $role->id();
     }, $roles);
@@ -366,6 +369,9 @@ class OgMembership extends ContentEntityBase implements OgMembershipInterface {
 
     // Reset internal cache.
     Og::reset();
+
+    // Invalidate the group membership manager.
+    \Drupal::service('og.membership_manager')->reset();
 
     return $result;
   }

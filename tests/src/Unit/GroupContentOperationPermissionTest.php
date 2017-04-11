@@ -24,7 +24,7 @@ class GroupContentOperationPermissionTest extends UnitTestCase {
    *
    * @dataProvider groupContentOperationPermissionProvider
    */
-  public function testGetEntityType($values) {
+  public function testGetEntityType(array $values) {
     $permission = new GroupContentOperationPermission($values);
     $this->assertEquals($values['entity type'], $permission->getEntityType());
   }

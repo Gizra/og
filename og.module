@@ -6,6 +6,7 @@
  */
 
 use Drupal\Core\Access\AccessResult;
+use Drupal\Core\Cache\Cache;
 use Drupal\Core\Entity\ContentEntityInterface;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Entity\EntityTypeInterface;
@@ -27,6 +28,9 @@ define('OG_DEFAULT_ACCESS_FIELD', 'og_roles_permissions');
  * Subscribe the group manager.
  */
 function og_entity_insert(EntityInterface $entity) {
+  // Invalidate cache tags if new group content is created.
+  og_invalidate_group_content_cache_tags($entity);
+
   if (!Og::isGroup($entity->getEntityTypeId(), $entity->bundle())) {
     // Not a group entity.
     return;
@@ -43,6 +47,14 @@ function og_entity_insert(EntityInterface $entity) {
 
   $membership = Og::createMembership($entity, $entity->getOwner());
   $membership->save();
+}
+
+/**
+ * Implements hook_entity_update().
+ */
+function og_entity_update(EntityInterface $entity) {
+  // Invalidate cache tags if a group or group content entity is updated.
+  og_invalidate_group_content_cache_tags($entity);
 }
 
 /**
@@ -67,6 +79,19 @@ function og_entity_predelete(EntityInterface $entity) {
   if ($entity instanceof UserInterface) {
     // @todo Delete memberships when deleting users.
     // @see https://github.com/amitaibu/og/issues/176
+  }
+}
+
+/**
+ * Implements hook_entity_delete().
+ */
+function og_entity_delete(EntityInterface $entity) {
+  // Invalidate cache tags after a group or group content entity is deleted.
+  og_invalidate_group_content_cache_tags($entity);
+
+  // Clear static caches after a group or group content entity is deleted.
+  if (Og::isGroup($entity->getEntityTypeId(), $entity->bundle()) || Og::isGroupContent($entity->getEntityTypeId(), $entity->bundle())) {
+    Og::invalidateCache();
   }
 }
 
@@ -247,5 +272,29 @@ function og_entity_type_alter(array &$entity_types) {
   /** @var \Drupal\Core\Entity\EntityTypeInterface $entity_type */
   foreach ($entity_types as $entity_type_id => $entity_type) {
     $entity_type->setLinkTemplate('og-admin-routes', "/group/$entity_type_id/{{$entity_type_id}}/admin");
+  }
+}
+
+/**
+ * Invalidates group content cache tags for the groups this entity belongs to.
+ *
+ * @param \Drupal\Core\Entity\EntityInterface $entity
+ *   The group content entity that is being created, changed or deleted and is
+ *   the direct cause for the need to invalidate cached group content.
+ */
+function og_invalidate_group_content_cache_tags(EntityInterface $entity) {
+  // If group content is created or updated, invalidate the group content cache
+  // tags for each of the groups this group content belongs to. This allows
+  // group listings to be cached effectively. Also invalidate the tags if the
+  // group itself changes. The cache tag format is
+  // 'og-group-content:{group entity type}:{group entity id}'.
+  if (Og::isGroup($entity->getEntityTypeId(), $entity->bundle()) || Og::isGroupContent($entity->getEntityTypeId(), $entity->bundle())) {
+    $tags = [];
+    foreach (\Drupal::service('og.membership_manager')->getGroupIds($entity) as $entity_type => $ids) {
+      foreach ($ids as $id) {
+        $tags[] = "$entity_type:$id";
+      }
+    }
+    Cache::invalidateTags(Cache::buildTags('og-group-content', $tags));
   }
 }

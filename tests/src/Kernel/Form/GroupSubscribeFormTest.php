@@ -193,7 +193,7 @@ class GroupSubscribeFormTest extends KernelTestBase {
    * @return \Drupal\user\Entity\User
    *   The created user entity.
    */
-  protected function createUser($permissions = []) {
+  protected function createUser(array $permissions = []) {
     $values = [];
     if ($permissions) {
       // Create a new role and apply permissions to it.

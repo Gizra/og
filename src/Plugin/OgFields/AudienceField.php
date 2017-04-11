@@ -52,7 +52,6 @@ class AudienceField extends OgFieldBase implements OgFieldsInterface {
     ];
 
     return parent::getFieldBaseDefinition($values);
-
   }
 
   /**

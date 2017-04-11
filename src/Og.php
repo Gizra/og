@@ -197,7 +197,7 @@ class Og {
    * @return bool
    *   TRUE if the user belongs to a group with a certain state.
    */
-  public static function isMember(EntityInterface $group, AccountInterface $user, $states = [OgMembershipInterface::STATE_ACTIVE]) {
+  public static function isMember(EntityInterface $group, AccountInterface $user, array $states = [OgMembershipInterface::STATE_ACTIVE]) {
     /** @var \Drupal\og\MembershipManagerInterface $membership_manager */
     $membership_manager = \Drupal::service('og.membership_manager');
     return $membership_manager->isMember($group, $user, $states);

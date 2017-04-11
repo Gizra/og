@@ -40,6 +40,12 @@ og.settings:
     deny_subscribe_without_approval:
       type: boolean
       label: 'When enabled, a user that ask to join to a private group their membership status will be pending regardless of the group permissions'
+    group_resolvers:
+      type: sequence
+      label: 'List of OgGroupResolver plugins that are used to discover the group context, in order of priority.'
+      sequence:
+        type: string
+        label: 'OgGroupResolver plugin ID.'
 
 og.settings.group.*:
   type: sequence
