@@ -213,11 +213,11 @@ class OgAccess implements OgAccessInterface {
       // pass them along to the implementing modules.
       $alterable_permissions = $this->getPermissionsCache($group, $user, TRUE);
 
-      $context = array(
+      $context = [
         'operation' => $operation,
         'group' => $group,
         'user' => $user,
-      );
+      ];
       $this->moduleHandler->alter('og_user_access', $alterable_permissions['permissions'], $cacheable_metadata, $context);
 
       $this->setPermissionCache($group, $user, FALSE, $alterable_permissions['permissions'], $alterable_permissions['is_admin'], $cacheable_metadata);

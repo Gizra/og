@@ -168,7 +168,7 @@ class OgGroupContentOperationAccessTest extends KernelTestBase {
       // fine to save this membership, but in the most common use case this
       // membership will not exist in the database.
       if ($role_name !== OgRoleInterface::ANONYMOUS) {
-        /** @var OgMembership $membership */
+        /** @var \Drupal\og\Entity\OgMembership $membership */
         $membership = OgMembership::create();
         $membership
           ->setUser($this->users[$role_name])

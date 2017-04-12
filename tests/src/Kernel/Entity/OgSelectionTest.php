@@ -211,7 +211,7 @@ class OgSelectionTest extends KernelTestBase {
    *
    * @param int $amount
    *   The number of groups to create.
-   * @param User $user
+   * @param \Drupal\user\Entity\User $user
    *   The user object which owns the groups.
    *
    * @return \Drupal\Core\Entity\ContentEntityBase[]
