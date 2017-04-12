@@ -139,7 +139,7 @@ class OgSelection extends DefaultSelection {
       $query->condition($bundle_key, $bundles, 'IN');
     }
 
-    if (!$this->currentUser->isAnonymous()) {
+    if ($this->currentUser->isAnonymous()) {
       // @todo: What to do with anonymous user?
       return $query;
     }
