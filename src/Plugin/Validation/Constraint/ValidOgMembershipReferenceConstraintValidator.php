@@ -2,8 +2,6 @@
 
 namespace Drupal\og\Plugin\Validation\Constraint;
 
-use Drupal\Core\Access\AccessResult;
-use Drupal\Core\Entity\ContentEntityInterface;
 use Drupal\og\Og;
 use Symfony\Component\Validator\Constraint;
 use Symfony\Component\Validator\ConstraintValidator;
@@ -38,10 +36,10 @@ class ValidOgMembershipReferenceConstraintValidator extends ConstraintValidator 
       $this->context->addViolation($constraint->NotValidGroup, $params);
     }
 
-    /** @var ContentEntityInterface $entity */
+    /** @var \Drupal\Core\Entity\ContentEntityInterface $entity */
     $entity = $this->context->getRoot()->getValue();
 
-    /** @var AccessResult $access */
+    /** @var \Drupal\Core\Access\AccessResult $access */
     $access = \Drupal::service('og.access')->userAccessEntity('create ' . $entity->getEntityTypeId() . ' ' . $entity->bundle(), $group, \Drupal::currentUser()->getAccount());
 
     if ($access->isForbidden()) {

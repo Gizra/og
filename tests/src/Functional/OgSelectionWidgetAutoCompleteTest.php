@@ -134,7 +134,6 @@ class OgSelectionWidgetAutoCompleteTest extends BrowserTestBase {
     $this->assertSession()->pageTextContains('You are not allowed to post content in the group ' . $this->group2->label());
 
     // Add the member to the group.
-
     Og::createMembership($this->group2, $this->user1)->addRole($this->role)->save();
 
     $this->drupalLogin($this->user1);

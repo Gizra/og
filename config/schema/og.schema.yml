@@ -106,4 +106,3 @@ og.og_role.*:
     role_type:
       type: string
       label: 'Role type'
-
