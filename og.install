@@ -17,60 +17,60 @@ function og_uninstall() {
  * Implements hook_schema().
  */
 function og_schema() {
-  $schema = array();
+  $schema = [];
 
-  $schema['og_users_roles'] = array(
+  $schema['og_users_roles'] = [
     'description' => 'Maps users to roles.',
-    'fields' => array(
-      'id' => array(
+    'fields' => [
+      'id' => [
         'type' => 'serial',
         'description' => "The unique identifier.",
         'unsigned' => TRUE,
         'not null' => TRUE,
-      ),
-      'uid' => array(
+      ],
+      'uid' => [
         'type' => 'int',
         'unsigned' => TRUE,
         'not null' => TRUE,
         'default' => 0,
         'description' => 'Primary Key: {users}.uid for user.',
-      ),
-      'rid' => array(
+      ],
+      'rid' => [
         'type' => 'int',
         'unsigned' => TRUE,
         'not null' => TRUE,
         'default' => 0,
         'description' => 'Primary Key: {og_role}.rid for role.',
-      ),
-      'gid' => array(
+      ],
+      'gid' => [
         'description' => "The group's unique ID.",
         'type' => 'int',
         'size' => 'normal',
         'not null' => TRUE,
-      ),
-      'group_type' => array(
+      ],
+      'group_type' => [
         'type' => 'varchar',
         'length' => 255,
         'not null' => TRUE,
         'default' => '',
         'description' => "The group's entity type.",
-      ),
-    ),
-    'primary key' => array('id'),
-    'indexes' => array(
-      'rid' => array('rid'),
-    ),
-    'foreign keys' => array(
-      'user' => array(
+      ],
+    ],
+    'primary key' => ['id'],
+    'indexes' => [
+      'rid' => ['rid'],
+    ],
+    'foreign keys' => [
+      'user' => [
         'table' => 'users',
-        'columns' => array('uid' => 'uid'),
-      ),
-      'og_role' => array(
+        'columns' => ['uid' => 'uid'],
+      ],
+      'og_role' => [
         'table' => 'og_role',
-        'columns' => array('rid' => 'rid'),
-      ),
-    ),
-  );
+        'columns' => ['rid' => 'rid'],
+      ],
+    ],
+  ];
 
   return $schema;
 }

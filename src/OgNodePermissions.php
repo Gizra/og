@@ -19,7 +19,7 @@ class OgNodePermissions extends NodePermissions {
    * @see \Drupal\user\PermissionHandlerInterface::getPermissions()
    */
   public function nodeTypePermissions() {
-    $perms = array();
+    $perms = [];
 
     // Generate node permissions for all group content node types.
     foreach (NodeType::loadMultiple() as $bundle) {

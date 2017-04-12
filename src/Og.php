@@ -313,7 +313,7 @@ class Og {
   public static function invalidateCache() {
     // @todo We should not be using drupal_static() review and remove.
     // Reset static cache.
-    $caches = array(
+    $caches = [
       'og_user_access',
       'og_user_access_alter',
       'og_role_permissions',
@@ -323,7 +323,7 @@ class Og {
       'og_get_membership',
       'og_get_field_og_membership_properties',
       'og_get_user_roles',
-    );
+    ];
 
     foreach ($caches as $cache) {
       drupal_static_reset($cache);

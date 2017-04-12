@@ -130,7 +130,7 @@ class AccessByOgMembershipTest extends KernelTestBase {
 
     // Grant both members and non-members permission to edit any group content.
     foreach ([OgRoleInterface::AUTHENTICATED, OgRoleInterface::ANONYMOUS] as $role_name) {
-      /** @var OgRole $role */
+      /** @var \Drupal\og\Entity\OgRole $role */
       $role = OgRole::getRole('block_content', 'group', $role_name);
 
       $role
@@ -191,7 +191,7 @@ class AccessByOgMembershipTest extends KernelTestBase {
    * @expectedException \Drupal\Core\Entity\EntityStorageException
    */
   public function testNonMemberRoleMembershipSave() {
-    /** @var OgRole $role */
+    /** @var \Drupal\og\Entity\OgRole $role */
     $role = OgRole::getRole('block_content', 'group', OgRoleInterface::ANONYMOUS);
 
     $role

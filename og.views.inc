@@ -52,7 +52,7 @@ function og_field_views_data(FieldStorageConfigInterface $field_storage) {
           '@label' => $target_entity_type->getLabel(),
           '@field_name' => $field_name,
         ];
-        $data[$table_name][$field_name]['relationship'] = array(
+        $data[$table_name][$field_name]['relationship'] = [
           'title' => t('@label referenced from @field_name', $args),
           'label' => t('@field_name: @label', $args),
           'group' => $entity_type->getLabel(),
@@ -62,7 +62,7 @@ function og_field_views_data(FieldStorageConfigInterface $field_storage) {
           'entity type' => $target_entity_type_id,
           'base field' => $target_entity_type->getKey('id'),
           'relationship field' => $field_name . '_target_id',
-        );
+        ];
         // Provide a reverse relationship for the entity type that is referenced
         // by the field.
         $args['@entity'] = $entity_type->getLabel();

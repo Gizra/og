@@ -43,7 +43,7 @@ class OgAdminMembersViewTest extends ViewsKernelTestBase {
    *
    * @var array
    */
-  protected $configProperties = array(
+  protected $configProperties = [
     'disabled',
     'name',
     'description',
@@ -52,14 +52,14 @@ class OgAdminMembersViewTest extends ViewsKernelTestBase {
     'label',
     'core',
     'display',
-  );
+  ];
 
   /**
    * Properties that should be stored in the executable.
    *
    * @var array
    */
-  protected $executableProperties = array(
+  protected $executableProperties = [
     'storage',
     'built',
     'executed',
@@ -72,7 +72,7 @@ class OgAdminMembersViewTest extends ViewsKernelTestBase {
     'exposed_raw_input',
     'old_view',
     'parent_views',
-  );
+  ];
 
   /**
    * The user entity.

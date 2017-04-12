@@ -49,7 +49,7 @@ class RecentGroupContentBlock extends BlockBase implements ContainerFactoryPlugi
   /**
    * The bundle information service.
    *
-   * @var EntityTypeBundleInfoInterface
+   * @var \Drupal\Core\Entity\EntityTypeBundleInfoInterface
    */
   protected $entityTypeBundleInfo;
 
@@ -156,12 +156,12 @@ class RecentGroupContentBlock extends BlockBase implements ContainerFactoryPlugi
     $form['entity_type']['#options'] = $entity_type_options;
 
     $range = range(2, 20);
-    $form['count'] = array(
+    $form['count'] = [
       '#type' => 'select',
       '#title' => $this->t('Number of results to show'),
       '#default_value' => $this->configuration['count'],
       '#options' => array_combine($range, $range),
-    );
+    ];
 
     return $form;
   }

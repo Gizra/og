@@ -61,7 +61,7 @@ class DefaultRoleEventIntegrationTest extends KernelTestBase {
    * Tests that OG correctly provides the group administrator default role.
    */
   public function testPermissionEventIntegration() {
-    /** @var DefaultRoleEvent $event */
+    /** @var \Drupal\og\Event\DefaultRoleEvent $event */
     $event = new DefaultRoleEvent();
 
     // Query the event listener directly to see if the administrator role is

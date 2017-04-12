@@ -57,7 +57,7 @@ class GroupSubscribeForm extends ContentEntityForm {
    *   The confirmation question.
    */
   public function getQuestion() {
-    /** @var OgMembershipInterface $membership */
+    /** @var \Drupal\og\OgMembershipInterface $membership */
     $membership = $this->entity;
     /** @var EntityInterface $group */
     $group = $membership->getGroup();
@@ -104,7 +104,7 @@ class GroupSubscribeForm extends ContentEntityForm {
   public function buildForm(array $form, FormStateInterface $form_state) {
     $state = $this->isStateActive() ? OgMembershipInterface::STATE_ACTIVE : OgMembershipInterface::STATE_PENDING;
 
-    /** @var OgMembershipInterface $membership */
+    /** @var \Drupal\og\OgMembershipInterface $membership */
     $membership = $this->entity;
     $membership->setState($state);
 
@@ -167,7 +167,7 @@ class GroupSubscribeForm extends ContentEntityForm {
    *   True if the state is active.
    */
   public function isStateActive() {
-    /** @var OgMembershipInterface $membership */
+    /** @var \Drupal\og\OgMembershipInterface $membership */
     $membership = $this->getEntity();
 
     /** @var EntityInterface $group */
@@ -195,7 +195,7 @@ class GroupSubscribeForm extends ContentEntityForm {
    */
   public function submitForm(array &$form, FormStateInterface $form_state) {
     parent::submitForm($form, $form_state);
-    /** @var OgMembershipInterface $membership */
+    /** @var \Drupal\og\OgMembershipInterface $membership */
     $membership = $this->getEntity();
 
     /** @var EntityInterface $group */

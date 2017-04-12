@@ -97,11 +97,11 @@ class OgComplexWidgetTest extends BrowserTestBase {
       ->execute();
     $post_nid = reset($result);
 
-    /** @var NodeInterface $post */
+    /** @var \Drupal\node\Entity\NodeInterface $post */
     $post = Node::load($post_nid);
 
     // Check that the post references the group correctly.
-    /** @var OgMembershipReferenceItemList $reference_list */
+    /** @var \Drupal\og\OgMembershipReferenceItemList $reference_list */
     $reference_list = $post->get(OgGroupAudienceHelperInterface::DEFAULT_FIELD);
     $this->assertEquals(1, $reference_list->count(), "There is 1 reference after adding a group to the '$field' field.");
     $this->assertEquals($group->id(), $reference_list->first()->getValue()['target_id'], "The '$field' field references the correct group.");

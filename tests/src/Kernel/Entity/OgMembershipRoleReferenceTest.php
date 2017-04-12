@@ -38,14 +38,14 @@ class OgMembershipRoleReferenceTest extends KernelTestBase {
   /**
    * The group entity, of type node.
    *
-   * @var Node
+   * @var \Drupal\node\Entity\Node
    */
   protected $group;
 
   /**
    * The user object.
    *
-   * @var User
+   * @var \Drupal\user\Entity\User
    */
   protected $user;
 
@@ -105,7 +105,7 @@ class OgMembershipRoleReferenceTest extends KernelTestBase {
       ->setLabel('Group member');
     $group_member->save();
 
-    /** @var OgMembership $membership */
+    /** @var \Drupal\og\OgMembership $membership */
     $membership = Og::getMembership($this->group, $this->user);
     $membership
       // Assign only the content editor role for now.
