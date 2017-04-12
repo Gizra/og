@@ -1,6 +1,5 @@
 <?php
 
-
 namespace Drupal\og_ui\Form;
 
 use Drupal\Core\Entity\EntityForm;
@@ -111,6 +110,8 @@ class OgRoleForm extends EntityForm {
   }
 
   /**
+   * The role creation page title callback.
+   *
    * @param string $bundle
    *   Entity type bundle.
    *

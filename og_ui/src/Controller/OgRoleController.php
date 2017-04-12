@@ -3,7 +3,6 @@
 namespace Drupal\og_ui\Controller;
 
 use Drupal\Core\Controller\ControllerBase;
-use Drupal\Core\Entity\Entity;
 use Drupal\Core\DependencyInjection\ContainerInjectionInterface;
 
 /**
@@ -29,10 +28,10 @@ class OgRoleController extends ControllerBase implements ContainerInjectionInter
     $build['#title'] = $this->t('Create New Role');
 
     // Show the actual reply box.
-    $og_role = $this->entityManager()->getStorage('og_role')->create(array(
+    $og_role = $this->entityTypeManager()->getStorage('og_role')->create([
       'group_type' => $entity_type,
       'group_bundle' => $bundle,
-    ));
+    ]);
     $build['og_role_form'] = $this->entityFormBuilder()->getForm($og_role);
 
     return $build;
