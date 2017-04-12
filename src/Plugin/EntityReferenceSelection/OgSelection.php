@@ -2,10 +2,16 @@
 
 namespace Drupal\og\Plugin\EntityReferenceSelection;
 
+use Drupal\Core\Entity\EntityManagerInterface;
 use Drupal\Core\Entity\Plugin\EntityReferenceSelection\DefaultSelection;
+use Drupal\Core\Extension\ModuleHandlerInterface;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Session\AccountInterface;
+use Drupal\og\MembershipManagerInterface;
+use Drupal\og\OgAccessInterface;
 use Drupal\user\Entity\User;
 use Drupal\og\Og;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Provide default OG selection handler.
@@ -25,6 +31,62 @@ use Drupal\og\Og;
  * )
  */
 class OgSelection extends DefaultSelection {
+
+  /**
+   * The OG access service.
+   *
+   * @var \Drupal\og\OgAccessInterface
+   */
+  protected $OgAccess;
+
+  /**
+   * The OG membership manager.
+   *
+   * @var \Drupal\og\MembershipManagerInterface
+   */
+  protected $OgMembershipManager;
+
+  /**
+   * Constructs a new SelectionBase object.
+   *
+   * @param array $configuration
+   *   A configuration array containing information about the plugin instance.
+   * @param string $plugin_id
+   *   The plugin_id for the plugin instance.
+   * @param mixed $plugin_definition
+   *   The plugin implementation definition.
+   * @param \Drupal\Core\Entity\EntityManagerInterface $entity_manager
+   *   The entity manager service.
+   * @param \Drupal\Core\Extension\ModuleHandlerInterface $module_handler
+   *   The module handler service.
+   * @param \Drupal\Core\Session\AccountInterface $current_user
+   *   The current user.
+   * @param \Drupal\og\OgAccessInterface $og_access
+   *   The OG access service.
+   * @param \Drupal\og\MembershipManagerInterface $og_membership_manager
+   *   The OG membership service.
+   */
+  public function __construct(array $configuration, $plugin_id, $plugin_definition, EntityManagerInterface $entity_manager, ModuleHandlerInterface $module_handler, AccountInterface $current_user, OgAccessInterface $og_access, MembershipManagerInterface $og_membership_manager) {
+    parent::__construct($configuration, $plugin_id, $plugin_definition, $entity_manager, $module_handler, $current_user);
+    $this->OgAccess = $og_access;
+    $this->OgMembershipManager = $og_membership_manager;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public static function create(ContainerInterface $container, array $configuration, $plugin_id, $plugin_definition) {
+    return new static(
+      $configuration,
+      $plugin_id,
+      $plugin_definition,
+      $container->get('entity.manager'),
+      $container->get('module_handler'),
+      $container->get('current_user'),
+      $container->get('og.access'),
+      $container->get('og.membership_manager')
+    );
+  }
 
   /**
    * Get the selection handler of the field.
@@ -77,23 +139,18 @@ class OgSelection extends DefaultSelection {
       $query->condition($bundle_key, $bundles, 'IN');
     }
 
-    $user = User::load(\Drupal::currentUser()->id());
-
-    if (!$user) {
+    if (!$this->currentUser->isAnonymous()) {
       // @todo: What to do with anonymous user?
       return $query;
     }
 
-    if ($user->hasPermission('administer group')) {
+    if ($this->currentUser->hasPermission('administer group')) {
       // User can see all the groups.
       return $query;
     }
 
     // User is a non-site wide group admin.
     $identifier_key = $definition->getKey('id');
-
-    /** @var \Drupal\og\OgAccessInterface $og_access */
-    $og_access = \Drupal::service('og.access');
 
     if (empty($this->configuration['entity'])) {
       // @todo: Find out why we have this scenario.
@@ -108,7 +165,7 @@ class OgSelection extends DefaultSelection {
     $ids = [];
     foreach ($this->getUserGroups() as $group) {
       // Check user has "create" permission on this entity.
-      if ($og_access->userAccess($group, "create $entity_type_id $bundle", $user)->isAllowed()) {
+      if ($this->OgAccess->userAccess($group, "create $entity_type_id $bundle", $this->currentUser)->isAllowed()) {
         $ids[] = $group->id();
       }
     }
@@ -133,9 +190,7 @@ class OgSelection extends DefaultSelection {
    */
   protected function getUserGroups() {
     $user = User::load($this->currentUser->id());
-    /** @var \Drupal\og\MembershipManagerInterface $membership_manager */
-    $membership_manager = \Drupal::service('og.membership_manager');
-    $other_groups = $membership_manager->getUserGroups($user);
+    $other_groups = $this->OgMembershipManager->getUserGroups($user);
     return isset($other_groups[$this->configuration['target_type']]) ? $other_groups[$this->configuration['target_type']] : [];
   }
 
