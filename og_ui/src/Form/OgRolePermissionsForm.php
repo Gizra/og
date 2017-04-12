@@ -2,15 +2,8 @@
 
 namespace Drupal\og_ui\Form;
 
-use Drupal\Core\Entity\EntityTypeBundleInfoInterface;
-use Drupal\Core\Entity\EntityTypeManagerInterface;
-use Drupal\Core\Form\FormBase;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\og\Entity\OgRole;
-use Drupal\og\GroupTypeManager;
-use Drupal\og\OgRoleManagerInterface;
-use Drupal\og\PermissionManagerInterface;
-use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Provide the group permissions form.
@@ -44,10 +37,21 @@ class OgRolePermissionsForm extends OgPermissionsForm {
   }
 
   /**
-   * {@inheritdoc}
+   * The group role permissions form constructor.
    *
+   * @param array $form
+   *   An associative array containing the structure of the form.
+   * @param \Drupal\Core\Form\FormStateInterface $form_state
+   *   The current state of the form.
+   * @param string $entity_type
+   *   The group entity type id.
+   * @param string $bundle
+   *   The group bundle id.
    * @param string $og_role
    *   The group role id.
+   *
+   * @return array
+   *   The form structure.
    */
   public function buildForm(array $form, FormStateInterface $form_state, $entity_type = '', $bundle = '', $og_role = '') {
     $role = OgRole::load($og_role);

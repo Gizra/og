@@ -5,7 +5,6 @@ namespace Drupal\og_ui\Form;
 use Drupal\Core\Entity\EntityDeleteForm;
 use Drupal\Core\Url;
 
-
 /**
  * Provides a form for deleting a node.
  */
@@ -29,6 +28,5 @@ class OgRoleDeleteForm extends EntityDeleteForm {
   protected function getRedirectUrl() {
     return $this->getCancelUrl();
   }
-
 
 }

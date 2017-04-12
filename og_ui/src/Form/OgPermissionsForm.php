@@ -23,14 +23,14 @@ class OgPermissionsForm extends FormBase {
   protected $permissionManager;
 
   /**
-   * The role manager
+   * The role manager.
    *
    * @var \Drupal\og\OgRoleManagerInterface
    */
   protected $roleManager;
 
   /**
-   * The group type manager
+   * The group type manager.
    *
    * @var \Drupal\og\GroupTypeManager
    */
@@ -46,7 +46,7 @@ class OgPermissionsForm extends FormBase {
   /**
    * The group roles.
    *
-   * @var []
+   * @var array
    */
   protected $roles;
 
@@ -81,7 +81,6 @@ class OgPermissionsForm extends FormBase {
     );
   }
 
-
   /**
    * {@inheritdoc}
    */
@@ -90,7 +89,7 @@ class OgPermissionsForm extends FormBase {
   }
 
   /**
-   * Title callback for the roles overview page.
+   * Title callback for the group permissions page.
    *
    * @param string $entity_type
    *   The group entity type id.
@@ -98,6 +97,7 @@ class OgPermissionsForm extends FormBase {
    *   The group bundle id.
    *
    * @return \Drupal\Core\StringTranslation\TranslatableMarkup
+   *   The group permission title.
    */
   public function titleCallback($entity_type, $bundle) {
     return $this->t('@bundle permissions', [
@@ -114,6 +114,7 @@ class OgPermissionsForm extends FormBase {
    *   The group entity bundle id.
    *
    * @return array
+   *   The group roles.
    */
   public function getGroupRoles($entity_type, $bundle) {
     if (empty($this->roles)) {
@@ -124,12 +125,19 @@ class OgPermissionsForm extends FormBase {
   }
 
   /**
-   * {@inheritdoc}
+   * The group permissions form constructor.
    *
+   * @param array $form
+   *   An associative array containing the structure of the form.
+   * @param \Drupal\Core\Form\FormStateInterface $form_state
+   *   The current state of the form.
    * @param string $entity_type
    *   The group entity type id.
    * @param string $bundle
    *   The group bundle id.
+   *
+   * @return array
+   *   The form structure.
    */
   public function buildForm(array $form, FormStateInterface $form_state, $entity_type = '', $bundle = '') {
     // Render the link for hiding descriptions.
@@ -171,12 +179,12 @@ class OgPermissionsForm extends FormBase {
       // Provider.
       $form['permissions'][$provider] = [
         [
-        '#wrapper_attributes' => [
-          'colspan' => count($roles) + 1,
-          'class' => ['module'],
-          'id' => 'provider-' . $provider,
-        ],
-        '#markup' => $provider,
+          '#wrapper_attributes' => [
+            'colspan' => count($roles) + 1,
+            'class' => ['module'],
+            'id' => 'provider-' . $provider,
+          ],
+          '#markup' => $provider,
         ],
       ];
 
