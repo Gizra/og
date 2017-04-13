@@ -139,7 +139,13 @@ class OgSelection extends DefaultSelection {
       $query->condition($bundle_key, $bundles, 'IN');
     }
 
-    if ($this->currentUser->isAnonymous()) {
+//    $user = User::load(\Drupal::currentUser()->id());
+//
+//
+//    var_dump($user);
+//    var_dump($this->currentUser->isAnonymous());
+
+    if (!$user) {
       // @todo: What to do with anonymous user?
       return $query;
     }
