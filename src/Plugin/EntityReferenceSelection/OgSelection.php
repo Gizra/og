@@ -139,24 +139,19 @@ class OgSelection extends DefaultSelection {
       $query->condition($bundle_key, $bundles, 'IN');
     }
 
-//    $user = User::load(\Drupal::currentUser()->id());
-//
-//
-//    var_dump($user);
-//    var_dump($this->currentUser->isAnonymous());
+    // Get the identifier key of the entity.
+    $identifier_key = $definition->getKey('id');
 
-    if (!$user) {
-      // @todo: What to do with anonymous user?
-      return $query;
+    if ($this->currentUser->isAnonymous()) {
+      // @todo: Check if anonymous users should have access to any referenced
+      // groups? What about groups that allow anonymous posts?
+      return $query->condition($identifier_key, -1);
     }
 
     if ($this->currentUser->hasPermission('administer group')) {
       // User can see all the groups.
       return $query;
     }
-
-    // User is a non-site wide group admin.
-    $identifier_key = $definition->getKey('id');
 
     if (empty($this->configuration['entity'])) {
       // @todo: Find out why we have this scenario.
