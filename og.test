@@ -854,171 +854,171 @@ class OgDefaultAccessFieldTestCase extends DrupalWebTestCase {
   }
 }
 
-/**
- * Upgrade 7000 test.
- *
- * Load a filled installation of Drupal 6 and run the upgrade on it.
- *
- * TODO: We have to use $this->drupalGet('node/' . $nid); to proerly load
- * the node data, otherwise. We should understand why this is needed, and
- * remove it.
- */
-class OgMigrate7000TestCase extends UpgradePathTestCase {
-  public static function getInfo() {
-    return array(
-      'name'  => 'OG migrate - 7000',
-      'description'  => 'Tests the upgrade path of OG from Drupal 6.',
-      'group' => 'Organic groups',
-      // TODO: Why do we need to enable Views?! - otherwise we get WSOD.
-      'dependencies' => array('migrate', 'views'),
-    );
-  }
-
-  public function setUp() {
-    // Path to the database dump.
-    $this->databaseDumpFiles = array(
-      drupal_get_path('module', 'og') . '/tests/drupal-6.og.database.php',
-    );
-    parent::setUp();
-    $this->assertTrue($this->performUpgrade(), t('The upgrade was completed successfully.'));
-
-    // spl_autoload_register() wasn't called, so we do it here, to allow
-    // classes to be auto-loaded.
-    spl_autoload_register('drupal_autoload_class');
-    spl_autoload_register('drupal_autoload_interface');
-
-    // TODO: Why do we need to enable Views?!
-    module_enable(array('og', 'views', 'migrate'));
-
-    $class_names = array(
-      'OgMigrateAddFields',
-      'OgMigrateUser',
-      'OgMigrateContent',
-    );
-
-    // FIXME: migrate_flush_caches() crashes, so we register manually.
-    foreach ($class_names as $class_name) {
-      MigrationBase::registerMigration($class_name);
-    }
-
-    // Register a dynamic migration.
-    MigrationBase::registerMigration('OgMigrateGroup', 'OgMigrateGroupTest_group', array('bundle' => 'test_group'));
-
-    $migration = Migration::getInstance('OgMigrateAddFields');
-    $result = $migration->processImport();
-    $this->assertEqual($result, Migration::RESULT_COMPLETED, 'Migration OgMigrateAddFields executed.');
-
-    $migration = Migration::getInstance('OgMigrateGroupTest_group', 'OgMigrateGroup', array('bundle' => 'test_group'));
-    $result = $migration->processImport();
-    $this->assertEqual($result, Migration::RESULT_COMPLETED, 'Migration OgMigrateGroupTest_group executed.');
-
-    $migration = Migration::getInstance('OgMigrateUser');
-    $result = $migration->processImport();
-    $this->assertEqual($result, Migration::RESULT_COMPLETED, 'Migration OgMigrateUser executed.');
-
-    $migration = Migration::getInstance('OgMigrateContent');
-    $result = $migration->processImport();
-    $this->assertEqual($result, Migration::RESULT_COMPLETED, 'Migration OgMigrateContent executed.');
-  }
-
-  /**
-   * Test a successful group upgrade.
-   *
-   * @see og_7000_group()
-   */
-  public function testGroup() {
-    // Assert according to the scenario Drupal 6's test table dump was created.
-    foreach (array(1, 2) as $nid) {
-      $this->drupalGet('node/' . $nid);
-      $node = node_load($nid);
-      $this->assertTrue($node->{OG_GROUP_FIELD}[LANGUAGE_NONE][0]['value'], t('Node ID @nid is an active group.', array('@nid' => $nid)));
-    }
-
-    // Test group content with NID 3 - 5 belong to the group with NID 2.
-    foreach (range(3, 5) as $nid) {
-      $this->drupalGet('node/' . $nid);
-      $node = node_load($nid);
-      $this->assertTrue(og_is_member('node', 2, 'node', $node), t('Node ID @nid is a group content of Node ID 2', array('@nid' => $nid)));
-    }
-
-    // Orphan group content (i.e. not attached to a group).
-    $node = node_load(6);
-    $this->assertFalse(og_get_entity_groups('node', $node), t('Node ID 6 is not associated with any group.'));
-
-    // Group content that shares the same group.
-    $node = node_load(9);
-    foreach (array(7, 8) as $nid) {
-      $this->assertTrue(og_is_member('node', $nid, 'node', $node), t('Node ID @nid is as group content associated with multiple groups.', array('@nid' => $node->nid)));
-    }
-  }
-
-  /**
-   * Test user upgrade.
-   *
-   * @see og_7000_user()
-   */
-  public function testUser() {
-    // Assert users.
-    $values = array(
-      // Uid 3 is the group manager, so in OG6 it was marked as admin.
-      3 => array('admin' => TRUE),
-      4 => array('active' => FALSE),
-      5 => array(),
-      6 => array('active' => FALSE, 'admin' => TRUE),
-      7 => array('admin' => TRUE),
-    );
-
-    $og_roles = og_roles('node', 'test_group');
-
-    foreach ($values as $uid => $value) {
-      $account = user_load($uid);
-
-      // Set default values.
-      $value += array('active' => TRUE, 'admin' => FALSE);
-      $roles = array();
-
-      if ($value['active']) {
-        $op = 'active';
-        $states = array(OG_STATE_ACTIVE);
-        $rid = array_search(OG_AUTHENTICATED_ROLE, $og_roles);
-      }
-      else {
-        $op = 'pending';
-        $states = array(OG_STATE_PENDING);
-        // If the member is pending then they have the anonymous role.
-        $rid = array_search(OG_ANONYMOUS_ROLE, $og_roles);
-      }
-
-      $roles[$rid] = TRUE;
-
-      if ($value['admin']) {
-        // OG_ADMINISTRATOR_ROLE
-        $rid = array_search(OG_ADMINISTRATOR_ROLE, $og_roles);
-        $roles[$rid] = TRUE;
-      }
-
-      $this->assertTrue(og_is_member('node', 10, 'user', $account, $states), format_string('User @uid is @op member in group.', array('@uid' => $uid, '@op' => $op)));
-      // Pass also pending state, so we make sure that even if the user
-      // isn't active they are considered members, to check they get the
-      // correct role.
-      $this->assertEqual(array_keys(og_get_user_roles('node', 10, $uid, TRUE, FALSE)), array_keys($roles), format_string('User @uid has the correct roles in group.', array('@uid' => $uid)));
-    }
-  }
-
-  /**
-   * Test group description upgrade.
-   *
-   * @see og_7000_group()
-   */
-  public function testGroupDescription() {
-    // Assert description was converted to a field.
-    foreach (array(1, 2, 7, 8, 10) as $nid) {
-      $this->drupalGet('node/' . $nid);
-      $node = node_load($nid);
-      $this->assertTrue($node->og_description[LANGUAGE_NONE][0]['value'], t('Description fields has correct data.'));
-    }
-  }
-}
+///**
+// * Upgrade 7000 test.
+// *
+// * Load a filled installation of Drupal 6 and run the upgrade on it.
+// *
+// * TODO: We have to use $this->drupalGet('node/' . $nid); to proerly load
+// * the node data, otherwise. We should understand why this is needed, and
+// * remove it.
+// */
+//class OgMigrate7000TestCase extends UpgradePathTestCase {
+//  public static function getInfo() {
+//    return array(
+//      'name'  => 'OG migrate - 7000',
+//      'description'  => 'Tests the upgrade path of OG from Drupal 6.',
+//      'group' => 'Organic groups',
+//      // TODO: Why do we need to enable Views?! - otherwise we get WSOD.
+//      'dependencies' => array('migrate', 'views'),
+//    );
+//  }
+//
+//  public function setUp() {
+//    // Path to the database dump.
+//    $this->databaseDumpFiles = array(
+//      drupal_get_path('module', 'og') . '/tests/drupal-6.og.database.php',
+//    );
+//    parent::setUp();
+//    $this->assertTrue($this->performUpgrade(), t('The upgrade was completed successfully.'));
+//
+//    // spl_autoload_register() wasn't called, so we do it here, to allow
+//    // classes to be auto-loaded.
+//    spl_autoload_register('drupal_autoload_class');
+//    spl_autoload_register('drupal_autoload_interface');
+//
+//    // TODO: Why do we need to enable Views?!
+//    module_enable(array('og', 'views', 'migrate'));
+//
+//    $class_names = array(
+//      'OgMigrateAddFields',
+//      'OgMigrateUser',
+//      'OgMigrateContent',
+//    );
+//
+//    // FIXME: migrate_flush_caches() crashes, so we register manually.
+//    foreach ($class_names as $class_name) {
+//      MigrationBase::registerMigration($class_name);
+//    }
+//
+//    // Register a dynamic migration.
+//    MigrationBase::registerMigration('OgMigrateGroup', 'OgMigrateGroupTest_group', array('bundle' => 'test_group'));
+//
+//    $migration = Migration::getInstance('OgMigrateAddFields');
+//    $result = $migration->processImport();
+//    $this->assertEqual($result, Migration::RESULT_COMPLETED, 'Migration OgMigrateAddFields executed.');
+//
+//    $migration = Migration::getInstance('OgMigrateGroupTest_group', 'OgMigrateGroup', array('bundle' => 'test_group'));
+//    $result = $migration->processImport();
+//    $this->assertEqual($result, Migration::RESULT_COMPLETED, 'Migration OgMigrateGroupTest_group executed.');
+//
+//    $migration = Migration::getInstance('OgMigrateUser');
+//    $result = $migration->processImport();
+//    $this->assertEqual($result, Migration::RESULT_COMPLETED, 'Migration OgMigrateUser executed.');
+//
+//    $migration = Migration::getInstance('OgMigrateContent');
+//    $result = $migration->processImport();
+//    $this->assertEqual($result, Migration::RESULT_COMPLETED, 'Migration OgMigrateContent executed.');
+//  }
+//
+//  /**
+//   * Test a successful group upgrade.
+//   *
+//   * @see og_7000_group()
+//   */
+//  public function testGroup() {
+//    // Assert according to the scenario Drupal 6's test table dump was created.
+//    foreach (array(1, 2) as $nid) {
+//      $this->drupalGet('node/' . $nid);
+//      $node = node_load($nid);
+//      $this->assertTrue($node->{OG_GROUP_FIELD}[LANGUAGE_NONE][0]['value'], t('Node ID @nid is an active group.', array('@nid' => $nid)));
+//    }
+//
+//    // Test group content with NID 3 - 5 belong to the group with NID 2.
+//    foreach (range(3, 5) as $nid) {
+//      $this->drupalGet('node/' . $nid);
+//      $node = node_load($nid);
+//      $this->assertTrue(og_is_member('node', 2, 'node', $node), t('Node ID @nid is a group content of Node ID 2', array('@nid' => $nid)));
+//    }
+//
+//    // Orphan group content (i.e. not attached to a group).
+//    $node = node_load(6);
+//    $this->assertFalse(og_get_entity_groups('node', $node), t('Node ID 6 is not associated with any group.'));
+//
+//    // Group content that shares the same group.
+//    $node = node_load(9);
+//    foreach (array(7, 8) as $nid) {
+//      $this->assertTrue(og_is_member('node', $nid, 'node', $node), t('Node ID @nid is as group content associated with multiple groups.', array('@nid' => $node->nid)));
+//    }
+//  }
+//
+//  /**
+//   * Test user upgrade.
+//   *
+//   * @see og_7000_user()
+//   */
+//  public function testUser() {
+//    // Assert users.
+//    $values = array(
+//      // Uid 3 is the group manager, so in OG6 it was marked as admin.
+//      3 => array('admin' => TRUE),
+//      4 => array('active' => FALSE),
+//      5 => array(),
+//      6 => array('active' => FALSE, 'admin' => TRUE),
+//      7 => array('admin' => TRUE),
+//    );
+//
+//    $og_roles = og_roles('node', 'test_group');
+//
+//    foreach ($values as $uid => $value) {
+//      $account = user_load($uid);
+//
+//      // Set default values.
+//      $value += array('active' => TRUE, 'admin' => FALSE);
+//      $roles = array();
+//
+//      if ($value['active']) {
+//        $op = 'active';
+//        $states = array(OG_STATE_ACTIVE);
+//        $rid = array_search(OG_AUTHENTICATED_ROLE, $og_roles);
+//      }
+//      else {
+//        $op = 'pending';
+//        $states = array(OG_STATE_PENDING);
+//        // If the member is pending then they have the anonymous role.
+//        $rid = array_search(OG_ANONYMOUS_ROLE, $og_roles);
+//      }
+//
+//      $roles[$rid] = TRUE;
+//
+//      if ($value['admin']) {
+//        // OG_ADMINISTRATOR_ROLE
+//        $rid = array_search(OG_ADMINISTRATOR_ROLE, $og_roles);
+//        $roles[$rid] = TRUE;
+//      }
+//
+//      $this->assertTrue(og_is_member('node', 10, 'user', $account, $states), format_string('User @uid is @op member in group.', array('@uid' => $uid, '@op' => $op)));
+//      // Pass also pending state, so we make sure that even if the user
+//      // isn't active they are considered members, to check they get the
+//      // correct role.
+//      $this->assertEqual(array_keys(og_get_user_roles('node', 10, $uid, TRUE, FALSE)), array_keys($roles), format_string('User @uid has the correct roles in group.', array('@uid' => $uid)));
+//    }
+//  }
+//
+//  /**
+//   * Test group description upgrade.
+//   *
+//   * @see og_7000_group()
+//   */
+//  public function testGroupDescription() {
+//    // Assert description was converted to a field.
+//    foreach (array(1, 2, 7, 8, 10) as $nid) {
+//      $this->drupalGet('node/' . $nid);
+//      $node = node_load($nid);
+//      $this->assertTrue($node->og_description[LANGUAGE_NONE][0]['value'], t('Description fields has correct data.'));
+//    }
+//  }
+//}
 
 
 /**
