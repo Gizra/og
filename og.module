@@ -2218,6 +2218,16 @@ function og_user_access($group_type, $gid, $string, $account = NULL, $skip_alter
  *   The entity object, or the entity ID.
  * @param $account
  *   (optional) The user object. If empty the current user will be used.
+ * @param $skip_alter
+ *   (optional) If TRUE then user access will not be sent to other modules
+ *   using drupal_alter(). This can be used by modules implementing
+ *   hook_og_user_access_alter() that still want to use og_user_access(), but
+ *   without causing a recursion. Defaults to FALSE.
+ * @param $ignore_admin
+ *   (optional) When TRUE the specific permission is checked, ignoring the
+ *   "administer group" permission if the user has it. When FALSE, a user
+ *   with "administer group" will be granted all permissions.
+ *   Defaults to FALSE.
  *
  * @return
  *   Returns TRUE if the user has access to the permission, otherwise FALSE, or
@@ -2225,7 +2235,7 @@ function og_user_access($group_type, $gid, $string, $account = NULL, $skip_alter
  *   a distinction between FALSE - no access, and NULL - no access as no OG
  *   context found.
  */
-function og_user_access_entity($perm, $entity_type, $entity, $account = NULL) {
+function og_user_access_entity($perm, $entity_type, $entity, $account = NULL, $skip_alter = FALSE, $ignore_admin = FALSE) {
   if (empty($account)) {
     global $user;
     $account = clone $user;
@@ -2268,7 +2278,7 @@ function og_user_access_entity($perm, $entity_type, $entity, $account = NULL) {
   if ($is_group_content && $groups = og_get_entity_groups($entity_type, $entity)) {
     foreach ($groups as $group_type => $gids) {
       foreach ($gids as $gid) {
-        if (og_user_access($group_type, $gid, $perm, $account)) {
+        if (og_user_access($group_type, $gid, $perm, $account, $skip_alter, $ignore_admin)) {
           return TRUE;
         }
       }
