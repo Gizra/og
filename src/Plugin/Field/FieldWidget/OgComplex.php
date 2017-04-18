@@ -327,7 +327,7 @@ class OgComplex extends EntityReferenceAutocompleteWidget {
 
       // Matches the entity label and ID. E.g. 'Label (123)'. The entity ID will
       // be captured in it's own group, with the key 'id'.
-      preg_match("|.+\((?<id>[\w.]+)\)|", $value['target_id']['#value'], $matches);
+      preg_match("|.+\((?<id>[!@#$%\^\&\*:/_-\w.]+)\)|", $value['target_id']['#value'], $matches);
 
       if (!empty($matches['id'])) {
         $values[] = [
