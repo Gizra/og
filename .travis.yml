@@ -13,10 +13,8 @@ before_script:
   - cd ../..
 
   # Install Drush
-  - mkdir ~/.bin
-  - wget https://github.com/drush-ops/drush/releases/download/8.1.10/drush.phar -O ~/.bin/drush
-  - chmod +x ~/.bin/drush
-  - export PATH=$PATH:~/.bin
+  - composer global require drush/drush
+  - export PATH=$PATH:~/.composer/vendor/bin
 
   # Install php packages required for running Drupal
   - sudo apt-get update > /dev/null
