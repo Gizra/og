@@ -22,9 +22,8 @@ before_script:
   - sudo apt-get update > /dev/null
   - sudo apt-get install -y --force-yes php5-mysql
 
-  # Create new site, stubbing sendmail path with true to prevent delivery errors and manually resolving drush path
+  # Create new site
   - mysql -e 'create database drupal'
-  - php -d sendmail_path=`which true`
   - drush --yes core-quick-drupal --profile=testing --no-server --db-url=mysql://root:@127.0.0.1/drupal --enable=simpletest og
 
   # Reference and enable module in build site
