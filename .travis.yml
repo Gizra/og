@@ -13,8 +13,9 @@ before_script:
   - cd ../..
 
   # install drush
-  - pear channel-discover pear.drush.org
-  - pear install drush/drush-5.8.0
+  - composer global require drush/drush:6.7.0
+  - export PATH="$HOME/.composer/vendor/bin:$PATH"
+  - phpenv config-rm xdebug.ini
   - phpenv rehash
 
   # install php packages required for running a web server from drush on php 5.3
@@ -23,7 +24,7 @@ before_script:
 
   # create new site, stubbing sendmail path with true to prevent delivery errors and manually resolving drush path
   - mysql -e 'create database drupal'
-  - php -d sendmail_path=`which true` `pear config-get php_dir`/drush/drush.php --yes core-quick-drupal --profile=testing --no-server --db-url=mysql://root:@127.0.0.1/drupal --enable=simpletest og
+  - php -d sendmail_path=`which true` $HOME/.composer/vendor/drush/drush.php --yes core-quick-drupal --profile=testing --no-server --db-url=mysql://root:@127.0.0.1/drupal --enable=simpletest og
 
   # reference and enable module in build site
   - ln -s $(readlink -e $(cd -)) og/drupal/sites/all/modules/og
