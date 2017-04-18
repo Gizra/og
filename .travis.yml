@@ -27,18 +27,18 @@ before_script:
   - php -d sendmail_path=`which true` ~/.bin/drush --yes core-quick-drupal --core=drupal-7.x --profile=testing --no-server --db-url=mysql://root:@127.0.0.1/drupal --enable=simpletest og
   - export DRUPAL_ROOT=og/drupal-7.x
 
-  # Create webserver for the Simpletest
-  # Mandatory despite the fact that the tests can be
-  # executed from CLI!
-  - drush runserver 127.0.0.1:8080 &
-  - until netstat -an 2>/dev/null | grep '8080.*LISTEN'; do true; done
-
   # Reference and enable module in build site
   - ln -s $(readlink -e $(cd -)) $DRUPAL_ROOT/sites/all/modules/og
   - cd $DRUPAL_ROOT
 
   # Enable OG-UI, so drush will auto-download all dependencies
   - drush --yes pm-enable og_ui
+
+  # Create webserver for the Simpletest
+  # Mandatory despite the fact that the tests can be
+  # executed from CLI!
+  - drush runserver 127.0.0.1:8080 &
+  - until netstat -an 2>/dev/null | grep '8080.*LISTEN'; do true; done
 
 script:
   - php scripts/run-tests.sh --url http://127.0.0.1:8080 --php $(phpenv which php) --concurrency 2 --verbose --color "Organic groups","Organic groups access","Organic groups context","Organic groups field access","Organic groups UI" 2>&1 | tee /tmp/simpletest-result.txt
