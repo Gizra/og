@@ -2657,6 +2657,49 @@ function og_role_permissions($roles = array()) {
 }
 
 /**
+ * Returns an array of all roles.
+ *
+ * @param $include_all
+ *   (optional) If TRUE then the anonymous and authenticated default roles will
+ *   be included.
+ *
+ * @return array
+ *   An associative array with the role id as the key and the role name as
+ *   value.
+ */
+function og_get_all_roles($include_all = TRUE) {
+
+  $query = db_select('og_role', 'ogr')
+      ->fields('ogr', array('rid', 'group_type', 'group_bundle', 'name'))
+      ->orderBy('rid', 'ASC');
+
+  if (!$include_all) {
+    $query->condition('name', array(OG_ANONYMOUS_ROLE, OG_AUTHENTICATED_ROLE), 'NOT IN');
+  }
+  $og_roles = $query
+    ->execute()
+    ->fetchAll();
+
+  $node_types = node_type_get_types();
+  $group_entities = og_get_all_group_entity();
+  $group_bundles = og_get_all_group_bundle();
+
+  $roles = array();
+  foreach ($og_roles as $role) {
+
+    $role_name_parts = array(
+      $group_entities[$role->group_type],
+      $group_bundles[$role->group_type][$role->group_bundle],
+      $role->name,
+    );
+
+    $roles[$role->rid] = implode(':', $role_name_parts);
+  }
+
+  return $roles;
+}
+
+/**
  * Retrieve an array of roles matching specified conditions.
  *
  * @param $group_type
