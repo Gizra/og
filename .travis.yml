@@ -35,5 +35,5 @@ before_script:
   - drush --yes pm-enable og_ui
 
 script:
-  - php scripts/run-tests.sh --concurrency 2 --verbose --color "Organic groups","Organic groups access","Organic groups context","Organic groups field access","Organic groups UI" 2>&1 | tee /tmp/simpletest-result.txt
+  - php scripts/run-tests.sh --php $(phpenv which php) --concurrency 2 --verbose --color "Organic groups","Organic groups access","Organic groups context","Organic groups field access","Organic groups UI" 2>&1 | tee /tmp/simpletest-result.txt
   - egrep -i "([1-9]+ fail)|(Fatal error)|([1-9]+ exception)" /tmp/simpletest-result.txt && exit 1
