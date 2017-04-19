@@ -1,7 +1,7 @@
 language: php
 
 php:
-  - 5.3
+  - 5.6
 
 mysql:
   database: drupal
@@ -12,18 +12,19 @@ before_script:
   # navigate out of module directory to prevent blown stack by recursive module lookup
   - cd ../..
 
-  # install drush
-  - pear channel-discover pear.drush.org
-  - pear install drush/drush-5.8.0
-  - phpenv rehash
+  # install drush with composer.
+  - curl -sS https://getcomposer.org/installer | php
+  - sudo mv composer.phar /usr/local/bin/composer
+  - export PATH="$HOME/.composer/vendor/bin:$PATH"
+  - composer global require drush/drush:7.*
 
-  # install php packages required for running a web server from drush on php 5.3
+  # install php packages required for running a web server from drush on php 5.6
   - sudo apt-get update > /dev/null
   - sudo apt-get install -y --force-yes php5-cgi php5-mysql
 
   # create new site, stubbing sendmail path with true to prevent delivery errors and manually resolving drush path
   - mysql -e 'create database drupal'
-  - php -d sendmail_path=`which true` `pear config-get php_dir`/drush/drush.php --yes core-quick-drupal --profile=testing --no-server --db-url=mysql://root:@127.0.0.1/drupal --enable=simpletest og
+  - php -d sendmail_path=`which true` ~/.composer/vendor/bin/drush.php --yes core-quick-drupal --profile=testing --no-server --db-url=mysql://root:@127.0.0.1/drupal --enable=simpletest og
 
   # reference and enable module in build site
   - ln -s $(readlink -e $(cd -)) og/drupal/sites/all/modules/og
@@ -35,4 +36,7 @@ before_script:
   - drush runserver 127.0.0.1:8080 &
   - until netstat -an 2>/dev/null | grep '8080.*LISTEN'; do true; done
 
-script: drush test-run "Organic groups","Organic groups access","Organic groups context","Organic groups field access","Organic groups UI" --uri=http://127.0.0.1:8080
+script:
+  - php ./scripts/run-tests.sh --php $(which php) --concurrency 4 --verbose --color --url http://127.0.0.1:8080 "Organic groups","Organic groups access","Organic groups context","Organic groups field access","Organic groups UI" 2>&1 | tee /tmp/simpletest-result.txt
+  - egrep -i "([1-9]+ fail)|(Fatal error)|([1-9]+ exception)" /tmp/simpletest-result.txt && exit 1
+  - exit 0
