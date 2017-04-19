@@ -41,7 +41,7 @@ class Membership extends ArgumentDefaultPluginBase implements CacheableDependenc
    *
    * @var \Drupal\Core\Session\AccountInterface
    */
-  protected $user;
+  protected $ogUser;
 
   /**
    * Constructs a new User instance.
@@ -64,7 +64,7 @@ class Membership extends ArgumentDefaultPluginBase implements CacheableDependenc
 
     $this->ogContext = $og_context;
     $this->ogMembership = $og_membership;
-    $this->user = $og_user;
+    $this->ogUser = $og_user;
   }
 
   /**
@@ -139,7 +139,7 @@ class Membership extends ArgumentDefaultPluginBase implements CacheableDependenc
    *   An array of groups, or an empty array if no group is found.
    */
   protected function getCurrentUserGroupIds($entity_type = 'node') {
-    $groups = $this->ogMembership->getUserGroupIds($this->user);
+    $groups = $this->ogMembership->getUserGroupIds($this->ogUser);
     if (!empty($groups) && isset($groups[$entity_type])) {
       return $groups[$entity_type];
     }
