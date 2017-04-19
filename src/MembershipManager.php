@@ -184,7 +184,7 @@ class MembershipManager implements MembershipManagerInterface {
       }
 
       // Clean up empty items.
-      $values = array_filter($entity->get($field->getName())->getValue(), function($value) {
+      $values = array_filter($entity->get($field->getName())->getValue(), function ($value) {
         return isset($value['target_id']);
       });
 
