@@ -262,16 +262,28 @@ function og_field_widget_info_alter(array &$info) {
 /**
  * Implements hook_entity_type_alter().
  *
- * Add link template to groups. We add it to all the entity types, and later on
- * return the correct access, depending if the bundle is indeed a group and
+ * Implementing this hook for two reasons:
+ *
+ * 1. Add link template to groups. We add it to all the entity types, and later
+ * on return the correct access, depending if the bundle is indeed a group and
  * accessible. We do not filter here the entity type by groups, so whenever
  * GroupTypeManager::addGroup is called, it's enough to mark route to be rebuilt
  * via RouteBuilder::setRebuildNeeded.
+ *
+ * 2. A user without site wide permission and with group permission to post
+ * group content can create a post of type type without populating the og
+ * audience field. Since we cannot use the group type manager to determine if
+ * the entity type is a group content entity we will add an entity constraint to
+ * all entity types.
  */
 function og_entity_type_alter(array &$entity_types) {
+
   /** @var \Drupal\Core\Entity\EntityTypeInterface $entity_type */
   foreach ($entity_types as $entity_type_id => $entity_type) {
     $entity_type->setLinkTemplate('og-admin-routes', "/group/$entity_type_id/{{$entity_type_id}}/admin");
+
+    // Adding constraint.
+    $entity_type->addConstraint('GroupContentAudienceFieldValidation');
   }
 }
 
