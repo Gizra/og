@@ -24,10 +24,23 @@ class GroupContentAudienceFieldValidationConstraintValidator extends ConstraintV
       return;
     }
 
-    dpm($entity->access('create'));
+    // Get all the fields and check if we have values inside them.
+    $fields = \Drupal::service('og.group_audience_helper')->getAllGroupAudienceFields($entity->getEntityTypeId(), $entity->bundle());
+    foreach (array_keys($fields) as $field) {
+      if ($entity->get($field)->target_id) {
+        // We found value in one of the fields. That's mean the node won't
+        // create without a reference to a group while the user must populate
+        // the field.
+        return;
+      }
+    }
 
-    $params['%label'] = 'foo';
-    $this->context->addViolation($constraint->AudienceFieldMustBePopulated, $params);
+    if ($entity->access('create')) {
+      // No values in the fields but the user have site wide permission.
+      return;
+    }
+
+    $this->context->addViolation($constraint->AudienceFieldMustBePopulated);
   }
 
 }
