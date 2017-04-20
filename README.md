@@ -124,6 +124,23 @@ DEVELOPERS & SITE BUILDERS
   "Use queue" option, and process it using for example:
   drush queue-run og_membership_orphans
 
+## TESTS
+
+Run the tests with Docker.
+
+1. Build the image
+  ```shell
+  docker build -t og .
+  ```
+2. From inside the project directory run the image
+  ```shell
+  docker run --name og-con -p 8080:80 -d og
+  ```
+3. OPTIONAL: If you want to get in the container terminal:
+  ```shell
+  docker exec -it og-con bash
+  ```
+
 FAQ
 ----
 Q: How should I update from Drupal 6?
