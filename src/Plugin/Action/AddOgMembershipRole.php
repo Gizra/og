@@ -1,6 +1,7 @@
 <?php
 
 namespace Drupal\og\Plugin\Action;
+
 use Drupal\og\Entity\OgMembership;
 use Drupal\og\Entity\OgRole;
 

@@ -9,7 +9,6 @@ use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
 use Drupal\Core\Session\AccountInterface;
-use Drupal\og\Entity\OgMembership;
 use Drupal\og\MembershipManagerInterface;
 use Drupal\user\RoleInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
@@ -47,6 +46,7 @@ abstract class ChangeOgMembershipRoleBase extends ConfigurableActionBase impleme
    * @param \Drupal\Core\Entity\EntityTypeInterface $entity_type
    *   The user role entity type.
    * @param \Drupal\og\MembershipManagerInterface $membership_manager
+   *   The OG membership manager.
    */
   public function __construct(array $configuration, $plugin_id, $plugin_definition, EntityTypeInterface $entity_type, MembershipManagerInterface $membership_manager) {
     parent::__construct($configuration, $plugin_id, $plugin_definition);

@@ -282,11 +282,11 @@ class OgMembership extends ContentEntityBase implements OgMembershipInterface {
       ->setLabel(t('Roles'))
       ->setDescription(t('The OG roles related to an OG membership entity.'))
       ->setCardinality(FieldStorageDefinitionInterface::CARDINALITY_UNLIMITED)
-      ->setDisplayOptions('view', array(
+      ->setDisplayOptions('view', [
         'label' => 'hidden',
         'type' => 'entity_reference_label',
         'weight' => 0,
-      ))
+      ])
       ->setSetting('target_type', 'og_role');
 
     $fields['created'] = BaseFieldDefinition::create('created')

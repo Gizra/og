@@ -304,28 +304,28 @@ function og_og_role_insert(OgRoleInterface $role) {
 
   $add_id = 'og_membership_add_role_action.' . $role->id();
   if (!Action::load($add_id)) {
-    $action = Action::create(array(
+    $action = Action::create([
       'id' => $add_id,
       'type' => 'og_membership',
-      'label' => t('Add the @label role to the selected members', array('@label' => $role->label())),
-      'configuration' => array(
+      'label' => t('Add the @label role to the selected members', ['@label' => $role->label()]),
+      'configuration' => [
         'rid' => $role->id(),
-      ),
+      ],
       'plugin' => 'og_membership_add_role_action',
-    ));
+    ]);
     $action->trustData()->save();
   }
   $remove_id = 'og_membership_remove_role_action.' . $role->id();
   if (!Action::load($remove_id)) {
-    $action = Action::create(array(
+    $action = Action::create([
       'id' => $remove_id,
       'type' => 'og_membership',
-      'label' => t('Remove the @label role from the selected members', array('@label' => $role->label())),
-      'configuration' => array(
+      'label' => t('Remove the @label role from the selected members', ['@label' => $role->label()]),
+      'configuration' => [
         'rid' => $role->id(),
-      ),
+      ],
       'plugin' => 'og_membership_remove_role_action',
-    ));
+    ]);
     $action->trustData()->save();
   }
 }
@@ -334,7 +334,6 @@ function og_og_role_insert(OgRoleInterface $role) {
  * Implements hook_ENTITY_TYPE_delete() for user_role entities.
  */
 function og_og_role_delete(OgRoleInterface $role) {
-
   $actions = Action::loadMultiple([
     'og_membership_add_role_action.' . $role->id(),
     'og_membership_remove_role_action.' . $role->id(),

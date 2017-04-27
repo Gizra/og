@@ -3,7 +3,6 @@
 namespace Drupal\og\Plugin\Action;
 
 use Drupal\og\Entity\OgMembership;
-use Drupal\og\Entity\OgRole;
 
 /**
  * Removes a role from a user.
