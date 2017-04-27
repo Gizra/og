@@ -18,7 +18,7 @@ class OgRoleTest extends KernelTestBase {
   /**
    * {@inheritdoc}
    */
-  public static $modules = ['field', 'og'];
+  public static $modules = ['field', 'og', 'system', 'user'];
 
   /**
    * The entity storage handler for OgRole entities.
