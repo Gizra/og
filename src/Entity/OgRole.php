@@ -108,27 +108,14 @@ class OgRole extends Role implements OgRoleInterface {
   }
 
   /**
-   * Returns the role type.
-   *
-   * @return string
-   *   The role type. One of OgRoleInterface::ROLE_TYPE_REQUIRED or
-   *   OgRoleInterface::ROLE_TYPE_STANDARD.
+   * {@inheritdoc}
    */
   public function getRoleType() {
     return $this->get('role_type') ?: OgRoleInterface::ROLE_TYPE_STANDARD;
   }
 
   /**
-   * Sets the role type.
-   *
-   * @param string $role_type
-   *   The role type to set. One of OgRoleInterface::ROLE_TYPE_REQUIRED or
-   *   OgRoleInterface::ROLE_TYPE_STANDARD.
-   *
-   * @return $this
-   *
-   * @throws \InvalidArgumentException
-   *   Thrown when an invalid role type is given.
+   * {@inheritdoc}
    */
   public function setRoleType($role_type) {
     if (!in_array($role_type, [
