@@ -95,4 +95,27 @@ interface OgRoleInterface {
    */
   public static function getRole($entity_type_id, $bundle, $role_name);
 
+  /**
+   * Returns the role type.
+   *
+   * @return string
+   *   The role type. One of OgRoleInterface::ROLE_TYPE_REQUIRED or
+   *   OgRoleInterface::ROLE_TYPE_STANDARD.
+   */
+  public function getRoleType();
+
+  /**
+   * Sets the role type.
+   *
+   * @param string $role_type
+   *   The role type to set. One of OgRoleInterface::ROLE_TYPE_REQUIRED or
+   *   OgRoleInterface::ROLE_TYPE_STANDARD.
+   *
+   * @return $this
+   *
+   * @throws \InvalidArgumentException
+   *   Thrown when an invalid role type is given.
+   */
+  public function setRoleType($role_type);
+
 }
