@@ -2,12 +2,15 @@
 
 namespace Drupal\og\Plugin\Action;
 
+use Drupal\Core\Access\AccessResult;
 use Drupal\Core\Action\ConfigurableActionBase;
 use Drupal\Core\Entity\DependencyTrait;
 use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
 use Drupal\Core\Session\AccountInterface;
+use Drupal\og\Entity\OgMembership;
+use Drupal\og\MembershipManagerInterface;
 use Drupal\user\RoleInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
@@ -26,11 +29,29 @@ abstract class ChangeOgMembershipRoleBase extends ConfigurableActionBase impleme
   protected $entityType;
 
   /**
-   * {@inheritdoc}
+   * The membership manager.
+   *
+   * @var \Drupal\og\MembershipManagerInterface
    */
-  public function __construct(array $configuration, $plugin_id, $plugin_definition, EntityTypeInterface $entity_type) {
+  protected $membershipManager;
+
+  /**
+   * Constructs a ChangeOgMembershipRoleBase object.
+   *
+   * @param array $configuration
+   *   A configuration array containing information about the plugin instance.
+   * @param string $plugin_id
+   *   The plugin_id for the plugin instance.
+   * @param mixed $plugin_definition
+   *   The plugin implementation definition.
+   * @param \Drupal\Core\Entity\EntityTypeInterface $entity_type
+   *   The user role entity type.
+   * @param \Drupal\og\MembershipManagerInterface $membership_manager
+   */
+  public function __construct(array $configuration, $plugin_id, $plugin_definition, EntityTypeInterface $entity_type, MembershipManagerInterface $membership_manager) {
     parent::__construct($configuration, $plugin_id, $plugin_definition);
     $this->entityType = $entity_type;
+    $this->membershipManager = $membership_manager;
   }
 
   /**
@@ -41,7 +62,8 @@ abstract class ChangeOgMembershipRoleBase extends ConfigurableActionBase impleme
       $configuration,
       $plugin_id,
       $plugin_definition,
-      $container->get('entity.manager')->getDefinition('user_role')
+      $container->get('entity.manager')->getDefinition('user_role'),
+      $container->get('og.membership_manager')
     );
   }
 
@@ -92,10 +114,15 @@ abstract class ChangeOgMembershipRoleBase extends ConfigurableActionBase impleme
    * {@inheritdoc}
    */
   public function access($object, AccountInterface $account = NULL, $return_as_object = FALSE) {
-    return TRUE;
-    /** @var \Drupal\user\UserInterface $object */
-    $access = $object->access('update', $account, TRUE)
-      ->andIf($object->roles->access('edit', $account, TRUE));
+    /** @var \Drupal\og\Entity\OgMembership $object */
+    // Grant access if the user can administer all groups.
+    $access = AccessResult::allowedIfHasPermission($account, 'administer group');
+
+    // Grant access if the user can manage members in this group.
+    $membership = $this->membershipManager->getMembership($object->getGroup(), $account);
+    if ($membership) {
+      $access->orIf(AccessResult::allowedIf($membership->hasPermission('manage members')));
+    }
 
     return $return_as_object ? $access : $access->isAllowed();
   }
