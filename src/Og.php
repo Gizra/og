@@ -309,14 +309,11 @@ class Og {
 
   /**
    * Invalidate cache.
-   *
-   * @param array $group_ids
-   *   Array with group IDs that their cache should be invalidated.
    */
-  public static function invalidateCache(array $group_ids = array()) {
+  public static function invalidateCache() {
     // @todo We should not be using drupal_static() review and remove.
     // Reset static cache.
-    $caches = array(
+    $caches = [
       'og_user_access',
       'og_user_access_alter',
       'og_role_permissions',
@@ -326,7 +323,7 @@ class Og {
       'og_get_membership',
       'og_get_field_og_membership_properties',
       'og_get_user_roles',
-    );
+    ];
 
     foreach ($caches as $cache) {
       drupal_static_reset($cache);
@@ -343,7 +340,7 @@ class Og {
     \Drupal::service('og.membership_manager')->reset();
 
     // Let other OG modules know we invalidate cache.
-    \Drupal::moduleHandler()->invokeAll('og_invalidate_cache', $group_ids);
+    \Drupal::moduleHandler()->invokeAll('og_invalidate_cache');
   }
 
   /**

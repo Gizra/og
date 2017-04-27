@@ -103,7 +103,7 @@ class EntityCreateAccessTest extends KernelTestBase {
       ->save();
 
     // Grant the anonymous user permission to view published content.
-    /** @var Role $role */
+    /** @var \Drupal\user\Entity\Role $role */
     $role = Role::create(['id' => Role::ANONYMOUS_ID, 'label' => 'anonymous user'])
       ->grantPermission('access content');
     $role->save();

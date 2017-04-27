@@ -37,7 +37,7 @@ interface PermissionEventInterface extends \ArrayAccess, \IteratorAggregate {
    * @param string $entity_type_id
    *   The group content entity type ID to which this permission applies.
    * @param string $bundle_id
-   *    The group content bundle ID to which this permission applies.
+   *   The group content bundle ID to which this permission applies.
    * @param string $operation
    *   The entity operation to which this permission applies.
    * @param bool $owner
@@ -93,7 +93,7 @@ interface PermissionEventInterface extends \ArrayAccess, \IteratorAggregate {
    * @param string $entity_type_id
    *   The group content entity type ID to which this permission applies.
    * @param string $bundle_id
-   *    The group content bundle ID to which this permission applies.
+   *   The group content bundle ID to which this permission applies.
    * @param string $operation
    *   The entity operation to which this permission applies.
    * @param bool $owner
@@ -119,7 +119,7 @@ interface PermissionEventInterface extends \ArrayAccess, \IteratorAggregate {
    * @param string $entity_type_id
    *   The group content entity type ID to which this permission applies.
    * @param string $bundle_id
-   *    The group content bundle ID to which this permission applies.
+   *   The group content bundle ID to which this permission applies.
    * @param string $operation
    *   The entity operation to which this permission applies.
    * @param bool $owner

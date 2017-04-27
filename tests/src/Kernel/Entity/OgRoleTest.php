@@ -43,7 +43,7 @@ class OgRoleTest extends KernelTestBase {
    * Testing OG role creation.
    */
   public function testRoleCreate() {
-    /** @var OgRole $og_role */
+    /** @var \Drupal\og\Entity\OgRole $og_role */
     $og_role = OgRole::create();
     $og_role
       ->setName('content_editor')

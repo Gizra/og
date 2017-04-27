@@ -66,10 +66,10 @@ class FieldCreateTest extends KernelTestBase {
    */
   public function testValidFields() {
     // Simple create, for all the fields defined by OG core.
-    $field_names = array(
+    $field_names = [
       OgGroupAudienceHelperInterface::DEFAULT_FIELD,
       OG_DEFAULT_ACCESS_FIELD,
-    );
+    ];
 
     foreach ($field_names as $field_name) {
       $bundle = $this->bundles[0];

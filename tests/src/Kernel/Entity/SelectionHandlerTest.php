@@ -40,14 +40,14 @@ class SelectionHandlerTest extends KernelTestBase {
   /**
    * A user object.
    *
-   * @var User
+   * @var \Drupal\user\Entity\User
    */
   protected $user1;
 
   /**
    * A user object.
    *
-   * @var User
+   * @var \Drupal\user\Entity\User
    */
   protected $user2;
 
@@ -167,7 +167,7 @@ class SelectionHandlerTest extends KernelTestBase {
    *
    * @param int $amount
    *   The number of groups to create.
-   * @param User $user
+   * @param \Drupal\user\Entity\User $user
    *   The user object which owns the groups.
    *
    * @return ContentEntityBase[]

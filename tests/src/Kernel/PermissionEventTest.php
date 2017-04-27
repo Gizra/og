@@ -89,7 +89,7 @@ class PermissionEventTest extends KernelTestBase {
    */
   public function testPermissionEventIntegration(array $group_content_bundle_ids, array $expected_permissions, array $expected_full_permissions) {
     // Retrieve the permissions from the listeners.
-    /** @var PermissionEvent $permission_event */
+    /** @var \Drupal\og\Event\PermissionEvent $permission_event */
     $event = new PermissionEvent($this->randomMachineName(), $this->randomMachineName(), $group_content_bundle_ids);
     $permission_event = $this->eventDispatcher->dispatch(PermissionEventInterface::EVENT_NAME, $event);
     $actual_permissions = array_keys($permission_event->getPermissions());
@@ -208,7 +208,7 @@ class PermissionEventTest extends KernelTestBase {
    *
    * @see t()
    */
-  public function t($string, array $args = array(), array $options = array()) {
+  public function t($string, array $args = [], array $options = []) {
     return SafeMarkup::format($string, $args);
   }
 

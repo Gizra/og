@@ -222,7 +222,7 @@ class OgRoleManagerTest extends UnitTestCase {
   /**
    * Return a new OG role manager object.
    *
-   * @return OgRoleManager
+   * @return \Drupal\og\Entity\OgRoleManager
    *   The initialized OG role manager.
    */
   protected function getOgRoleManager() {

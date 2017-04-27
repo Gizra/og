@@ -138,7 +138,7 @@ class OgMembershipTest extends KernelTestBase {
    * @expectedException \Drupal\Core\Entity\EntityStorageException
    */
   public function testSetNoUserException() {
-    /** @var OgMembershipInterface $membership */
+    /** @var \Drupal\og\Entity\OgMembershipInterface $membership */
     $membership = OgMembership::create(['type' => OgMembershipInterface::TYPE_DEFAULT]);
     $membership
       ->setGroup($this->group)
@@ -152,7 +152,7 @@ class OgMembershipTest extends KernelTestBase {
    * @expectedException \Drupal\Core\Entity\EntityStorageException
    */
   public function testSetNoGroupException() {
-    /** @var OgMembershipInterface $membership */
+    /** @var \Drupal\og\Entity\OgMembershipInterface $membership */
     $membership = OgMembership::create();
     $membership
       ->setUser($this->user)
@@ -172,7 +172,7 @@ class OgMembershipTest extends KernelTestBase {
     ]);
 
     $non_group->save();
-    /** @var OgMembershipInterface $membership */
+    /** @var \Drupal\og\Entity\OgMembershipInterface $membership */
     $membership = Og::createMembership($non_group, $this->user);
     $membership->save();
   }
@@ -193,7 +193,7 @@ class OgMembershipTest extends KernelTestBase {
 
     Og::groupTypeManager()->addGroup('entity_test', $group->bundle());
 
-    /** @var OgMembershipInterface $membership */
+    /** @var \Drupal\og\Entity\OgMembershipInterface $membership */
     $membership1 = Og::createMembership($group, $this->user);
     $membership1->save();
 
@@ -216,7 +216,7 @@ class OgMembershipTest extends KernelTestBase {
 
     Og::groupTypeManager()->addGroup('entity_test', $group->bundle());
 
-    /** @var OgMembershipInterface $membership */
+    /** @var \Drupal\og\Entity\OgMembershipInterface $membership */
     $membership = Og::createMembership($group, $this->user);
     $membership->save();
 

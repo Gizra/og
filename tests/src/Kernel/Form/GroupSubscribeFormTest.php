@@ -111,7 +111,7 @@ class GroupSubscribeFormTest extends KernelTestBase {
     $this->group3->save();
 
     // Change the permissions of group to "subscribe".
-    /** @var OgRole $role */
+    /** @var \Drupal\og\Entity\OgRole $role */
     $role = OgRole::getRole('node', $groupBundle1, OgRoleInterface::ANONYMOUS);
     $role
       ->grantPermission('subscribe')
@@ -197,19 +197,19 @@ class GroupSubscribeFormTest extends KernelTestBase {
     $values = [];
     if ($permissions) {
       // Create a new role and apply permissions to it.
-      $role = Role::create(array(
+      $role = Role::create([
         'id' => strtolower($this->randomMachineName(8)),
         'label' => $this->randomMachineName(8),
-      ));
+      ]);
       $role->save();
       user_role_grant_permissions($role->id(), $permissions);
       $values['roles'][] = $role->id();
     }
 
-    $account = User::create($values + array(
+    $account = User::create($values + [
       'name' => $this->randomMachineName(),
       'status' => 1,
-    ));
+    ]);
     $account->enforceIsNew();
     $account->save();
     return $account;
