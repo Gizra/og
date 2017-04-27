@@ -6,7 +6,7 @@ use Drupal\og\Entity\OgMembership;
 use Drupal\og\Entity\OgRole;
 
 /**
- * Adds a role to a user.
+ * Adds a role to a group membership.
  *
  * @Action(
  *   id = "og_membership_add_role_action",

@@ -5,7 +5,7 @@ namespace Drupal\og\Plugin\Action;
 use Drupal\og\Entity\OgMembership;
 
 /**
- * Removes a role from a user.
+ * Removes a role from a group membership.
  *
  * @Action(
  *   id = "og_membership_remove_role_action",

@@ -14,7 +14,7 @@ use Drupal\user\RoleInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
- * Provides a base class for operations to change a user's og membership.
+ * Provides a base class for operations to change a user's group membership.
  */
 abstract class ChangeOgMembershipRoleBase extends ConfigurableActionBase implements ContainerFactoryPluginInterface {
 
