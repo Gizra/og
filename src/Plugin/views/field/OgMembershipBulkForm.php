@@ -19,12 +19,6 @@ class OgMembershipBulkForm extends BulkForm {
    * Provide a more useful title to improve the accessibility.
    */
   public function viewsForm(&$form, FormStateInterface $form_state) {
-    // Remove all actions related to (non-)member role.
-    foreach ($this->actions as $key => $action) {
-      if (strstr($key, '-member') !== FALSE) {
-        unset($this->actions[$key]);
-      }
-    }
     parent::viewsForm($form, $form_state);
 
     if (!empty($this->view->result)) {
