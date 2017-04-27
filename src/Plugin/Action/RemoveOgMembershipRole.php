@@ -18,12 +18,12 @@ class RemoveOgMembershipRole extends ChangeOgMembershipRoleBase {
   /**
    * {@inheritdoc}
    */
-  public function execute(OgMembership $member = NULL) {
-    if (!$member) {
+  public function execute(OgMembership $membership = NULL) {
+    if (!$membership) {
       return;
     }
     $rid = $this->configuration['rid'];
-    $roles = $member->getRoles();
+    $roles = $membership->getRoles();
     $apply = FALSE;
     /** @var \Drupal\og\Entity\OgRole $role */
     foreach ($roles as $index => $role) {
@@ -37,9 +37,9 @@ class RemoveOgMembershipRole extends ChangeOgMembershipRoleBase {
     // For efficiency manually save the original account before applying
     // any changes.
     if ($apply) {
-      $member->original = clone $member;
-      $member->setRoles($roles);
-      $member->save();
+      $membership->original = clone $membership;
+      $membership->setRoles($roles);
+      $membership->save();
     }
   }
 

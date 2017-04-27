@@ -19,12 +19,12 @@ class AddOgMembershipRole extends ChangeOgMembershipRoleBase {
   /**
    * {@inheritdoc}
    */
-  public function execute(OgMembership $member = NULL) {
-    if (!$member) {
+  public function execute(OgMembership $membership = NULL) {
+    if (!$membership) {
       return;
     }
     $rid = $this->configuration['rid'];
-    $roles = $member->getRoles();
+    $roles = $membership->getRoles();
     /** @var \Drupal\og\Entity\OgRole $role */
     foreach ($roles as $role) {
       if ($rid == $role->id()) {
@@ -38,9 +38,9 @@ class AddOgMembershipRole extends ChangeOgMembershipRoleBase {
     }
     // For efficiency manually save the original account before applying
     // any changes.
-    $member->original = clone $member;
-    $member->addRole($role);
-    $member->save();
+    $membership->original = clone $membership;
+    $membership->addRole($role);
+    $membership->save();
   }
 
 }
