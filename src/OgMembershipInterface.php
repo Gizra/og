@@ -208,6 +208,14 @@ interface OgMembershipInterface extends ContentEntityInterface {
   public function getRoles();
 
   /**
+   * Gets all the referenced OG role IDs.
+   *
+   * @return string[]
+   *   List of OG role IDs that are granted in the membership.
+   */
+  public function getRolesIds();
+
+  /**
    * Checks if the user has a permission inside the group.
    *
    * @param string $permission
