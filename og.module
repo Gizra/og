@@ -12,6 +12,7 @@ use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Field\BaseFieldDefinition;
 use Drupal\Core\Session\AccountInterface;
+use Drupal\og\Entity\OgRole;
 use Drupal\og\Og;
 use Drupal\og\OgGroupAudienceHelperInterface;
 use Drupal\og\OgRoleInterface;
@@ -307,27 +308,27 @@ function og_og_role_insert(OgRoleInterface $role) {
     return;
   }
 
-  $add_id = 'og_membership_add_role_action.' . $role->id();
+  $add_id = 'og_membership_add_role_action.' . $role->getName();
   if (!Action::load($add_id)) {
     $action = Action::create([
       'id' => $add_id,
       'type' => 'og_membership',
       'label' => t('Add the @label role to the selected members', ['@label' => $role->label()]),
       'configuration' => [
-        'rid' => $role->id(),
+        'role_name' => $role->getName(),
       ],
       'plugin' => 'og_membership_add_role_action',
     ]);
     $action->trustData()->save();
   }
-  $remove_id = 'og_membership_remove_role_action.' . $role->id();
+  $remove_id = 'og_membership_remove_role_action.' . $role->getName();
   if (!Action::load($remove_id)) {
     $action = Action::create([
       'id' => $remove_id,
       'type' => 'og_membership',
       'label' => t('Remove the @label role from the selected members', ['@label' => $role->label()]),
       'configuration' => [
-        'rid' => $role->id(),
+        'role_name' => $role->getName(),
       ],
       'plugin' => 'og_membership_remove_role_action',
     ]);
@@ -339,11 +340,20 @@ function og_og_role_insert(OgRoleInterface $role) {
  * Implements hook_ENTITY_TYPE_delete() for user_role entities.
  */
 function og_og_role_delete(OgRoleInterface $role) {
+  $role_name = $role->getName();
   /** @var \Drupal\system\ActionConfigEntityInterface[] $actions */
   $actions = Action::loadMultiple([
-    'og_membership_add_role_action.' . $role->id(),
-    'og_membership_remove_role_action.' . $role->id(),
+    'og_membership_add_role_action.' . $role_name,
+    'og_membership_remove_role_action.' . $role_name,
   ]);
+
+  // Only remove the actions when the role name is not used by any other roles.
+  foreach (OgRole::loadMultiple() as $role) {
+    if ($role->getName() === $role_name) {
+      return;
+    }
+  }
+
   foreach ($actions as $action) {
     $action->delete();
   }

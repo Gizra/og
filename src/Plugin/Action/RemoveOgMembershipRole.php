@@ -22,10 +22,15 @@ class RemoveOgMembershipRole extends ChangeOgMembershipRoleBase {
     if (!$membership) {
       return;
     }
-    $rid = $this->configuration['rid'];
+    $role_name = $this->configuration['role_name'];
+    $role_id = implode('-', [
+      $membership->getGroupEntityType(),
+      $membership->getGroup()->bundle(),
+      $role_name,
+    ]);
     // Skip removing the role from the membership if it doesn't have it.
-    if (in_array($rid, $membership->getRolesIds())) {
-      $membership->revokeRoleById($rid)->save();
+    if (in_array($role_id, $membership->getRolesIds())) {
+      $membership->revokeRoleById($role_id)->save();
     }
   }
 

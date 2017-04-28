@@ -23,9 +23,14 @@ class AddOgMembershipRole extends ChangeOgMembershipRoleBase {
     if (!$membership) {
       return;
     }
-    $rid = $this->configuration['rid'];
-    if (!in_array($rid, $membership->getRolesIds())) {
-      $membership->addRole(OgRole::load($rid))->save();
+    $role_name = $this->configuration['role_name'];
+    $role_id = implode('-', [
+      $membership->getGroupEntityType(),
+      $membership->getGroup()->bundle(),
+      $role_name,
+    ]);
+    if (!in_array($role_id, $membership->getRolesIds())) {
+      $membership->addRole(OgRole::load($role_id))->save();
     }
   }
 

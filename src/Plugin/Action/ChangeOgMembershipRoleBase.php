@@ -75,7 +75,7 @@ abstract class ChangeOgMembershipRoleBase extends ConfigurableActionBase impleme
     $role_names = $this->getOgRoleLabels();
     reset($role_names);
     return [
-      'rid' => key($role_names),
+      'role_name' => key($role_names),
     ];
   }
 
@@ -85,11 +85,11 @@ abstract class ChangeOgMembershipRoleBase extends ConfigurableActionBase impleme
   public function buildConfigurationForm(array $form, FormStateInterface $form_state) {
     $options = $this->getOgRoleLabels();
     reset($options);
-    $form['rid'] = [
+    $form['role_name'] = [
       '#type' => 'radios',
       '#title' => t('Role'),
       '#options' => $options,
-      '#default_value' => $this->configuration['rid'],
+      '#default_value' => $this->configuration['role_name'],
       '#required' => TRUE,
     ];
     return $form;
@@ -99,16 +99,16 @@ abstract class ChangeOgMembershipRoleBase extends ConfigurableActionBase impleme
    * {@inheritdoc}
    */
   public function submitConfigurationForm(array &$form, FormStateInterface $form_state) {
-    $this->configuration['rid'] = $form_state->getValue('rid');
+    $this->configuration['role_name'] = $form_state->getValue('role_name');
   }
 
   /**
    * {@inheritdoc}
    */
   public function calculateDependencies() {
-    if (!empty($this->configuration['rid'])) {
+    if (!empty($this->configuration['role_name'])) {
       $prefix = $this->entityType->getConfigPrefix() . '.';
-      $this->addDependency('config', $prefix . $this->configuration['rid']);
+      $this->addDependency('config', $prefix . $this->configuration['role_name']);
     }
     return $this->dependencies;
   }
@@ -142,9 +142,9 @@ abstract class ChangeOgMembershipRoleBase extends ConfigurableActionBase impleme
     // Do not return the default roles 'member' and 'non-member'. These are
     // required and cannot be added to or removed from a membership.
     $role_names = [];
-    foreach ($roles as $role_id => $role) {
+    foreach ($roles as $role) {
       if ($role->getRoleType() !== OgRoleInterface::ROLE_TYPE_REQUIRED) {
-        $role_names[$role_id] = $role->label();
+        $role_names[$role->getName()] = $role->label();
       }
     }
 
