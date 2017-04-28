@@ -23,9 +23,9 @@ class OgMembershipBulkForm extends BulkForm {
 
     if (!empty($this->view->result)) {
       foreach ($this->view->result as $row_index => $result) {
-        $member = $result->_entity;
-        if ($member instanceof OgMembershipInterface) {
-          $form[$this->options['id']][$row_index]['#title'] = $this->t('Update the member @name', ['@name' => $member->getUser()->getAccountName()]);
+        $membership = $result->_entity;
+        if ($membership instanceof OgMembershipInterface) {
+          $form[$this->options['id']][$row_index]['#title'] = $this->t('Update the member @name', ['@name' => $membership->getUser()->getAccountName()]);
         }
       }
     }
