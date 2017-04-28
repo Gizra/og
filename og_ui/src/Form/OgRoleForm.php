@@ -103,7 +103,7 @@ class OgRoleForm extends EntityForm {
       $this->logger('user')->notice('OG role %label has been added.', ['%label' => $og_role->label(), 'link' => $edit_link]);
     }
     $form_state->setRedirect('og_ui.roles_overview', [
-      'entity_type' => $og_role->getGroupType(),
+      'entity_type_id' => $og_role->getGroupType(),
       'bundle' => $og_role->getGroupBundle(),
     ]);
   }
