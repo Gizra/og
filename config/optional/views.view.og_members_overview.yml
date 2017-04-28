@@ -5,7 +5,7 @@ dependencies:
     - og
     - user
 _core:
-  default_config_hash: pQ1Db2KCnLywk9EMbe83sqS-8HbmaIbhCTB0Jm87zbE
+  default_config_hash: 8BVuJfGvvtoB1XXZfAOzW50q7GH0_tQTlG0KIvnuSzI
 id: og_members_overview
 label: 'Members overview'
 module: views
@@ -100,6 +100,59 @@ display:
           hide_empty: false
           default_field_elements: true
       fields:
+        og_membership_bulk_form:
+          id: og_membership_bulk_form
+          table: og_membership
+          field: og_membership_bulk_form
+          relationship: none
+          group_type: group
+          admin_label: ''
+          label: 'Bulk update'
+          exclude: false
+          alter:
+            alter_text: false
+            text: ''
+            make_link: false
+            path: ''
+            absolute: false
+            external: false
+            replace_spaces: false
+            path_case: none
+            trim_whitespace: false
+            alt: ''
+            rel: ''
+            link_class: ''
+            prefix: ''
+            suffix: ''
+            target: ''
+            nl2br: false
+            max_length: 0
+            word_boundary: true
+            ellipsis: true
+            more_link: false
+            more_link_text: ''
+            more_link_path: ''
+            strip_tags: false
+            trim: false
+            preserve_tags: ''
+            html: false
+          element_type: ''
+          element_class: ''
+          element_label_type: ''
+          element_label_class: ''
+          element_label_colon: true
+          element_wrapper_type: ''
+          element_wrapper_class: ''
+          element_default_classes: true
+          empty: ''
+          hide_empty: false
+          empty_zero: false
+          hide_alter_empty: true
+          action_title: Action
+          include_exclude: exclude
+          selected_actions: {  }
+          entity_type: og_membership
+          plugin_id: og_membership_bulk_form
         name:
           id: name
           table: users_field_data
@@ -362,59 +415,6 @@ display:
           entity_type: og_membership
           entity_field: roles
           plugin_id: field
-        og_membership_bulk_form:
-          id: og_membership_bulk_form
-          table: og_membership
-          field: og_membership_bulk_form
-          relationship: none
-          group_type: group
-          admin_label: ''
-          label: 'Bulk update'
-          exclude: false
-          alter:
-            alter_text: false
-            text: ''
-            make_link: false
-            path: ''
-            absolute: false
-            external: false
-            replace_spaces: false
-            path_case: none
-            trim_whitespace: false
-            alt: ''
-            rel: ''
-            link_class: ''
-            prefix: ''
-            suffix: ''
-            target: ''
-            nl2br: false
-            max_length: 0
-            word_boundary: true
-            ellipsis: true
-            more_link: false
-            more_link_text: ''
-            more_link_path: ''
-            strip_tags: false
-            trim: false
-            preserve_tags: ''
-            html: false
-          element_type: ''
-          element_class: ''
-          element_label_type: ''
-          element_label_class: ''
-          element_label_colon: true
-          element_wrapper_type: ''
-          element_wrapper_class: ''
-          element_default_classes: true
-          empty: ''
-          hide_empty: false
-          empty_zero: false
-          hide_alter_empty: true
-          action_title: Action
-          include_exclude: exclude
-          selected_actions: {  }
-          entity_type: og_membership
-          plugin_id: og_membership_bulk_form
       filters: {  }
       sorts: {  }
       header: {  }
