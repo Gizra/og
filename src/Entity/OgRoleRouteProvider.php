@@ -49,9 +49,7 @@ class OgRoleRouteProvider extends AdminHtmlRouteProvider {
    */
   protected function getCollectionRoute(EntityTypeInterface $entity_type) {
     if ($route = parent::getCollectionRoute($entity_type)) {
-      $route->setDefault('_title_callback', '\Drupal\og_ui\Controller\OgUiController::rolesOverviewPageTitleCallback')
-        ->setOption('parameters', ['entity_type' => ['type' => 'entity:{entity_type}']])
-        ->setRequirement('_permission', 'administer group');
+      $route->setDefault('_title_callback', '\Drupal\og_ui\Controller\OgUiController::rolesOverviewPageTitleCallback');
       return $route;
     }
   }
