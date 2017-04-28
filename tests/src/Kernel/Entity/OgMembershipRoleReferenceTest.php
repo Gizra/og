@@ -105,7 +105,7 @@ class OgMembershipRoleReferenceTest extends KernelTestBase {
       ->setLabel('Group member');
     $group_member->save();
 
-    /** @var \Drupal\og\OgMembership $membership */
+    /** @var \Drupal\og\OgMembershipInterface $membership */
     $membership = Og::getMembership($this->group, $this->user);
     $membership
       // Assign only the content editor role for now.
@@ -133,6 +133,11 @@ class OgMembershipRoleReferenceTest extends KernelTestBase {
     $this->assertFalse($membership->hasPermission('administer group'), 'The user has permission to administer groups.');
     $membership->addRole($content_editor);
     $this->assertTrue($membership->hasPermission('administer group'), 'The user has permission to administer groups.');
+
+    // Remove a role by ID.
+    $membership->revokeRoleById($group_member->id());
+    $roles_ids = $membership->getRolesIds();
+    $this->assertFalse(in_array($group_member->id(), $roles_ids), 'The group member role has been revoked.');
   }
 
 }
