@@ -24,23 +24,9 @@ class AddOgMembershipRole extends ChangeOgMembershipRoleBase {
       return;
     }
     $rid = $this->configuration['rid'];
-    $roles = $membership->getRoles();
-    /** @var \Drupal\og\Entity\OgRole $role */
-    foreach ($roles as $role) {
-      if ($rid == $role->id()) {
-        return;
-      }
+    if (!in_array($rid, $membership->getRolesIds())) {
+      $membership->addRole(OgRole::load($rid))->save();
     }
-    $role = OgRole::load($rid);
-
-    if (!$role) {
-      throw new \Exception('Unknown role ' . $rid);
-    }
-    // For efficiency manually save the original account before applying
-    // any changes.
-    $membership->original = clone $membership;
-    $membership->addRole($role);
-    $membership->save();
   }
 
 }
