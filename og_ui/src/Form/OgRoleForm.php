@@ -34,17 +34,9 @@ class OgRoleForm extends EntityForm {
       '#description' => $this->t('The name for this role. Example: "Moderator", "Editorial board", "Site architect".'),
     ];
 
-    $role_id = '';
-    if ($og_role->id()) {
-      // The actual role id is <ENTITY TYPE>-<BUNDLE>-<ID>
-      // Given the machine_name constraints, we go back to ID here
-      // as the full id is assembled in OgRole::save().
-      list(, , $role_id) = explode('-', $og_role->id(), 3);
-    }
-
     $form['name'] = [
       '#type' => 'machine_name',
-      '#default_value' => $role_id,
+      '#default_value' => $og_role->getName(),
       '#required' => TRUE,
       '#disabled' => !$og_role->isNew(),
       '#size' => 30,
