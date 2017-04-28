@@ -121,7 +121,7 @@ class OgUiController extends ControllerBase {
   /**
    * Title callback for the roles overview page.
    *
-   * @param string $entity_type
+   * @param string $entity_type_id
    *   The group entity type.
    * @param string $bundle
    *   The group bundle.
@@ -129,10 +129,10 @@ class OgUiController extends ControllerBase {
    * @return \Drupal\Core\StringTranslation\TranslatableMarkup
    *   The roles overview page title.
    */
-  public function rolesOverviewPageTitleCallback($entity_type, $bundle) {
+  public function rolesOverviewPageTitleCallback($entity_type_id, $bundle) {
     return $this->t('OG @type - @bundle roles', [
-      '@type' => $this->entityTypeManager->getDefinition($entity_type)->getLabel(),
-      '@bundle' => $this->entityTypeBundleInfo->getBundleInfo($entity_type)[$bundle]['label'],
+      '@type' => $this->entityTypeManager->getDefinition($entity_type_id)->getLabel(),
+      '@bundle' => $this->entityTypeBundleInfo->getBundleInfo($entity_type_id)[$bundle]['label'],
     ]);
   }
 
