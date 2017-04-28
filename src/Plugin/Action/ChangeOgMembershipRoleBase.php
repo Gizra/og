@@ -9,8 +9,9 @@ use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
 use Drupal\Core\Session\AccountInterface;
+use Drupal\og\Entity\OgRole;
 use Drupal\og\MembershipManagerInterface;
-use Drupal\user\RoleInterface;
+use Drupal\og\OgRoleInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
@@ -71,8 +72,10 @@ abstract class ChangeOgMembershipRoleBase extends ConfigurableActionBase impleme
    * {@inheritdoc}
    */
   public function defaultConfiguration() {
+    $role_names = $this->getOgRoleLabels();
+    reset($role_names);
     return [
-      'rid' => '',
+      'rid' => key($role_names),
     ];
   }
 
@@ -80,12 +83,12 @@ abstract class ChangeOgMembershipRoleBase extends ConfigurableActionBase impleme
    * {@inheritdoc}
    */
   public function buildConfigurationForm(array $form, FormStateInterface $form_state) {
-    $roles = user_role_names(TRUE);
-    unset($roles[RoleInterface::AUTHENTICATED_ID]);
+    $options = $this->getOgRoleLabels();
+    reset($options);
     $form['rid'] = [
       '#type' => 'radios',
       '#title' => t('Role'),
-      '#options' => $roles,
+      '#options' => $options,
       '#default_value' => $this->configuration['rid'],
       '#required' => TRUE,
     ];
@@ -125,6 +128,27 @@ abstract class ChangeOgMembershipRoleBase extends ConfigurableActionBase impleme
     }
 
     return $return_as_object ? $access : $access->isAllowed();
+  }
+
+  /**
+   * Returns a list of OgRole labels.
+   *
+   * @return array
+   *   An associative array of labels, keyed by OgRole ID.
+   */
+  protected function getOgRoleLabels() {
+    /** @var \Drupal\og\OgRoleInterface[] $roles */
+    $roles = OgRole::loadMultiple();
+    // Do not return the default roles 'member' and 'non-member'. These are
+    // required and cannot be added to or removed from a membership.
+    $role_names = [];
+    foreach ($roles as $role_id => $role) {
+      if ($role->getRoleType() !== OgRoleInterface::ROLE_TYPE_REQUIRED) {
+        $role_names[$role_id] = $role->label();
+      }
+    }
+
+    return $role_names;
   }
 
 }
