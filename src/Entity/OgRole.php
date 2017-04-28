@@ -337,4 +337,15 @@ class OgRole extends Role implements OgRoleInterface {
     return \Drupal::service('og.access');
   }
 
+  /**
+   * {@inheritdoc}
+   */
+  public function calculateDependencies() {
+    parent::calculateDependencies();
+
+    // Create a dependency on the group bundle.
+    $bundle_config_dependency = \Drupal::entityTypeManager()->getDefinition($this->getGroupType())->getBundleConfigDependency($this->getGroupBundle());
+    $this->addDependency($bundle_config_dependency['type'], $bundle_config_dependency['name']);
+  }
+
 }
