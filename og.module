@@ -339,6 +339,7 @@ function og_og_role_insert(OgRoleInterface $role) {
  * Implements hook_ENTITY_TYPE_delete() for user_role entities.
  */
 function og_og_role_delete(OgRoleInterface $role) {
+  /** @var \Drupal\system\ActionConfigEntityInterface[] $actions */
   $actions = Action::loadMultiple([
     'og_membership_add_role_action.' . $role->id(),
     'og_membership_remove_role_action.' . $role->id(),
