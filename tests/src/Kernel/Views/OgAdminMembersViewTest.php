@@ -139,7 +139,7 @@ class OgAdminMembersViewTest extends ViewsKernelTestBase {
       'State' => '//*[@id="view-state-table-column"]',
 
       // Validate the user appears.
-      $this->user->label() => '//*/tbody/tr/td[1]/span/text()',
+      $this->user->label() => '//*/tbody/tr/td[2]/span/text()',
 
       // Validate that the user has the bulk operation checkbox.
       'Update the member' => '//td[contains(@class, \'views-field-og-membership-bulk-form\')]/div/label',
