@@ -42,7 +42,7 @@ class OgRoleForm extends EntityForm {
       '#size' => 30,
       '#maxlength' => 64,
       '#machine_name' => [
-        'exists' => ['\Drupal\og_ui\Entity\OgRole', 'load'],
+        'exists' => [$this, 'exists'],
       ],
       '#field_prefix' => $og_role->getGroupType() . '-' . $og_role->getGroupBundle() . '-',
     ];
@@ -57,6 +57,29 @@ class OgRoleForm extends EntityForm {
     ];
 
     return parent::form($form, $form_state, $og_role);
+  }
+
+  /**
+   * Machine name callback.
+   *
+   * Cannot use OgRole::load as the #machine_name callback as we are only
+   * allowing editing the role name.
+   *
+   * @param string $role_name
+   *   The role name.
+   *
+   * @return OgRole|NULL
+   *   The OG role if it exists. NULL otherwise.
+   */
+  public function exists($role_name) {
+    $og_role = $this->entity;
+    $role_id = implode('-', [
+      $og_role->getGroupType(),
+      $og_role->getGroupBundle(),
+      $role_name,
+    ]);
+
+    return OgRole::load($role_id);
   }
 
   /**
