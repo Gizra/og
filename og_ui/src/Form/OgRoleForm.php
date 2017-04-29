@@ -124,20 +124,4 @@ class OgRoleForm extends EntityForm {
     ]);
   }
 
-  /**
-   * The role creation page title callback.
-   *
-   * @param string $bundle_id
-   *   Entity type bundle.
-   *
-   * @return \Drupal\Core\StringTranslation\TranslatableMarkup
-   *   An object that, when cast to a string, returns the translated title
-   *   callback.
-   */
-  public function addRoleTitleCallback($bundle_id) {
-    return $this->t('Create %bundle OG role', [
-      '%bundle' => $bundle_id,
-    ]);
-  }
-
 }

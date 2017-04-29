@@ -29,9 +29,6 @@ use Drupal\user\Entity\Role;
  *       "delete" = "Drupal\og_ui\Form\OgRoleDeleteForm",
  *       "edit" = "Drupal\og_ui\Form\OgRoleForm",
  *     },
- *     "route_provider" = {
- *       "html" = "Drupal\og\Entity\OgRoleRouteProvider",
- *     },
  *    "list_builder" = "Drupal\og\Entity\OgRoleListBuilder",
  *   },
  *   admin_permission = "administer group",

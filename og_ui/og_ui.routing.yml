@@ -25,18 +25,19 @@ og_ui.roles_permissions_overview:
     _permission: 'administer group'
     type: '^(roles|permissions)$'
 
-og_ui.roles_overview:
+entity.og_role.collection:
   path: 'admin/config/group/roles/{entity_type_id}/{bundle_id}'
   defaults:
     _entity_list: 'og_role'
+    _title_callback: '\Drupal\og_ui\Controller\OgUiController::rolesOverviewPageTitleCallback'
   requirements:
     _permission: 'administer group'
 
-og_ui.role_add:
+entity.og_role.add_form:
   path: 'admin/config/group/roles/{entity_type_id}/{bundle_id}/add'
   defaults:
-    _controller: '\Drupal\og_ui\Controller\OgRoleController::addGroupTypeRole'
-    _title_callback: '\Drupal\og_ui\Form\OgRoleForm::addRoleTitleCallback'
+    _entity_form: og_role.default
+    _title: 'Add role'
   requirements:
     _permission: 'administer group'
 
