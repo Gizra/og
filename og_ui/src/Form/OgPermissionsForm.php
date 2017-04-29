@@ -93,34 +93,34 @@ class OgPermissionsForm extends FormBase {
   /**
    * Title callback for the group permissions page.
    *
-   * @param string $entity_type
+   * @param string $entity_type_id
    *   The group entity type id.
-   * @param string $bundle
+   * @param string $bundle_id
    *   The group bundle id.
    *
    * @return \Drupal\Core\StringTranslation\TranslatableMarkup
    *   The group permission title.
    */
-  public function titleCallback($entity_type, $bundle) {
+  public function titleCallback($entity_type_id, $bundle_id) {
     return $this->t('@bundle permissions', [
-      '@bundle' => $this->entityTypeBundleInfo->getBundleInfo($entity_type)[$bundle]['label'],
+      '@bundle' => $this->entityTypeBundleInfo->getBundleInfo($entity_type_id)[$bundle_id]['label'],
     ]);
   }
 
   /**
    * Returns the group roles to display in the form.
    *
-   * @param string $entity_type
+   * @param string $entity_type_id
    *   The group entity type id.
-   * @param string $bundle
+   * @param string $bundle_id
    *   The group entity bundle id.
    *
    * @return array
    *   The group roles.
    */
-  public function getGroupRoles($entity_type, $bundle) {
+  public function getGroupRoles($entity_type_id, $bundle_id) {
     if (empty($this->roles)) {
-      $this->roles = $this->roleManager->getRolesByBundle($entity_type, $bundle);
+      $this->roles = $this->roleManager->getRolesByBundle($entity_type_id, $bundle_id);
     }
 
     return $this->roles;
@@ -133,17 +133,17 @@ class OgPermissionsForm extends FormBase {
    *   An associative array containing the structure of the form.
    * @param \Drupal\Core\Form\FormStateInterface $form_state
    *   The current state of the form.
-   * @param string $entity_type
+   * @param string $entity_type_id
    *   The group entity type id.
-   * @param string $bundle
+   * @param string $bundle_id
    *   The group bundle id.
    *
    * @return array
    *   The form structure.
    */
-  public function buildForm(array $form, FormStateInterface $form_state, $entity_type = '', $bundle = '') {
+  public function buildForm(array $form, FormStateInterface $form_state, $entity_type_id = '', $bundle_id = '') {
     // Return a 404 error when this is not a group.
-    if (!Og::isGroup($entity_type, $bundle)) {
+    if (!Og::isGroup($entity_type_id, $bundle_id)) {
       throw new NotFoundHttpException();
     }
 
@@ -163,7 +163,7 @@ class OgPermissionsForm extends FormBase {
       '#sticky' => TRUE,
     ];
 
-    $roles = $this->getGroupRoles($entity_type, $bundle);
+    $roles = $this->getGroupRoles($entity_type_id, $bundle_id);
 
     /** @var \Drupal\og\Entity\OgRole $role */
     foreach ($roles as $role) {
@@ -173,9 +173,9 @@ class OgPermissionsForm extends FormBase {
       ];
     }
 
-    $bundles = $this->groupTypeManager->getGroupContentBundleIdsByGroupBundle($entity_type, $bundle);
-    $group_permissions = $this->permissionManager->getDefaultGroupPermissions($entity_type, $bundle);
-    $group_content_permissions = $this->permissionManager->getDefaultEntityOperationPermissions($entity_type, $bundle, $bundles);
+    $bundles = $this->groupTypeManager->getGroupContentBundleIdsByGroupBundle($entity_type_id, $bundle_id);
+    $group_permissions = $this->permissionManager->getDefaultGroupPermissions($entity_type_id, $bundle_id);
+    $group_content_permissions = $this->permissionManager->getDefaultEntityOperationPermissions($entity_type_id, $bundle_id, $bundles);
 
     $permissions_by_provider = [
       'Group' => $group_permissions,

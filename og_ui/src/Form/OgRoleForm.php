@@ -104,7 +104,7 @@ class OgRoleForm extends EntityForm {
     }
     $form_state->setRedirect('og_ui.roles_overview', [
       'entity_type_id' => $og_role->getGroupType(),
-      'bundle' => $og_role->getGroupBundle(),
+      'bundle_id' => $og_role->getGroupBundle(),
     ]);
   }
 
@@ -127,16 +127,16 @@ class OgRoleForm extends EntityForm {
   /**
    * The role creation page title callback.
    *
-   * @param string $bundle
+   * @param string $bundle_id
    *   Entity type bundle.
    *
    * @return \Drupal\Core\StringTranslation\TranslatableMarkup
    *   An object that, when cast to a string, returns the translated title
    *   callback.
    */
-  public function addRoleTitleCallback($bundle) {
+  public function addRoleTitleCallback($bundle_id) {
     return $this->t('Create %bundle OG role', [
-      '%bundle' => $bundle,
+      '%bundle' => $bundle_id,
     ]);
   }
 

@@ -88,7 +88,7 @@ class OgUiController extends ControllerBase {
           [
             'data' => Link::createFromRoute($action, 'og_ui.' . $type . '_overview', [
               'entity_type_id' => $entity_type,
-              'bundle' => $bundle,
+              'bundle_id' => $bundle,
             ]),
           ],
         ];
@@ -123,16 +123,16 @@ class OgUiController extends ControllerBase {
    *
    * @param string $entity_type_id
    *   The group entity type.
-   * @param string $bundle
+   * @param string $bundle_id
    *   The group bundle.
    *
    * @return \Drupal\Core\StringTranslation\TranslatableMarkup
    *   The roles overview page title.
    */
-  public function rolesOverviewPageTitleCallback($entity_type_id, $bundle) {
+  public function rolesOverviewPageTitleCallback($entity_type_id, $bundle_id) {
     return $this->t('OG @type - @bundle roles', [
       '@type' => $this->entityTypeManager->getDefinition($entity_type_id)->getLabel(),
-      '@bundle' => $this->entityTypeBundleInfo->getBundleInfo($entity_type_id)[$bundle]['label'],
+      '@bundle' => $this->entityTypeBundleInfo->getBundleInfo($entity_type_id)[$bundle_id]['label'],
     ]);
   }
 

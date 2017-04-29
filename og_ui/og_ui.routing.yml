@@ -26,14 +26,14 @@ og_ui.roles_permissions_overview:
     type: '^(roles|permissions)$'
 
 og_ui.roles_overview:
-  path: 'admin/config/group/roles/{entity_type_id}/{bundle}'
+  path: 'admin/config/group/roles/{entity_type_id}/{bundle_id}'
   defaults:
     _entity_list: 'og_role'
   requirements:
     _permission: 'administer group'
 
 og_ui.role_add:
-  path: 'admin/config/group/role/{entity_type}/{bundle}/add'
+  path: 'admin/config/group/roles/{entity_type_id}/{bundle_id}/add'
   defaults:
     _controller: '\Drupal\og_ui\Controller\OgRoleController::addGroupTypeRole'
     _title_callback: '\Drupal\og_ui\Form\OgRoleForm::addRoleTitleCallback'
@@ -57,7 +57,7 @@ entity.og_role.delete_form:
     _entity_access: 'og_role.delete'
 
 og_ui.permissions_overview:
-  path: 'admin/config/group/permissions/{entity_type}/{bundle}'
+  path: 'admin/config/group/permissions/{entity_type_id}/{bundle_id}'
   defaults:
     _form: '\Drupal\og_ui\Form\OgPermissionsForm'
     _title_callback: '\Drupal\og_ui\Form\OgPermissionsForm::titleCallback'
@@ -65,7 +65,7 @@ og_ui.permissions_overview:
     _permission: 'administer group'
 
 og_ui.permissions_edit_form:
-  path: 'admin/config/group/permissions/{entity_type}/{bundle}/{role_name}'
+  path: 'admin/config/group/permissions/{entity_type_id}/{bundle_id}/{role_name}'
   defaults:
     _form: '\Drupal\og_ui\Form\OgRolePermissionsForm'
     _title_callback: '\Drupal\og_ui\Form\OgRolePermissionsForm::rolePermissionTitleCallback'

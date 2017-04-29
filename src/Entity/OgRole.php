@@ -42,10 +42,10 @@ use Drupal\user\Entity\Role;
  *     "weight" = "weight"
  *   },
  *   links = {
- *     "add-form" = "/admin/config/group/role/{entity_type}/{bundle}/add",
+ *     "collection" = "/admin/config/group/roles/{entity_type_id}/{bundle_id}",
+ *     "add-form" = "/admin/config/group/roles/{entity_type_id}/{bundle_id}/add",
  *     "edit-form" = "/admin/config/group/role/{og_role}/edit",
  *     "delete-form" = "/admin/config/group/role/{og_role}/delete",
- *     "collection" = "/admin/config/group/roles/{entity_type_id}/{bundle}",
  *   },
  *   config_export = {
  *     "id",
