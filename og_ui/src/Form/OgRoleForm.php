@@ -78,7 +78,7 @@ class OgRoleForm extends EntityForm {
    * @param string $role_name
    *   The role name.
    *
-   * @return OgRole|NULL
+   * @return \Drupal\og\Entity\OgRole|null
    *   The OG role if it exists. NULL otherwise.
    */
   public function exists($role_name) {
