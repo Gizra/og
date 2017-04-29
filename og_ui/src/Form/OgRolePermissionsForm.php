@@ -24,12 +24,19 @@ class OgRolePermissionsForm extends OgPermissionsForm {
    *   The group entity type id.
    * @param string $bundle
    *   The group bundle id.
+   * @param string $role_name
+   *   The group role name.
    *
    * @return \Drupal\Core\StringTranslation\TranslatableMarkup
    *   The role permission form title.
    */
-  public function rolePermissionTitleCallback($entity_type, $bundle, $og_role) {
-    $role = OgRole::load($og_role);
+  public function rolePermissionTitleCallback($entity_type, $bundle, $role_name) {
+    $role_id = implode('-', [
+      $entity_type,
+      $bundle,
+      $role_name,
+    ]);
+    $role = OgRole::load($role_id);
     return $this->t('@bundle roles - @role permissions', [
       '@bundle' => $this->entityTypeBundleInfo->getBundleInfo($entity_type)[$bundle]['label'],
       '@role' => $role->getLabel(),
@@ -47,15 +54,22 @@ class OgRolePermissionsForm extends OgPermissionsForm {
    *   The group entity type id.
    * @param string $bundle
    *   The group bundle id.
-   * @param string $og_role
-   *   The group role id.
+   * @param string $role_name
+   *   The group role name.
    *
    * @return array
    *   The form structure.
    */
-  public function buildForm(array $form, FormStateInterface $form_state, $entity_type = '', $bundle = '', $og_role = '') {
-    $role = OgRole::load($og_role);
-    $this->roles = [$role->id() => $role];
+  public function buildForm(array $form, FormStateInterface $form_state, $entity_type = '', $bundle = '', $role_name = '') {
+    $role_id = implode('-', [
+      $entity_type,
+      $bundle,
+      $role_name,
+    ]);
+
+    if ($role = OgRole::load($role_id)) {
+      $this->roles = [$role->id() => $role];
+    }
 
     return parent::buildForm($form, $form_state, $entity_type, $bundle);
   }
