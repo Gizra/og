@@ -179,8 +179,11 @@ class OgPermissionsForm extends FormBase {
 
     $permissions_by_provider = [
       'Group' => $group_permissions,
-      'Group content' => $group_content_permissions,
     ];
+
+    if (!empty($group_content_permissions)) {
+      $permissions_by_provider['Group content'] = $group_content_permissions;
+    }
 
     foreach ($permissions_by_provider as $provider => $permissions) {
       // Provider.
