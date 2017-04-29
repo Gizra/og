@@ -125,7 +125,7 @@ class OgRoleListBuilder extends DraggableListBuilder {
       'url' => Url::fromRoute('og_ui.permissions_edit_form', [
         'entity_type' => $this->groupType,
         'bundle' => $this->groupBundle,
-        'og_role' => $role->id(),
+        'role_name' => $role->getName(),
       ]),
     ];
 

@@ -64,10 +64,8 @@ og_ui.permissions_overview:
   requirements:
     _permission: 'administer group'
 
-# Todo: the {og_role} parameter could use being the simple form
-#       i.e. administrator instead of entity_type-bundle-role
 og_ui.permissions_edit_form:
-  path: 'admin/config/group/permissions/{entity_type}/{bundle}/{og_role}'
+  path: 'admin/config/group/permissions/{entity_type}/{bundle}/{role_name}'
   defaults:
     _form: '\Drupal\og_ui\Form\OgRolePermissionsForm'
     _title_callback: '\Drupal\og_ui\Form\OgRolePermissionsForm::rolePermissionTitleCallback'
