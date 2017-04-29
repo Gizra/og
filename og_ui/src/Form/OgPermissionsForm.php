@@ -10,7 +10,7 @@ use Drupal\og\Og;
 use Drupal\og\OgRoleManagerInterface;
 use Drupal\og\PermissionManagerInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
-use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 /**
  * Provide the group permissions form.
@@ -142,9 +142,9 @@ class OgPermissionsForm extends FormBase {
    *   The form structure.
    */
   public function buildForm(array $form, FormStateInterface $form_state, $entity_type = '', $bundle = '') {
+    // Return a 404 error when this is not a group.
     if (!Og::isGroup($entity_type, $bundle)) {
-      // Not a valid entity.
-      throw new AccessDeniedHttpException();
+      throw new NotFoundHttpException();
     }
 
     // Render the link for hiding descriptions.
