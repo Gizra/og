@@ -17,8 +17,8 @@ class OgRoleDeleteForm extends EntityDeleteForm {
     $entity = $this->getEntity();
 
     return Url::fromRoute('og_ui.roles_overview', [
-      'entity_type' => $entity->group_type,
-      'bundle' => $entity->group_bundle,
+      'entity_type_id' => $entity->group_type,
+      'bundle_id' => $entity->group_bundle,
     ]);
   }
 

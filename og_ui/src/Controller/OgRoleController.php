@@ -15,22 +15,22 @@ class OgRoleController extends ControllerBase implements ContainerInjectionInter
   /**
    * Form constructor for OgRole add form.
    *
-   * @param string $entity_type
+   * @param string $entity_type_id
    *   Group type.
-   * @param string $bundle
+   * @param string $bundle_id
    *   Group bundle.
    *
    * @return array
    *   An associative array containing:
    *   - og_role_form: The og_role form as a renderable array.
    */
-  public function addGroupTypeRole($entity_type, $bundle) {
+  public function addGroupTypeRole($entity_type_id, $bundle_id) {
     $build['#title'] = $this->t('Create New Role');
 
     // Show the actual reply box.
     $og_role = $this->entityTypeManager()->getStorage('og_role')->create([
-      'group_type' => $entity_type,
-      'group_bundle' => $bundle,
+      'group_type' => $entity_type_id,
+      'group_bundle' => $bundle_id,
     ]);
     $build['og_role_form'] = $this->entityFormBuilder()->getForm($og_role);
 

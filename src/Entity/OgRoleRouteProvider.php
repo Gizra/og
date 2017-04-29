@@ -15,8 +15,8 @@ class OgRoleRouteProvider extends AdminHtmlRouteProvider {
    */
   protected function getAddFormRoute(EntityTypeInterface $entity_type) {
     if ($route = parent::getAddFormRoute($entity_type)) {
-      $route->setOption('parameters', ['entity_type' => ['type' => 'entity:{entity_type}']])
-        ->setOption('parameters', ['bundle' => ['type' => '{entity_type}:{bundle}']]);
+      $route->setOption('parameters', ['entity_type_id' => ['type' => 'entity:{entity_type_id}']])
+        ->setOption('parameters', ['bundle_id' => ['type' => '{entity_type}:{bundle_id}']]);
       return $route;
     }
   }

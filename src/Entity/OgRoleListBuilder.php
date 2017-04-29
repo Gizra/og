@@ -66,8 +66,8 @@ class OgRoleListBuilder extends DraggableListBuilder {
       if ($parameters->has('entity_type_id')) {
         $this->groupType = $parameters->get('entity_type_id');
       }
-      if ($parameters->has('bundle')) {
-        $this->groupBundle = $parameters->get('bundle');
+      if ($parameters->has('bundle_id')) {
+        $this->groupBundle = $parameters->get('bundle_id');
       }
     }
   }
@@ -123,8 +123,8 @@ class OgRoleListBuilder extends DraggableListBuilder {
       'title' => t('Edit permissions'),
       'weight' => 20,
       'url' => Url::fromRoute('og_ui.permissions_edit_form', [
-        'entity_type' => $this->groupType,
-        'bundle' => $this->groupBundle,
+        'entity_type_id' => $this->groupType,
+        'bundle_id' => $this->groupBundle,
         'role_name' => $role->getName(),
       ]),
     ];
@@ -154,8 +154,8 @@ class OgRoleListBuilder extends DraggableListBuilder {
     $build = parent::render();
     $build['entities']['#empty'] = $this->t('There are no OG roles available yet. <a href="@link">Add an OG role</a>.', [
       '@link' => Url::fromRoute('entity.og_role.add_form', [
-        'entity_type' => $this->groupType,
-        'bundle' => $this->groupBundle,
+        'entity_type_id' => $this->groupType,
+        'bundle_id' => $this->groupBundle,
       ])->toString(),
     ]);
 

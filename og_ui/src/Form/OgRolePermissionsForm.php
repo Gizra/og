@@ -20,9 +20,9 @@ class OgRolePermissionsForm extends OgPermissionsForm {
   /**
    * Title callback for the roles overview page.
    *
-   * @param string $entity_type
+   * @param string $entity_type_id
    *   The group entity type id.
-   * @param string $bundle
+   * @param string $bundle_id
    *   The group bundle id.
    * @param string $role_name
    *   The group role name.
@@ -30,15 +30,15 @@ class OgRolePermissionsForm extends OgPermissionsForm {
    * @return \Drupal\Core\StringTranslation\TranslatableMarkup
    *   The role permission form title.
    */
-  public function rolePermissionTitleCallback($entity_type, $bundle, $role_name) {
+  public function rolePermissionTitleCallback($entity_type_id, $bundle_id, $role_name) {
     $role_id = implode('-', [
-      $entity_type,
-      $bundle,
+      $entity_type_id,
+      $bundle_id,
       $role_name,
     ]);
     $role = OgRole::load($role_id);
     return $this->t('@bundle roles - @role permissions', [
-      '@bundle' => $this->entityTypeBundleInfo->getBundleInfo($entity_type)[$bundle]['label'],
+      '@bundle' => $this->entityTypeBundleInfo->getBundleInfo($entity_type_id)[$bundle_id]['label'],
       '@role' => $role->getLabel(),
     ]);
   }
@@ -50,9 +50,9 @@ class OgRolePermissionsForm extends OgPermissionsForm {
    *   An associative array containing the structure of the form.
    * @param \Drupal\Core\Form\FormStateInterface $form_state
    *   The current state of the form.
-   * @param string $entity_type
+   * @param string $entity_type_id
    *   The group entity type id.
-   * @param string $bundle
+   * @param string $bundle_id
    *   The group bundle id.
    * @param string $role_name
    *   The group role name.
@@ -60,10 +60,10 @@ class OgRolePermissionsForm extends OgPermissionsForm {
    * @return array
    *   The form structure.
    */
-  public function buildForm(array $form, FormStateInterface $form_state, $entity_type = '', $bundle = '', $role_name = '') {
+  public function buildForm(array $form, FormStateInterface $form_state, $entity_type_id = '', $bundle_id = '', $role_name = '') {
     $role_id = implode('-', [
-      $entity_type,
-      $bundle,
+      $entity_type_id,
+      $bundle_id,
       $role_name,
     ]);
 
@@ -71,7 +71,7 @@ class OgRolePermissionsForm extends OgPermissionsForm {
       $this->roles = [$role->id() => $role];
     }
 
-    return parent::buildForm($form, $form_state, $entity_type, $bundle);
+    return parent::buildForm($form, $form_state, $entity_type_id, $bundle_id);
   }
 
 }
