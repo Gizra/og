@@ -25,14 +25,18 @@ class OgRoleForm extends EntityForm {
    * {@inheritdoc}
    */
   public function buildForm(array $form, FormStateInterface $form_state, $entity_type_id = '', $bundle_id = '') {
-    // Return a 404 error when this is not a group.
-    if (!Og::isGroup($entity_type_id, $bundle_id)) {
-      throw new NotFoundHttpException();
+    $og_role = $this->entity;
+
+    if ($og_role->isNew()) {
+      // Return a 404 error when this is not a group.
+      if (!Og::isGroup($entity_type_id, $bundle_id)) {
+        throw new NotFoundHttpException();
+      }
+
+      $og_role->setGroupType($entity_type_id);
+      $og_role->setGroupBundle($bundle_id);
     }
 
-    $og_role = $this->entity;
-    $og_role->setGroupType($entity_type_id);
-    $og_role->setGroupBundle($bundle_id);
 
     $form['label'] = [
       '#type' => 'textfield',
