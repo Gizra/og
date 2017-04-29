@@ -53,7 +53,6 @@ entity.og_role.delete_form:
   path: 'admin/config/group/role/{og_role}/delete'
   defaults:
     _entity_form: og_role.delete
-    _title_callback: '\Drupal\og_ui\Form\OgRoleForm::editRoleTitleCallback'
   requirements:
     _entity_access: 'og_role.delete'
 

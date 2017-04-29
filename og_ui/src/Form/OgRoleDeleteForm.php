@@ -14,11 +14,12 @@ class OgRoleDeleteForm extends EntityDeleteForm {
    * {@inheritdoc}
    */
   public function getCancelUrl() {
-    $entity = $this->getEntity();
+    /** @var \Drupal\og\Entity\OgRole $role */
+    $role = $this->getEntity();
 
-    return Url::fromRoute('og_ui.roles_overview', [
-      'entity_type_id' => $entity->group_type,
-      'bundle_id' => $entity->group_bundle,
+    return Url::fromRoute('entity.og_role.collection', [
+      'entity_type_id' => $role->getGroupType(),
+      'bundle_id' => $role->getGroupBundle(),
     ]);
   }
 

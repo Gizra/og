@@ -5,7 +5,9 @@ namespace Drupal\og_ui\Form;
 use Drupal\Core\Entity\EntityForm;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\og\Entity\OgRole;
+use Drupal\og\Og;
 use Drupal\og\OgRoleInterface;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 /**
  * Form to add or edit an OG role.
@@ -22,8 +24,16 @@ class OgRoleForm extends EntityForm {
   /**
    * {@inheritdoc}
    */
-  public function form(array $form, FormStateInterface $form_state) {
+  public function buildForm(array $form, FormStateInterface $form_state, $entity_type_id = '', $bundle_id = '') {
+    // Return a 404 error when this is not a group.
+    if (!Og::isGroup($entity_type_id, $bundle_id)) {
+      throw new NotFoundHttpException();
+    }
+
     $og_role = $this->entity;
+    $og_role->setGroupType($entity_type_id);
+    $og_role->setGroupBundle($bundle_id);
+
     $form['label'] = [
       '#type' => 'textfield',
       '#title' => $this->t('Role name'),
@@ -56,7 +66,7 @@ class OgRoleForm extends EntityForm {
       '#value' => OgRoleInterface::ROLE_TYPE_STANDARD,
     ];
 
-    return parent::form($form, $form_state, $og_role);
+    return parent::buildForm($form, $form_state, $og_role);
   }
 
   /**
@@ -102,7 +112,8 @@ class OgRoleForm extends EntityForm {
       drupal_set_message($this->t('OG role %label has been added.', ['%label' => $og_role->label()]));
       $this->logger('user')->notice('OG role %label has been added.', ['%label' => $og_role->label(), 'link' => $edit_link]);
     }
-    $form_state->setRedirect('og_ui.roles_overview', [
+    // Cannot use $og_role->url() because we need to pass mandatory parameters.
+    $form_state->setRedirect('entity.og_role.collection', [
       'entity_type_id' => $og_role->getGroupType(),
       'bundle_id' => $og_role->getGroupBundle(),
     ]);
