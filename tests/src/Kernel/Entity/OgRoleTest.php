@@ -95,10 +95,9 @@ class OgRoleTest extends KernelTestBase {
       ->setLabel('Content editor')
       ->setGroupType('entity_test')
       ->setGroupBundle('group')
-      ->setGroupID(1)
       ->save();
 
-    $this->assertEquals('entity_test-group-1-content_editor', $og_role->id());
+    $this->assertEquals('entity_test-group-content_editor', $og_role->id());
 
     // Confirm role can be re-saved.
     $og_role->save();
@@ -119,7 +118,6 @@ class OgRoleTest extends KernelTestBase {
         ->setLabel('Content editor')
         ->setGroupType('entity_test')
         ->setGroupBundle('group')
-        ->setGroupID(1)
         ->save();
 
       $this->fail('OG role with the same ID on the same group can be saved.');
