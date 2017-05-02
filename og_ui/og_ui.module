@@ -40,23 +40,6 @@ function og_ui_entity_update(EntityInterface $entity) {
 }
 
 /**
- * Implements hook_entity_delete().
- */
-function og_ui_entity_delete(EntityInterface $entity) {
-  if (!$entity instanceof ConfigEntityBundleBase) {
-    return;
-  }
-  $bundle = $entity->id();
-  $definition = \Drupal::entityTypeManager()->getDefinition($entity->getEntityTypeId());
-  $entity_type_id = $definition->getBundleOf();
-
-  // Add/remove the group itself.
-  if (Og::isGroup($entity_type_id, $bundle)) {
-    Og::groupTypeManager()->removeGroup($entity_type_id, $bundle);
-  }
-}
-
-/**
  * Helper to save group information.
  *
  * @param \Drupal\Core\Entity\EntityInterface $entity
