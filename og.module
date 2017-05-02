@@ -7,6 +7,7 @@
 
 use Drupal\Core\Access\AccessResult;
 use Drupal\Core\Cache\Cache;
+use Drupal\Core\Config\Entity\ConfigEntityBundleBase;
 use Drupal\Core\Entity\ContentEntityInterface;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Entity\EntityTypeInterface;
@@ -92,6 +93,16 @@ function og_entity_delete(EntityInterface $entity) {
   // Clear static caches after a group or group content entity is deleted.
   if (Og::isGroup($entity->getEntityTypeId(), $entity->bundle()) || Og::isGroupContent($entity->getEntityTypeId(), $entity->bundle())) {
     Og::invalidateCache();
+  }
+
+  // If a group content type is deleted, make sure to remove it from the list of
+  // groups.
+  if ($entity instanceof ConfigEntityBundleBase) {
+    $bundle = $entity->id();
+    $entity_type_id = \Drupal::entityTypeManager()->getDefinition($entity->getEntityTypeId())->getBundleOf();
+    if (Og::isGroup($entity_type_id, $bundle)) {
+      Og::groupTypeManager()->removeGroup($entity_type_id, $bundle);
+    }
   }
 }
 
