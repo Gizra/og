@@ -45,6 +45,13 @@ class OgRoleTest extends KernelTestBase {
   protected $roleStorage;
 
   /**
+   * Test group types.
+   *
+   * @var \Drupal\Core\Config\Entity\ConfigEntityBundleBase[]
+   */
+  protected $groupTypes;
+
+  /**
    * {@inheritdoc}
    */
   protected function setUp() {
@@ -59,8 +66,10 @@ class OgRoleTest extends KernelTestBase {
 
     // Create two test group types.
     $values = ['type' => 'group', 'name' => 'Group'];
-    NodeType::create($values)->save();
-    EntityTest::create($values)->save();
+    $this->groupTypes['node'] = NodeType::create($values);
+    $this->groupTypes['node']->save();
+    $this->groupTypes['entity_test'] = EntityTest::create($values);
+    $this->groupTypes['entity_test']->save();
   }
 
   /**
@@ -197,12 +206,14 @@ class OgRoleTest extends KernelTestBase {
       $this->assertTrue(TRUE, "OG role with a non-matching ID can not be saved.");
     }
 
-    // We have created two roles for the content editor. When both of these are
-    // deleted the two actions should also be deleted.
-    OgRole::getRole('node', 'group', 'content_editor')->delete();
+    // Delete the first group type. Doing this should automatically delete the
+    // role that depends on the group type. The actions should still be present
+    // since there still is one role left that references this role name.
+    $this->groupTypes['node']->delete();
 
-    // One of the two content editor roles is deleted. The actions should still
-    // be present since there still is one role left.
+    $role = OgRole::getRole('node', 'group', 'content_editor');
+    $this->assertEmpty($role);
+
     foreach ($action_ids as $action_id) {
       $action = $this->actionStorage->loadUnchanged($action_id);
       $this->assertEquals($action_id, $action->id());
