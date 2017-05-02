@@ -91,29 +91,6 @@ class OgRole extends Role implements OgRoleInterface {
   }
 
   /**
-   * Returns the group ID.
-   *
-   * @return int
-   *   The group ID.
-   */
-  public function getGroupId() {
-    return $this->get('group_id');
-  }
-
-  /**
-   * Sets the group ID.
-   *
-   * @param int $group_id
-   *   The group ID to set.
-   *
-   * @return $this
-   */
-  public function setGroupId($group_id) {
-    $this->set('group_id', $group_id);
-    return $this;
-  }
-
-  /**
    * Returns the group type.
    *
    * @return string
@@ -255,10 +232,6 @@ class OgRole extends Role implements OgRoleInterface {
       // When assigning a role to group we need to add a prefix to the ID in
       // order to prevent duplicate IDs.
       $prefix = $this->getGroupType() . '-' . $this->getGroupBundle() . '-';
-
-      if ($this->getGroupId()) {
-        $prefix .= $this->getGroupId() . '-';
-      }
 
       $this->setId($prefix . $this->getName());
     }
