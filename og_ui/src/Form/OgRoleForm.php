@@ -37,7 +37,6 @@ class OgRoleForm extends EntityForm {
       $og_role->setGroupBundle($bundle_id);
     }
 
-
     $form['label'] = [
       '#type' => 'textfield',
       '#title' => $this->t('Role name'),
@@ -87,13 +86,7 @@ class OgRoleForm extends EntityForm {
    */
   public function exists($role_name) {
     $og_role = $this->entity;
-    $role_id = implode('-', [
-      $og_role->getGroupType(),
-      $og_role->getGroupBundle(),
-      $role_name,
-    ]);
-
-    return OgRole::load($role_id);
+    return OgRole::getRole($og_role->getGroupType(), $og_role->getGroupBundle(), $role_name);
   }
 
   /**
