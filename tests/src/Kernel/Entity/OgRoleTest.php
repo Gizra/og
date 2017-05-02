@@ -4,9 +4,12 @@ namespace Drupal\Tests\og\Kernel\Entity;
 
 use Drupal\Core\Config\ConfigValueException;
 use Drupal\Core\Entity\EntityStorageException;
+use Drupal\entity_test\Entity\EntityTest;
 use Drupal\KernelTests\KernelTestBase;
+use Drupal\node\Entity\NodeType;
 use Drupal\og\Entity\OgRole;
 use Drupal\og\Exception\OgRoleException;
+use Drupal\system\Entity\Action;
 
 /**
  * Test OG role creation.
@@ -18,7 +21,21 @@ class OgRoleTest extends KernelTestBase {
   /**
    * {@inheritdoc}
    */
-  public static $modules = ['field', 'og', 'system', 'user'];
+  public static $modules = [
+    'entity_test',
+    'field',
+    'node',
+    'og',
+    'system',
+    'user',
+  ];
+
+  /**
+   * The entity storage handler for Action entities.
+   *
+   * @var \Drupal\Core\Entity\EntityStorageInterface
+   */
+  protected $actionStorage;
 
   /**
    * The entity storage handler for OgRole entities.
@@ -35,8 +52,15 @@ class OgRoleTest extends KernelTestBase {
 
     // Installing needed schema.
     $this->installConfig(['og']);
+    $this->installEntitySchema('entity_test');
 
+    $this->actionStorage = $this->container->get('entity_type.manager')->getStorage('action');
     $this->roleStorage = $this->container->get('entity_type.manager')->getStorage('og_role');
+
+    // Create two test group types.
+    $values = ['type' => 'group', 'name' => 'Group'];
+    NodeType::create($values)->save();
+    EntityTest::create($values)->save();
   }
 
   /**
@@ -70,6 +94,19 @@ class OgRoleTest extends KernelTestBase {
 
     // Checking creation of the role.
     $this->assertEquals($og_role->getPermissions(), ['administer group']);
+
+    // When a role is created the two accompanying actions to add or remove this
+    // role to a membership should also be created.
+    $action_ids = [
+      'og_membership_add_role_action.content_editor',
+      'og_membership_remove_role_action.content_editor',
+    ];
+    /** @var \Drupal\Core\Action\ActionInterface[] $actions */
+    $actions = Action::loadMultiple($action_ids);
+    foreach ($action_ids as $action_id) {
+      $this->assertTrue(array_key_exists($action_id, $actions));
+      $this->assertEquals($action_id, $actions[$action_id]->id());
+    }
 
     // Try to create the same role again.
     try {
@@ -158,6 +195,26 @@ class OgRoleTest extends KernelTestBase {
     }
     catch (ConfigValueException $e) {
       $this->assertTrue(TRUE, "OG role with a non-matching ID can not be saved.");
+    }
+
+    // We have created two roles for the content editor. When both of these are
+    // deleted the two actions should also be deleted.
+    OgRole::getRole('node', 'group', 'content_editor')->delete();
+
+    // One of the two content editor roles is deleted. The actions should still
+    // be present since there still is one role left.
+    foreach ($action_ids as $action_id) {
+      $action = $this->actionStorage->loadUnchanged($action_id);
+      $this->assertEquals($action_id, $action->id());
+    }
+
+    // Delete the last role that references the content editor. Now the two
+    // actions should also be deleted.
+    OgRole::getRole('entity_test', 'group', 'content_editor')->delete();
+
+    foreach ($action_ids as $action_id) {
+      $action = $this->actionStorage->loadUnchanged($action_id);
+      $this->assertEmpty($action);
     }
   }
 
