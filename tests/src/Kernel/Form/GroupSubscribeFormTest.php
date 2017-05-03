@@ -5,6 +5,7 @@ namespace Drupal\Tests\og\Kernel\Form;
 use Drupal\Component\Utility\Unicode;
 use Drupal\KernelTests\KernelTestBase;
 use Drupal\node\Entity\Node;
+use Drupal\node\Entity\NodeType;
 use Drupal\og\Entity\OgMembership;
 use Drupal\og\Entity\OgRole;
 use Drupal\og\Og;
@@ -37,7 +38,6 @@ class GroupSubscribeFormTest extends KernelTestBase {
    * @var \Drupal\user\Entity\User
    */
   protected $user1;
-
 
   /**
    * A group entity.
@@ -72,15 +72,14 @@ class GroupSubscribeFormTest extends KernelTestBase {
     $this->installEntitySchema('node');
     $this->installSchema('system', 'sequences');
 
-    // Create bundles.
-    $groupBundle1 = Unicode::strtolower($this->randomMachineName());
-    $groupBundle2 = Unicode::strtolower($this->randomMachineName());
-    $groupBundle3 = Unicode::strtolower($this->randomMachineName());
-
-    // Define the entities as groups.
-    Og::groupTypeManager()->addGroup('node', $groupBundle1);
-    Og::groupTypeManager()->addGroup('node', $groupBundle2);
-    Og::groupTypeManager()->addGroup('node', $groupBundle3);
+    // Create 3 test bundles and declare them as groups.
+    $bundle_names = [];
+    for ($i = 0; $i < 3; $i++) {
+      $bundle_name = Unicode::strtolower($this->randomMachineName());
+      NodeType::create(['type' => $bundle_name])->save();
+      Og::groupTypeManager()->addGroup('node', $bundle_name);
+      $bundle_names[] = $bundle_name;
+    }
 
     // Create node author user.
     $user = User::create(['name' => $this->randomString()]);
@@ -88,14 +87,14 @@ class GroupSubscribeFormTest extends KernelTestBase {
 
     // Create groups.
     $this->group1 = Node::create([
-      'type' => $groupBundle1,
+      'type' => $bundle_names[0],
       'title' => $this->randomString(),
       'uid' => $user->id(),
     ]);
     $this->group1->save();
 
     $this->group2 = Node::create([
-      'type' => $groupBundle2,
+      'type' => $bundle_names[1],
       'title' => $this->randomString(),
       'uid' => $user->id(),
     ]);
@@ -103,7 +102,7 @@ class GroupSubscribeFormTest extends KernelTestBase {
 
     // Create an unpublished node, so users won't have access to it.
     $this->group3 = Node::create([
-      'type' => $groupBundle3,
+      'type' => $bundle_names[2],
       'title' => $this->randomString(),
       'uid' => $user->id(),
       'status' => NODE_NOT_PUBLISHED,
@@ -112,24 +111,23 @@ class GroupSubscribeFormTest extends KernelTestBase {
 
     // Change the permissions of group to "subscribe".
     /** @var \Drupal\og\Entity\OgRole $role */
-    $role = OgRole::getRole('node', $groupBundle1, OgRoleInterface::ANONYMOUS);
+    $role = OgRole::getRole('node', $bundle_names[0], OgRoleInterface::ANONYMOUS);
     $role
       ->grantPermission('subscribe')
       ->save();
 
     // Change the permissions of group to allow "subscribe without approval".
-    $role = OgRole::getRole('node', $groupBundle2, OgRoleInterface::ANONYMOUS);
+    $role = OgRole::getRole('node', $bundle_names[1], OgRoleInterface::ANONYMOUS);
     $role
       ->grantPermission('subscribe without approval')
       ->save();
 
     // Change the permissions of group to allow "subscribe without approval" on
     // the unpublished node.
-    $role = OgRole::getRole('node', $groupBundle3, OgRoleInterface::ANONYMOUS);
+    $role = OgRole::getRole('node', $bundle_names[2], OgRoleInterface::ANONYMOUS);
     $role
       ->grantPermission('subscribe without approval')
       ->save();
-
   }
 
   /**

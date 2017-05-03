@@ -4,7 +4,9 @@ namespace Drupal\Tests\og\Kernel\Entity;
 
 use Drupal\Core\Config\ConfigValueException;
 use Drupal\Core\Entity\EntityStorageException;
+use Drupal\entity_test\Entity\EntityTest;
 use Drupal\KernelTests\KernelTestBase;
+use Drupal\node\Entity\NodeType;
 use Drupal\og\Entity\OgRole;
 use Drupal\og\Exception\OgRoleException;
 
@@ -18,7 +20,14 @@ class OgRoleTest extends KernelTestBase {
   /**
    * {@inheritdoc}
    */
-  public static $modules = ['field', 'og'];
+  public static $modules = [
+    'entity_test',
+    'field',
+    'node',
+    'og',
+    'system',
+    'user',
+  ];
 
   /**
    * The entity storage handler for OgRole entities.
@@ -35,8 +44,14 @@ class OgRoleTest extends KernelTestBase {
 
     // Installing needed schema.
     $this->installConfig(['og']);
+    $this->installEntitySchema('entity_test');
 
     $this->roleStorage = $this->container->get('entity_type.manager')->getStorage('og_role');
+
+    // Create two test group types.
+    $values = ['type' => 'group', 'name' => 'Group'];
+    NodeType::create($values)->save();
+    EntityTest::create($values)->save();
   }
 
   /**
