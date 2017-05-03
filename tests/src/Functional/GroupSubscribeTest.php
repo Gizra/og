@@ -4,6 +4,7 @@ namespace Drupal\Tests\og\Functional;
 
 use Drupal\Component\Utility\Unicode;
 use Drupal\node\Entity\Node;
+use Drupal\node\Entity\NodeType;
 use Drupal\og\Entity\OgMembershipType;
 use Drupal\og\Entity\OgRole;
 use Drupal\og\Og;
@@ -93,12 +94,14 @@ class GroupSubscribeTest extends BrowserTestBase {
     parent::setUp();
 
     // Create bundles.
-    // We don't need to later call NodeType::create() on the bundles, as we
-    // don't call the node view.
     $this->groupBundle1 = Unicode::strtolower($this->randomMachineName());
+    NodeType::create(['type' => $this->groupBundle1])->save();
     $this->groupBundle2 = Unicode::strtolower($this->randomMachineName());
+    NodeType::create(['type' => $this->groupBundle2])->save();
     $this->nonGroupBundle = Unicode::strtolower($this->randomMachineName());
+    NodeType::create(['type' => $this->nonGroupBundle])->save();
     $this->membershipTypeBundle = Unicode::strtolower($this->randomMachineName());
+    NodeType::create(['type' => $this->membershipTypeBundle])->save();
 
     // Define the entities as groups.
     Og::groupTypeManager()->addGroup('node', $this->groupBundle1);

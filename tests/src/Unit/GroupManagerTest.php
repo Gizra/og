@@ -309,8 +309,6 @@ class GroupManagerTest extends UnitTestCase {
       ->willReturn($groups_after)
       ->shouldBeCalled();
 
-    $this->ogRoleManager->removeRoles('test_entity', 'b')->shouldBeCalled();
-
     $manager = $this->createGroupManager();
 
     // Add to existing.
