@@ -124,7 +124,7 @@ abstract class ChangeOgMembershipRoleBase extends ConfigurableActionBase impleme
     // Grant access if the user can manage members in this group.
     $membership = $this->membershipManager->getMembership($object->getGroup(), $account);
     if ($membership) {
-      $access->orIf(AccessResult::allowedIf($membership->hasPermission('manage members')));
+      $access = $access->orIf(AccessResult::allowedIf($membership->hasPermission('manage members')));
     }
 
     return $return_as_object ? $access : $access->isAllowed();

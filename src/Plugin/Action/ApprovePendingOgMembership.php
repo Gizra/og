@@ -79,11 +79,13 @@ class ApprovePendingOgMembership extends ActionBase implements ContainerFactoryP
     // Grant access if the user can manage members in this group.
     $membership = $this->membershipManager->getMembership($object->getGroup(), $account);
     if ($membership) {
-      $access->orIf(AccessResult::allowedIf($membership->hasPermission('manage members')));
+      $access = $access->orIf(AccessResult::allowedIf($membership->hasPermission('manage members')));
     }
 
     // Deny access if the membership is not in pending state.
-    $access->andIf(AccessResult::forbiddenIf($object->getState() !== OgMembershipInterface::STATE_PENDING));
+    if ($object->getState() !== OgMembershipInterface::STATE_PENDING) {
+      $access = AccessResult::forbidden();
+    }
 
     return $return_as_object ? $access : $access->isAllowed();
   }
