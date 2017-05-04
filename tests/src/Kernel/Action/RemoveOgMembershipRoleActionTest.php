@@ -5,17 +5,17 @@ namespace Drupal\Tests\og\Kernel\Action;
 use Drupal\og\Entity\OgRole;
 
 /**
- * Tests the AddOgMembershipRole action plugin.
+ * Tests the RemoveOgMembershipRole action plugin.
  *
  * @group og
- * @coversDefaultClass \Drupal\og\Plugin\Action\AddOgMembershipRole
+ * @coversDefaultClass \Drupal\og\Plugin\Action\RemoveOgMembershipRole
  */
-class AddOgMembershipRoleActionTest extends ChangeOgMembershipActionTestBase {
+class RemoveOgMembershipRoleActionTest extends ChangeOgMembershipActionTestBase {
 
   /**
    * {@inheritdoc}
    */
-  protected $plugin_id = 'og_membership_add_role_action';
+  protected $plugin_id = 'og_membership_remove_role_action';
 
   /**
    * Checks if the action can be performed correctly.
@@ -26,7 +26,7 @@ class AddOgMembershipRoleActionTest extends ChangeOgMembershipActionTestBase {
    *   The name of the role that is used by default by the action plugin, if no
    *   other role has been configured through the UI.
    * @param string $expected_role_name
-   *   The name of the role that is expected to be present on the membership
+   *   The name of the role that is expected to be removed from the membership
    *   after the action has been executed.
    *
    * @covers ::execute
@@ -41,43 +41,22 @@ class AddOgMembershipRoleActionTest extends ChangeOgMembershipActionTestBase {
     $has_role = (bool) array_filter($this->memberships[$membership]->getRoles(), function (OgRole $role) use ($expected_role_name) {
       return $role->getName() === $expected_role_name;
     });
-    $this->assertTrue($has_role);
+    $this->assertFalse($has_role);
   }
 
   /**
    * Data provider for testExecute().
    */
   public function executeProvider() {
-    // It should be possible to add roles to any membership, regardless if they
-    // are pending or blocked, or have any other membership.
     return [
       // If no default role is passed, the plugin should default to the first
       // available role (administrator).
-      ['member', NULL, 'administrator'],
-      ['member', 'administrator', 'administrator'],
-      ['member', 'moderator', 'moderator'],
-      ['pending', NULL, 'administrator'],
-      ['pending', 'administrator', 'administrator'],
-      ['pending', 'moderator', 'moderator'],
-      ['blocked', NULL, 'administrator'],
-      ['blocked', 'administrator', 'administrator'],
-      ['blocked', 'moderator', 'moderator'],
       ['group_administrator', NULL, 'administrator'],
-      // If an administrator is given the administrator role a second time, the
-      // role should be kept intact.
       ['group_administrator', 'administrator', 'administrator'],
       ['group_administrator', 'moderator', 'moderator'],
-      // If an administrator is also made a moderator, they should still keep
-      // the administrator role.
-      ['group_administrator', 'moderator', 'administrator'],
       ['group_moderator', NULL, 'administrator'],
       ['group_moderator', 'administrator', 'administrator'],
-      // If a moderator is given the moderator role a second time, the role
-      // should be kept intact.
       ['group_moderator', 'moderator', 'moderator'],
-      // If a moderator is also made an administrator, they should still keep
-      // the moderator role.
-      ['group_moderator', 'administrator', 'moderator'],
     ];
   }
 
