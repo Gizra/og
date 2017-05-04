@@ -15,14 +15,14 @@ class RemoveOgMembershipRoleActionTest extends ChangeOgMembershipActionTestBase 
   /**
    * {@inheritdoc}
    */
-  protected $plugin_id = 'og_membership_remove_role_action';
+  protected $pluginId = 'og_membership_remove_role_action';
 
   /**
    * Checks if the action can be performed correctly.
    *
    * @param string $membership
    *   The membership on which to perform the action.
-   * @param string|NULL $default_role_name
+   * @param string|null $default_role_name
    *   The name of the role that is used by default by the action plugin, if no
    *   other role has been configured through the UI.
    * @param string $expected_role_name

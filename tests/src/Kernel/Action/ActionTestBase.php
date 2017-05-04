@@ -25,7 +25,7 @@ abstract class ActionTestBase extends KernelTestBase {
    *
    * @var string
    */
-  protected $plugin_id;
+  protected $pluginId;
 
   /**
    * {@inheritdoc}
@@ -169,11 +169,12 @@ abstract class ActionTestBase extends KernelTestBase {
    *   An array of configuration relevant to the plugin instance.
    *
    * @return \Drupal\Core\Action\ActionInterface
+   *   The plugin instance.
    */
   public function getPlugin($configuration = []) {
     /** @var \Drupal\Core\Action\ActionManager $plugin_manager */
     $plugin_manager = $this->container->get('plugin.manager.action');
-    return $plugin_manager->createInstance($this->plugin_id, $configuration);
+    return $plugin_manager->createInstance($this->pluginId, $configuration);
   }
 
   /**

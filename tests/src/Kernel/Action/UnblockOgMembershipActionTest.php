@@ -15,7 +15,7 @@ class UnblockOgMembershipActionTest extends ActionTestBase {
   /**
    * {@inheritdoc}
    */
-  protected $plugin_id = 'og_membership_unblock_action';
+  protected $pluginId = 'og_membership_unblock_action';
 
   /**
    * Checks if the action can be performed correctly.

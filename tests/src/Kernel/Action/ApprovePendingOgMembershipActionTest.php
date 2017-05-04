@@ -15,7 +15,7 @@ class ApprovePendingOgMembershipActionTest extends ActionTestBase {
   /**
    * {@inheritdoc}
    */
-  protected $plugin_id = 'og_membership_approve_pending_action';
+  protected $pluginId = 'og_membership_approve_pending_action';
 
   /**
    * Checks if the action can be performed correctly.
