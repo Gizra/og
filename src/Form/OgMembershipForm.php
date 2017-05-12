@@ -2,8 +2,14 @@
 
 namespace Drupal\og\Form;
 
+use Drupal\Component\Datetime\TimeInterface;
 use Drupal\Core\Entity\ContentEntityForm;
+use Drupal\Core\Entity\EntityManagerInterface;
+use Drupal\Core\Entity\EntityTypeBundleInfoInterface;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\og\OgAccessInterface;
+use Drupal\og\OgMembershipInterface;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Form controller for the group content edit forms.
@@ -11,6 +17,42 @@ use Drupal\Core\Form\FormStateInterface;
  * @ingroup group
  */
 class OgMembershipForm extends ContentEntityForm {
+
+  /**
+   * The OG access service.
+   *
+   * @var \Drupal\og\OgAccess
+   */
+  protected $ogAccess;
+
+  /**
+   * Constructs a MessageForm object.
+   *
+   * @param \Drupal\Core\Entity\EntityManagerInterface $entity_manager
+   *   The entity manager.
+   * @param \Drupal\Core\Entity\EntityTypeBundleInfoInterface $entity_type_bundle_info
+   *   The entity type bundle service.
+   * @param \Drupal\Component\Datetime\TimeInterface $time
+   *   The time service.
+   * @param \Drupal\og\OgAccessInterface $og_access
+   *   The OG access service.
+   */
+  public function __construct(EntityManagerInterface $entity_manager, EntityTypeBundleInfoInterface $entity_type_bundle_info = NULL, TimeInterface $time = NULL, OgAccessInterface $og_access) {
+    parent::__construct($entity_manager, $entity_type_bundle_info, $time);
+    $this->ogAccess = $og_access;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public static function create(ContainerInterface $container) {
+    return new static(
+      $container->get('entity.manager'),
+      $container->get('entity_type.bundle.info'),
+      $container->get('datetime.time'),
+      $container->get('og.access')
+    );
+  }
 
   /**
    * {@inheritdoc}
@@ -26,11 +68,11 @@ class OgMembershipForm extends ContentEntityForm {
     $form['entity_type'] = ['#value' => $entity->getEntityType()->id()];
     $form['entity_id'] = ['#value' => $group->id()];
 
-    if ($entity->getType() != 'default') {
+    if ($entity->getType() != OgMembershipInterface::TYPE_DEFAULT) {
       $form['membership_type'] = [
         '#title' => $this->t('Membership type'),
         '#type' => 'item',
-        '#markup' => $entity->type->entity->label(),
+        '#plain_text' => $entity->type->entity->label(),
         '#weight' => -2,
       ];
     }
@@ -39,7 +81,7 @@ class OgMembershipForm extends ContentEntityForm {
       $form['#title'] = $this->t('Edit membership in %group', ['%group' => $group->label()]);
       $form['uid']['#access'] = FALSE;
       $form['member'] = [
-        '#title' => t('Member name'),
+        '#title' => $this->t('Member name'),
         '#type' => 'item',
         '#markup' => $entity->getUser()->getDisplayName(),
         '#weight' => -10,
@@ -47,7 +89,7 @@ class OgMembershipForm extends ContentEntityForm {
     }
 
     // Require the 'manage members' permission to be able to edit roles.
-    $form['roles']['#access'] = \Drupal::service('og.access')
+    $form['roles']['#access'] = $this->ogAccess
       ->userAccess($group, 'manage members')
       ->isAllowed();
 

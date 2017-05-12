@@ -19,13 +19,21 @@ class UniqueOgMembershipConstraintValidator extends ConstraintValidator {
       return;
     }
 
+    /* @var \Drupal\og\Entity\OgMembership $entity */
     $entity = $value->getEntity();
+
     // Only applicable to new memberships.
     if (!$entity->isNew()) {
       return;
     }
 
-    $new_member_uid = $value->getValue()[0]['target_id'];
+    // The default entity reference constraint adds a violation in this case.
+    $value = $value->getValue();
+    if (!isset($value[0]) || !isset($value[0]['target_id'])) {
+      return;
+    }
+
+    $new_member_uid = $value[0]['target_id'];
     $membership_manager = \Drupal::service('og.membership_manager');
     foreach ($membership_manager->getGroupMemberships($entity->getGroup()) as $membership) {
       if ((string) $membership->getUser()->id() === (string) $new_member_uid) {

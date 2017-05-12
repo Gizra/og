@@ -5,7 +5,7 @@ namespace Drupal\og\Form;
 use Drupal\Core\Entity\ContentEntityDeleteForm;
 
 /**
- * Provides a form for deleting a node.
+ * Provides a form for deleting an OG membership.
  */
 class OgMembershipDeleteForm extends ContentEntityDeleteForm {
 

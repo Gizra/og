@@ -2,14 +2,18 @@
 
 namespace Drupal\og\Access;
 
+use Drupal\Core\Access\AccessResult;
+use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Routing\Access\AccessInterface;
 use Drupal\Core\Routing\RouteMatchInterface;
 use Drupal\Core\Session\AccountInterface;
-use Symfony\Component\Routing\Route;
+use Drupal\og\Og;
+use Drupal\og\OgMembershipInterface;
+use Drupal\og\OgMembershipTypeInterface;
 
 /**
- * Determines access to for node add pages.
+ * Determines access to for membership add pages.
  */
 class OgMembershipAddAccessCheck implements AccessInterface {
 
@@ -37,31 +41,37 @@ class OgMembershipAddAccessCheck implements AccessInterface {
    *   The parametrized route.
    * @param \Drupal\Core\Session\AccountInterface $account
    *   The currently logged in account.
+   * @param \Drupal\Core\Entity\EntityInterface $group
+   *   The group entity.
+   * @param \Drupal\og\OgMembershipTypeInterface $og_membership_type
+   *   The membership type entity.
    *
    * @return \Drupal\Core\Access\AccessResultInterface
    *   The access result.
    */
-  public function access(Route $route, RouteMatchInterface $route_match, AccountInterface $account) {
-    $og_membership_type = $route_match->getParameter('membership_type');
-    if (is_object($og_membership_type)) {
-      $og_membership_type = $og_membership_type->id();
+  public function access(RouteMatchInterface $route_match, AccountInterface $account, EntityInterface $group = NULL, OgMembershipTypeInterface $og_membership_type = NULL) {
+    // The $group param will be null if it is from the
+    // Drupal\og\Event\OgAdminRoutesEvent rather than the routing.yml version.
+    if (is_null($group)) {
+      $entity_type_id = $route_match->getRouteObject()
+        ->getOption('_og_entity_type_id');
+      $group = $route_match->getParameter($entity_type_id);
     }
 
-    if ($entity_type_id = $route_match->getParameter('entity_type_id')) {
-      $group = $this->entityTypeManager
-        ->getStorage($route_match->getParameter('entity_type_id'))
-        ->load($route_match->getParameter('group'));
+    if (!Og::isGroup($group->getEntityTypeId(), $group->bundle())) {
+      return AccessResult::forbidden();
     }
-    else {
-      $entity_type_id = $route->getOption('_og_entity_type_id');
-      $group = $route_match->getParameter($entity_type_id);
+
+    $membership_type_id = OgMembershipInterface::TYPE_DEFAULT;
+    if (!is_null($og_membership_type)) {
+      $membership_type_id = $og_membership_type->id();
     }
 
     $context = ['group' => $group];
 
     return $this->entityTypeManager
       ->getAccessControlHandler('og_membership')
-      ->createAccess($og_membership_type, $account, $context, TRUE);
+      ->createAccess($membership_type_id, $account, $context, TRUE);
   }
 
 }
