@@ -107,8 +107,8 @@ class OgRoleTest extends KernelTestBase {
     // When a role is created the two accompanying actions to add or remove this
     // role to a membership should also be created.
     $action_ids = [
-      'og_membership_add_role_action.content_editor',
-      'og_membership_remove_role_action.content_editor',
+      'og_membership_add_single_role_action.content_editor',
+      'og_membership_remove_single_role_action.content_editor',
     ];
     /** @var \Drupal\Core\Action\ActionInterface[] $actions */
     $actions = Action::loadMultiple($action_ids);

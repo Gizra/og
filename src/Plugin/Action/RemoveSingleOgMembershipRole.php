@@ -8,12 +8,12 @@ use Drupal\og\Entity\OgMembership;
  * Removes a role from a group membership.
  *
  * @Action(
- *   id = "og_membership_remove_role_action",
+ *   id = "og_membership_remove_single_role_action",
  *   label = @Translation("Remove a role from the selected members"),
  *   type = "og_membership"
  * )
  */
-class RemoveOgMembershipRole extends ChangeOgMembershipRoleBase {
+class RemoveSingleOgMembershipRole extends ChangeSingleOgMembershipRoleBase {
 
   /**
    * {@inheritdoc}

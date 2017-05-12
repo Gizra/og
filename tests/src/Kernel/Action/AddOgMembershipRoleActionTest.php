@@ -5,17 +5,17 @@ namespace Drupal\Tests\og\Kernel\Action;
 use Drupal\og\Entity\OgRole;
 
 /**
- * Tests the AddOgMembershipRole action plugin.
+ * Tests the AddSingleOgMembershipRole action plugin.
  *
  * @group og
- * @coversDefaultClass \Drupal\og\Plugin\Action\AddOgMembershipRole
+ * @coversDefaultClass \Drupal\og\Plugin\Action\AddSingleOgMembershipRole
  */
 class AddOgMembershipRoleActionTest extends ChangeOgMembershipActionTestBase {
 
   /**
    * {@inheritdoc}
    */
-  protected $pluginId = 'og_membership_add_role_action';
+  protected $pluginId = 'og_membership_add_single_role_action';
 
   /**
    * Checks if the action can be performed correctly.
@@ -33,7 +33,7 @@ class AddOgMembershipRoleActionTest extends ChangeOgMembershipActionTestBase {
    * @dataProvider executeProvider
    */
   public function testExecute($membership, $default_role_name = NULL, $expected_role_name = NULL) {
-    /** @var \Drupal\og\Plugin\Action\AddOgMembershipRole $plugin */
+    /** @var \Drupal\og\Plugin\Action\AddSingleOgMembershipRole $plugin */
     $configuration = !empty($default_role_name) ? ['role_name' => $default_role_name] : [];
     $plugin = $this->getPlugin($configuration);
     $plugin->execute($this->memberships[$membership]);

@@ -17,7 +17,7 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 /**
  * Provides a base class for operations to change a user's group membership.
  */
-abstract class ChangeOgMembershipRoleBase extends ConfigurableActionBase implements ContainerFactoryPluginInterface {
+abstract class ChangeSingleOgMembershipRoleBase extends ConfigurableActionBase implements ContainerFactoryPluginInterface {
 
   use DependencyTrait;
 
@@ -36,7 +36,7 @@ abstract class ChangeOgMembershipRoleBase extends ConfigurableActionBase impleme
   protected $membershipManager;
 
   /**
-   * Constructs a ChangeOgMembershipRoleBase object.
+   * Constructs a ChangeSingleOgMembershipRoleBase object.
    *
    * @param array $configuration
    *   A configuration array containing information about the plugin instance.
