@@ -22,9 +22,9 @@ abstract class ChangeSingleOgMembershipRoleBase extends ConfigurableActionBase i
   use DependencyTrait;
 
   /**
-   * The user role entity type.
+   * The OG role entity type.
    *
-   * @var \Drupal\Core\Entity\EntityTypeInterface
+   * @var \Drupal\Core\Config\Entity\ConfigEntityTypeInterface
    */
   protected $entityType;
 
@@ -63,7 +63,7 @@ abstract class ChangeSingleOgMembershipRoleBase extends ConfigurableActionBase i
       $configuration,
       $plugin_id,
       $plugin_definition,
-      $container->get('entity.manager')->getDefinition('user_role'),
+      $container->get('entity_type.manager')->getDefinition('og_role'),
       $container->get('og.membership_manager')
     );
   }
