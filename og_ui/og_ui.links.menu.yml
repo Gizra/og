@@ -12,7 +12,7 @@ og_ui.settings:
   description: 'Administer OG settings.'
   route_name: og_ui.settings
 
-og_ui.roles_overview:
+og_ui.roles_permissions_overview:
   title: 'OG roles'
   parent: og_ui.admin_index
   description: 'Administer OG roles.'
