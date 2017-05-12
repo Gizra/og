@@ -72,6 +72,7 @@ class OgUiController extends ControllerBase {
    *   The overview as a render array.
    */
   public function rolesPermissionsOverviewPage($type) {
+    $route = $type === 'roles' ? 'entity.og_role.collection' : 'og_ui.permissions_overview';
     $action = $type === 'roles' ? t('Edit roles') : t('Edit permissions');
     $header = [t('Group type'), t('Operations')];
     $rows = [];
@@ -86,7 +87,7 @@ class OgUiController extends ControllerBase {
             'data' => $definition->getLabel() . ' - ' . $bundle_info[$bundle]['label'],
           ],
           [
-            'data' => Link::createFromRoute($action, 'og_ui.' . $type . '_overview', [
+            'data' => Link::createFromRoute($action, $route, [
               'entity_type_id' => $entity_type,
               'bundle_id' => $bundle,
             ]),
