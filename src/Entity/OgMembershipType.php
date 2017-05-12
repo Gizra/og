@@ -4,6 +4,7 @@ namespace Drupal\og\Entity;
 
 use Drupal\Core\Config\Entity\ConfigEntityBase;
 use Drupal\field\Entity\FieldConfig;
+use Drupal\og\OgMembershipInterface;
 use Drupal\og\OgMembershipTypeInterface;
 
 /**
@@ -88,7 +89,7 @@ class OgMembershipType extends ConfigEntityBase implements OgMembershipTypeInter
    * {@inheritdoc}
    */
   public function delete() {
-    if ($this->id() === 'default') {
+    if ($this->id() === OgMembershipInterface::TYPE_DEFAULT) {
       throw \Exception("The default OG membership type cannot be deleted.");
     }
     parent::delete();

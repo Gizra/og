@@ -82,7 +82,7 @@ use Drupal\user\EntityOwnerInterface;
  *   links = {
  *     "edit-form" = "/group/{entity_type_id}/{group}/admin/members/{og_membership}/edit",
  *     "delete-form" = "/group/{entity_type_id}/{group}/admin/members/{og_membership}/delete",
- *     "canonical" = "/group/{entity_type_id}/{group}/admin/members/{og_membership}"
+ *     "canonical" = "/group/{entity_type_id}/{group}/admin/members/{og_membership}/edit"
  *   },
  *   field_ui_base_route = "entity.og_membership_type.edit_form"
  * )
@@ -379,7 +379,7 @@ class OgMembership extends ContentEntityBase implements OgMembershipInterface {
       ->setSetting('target_type', 'og_membership_type');
 
     $fields['uid'] = BaseFieldDefinition::create('entity_reference')
-      ->setLabel(t('Member User ID'))
+      ->setLabel(t('Username'))
       ->setDescription(t('The user ID of the member.'))
       ->setSetting('target_type', 'user')
       ->setSetting('handler', 'og:user')

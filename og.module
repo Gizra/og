@@ -179,7 +179,7 @@ function og_entity_access(EntityInterface $entity, $operation, AccountInterface 
  */
 function og_og_membership_type_access(OgMembershipTypeInterface $entity, $operation, AccountInterface $account) {
   // Do not allow deleting the default membership type.
-  if (($operation === 'delete') && ($entity->id() === 'default')) {
+  if ($operation === 'delete' && $entity->id() === OgMembershipInterface::TYPE_DEFAULT) {
     return AccessResult::forbidden();
   }
 
@@ -189,6 +189,19 @@ function og_og_membership_type_access(OgMembershipTypeInterface $entity, $operat
   }
 
   return AccessResult::forbidden();
+}
+
+/**
+ * Implements hook_ENTITY_TYPE_access().
+ */
+function og_og_membership_access(OgMembershipInterface $entity, $operation, AccountInterface $account) {
+  $group = $entity->getGroup();
+  if ($operation === 'delete' && $group->get('uid')->entity->id() === $entity->getUser()->id()) {
+    return AccessResult::forbidden();
+  }
+
+  return \Drupal::service('og.access')
+    ->userAccess($entity->getGroup(), 'manage members');
 }
 
 /**

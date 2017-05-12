@@ -16,7 +16,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 
 /**
- * Defines a route controller for entity autocomplete form elements.
+ * Defines a route controller for OG autocomplete form elements.
  */
 class OgAutocompleteController extends ControllerBase {
 

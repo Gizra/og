@@ -19,7 +19,7 @@ class OgRoleSelection extends DefaultSelection {
   /**
    * Get the selection handler of the field.
    *
-   * @return DefaultSelection
+   * @return Drupal\Core\Entity\Plugin\EntityReferenceSelection\DefaultSelection
    *   Returns the selection handler.
    */
   public function getSelectionHandler() {
