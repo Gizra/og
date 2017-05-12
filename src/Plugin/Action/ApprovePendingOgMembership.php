@@ -7,7 +7,7 @@ use Drupal\Core\Action\ActionBase;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\og\Entity\OgMembership;
-use Drupal\og\MembershipManagerInterface;
+use Drupal\og\OgAccessInterface;
 use Drupal\og\OgMembershipInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
@@ -23,11 +23,11 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 class ApprovePendingOgMembership extends ActionBase implements ContainerFactoryPluginInterface {
 
   /**
-   * The membership manager.
+   * The OG access service.
    *
-   * @var \Drupal\og\MembershipManagerInterface
+   * @var \Drupal\og\OgAccessInterface
    */
-  protected $membershipManager;
+  protected $ogAccess;
 
   /**
    * Constructs an ApprovePendingOgMembership object.
@@ -38,12 +38,12 @@ class ApprovePendingOgMembership extends ActionBase implements ContainerFactoryP
    *   The plugin_id for the plugin instance.
    * @param mixed $plugin_definition
    *   The plugin implementation definition.
-   * @param \Drupal\og\MembershipManagerInterface $membership_manager
-   *   The OG membership manager.
+   * @param \Drupal\og\OgAccessInterface $og_access
+   *   The OG access service.
    */
-  public function __construct(array $configuration, $plugin_id, $plugin_definition, MembershipManagerInterface $membership_manager) {
+  public function __construct(array $configuration, $plugin_id, $plugin_definition, OgAccessInterface $og_access) {
     parent::__construct($configuration, $plugin_id, $plugin_definition);
-    $this->membershipManager = $membership_manager;
+    $this->ogAccess = $og_access;
   }
 
   /**
@@ -54,7 +54,7 @@ class ApprovePendingOgMembership extends ActionBase implements ContainerFactoryP
       $configuration,
       $plugin_id,
       $plugin_definition,
-      $container->get('og.membership_manager')
+      $container->get('og.access')
     );
   }
 
@@ -73,18 +73,13 @@ class ApprovePendingOgMembership extends ActionBase implements ContainerFactoryP
    */
   public function access($object, AccountInterface $account = NULL, $return_as_object = FALSE) {
     /** @var \Drupal\og\Entity\OgMembership $object */
-    // Grant access if the user can administer all groups.
-    $access = AccessResult::allowedIfHasPermission($account, 'administer group');
-
-    // Grant access if the user can manage members in this group.
-    $membership = $this->membershipManager->getMembership($object->getGroup(), $account);
-    if ($membership) {
-      $access = $access->orIf(AccessResult::allowedIf($membership->hasPermission('manage members')));
-    }
-
     // Deny access if the membership is not in pending state.
     if ($object->getState() !== OgMembershipInterface::STATE_PENDING) {
       $access = AccessResult::forbidden();
+    }
+    else {
+      // Only grant access if the user can manage members in this group.
+      $access = $this->ogAccess->userAccess($object->getGroup(), 'manage members', $account);
     }
 
     return $return_as_object ? $access : $access->isAllowed();

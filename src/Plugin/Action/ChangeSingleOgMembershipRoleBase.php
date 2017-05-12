@@ -2,7 +2,6 @@
 
 namespace Drupal\og\Plugin\Action;
 
-use Drupal\Core\Access\AccessResult;
 use Drupal\Core\Action\ConfigurableActionBase;
 use Drupal\Core\Entity\DependencyTrait;
 use Drupal\Core\Entity\EntityTypeInterface;
@@ -10,7 +9,7 @@ use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\og\Entity\OgRole;
-use Drupal\og\MembershipManagerInterface;
+use Drupal\og\OgAccessInterface;
 use Drupal\og\OgRoleInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
@@ -29,11 +28,11 @@ abstract class ChangeSingleOgMembershipRoleBase extends ConfigurableActionBase i
   protected $entityType;
 
   /**
-   * The membership manager.
+   * The OG access service.
    *
-   * @var \Drupal\og\MembershipManagerInterface
+   * @var \Drupal\og\OgAccessInterface
    */
-  protected $membershipManager;
+  protected $ogAccess;
 
   /**
    * Constructs a ChangeSingleOgMembershipRoleBase object.
@@ -46,13 +45,13 @@ abstract class ChangeSingleOgMembershipRoleBase extends ConfigurableActionBase i
    *   The plugin implementation definition.
    * @param \Drupal\Core\Entity\EntityTypeInterface $entity_type
    *   The user role entity type.
-   * @param \Drupal\og\MembershipManagerInterface $membership_manager
-   *   The OG membership manager.
+   * @param \Drupal\og\OgAccessInterface $og_access
+   *   The OG access service.
    */
-  public function __construct(array $configuration, $plugin_id, $plugin_definition, EntityTypeInterface $entity_type, MembershipManagerInterface $membership_manager) {
+  public function __construct(array $configuration, $plugin_id, $plugin_definition, EntityTypeInterface $entity_type, OgAccessInterface $og_access) {
     parent::__construct($configuration, $plugin_id, $plugin_definition);
     $this->entityType = $entity_type;
-    $this->membershipManager = $membership_manager;
+    $this->ogAccess = $og_access;
   }
 
   /**
@@ -64,7 +63,7 @@ abstract class ChangeSingleOgMembershipRoleBase extends ConfigurableActionBase i
       $plugin_id,
       $plugin_definition,
       $container->get('entity_type.manager')->getDefinition('og_role'),
-      $container->get('og.membership_manager')
+      $container->get('og.access')
     );
   }
 
@@ -118,14 +117,8 @@ abstract class ChangeSingleOgMembershipRoleBase extends ConfigurableActionBase i
    */
   public function access($object, AccountInterface $account = NULL, $return_as_object = FALSE) {
     /** @var \Drupal\og\Entity\OgMembership $object */
-    // Grant access if the user can administer all groups.
-    $access = AccessResult::allowedIfHasPermission($account, 'administer group');
-
     // Grant access if the user can manage members in this group.
-    $membership = $this->membershipManager->getMembership($object->getGroup(), $account);
-    if ($membership) {
-      $access = $access->orIf(AccessResult::allowedIf($membership->hasPermission('manage members')));
-    }
+    $access = $this->ogAccess->userAccess($object->getGroup(), 'manage members', $account);
 
     return $return_as_object ? $access : $access->isAllowed();
   }
