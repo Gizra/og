@@ -244,13 +244,20 @@ class OgRole extends Role implements OgRoleInterface {
   public function delete() {
     // The default roles are required. Prevent them from being deleted for as
     // long as the group still exists.
-    if (in_array($this->id(), [self::ANONYMOUS, self::AUTHENTICATED]) && $this->groupTypeManager()->isGroup($this->getGroupType(), $this->getGroupBundle())) {
+    if ($this->isDefaultRole() && $this->groupTypeManager()->isGroup($this->getGroupType(), $this->getGroupBundle())) {
       throw new OgRoleException('The default roles "non-member" and "member" cannot be deleted.');
     }
 
     // Reset access cache, as the role is no longer present.
     $this->ogAccess()->reset();
     parent::delete();
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function isDefaultRole() {
+    return in_array($this->getName(), [self::ANONYMOUS, self::AUTHENTICATED]);
   }
 
   /**
