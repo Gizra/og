@@ -167,7 +167,7 @@ class OgMembership extends ContentEntityBase implements OgMembershipInterface {
   /**
    * {@inheritdoc}
    */
-  public function addRole(OgRole $role) {
+  public function addRole(OgRoleInterface $role) {
     $roles = $this->getRoles();
     $roles[] = $role;
 
@@ -177,7 +177,7 @@ class OgMembership extends ContentEntityBase implements OgMembershipInterface {
   /**
    * {@inheritdoc}
    */
-  public function revokeRole(OgRole $role) {
+  public function revokeRole(OgRoleInterface $role) {
     $roles = $this->getRoles();
 
     foreach ($roles as $key => $existing_role) {
