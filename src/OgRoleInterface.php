@@ -50,6 +50,83 @@ interface OgRoleInterface {
   public function setId($id);
 
   /**
+   * Returns the label.
+   *
+   * @return string
+   *   The label.
+   */
+  public function getLabel();
+
+  /**
+   * Sets the label.
+   *
+   * @param string $label
+   *   The label to set.
+   *
+   * @return $this
+   */
+  public function setLabel($label);
+
+  /**
+   * Returns the group type.
+   *
+   * @return string
+   *   The group type.
+   */
+  public function getGroupType();
+
+  /**
+   * Sets the group type.
+   *
+   * @param string $group_type
+   *   The group type to set.
+   *
+   * @return $this
+   */
+  public function setGroupType($group_type);
+
+  /**
+   * Returns the group bundle.
+   *
+   * @return string
+   *   The group bundle.
+   */
+  public function getGroupBundle();
+
+  /**
+   * Sets the group bundle.
+   *
+   * @param string $group_bundle
+   *   The group bundle to set.
+   *
+   * @return $this
+   */
+  public function setGroupBundle($group_bundle);
+
+  /**
+   * Returns the role type.
+   *
+   * @return string
+   *   The role type. One of OgRoleInterface::ROLE_TYPE_REQUIRED or
+   *   OgRoleInterface::ROLE_TYPE_STANDARD.
+   */
+  public function getRoleType();
+
+  /**
+   * Sets the role type.
+   *
+   * @param string $role_type
+   *   The role type to set. One of OgRoleInterface::ROLE_TYPE_REQUIRED or
+   *   OgRoleInterface::ROLE_TYPE_STANDARD.
+   *
+   * @return $this
+   *
+   * @throws \InvalidArgumentException
+   *   Thrown when an invalid role type is given.
+   */
+  public function setRoleType($role_type);
+
+  /**
    * Returns the role name.
    *
    * @return string
