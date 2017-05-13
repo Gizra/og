@@ -5,7 +5,6 @@ namespace Drupal\og;
 use Drupal\Core\Entity\ContentEntityInterface;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Session\AccountInterface;
-use Drupal\og\Entity\OgRole;
 
 /**
  * Provides an interface for OG memberships.
@@ -169,24 +168,24 @@ interface OgMembershipInterface extends ContentEntityInterface {
   /**
    * Adds a role to the user membership.
    *
-   * @param \Drupal\og\Entity\OgRole $role
+   * @param \Drupal\og\OgRoleInterface $role
    *   The OG role.
    *
    * @return \Drupal\og\OgMembershipInterface
    *   The updated OG Membership object.
    */
-  public function addRole(OgRole $role);
+  public function addRole(OgRoleInterface $role);
 
   /**
    * Revokes a role from the OG membership.
    *
-   * @param \Drupal\og\Entity\OgRole $role
+   * @param \Drupal\og\OgRoleInterface $role
    *   The OG role.
    *
    * @return \Drupal\og\OgMembershipInterface
    *   The updated OG Membership object.
    */
-  public function revokeRole(OgRole $role);
+  public function revokeRole(OgRoleInterface $role);
 
   /**
    * Revokes a role from the OG membership.
