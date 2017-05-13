@@ -409,10 +409,24 @@ class OgMembership extends ContentEntityBase implements OgMembershipInterface {
       ->setLabel(t('Group entity ID'))
       ->setDescription(t('The entity ID of the group.'));
 
-    $fields['state'] = BaseFieldDefinition::create('string')
+    $fields['state'] = BaseFieldDefinition::create('list_string')
       ->setLabel(t('State'))
       ->setDescription(t('The user membership state: active, pending, or blocked.'))
-      ->setDefaultValue(OgMembershipInterface::STATE_ACTIVE);
+      ->setDefaultValue(OgMembershipInterface::STATE_ACTIVE)
+      ->setSettings([
+        'allowed_values' => [
+          OgMembershipInterface::STATE_ACTIVE => t('Active'),
+          OgMembershipInterface::STATE_PENDING => t('Pending'),
+          OgMembershipInterface::STATE_BLOCKED => t('Blocked'),
+        ],
+      ])
+      ->setDisplayOptions('form', [
+        'type' => 'options_buttons',
+        'weight' => 0,
+      ])
+      ->setDisplayConfigurable('view', TRUE)
+      ->setDisplayConfigurable('form', TRUE)
+      ->setRequired(TRUE);
 
     $fields['roles'] = BaseFieldDefinition::create('entity_reference')
       ->setLabel(t('Roles'))

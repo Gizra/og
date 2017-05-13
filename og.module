@@ -196,7 +196,18 @@ function og_og_membership_type_access(OgMembershipTypeInterface $entity, $operat
  */
 function og_og_membership_access(OgMembershipInterface $entity, $operation, AccountInterface $account) {
   $group = $entity->getGroup();
-  if ($operation === 'delete' && $group->get('uid')->entity->id() === $entity->getUser()->id()) {
+
+  // If there's a group owner, don't let them leave.
+  if (
+    isset($group_fields['uid'])
+    && $operation === 'delete'
+    && $group_fields['uid']->entity->id() === $entity->getUser()->id()
+  ) {
+    return AccessResult::forbidden();
+  }
+
+  // Ensure that there's at least one member in the group.
+  if ($operation === 'delete' && count(Og::getGroupMemberships($group)) === 1) {
     return AccessResult::forbidden();
   }
 
