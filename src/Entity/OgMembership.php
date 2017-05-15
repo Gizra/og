@@ -134,6 +134,11 @@ class OgMembership extends ContentEntityBase implements OgMembershipInterface {
   public function getGroup() {
     $entity_type = $this->get('entity_type')->value;
     $entity_id = $this->get('entity_id')->value;
+
+    if (empty($entity_type) || empty($entity_id)) {
+      return NULL;
+    }
+
     return \Drupal::entityTypeManager()->getStorage($entity_type)->load($entity_id);
   }
 

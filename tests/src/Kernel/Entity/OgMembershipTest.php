@@ -379,6 +379,25 @@ class OgMembershipTest extends KernelTestBase {
   }
 
   /**
+   * Tests getting the group that is associated with a membership.
+   *
+   * @covers ::getGroup
+   */
+  public function testGetGroup() {
+    $membership = OgMembership::create();
+
+    // When no group has been set yet, the method should return NULL.
+    $this->assertNull($membership->getGroup());
+
+    // Set a group.
+    $membership->setGroup($this->group);
+
+    // Now the group should be returned. Check both the entity type and ID.
+    $this->assertEquals($this->group->getEntityTypeId(), $membership->getGroup()->getEntityTypeId());
+    $this->assertEquals($this->group->id(), $membership->getGroup()->id());
+  }
+
+  /**
    * Tests that membership has "member" role when roles are retrieved.
    *
    * @covers ::getRoles
