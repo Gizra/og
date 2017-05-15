@@ -2,11 +2,9 @@
 
 namespace Drupal\og\Plugin\Action;
 
-use Drupal\Core\Access\AccessResult;
 use Drupal\Core\Action\ActionBase;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
 use Drupal\Core\Session\AccountInterface;
-use Drupal\og\MembershipManagerInterface;
 use Drupal\og\OgAccessInterface;
 use Drupal\og\OgMembershipInterface;
 use Drupal\user\PrivateTempStoreFactory;
