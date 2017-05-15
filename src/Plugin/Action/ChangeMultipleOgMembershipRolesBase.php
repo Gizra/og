@@ -84,6 +84,8 @@ abstract class ChangeMultipleOgMembershipRolesBase extends ActionBase implements
    */
   public function access($object, AccountInterface $account = NULL, $return_as_object = FALSE) {
     /** @var \Drupal\og\Entity\OgMembership $object */
+    // Only grant access if the user has permission to manage members in this
+    // group.
     $access = $this->ogAccess->userAccess($object->getGroup(), 'manage members', $account);
 
     return $return_as_object ? $access : $access->isAllowed();
