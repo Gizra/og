@@ -66,6 +66,10 @@ abstract class ChangeMultipleOgMembershipRolesBase extends ActionBase implements
    * {@inheritdoc}
    */
   public function executeMultiple(array $memberships) {
+    // Store the memberships to be processed in temporary storage. The actual
+    // processing will be handled in the confirmation form.
+    // @see \Drupal\og\Form\OgAddMultipleRolesForm
+    // @see \Drupal\og\Form\OgRemoveMultipleRolesForm
     $membership_ids = array_map(function (OgMembershipInterface $membership) {
       return $membership->id();
     }, $memberships);
