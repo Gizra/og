@@ -29,8 +29,10 @@ class AddSingleOgMembershipRole extends ChangeSingleOgMembershipRoleBase {
       $membership->getGroup()->bundle(),
       $role_name,
     ]);
-    if (!in_array($role_id, $membership->getRolesIds())) {
-      $membership->addRole(OgRole::load($role_id))->save();
+    // Only add the role if it is valid and doesn't exist yet.
+    $role = OgRole::load($role_id);
+    if ($membership->isRoleValid($role) && !$membership->hasRole($role_id)) {
+      $membership->addRole($role)->save();
     }
   }
 

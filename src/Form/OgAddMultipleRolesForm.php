@@ -24,6 +24,7 @@ class OgAddMultipleRolesForm extends OgChangeMultipleRolesFormBase {
   public function buildForm(array $form, FormStateInterface $form_state) {
     $options = [];
     foreach ($this->getGroupTypes() as $group_type) {
+      /** @var \Drupal\og\OgRoleInterface $role */
       foreach (OgRole::loadRolesByGroupType($group_type['entity_type_id'], $group_type['bundle_id']) as $role) {
         // Only add the role to the list if it is not a default role, these
         // cannot be added.
@@ -56,7 +57,9 @@ class OgAddMultipleRolesForm extends OgChangeMultipleRolesFormBase {
       foreach ($roles as $role) {
         $group = $membership->getGroup();
         if ($group->getEntityTypeId() === $role->getGroupType() && $group->bundle() === $role->getGroupBundle()) {
-          if (!$membership->hasRole($role->id())) {
+          // Only add the role to the membership if it is valid and doesn't
+          // exist yet.
+          if ($membership->isRoleValid($role) && !$membership->hasRole($role->id())) {
             $changed = TRUE;
             $membership->addRole($role);
           }
