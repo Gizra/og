@@ -252,6 +252,91 @@ class OgMembershipTest extends KernelTestBase {
   }
 
   /**
+   * Tests if it is possible to check if a role is valid for a membership.
+   *
+   * @covers ::isRoleValid
+   * @dataProvider isRoleValidProvider
+   */
+  public function testIsRoleValid($group_type, $group_bundle, $role_name, $expected) {
+    $role = OgRole::create([
+      'group_type' => $group_type,
+      'group_bundle' => $group_bundle,
+      'name' => $role_name,
+    ]);
+
+    $group = EntityTest::create([
+      'type' => 'entity_test',
+      'name' => $this->randomString(),
+    ]);
+    $group->save();
+
+    $membership = OgMembership::create()->setGroup($group);
+
+    $this->assertEquals($expected, $membership->isRoleValid($role));
+  }
+
+  /**
+   * Data provider for testIsRoleValid().
+   *
+   * @return array
+   *   An array of test data, each test case containing the following 4 items:
+   *   1. The entity type ID of the role.
+   *   2. The bundle ID of the role.
+   *   3. The role name.
+   *   4. A boolean indicating whether or not this role is expected to be valid.
+   */
+  public function isRoleValidProvider() {
+    return [
+      // A valid role.
+      [
+        'entity_test',
+        'entity_test',
+        'administrator',
+        TRUE,
+      ],
+      // An invalid role which has the wrong group entity type.
+      [
+        'user',
+        'entity_test',
+        'administrator',
+        FALSE,
+      ],
+      // An invalid role which has the wrong group bundle.
+      [
+        'entity_test',
+        'incorrect_bundle',
+        'administrator',
+        FALSE,
+      ],
+      // A non-member role is never valid for any membership.
+      [
+        'entity_test',
+        'entity_test',
+        OgRoleInterface::ANONYMOUS,
+        FALSE,
+      ],
+    ];
+  }
+
+  /**
+   * Tests the exception thrown if the validity of a role cannot be established.
+   *
+   * @covers ::isRoleValid
+   * @expectedException \LogicException
+   */
+  public function testIsRoleValidException() {
+    $role = OgRole::create([
+      'group_type' => 'entity_test',
+      'group_bundle' => 'entity_test',
+    ]);
+    $membership = OgMembership::create();
+
+    // If a membership doesn't have a group yet it is not possible to determine
+    // wheter a role is valid.
+    $membership->isRoleValid($role);
+  }
+
+  /**
    * Tests re-saving a membership.
    *
    * @covers ::preSave

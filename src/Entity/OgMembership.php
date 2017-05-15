@@ -227,6 +227,33 @@ class OgMembership extends ContentEntityBase implements OgMembershipInterface {
   /**
    * {@inheritdoc}
    */
+  public function isRoleValid(OgRoleInterface $role) {
+    $group = $this->getGroup();
+
+    // If there is no group yet then we cannot determine whether the role is
+    // valid.
+    if (!$group) {
+      throw new \LogicException('Cannot determine whether a role is valid for a membership that doesn\'t have a group.');
+    }
+
+    // Non-member roles are never valid for any membership.
+    if ($role->getName() == OgRoleInterface::ANONYMOUS) {
+      return FALSE;
+    }
+
+
+    // If the entity type and bundle of the role doesn't match the group then
+    // the role is intended for a different group type.
+    elseif ($role->getGroupType() !== $group->getEntityTypeId() || $role->getGroupBundle() !== $group->bundle()) {
+      return FALSE;
+    }
+
+    return TRUE;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   public function hasPermission($permission) {
     // Blocked users do not have any permissions.
     if ($this->isBlocked()) {
@@ -336,7 +363,7 @@ class OgMembership extends ContentEntityBase implements OgMembershipInterface {
         $this->revokeRole($role);
       }
       // The roles should apply to the group type.
-      elseif ($role->getGroupType() !== $group->getEntityTypeId() || $role->getGroupBundle() !== $group->bundle()) {
+      elseif (!$this->isRoleValid($role)) {
         throw new \LogicException(sprintf('The role with ID %s does not match the group type of the membership.', $role->id()));
       }
     }

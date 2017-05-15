@@ -197,6 +197,21 @@ interface OgMembershipInterface extends ContentEntityInterface {
   public function getRoles();
 
   /**
+   * Returns whether the given role is valid for this membership.
+   *
+   * @param \Drupal\og\OgRoleInterface $role
+   *   The role to check.
+   *
+   * @return bool
+   *   True if the role is valid, false otherwise.
+   *
+   * @throws \LogicException
+   *   Thrown when the validity of the role cannot be established, for example
+   *   because the group hasn't yet been set on the membership.
+   */
+  public function isRoleValid(OgRoleInterface $role);
+
+  /**
    * Checks if the user has a permission inside the group.
    *
    * @param string $permission
