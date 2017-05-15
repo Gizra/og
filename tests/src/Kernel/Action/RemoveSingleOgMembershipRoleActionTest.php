@@ -10,7 +10,7 @@ use Drupal\og\Entity\OgRole;
  * @group og
  * @coversDefaultClass \Drupal\og\Plugin\Action\RemoveSingleOgMembershipRole
  */
-class RemoveOgMembershipRoleActionTest extends ChangeOgMembershipActionTestBase {
+class RemoveSingleOgMembershipRoleActionTest extends ChangeOgMembershipActionTestBase {
 
   /**
    * {@inheritdoc}

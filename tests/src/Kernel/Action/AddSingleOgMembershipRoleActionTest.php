@@ -10,7 +10,7 @@ use Drupal\og\Entity\OgRole;
  * @group og
  * @coversDefaultClass \Drupal\og\Plugin\Action\AddSingleOgMembershipRole
  */
-class AddOgMembershipRoleActionTest extends ChangeOgMembershipActionTestBase {
+class AddSingleOgMembershipRoleActionTest extends ChangeOgMembershipActionTestBase {
 
   /**
    * {@inheritdoc}
