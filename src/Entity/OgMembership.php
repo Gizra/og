@@ -246,7 +246,6 @@ class OgMembership extends ContentEntityBase implements OgMembershipInterface {
       return FALSE;
     }
 
-
     // If the entity type and bundle of the role doesn't match the group then
     // the role is intended for a different group type.
     elseif ($role->getGroupType() !== $group->getEntityTypeId() || $role->getGroupBundle() !== $group->bundle()) {
