@@ -106,7 +106,7 @@ function og_access_node_access_records(NodeInterface $node) {
       $audience_helper = \Drupal::service('og.group_audience_helper');
       foreach ($audience_helper->getAllGroupAudienceFields('node', $node->getType()) as $field_name => $field) {
         foreach ($node->get($field_name)->referencedEntities() as $group) {
-          $list_gids[$group->getType][] = $group->id();
+          $list_gids[$group->getEntityTypeId()][] = $group->id();
 
           if ($has_private) {
             // We already know we have a private group, so we can avoid
@@ -131,7 +131,7 @@ function og_access_node_access_records(NodeInterface $node) {
       $audience_helper = \Drupal::service('og.group_audience_helper');
       foreach ($audience_helper->getAllGroupAudienceFields('node', $node->getType()) as $field_name => $field) {
         foreach ($node->get($field_name)->referencedEntities() as $group) {
-          $list_gids[$group->getType][] = $group->id();
+          $list_gids[$group->getEntityTypeId()][] = $group->id();
         }
       }
 
