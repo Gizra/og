@@ -150,6 +150,10 @@ views.field.og_membership_bulk_form:
   type: views_field_bulk_form
   label: 'OG Membership bulk form'
 
+action.configuration.og_membership_add_multiple_roles_action:
+  type: action_configuration_default
+  label: 'Add roles to the selected membership(s)'
+
 action.configuration.og_membership_add_single_role_action:
   type: action_configuration_default
   label: 'Add a role to a group member'
@@ -169,6 +173,10 @@ action.configuration.og_membership_delete_action:
 action.configuration.og_membership_remove_single_role_action:
   type: action_configuration_default
   label: 'Remove a role to a group member'
+
+action.configuration.og_membership_remove_multiple_roles_action:
+  type: action_configuration_default
+  label: 'Remove roles from the selected membership(s)'
 
 action.configuration.og_membership_unblock_action:
   type: action_configuration_default
