@@ -48,4 +48,4 @@ before_script:
 
 script:
   - php scripts/run-tests.sh --url http://127.0.0.1:8080 --php $(phpenv which php) --concurrency 2 --verbose --color "Organic groups","Organic groups access","Organic groups context","Organic groups field access","Organic groups UI" 2>&1 | tee /tmp/simpletest-result.txt
-  - egrep -i "([1-9]+ fail)|(Fatal error)|([1-9]+ exception)" /tmp/simpletest-result.txt && exit 1
+  - set -e && egrep -i "([1-9]+ fail)|(Fatal error)|([1-9]+ exception)" /tmp/simpletest-result.txt && exit 1
