@@ -191,36 +191,42 @@ abstract class ActionTestBase extends KernelTestBase {
   /**
    * Checks that the user can perform the action on the membership.
    *
-   * @param string $user
-   *   The user for which to perform the access check.
-   * @param string $membership
-   *   The membership on which to perform the access check.
-   *
    * @covers ::access
-   * @dataProvider accessProvider
    */
-  public function testAccess($user, $membership) {
-    $plugin = $this->getPlugin();
-    $access_as_object = $plugin->access($this->memberships[$membership], $this->users[$user], TRUE);
-    $this->assertTrue($access_as_object instanceof AccessResultAllowed);
+  public function testAccess() {
+    // Dramatically improve testing speed by looping over all test cases in a
+    // single test, so that the expensive setup is not executed over and over.
+    $test_cases = $this->accessProvider();
+    foreach ($test_cases as $test_case) {
+      list($user, $membership) = $test_case;
 
-    $access_as_boolean = $plugin->access($this->memberships[$membership], $this->users[$user], FALSE);
-    $this->assertTrue($access_as_boolean);
+      $plugin = $this->getPlugin();
+      $access_as_object = $plugin->access($this->memberships[$membership], $this->users[$user], TRUE);
+      $this->assertTrue($access_as_object instanceof AccessResultAllowed);
+
+      $access_as_boolean = $plugin->access($this->memberships[$membership], $this->users[$user], FALSE);
+      $this->assertTrue($access_as_boolean);
+    }
   }
 
   /**
    * Checks that the user cannot perform the action on the membership.
    *
    * @covers ::access
-   * @dataProvider noAccessProvider
    */
-  public function testNoAccess($user, $membership) {
-    $plugin = $this->getPlugin();
-    $access_as_object = $plugin->access($this->memberships[$membership], $this->users[$user], TRUE);
-    $this->assertFalse($access_as_object instanceof AccessResultAllowed);
+  public function testNoAccess() {
+    // Dramatically improve testing speed by looping over all test cases in a
+    // single test, so that the expensive setup is not executed over and over.
+    $test_cases = $this->noAccessProvider();
+    foreach ($test_cases as $test_case) {
+      list($user, $membership) = $test_case;
+      $plugin = $this->getPlugin();
+      $access_as_object = $plugin->access($this->memberships[$membership], $this->users[$user], TRUE);
+      $this->assertFalse($access_as_object instanceof AccessResultAllowed);
 
-    $access_as_boolean = $plugin->access($this->memberships[$membership], $this->users[$user], FALSE);
-    $this->assertFalse($access_as_boolean);
+      $access_as_boolean = $plugin->access($this->memberships[$membership], $this->users[$user], FALSE);
+      $this->assertFalse($access_as_boolean);
+    }
   }
 
   /**
