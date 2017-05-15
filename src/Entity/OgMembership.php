@@ -324,14 +324,20 @@ class OgMembership extends ContentEntityBase implements OgMembershipInterface {
       throw new \LogicException(sprintf('Entity type %s with ID %s is not an OG group.', $entity_type_id, $group->id()));
     }
 
-    // Make sure we don't save non-member or member role with a membership.
+    // Check if the roles are valid.
     foreach ($this->getRoles() as $role) {
       /** @var \Drupal\og\Entity\OgRole $role */
+      // Make sure we don't save a membership for a non-member.
       if ($role->getName() == OgRoleInterface::ANONYMOUS) {
         throw new \LogicException('Cannot save an OgMembership with reference to a non-member role.');
       }
+      // The regular membership is implied, we do not need to store it.
       elseif ($role->getName() == OgRoleInterface::AUTHENTICATED) {
         $this->revokeRole($role);
+      }
+      // The roles should apply to the group type.
+      elseif ($role->getGroupType() !== $group->getEntityTypeId() || $role->getGroupBundle() !== $group->bundle()) {
+        throw new \LogicException(sprintf('The role with ID %s does not match the group type of the membership.', $role->id()));
       }
     }
 

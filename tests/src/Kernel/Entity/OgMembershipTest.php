@@ -6,6 +6,7 @@ use Drupal\Component\Utility\Unicode;
 use Drupal\entity_test\Entity\EntityTest;
 use Drupal\KernelTests\KernelTestBase;
 use Drupal\og\Entity\OgMembership;
+use Drupal\og\Entity\OgRole;
 use Drupal\og\Og;
 use Drupal\og\OgMembershipInterface;
 use Drupal\og\OgRoleInterface;
@@ -199,6 +200,55 @@ class OgMembershipTest extends KernelTestBase {
 
     $membership2 = Og::createMembership($group, $this->user);
     $membership2->save();
+  }
+
+  /**
+   * Tests saving a membership with a role with a different group type.
+   *
+   * @covers ::preSave
+   * @expectedException \Drupal\Core\Entity\EntityStorageException
+   * @dataProvider saveRoleWithWrongGroupTypeProvider
+   */
+  public function testSaveRoleWithWrongGroupType($group_entity_type_id, $group_bundle_id) {
+    $group = EntityTest::create([
+      'type' => 'entity_test',
+      'name' => $this->randomString(),
+    ]);
+
+    $group->save();
+
+    Og::groupTypeManager()->addGroup('entity_test', $group->bundle());
+
+    $wrong_role = OgRole::create()
+      ->setGroupType($group_entity_type_id)
+      ->setGroupBundle($group_bundle_id)
+      ->setName(Unicode::strtolower($this->randomMachineName()));
+    $wrong_role->save();
+
+    Og::createMembership($group, $this->user)->addRole($wrong_role)->save();
+  }
+
+  /**
+   * Data provider for testSaveRoleWithWrongGroupType().
+   *
+   * @return array
+   *   An array of test data, each item an array consisting of two items:
+   *   1. The entity type ID of the role to add to the membership.
+   *   2. The bundle ID of the role to add to the membership.
+   */
+  public function saveRoleWithWrongGroupTypeProvider() {
+    return [
+      // Try saving a membership containing a role with the wrong entity type.
+      [
+        'user',
+        'entity_test',
+      ],
+      // Try saving a membership containing a role with the wrong bundle.
+      [
+        'entity_test',
+        'some_other_bundle',
+      ],
+    ];
   }
 
   /**
