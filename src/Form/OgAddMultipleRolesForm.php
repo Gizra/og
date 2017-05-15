@@ -4,7 +4,6 @@ namespace Drupal\og\Form;
 
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\og\Entity\OgRole;
-use Drupal\og\OgRoleInterface;
 
 /**
  * Provides a form to add multiple OG roles to a membership.
@@ -50,7 +49,7 @@ class OgAddMultipleRolesForm extends OgChangeMultipleRolesFormBase {
    */
   public function submitForm(array &$form, FormStateInterface $form_state) {
     $role_ids = array_keys($form_state->getValue('roles'));
-    /** @var OgRoleInterface[] $roles */
+    /** @var \Drupal\og\OgRoleInterface[] $roles */
     $roles = OgRole::loadMultiple($role_ids);
     foreach ($this->getMemberships() as $membership) {
       $changed = FALSE;

@@ -67,7 +67,6 @@ class ChangeMultipleOgMembershipRolesActionTestBase extends ChangeOgMembershipAc
     // storage. The actual processing of the memberships will be handled in the
     // confirmation form.
     $this->assertStoredMemberships($membership_ids);
-
   }
 
   /**
@@ -78,7 +77,15 @@ class ChangeMultipleOgMembershipRolesActionTestBase extends ChangeOgMembershipAc
     return [
       [['pending', 'member']],
       [['blocked', 'member', 'group_moderator']],
-      [['blocked', 'pending', 'member', 'group_administrator', 'group_moderator']],
+      [
+        [
+          'blocked',
+          'pending',
+          'member',
+          'group_administrator',
+          'group_moderator',
+        ],
+      ],
     ];
   }
 

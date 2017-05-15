@@ -4,7 +4,6 @@ namespace Drupal\og\Form;
 
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\og\Entity\OgRole;
-use Drupal\og\OgRoleInterface;
 
 /**
  * Provides a form to remove multiple OG roles from a membership.
@@ -49,7 +48,7 @@ class OgRemoveMultipleRolesForm extends OgChangeMultipleRolesFormBase {
    */
   public function submitForm(array &$form, FormStateInterface $form_state) {
     $role_ids = array_keys($form_state->getValue('roles'));
-    /** @var OgRoleInterface[] $roles */
+    /** @var \Drupal\og\OgRoleInterface[] $roles */
     $roles = OgRole::loadMultiple($role_ids);
     foreach ($this->getMemberships() as $membership) {
       $changed = FALSE;

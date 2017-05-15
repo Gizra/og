@@ -9,7 +9,6 @@ use Drupal\Core\Session\AccountInterface;
 use Drupal\og\Entity\OgMembership;
 use Drupal\og\Entity\OgRole;
 use Drupal\og\OgAccessInterface;
-use Drupal\og\OgRoleInterface;
 use Drupal\user\PrivateTempStoreFactory;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
@@ -100,7 +99,7 @@ class OgChangeMultipleRolesFormBase extends FormBase {
    */
   public function submitForm(array &$form, FormStateInterface $form_state) {
     $role_ids = array_keys($form_state->getValue('roles'));
-    /** @var OgRoleInterface[] $roles */
+    /** @var \Drupal\og\OgRoleInterface[] $roles */
     $roles = OgRole::loadMultiple($role_ids);
     foreach ($this->getMemberships() as $membership) {
       $changed = FALSE;
@@ -146,6 +145,7 @@ class OgChangeMultipleRolesFormBase extends FormBase {
    * Returns the temporary storage for the current user.
    *
    * @return \Drupal\user\PrivateTempStore
+   *   The temporary storage for the current user.
    */
   protected function getTempStore() {
     if (empty($this->tempStore)) {
@@ -191,4 +191,5 @@ class OgChangeMultipleRolesFormBase extends FormBase {
 
     return $group_types;
   }
+
 }
