@@ -101,8 +101,9 @@ interface OgMembershipInterface extends ContentEntityInterface {
   /**
    * Gets the group associated with the membership.
    *
-   * @return \Drupal\Core\Entity\EntityInterface
-   *   The group object which the membership reference to.
+   * @return \Drupal\Core\Entity\EntityInterface|null
+   *   The group object which is referenced by the membership, or NULL if no
+   *   group has been set yet.
    */
   public function getGroup();
 
@@ -195,6 +196,21 @@ interface OgMembershipInterface extends ContentEntityInterface {
    *   List of OG roles the user own for the current membership instance.
    */
   public function getRoles();
+
+  /**
+   * Returns whether the given role is valid for this membership.
+   *
+   * @param \Drupal\og\OgRoleInterface $role
+   *   The role to check.
+   *
+   * @return bool
+   *   True if the role is valid, false otherwise.
+   *
+   * @throws \LogicException
+   *   Thrown when the validity of the role cannot be established, for example
+   *   because the group hasn't yet been set on the membership.
+   */
+  public function isRoleValid(OgRoleInterface $role);
 
   /**
    * Checks if the user has a permission inside the group.
