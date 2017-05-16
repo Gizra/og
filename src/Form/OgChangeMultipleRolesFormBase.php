@@ -180,7 +180,7 @@ class OgChangeMultipleRolesFormBase extends FormBase {
    */
   protected function getGroupTypes() {
     $group_types = [];
-    foreach($this->getMemberships() as $membership) {
+    foreach ($this->getMemberships() as $membership) {
       $group = $membership->getGroup();
       $key = implode('-', [$group->getEntityTypeId(), $group->bundle()]);
       $group_types[$key] = [
