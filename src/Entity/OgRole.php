@@ -55,12 +55,7 @@ class OgRole extends Role implements OgRoleInterface {
   }
 
   /**
-   * Sets the ID of the role.
-   *
-   * @param string $id
-   *   The machine name of the role.
-   *
-   * @return $this
+   * {@inheritdoc}
    */
   public function setId($id) {
     $this->set('id', $id);
@@ -68,22 +63,14 @@ class OgRole extends Role implements OgRoleInterface {
   }
 
   /**
-   * Returns the label.
-   *
-   * @return string
-   *   The label.
+   * {@inheritdoc}
    */
   public function getLabel() {
     return $this->get('label');
   }
 
   /**
-   * Sets the label.
-   *
-   * @param string $label
-   *   The label to set.
-   *
-   * @return $this
+   * {@inheritdoc}
    */
   public function setLabel($label) {
     $this->set('label', $label);
@@ -91,22 +78,14 @@ class OgRole extends Role implements OgRoleInterface {
   }
 
   /**
-   * Returns the group type.
-   *
-   * @return string
-   *   The group type.
+   * {@inheritdoc}
    */
   public function getGroupType() {
     return $this->get('group_type');
   }
 
   /**
-   * Sets the group type.
-   *
-   * @param string $group_type
-   *   The group type to set.
-   *
-   * @return $this
+   * {@inheritdoc}
    */
   public function setGroupType($group_type) {
     $this->set('group_type', $group_type);
@@ -114,22 +93,14 @@ class OgRole extends Role implements OgRoleInterface {
   }
 
   /**
-   * Returns the group bundle.
-   *
-   * @return string
-   *   The group bundle.
+   * {@inheritdoc}
    */
   public function getGroupBundle() {
     return $this->get('group_bundle');
   }
 
   /**
-   * Sets the group bundle.
-   *
-   * @param string $group_bundle
-   *   The group bundle to set.
-   *
-   * @return $this
+   * {@inheritdoc}
    */
   public function setGroupBundle($group_bundle) {
     $this->set('group_bundle', $group_bundle);
