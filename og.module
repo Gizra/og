@@ -82,6 +82,9 @@ function og_entity_predelete(EntityInterface $entity) {
   }
   if ($entity instanceof UserInterface) {
     // @todo Delete memberships when deleting users.
+    // @todo Note that this should not be solved here in the predelete hook but
+    //   by introducing a dependency between the membership entities and the
+    //   user entities.
     // @see https://github.com/amitaibu/og/issues/176
   }
 }
