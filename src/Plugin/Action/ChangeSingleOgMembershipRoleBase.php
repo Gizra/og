@@ -104,17 +104,6 @@ abstract class ChangeSingleOgMembershipRoleBase extends ConfigurableActionBase i
   /**
    * {@inheritdoc}
    */
-  public function calculateDependencies() {
-    if (!empty($this->configuration['role_name'])) {
-      $prefix = $this->entityType->getConfigPrefix() . '.';
-      $this->addDependency('config', $prefix . $this->configuration['role_name']);
-    }
-    return $this->dependencies;
-  }
-
-  /**
-   * {@inheritdoc}
-   */
   public function access($object, AccountInterface $account = NULL, $return_as_object = FALSE) {
     /** @var \Drupal\og\Entity\OgMembership $object */
     // Grant access if the user can manage members in this group.
