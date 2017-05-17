@@ -145,3 +145,11 @@ field.widget.settings.og_complex:
     placeholder:
       type: label
       label: 'Placeholder'
+
+condition.plugin.og_group_type:
+  type: condition.plugin
+  mapping:
+    group_types:
+      type: sequence
+      sequence:
+        type: string
