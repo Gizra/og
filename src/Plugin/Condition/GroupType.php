@@ -90,6 +90,18 @@ class GroupType extends ConditionPluginBase implements ContainerFactoryPluginInt
   public function buildConfigurationForm(array $form, FormStateInterface $form_state) {
     $options = [];
     $group_types = $this->groupTypeManager->getAllGroupBundles();
+
+    // If no groups have been created yet, show only the error message and hide
+    // the other elements.
+    if (empty($group_types)) {
+      $form['empty'] = [
+        '#type' => 'html_tag',
+        '#tag' => 'p',
+        '#value' => $this->t('No groups have been set up yet.'),
+      ];
+      return $form;
+    }
+
     foreach ($group_types as $entity_type => $bundles) {
       $definition = $this->entityTypeManager->getDefinition($entity_type);
       $entity_type_label = $definition->getLabel();
@@ -105,6 +117,7 @@ class GroupType extends ConditionPluginBase implements ContainerFactoryPluginInt
       '#options' => $options,
       '#default_value' => $this->configuration['group_types'],
     ];
+
     return parent::buildConfigurationForm($form, $form_state);
   }
 
