@@ -3,6 +3,7 @@
 namespace Drupal\og\Plugin\EntityReferenceSelection;
 
 use Drupal\Core\Entity\Plugin\EntityReferenceSelection\DefaultSelection;
+use Drupal\Core\Form\FormStateInterface;
 use Drupal\user\Entity\User;
 use Drupal\og\Og;
 
@@ -68,7 +69,7 @@ class OgSelection extends DefaultSelection {
     $definition = \Drupal::entityTypeManager()->getDefinition($target_type);
 
     if ($bundle_key = $definition->getKey('bundle')) {
-      $bundles = Og::groupTypeManager()->getAllGroupBundles($target_type);
+      $bundles = Og::groupTypeManager()->getGroupBundlesByEntityType($target_type);
 
       if (!$bundles) {
         // If there are no bundles defined, we can return early.
@@ -125,6 +126,30 @@ class OgSelection extends DefaultSelection {
     $membership_manager = \Drupal::service('og.membership_manager');
     $other_groups = $membership_manager->getUserGroups($user);
     return isset($other_groups[$this->configuration['target_type']]) ? $other_groups[$this->configuration['target_type']] : [];
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function buildConfigurationForm(array $form, FormStateInterface $form_state) {
+    $form = parent::buildConfigurationForm($form, $form_state);
+
+    // Filter out the bundles that are not groups.
+    $entity_type_id = $this->configuration['target_type'];
+    $entity_type = $this->entityManager->getDefinition($entity_type_id);
+    $bundles_info = $this->entityManager->getBundleInfo($entity_type_id);
+
+    if ($entity_type->hasKey('bundle')) {
+
+      foreach (Og::groupTypeManager()->getGroupBundlesByEntityType($entity_type_id) as $bundle) {
+        $bundle_options[$bundle] = $bundles_info[$bundle]['label'];
+      }
+
+      natsort($bundle_options);
+      $form['target_bundles']['#options'] = $bundle_options;
+    }
+
+    return $form;
   }
 
 }

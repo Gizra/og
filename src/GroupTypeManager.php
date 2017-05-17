@@ -227,9 +227,22 @@ class GroupTypeManager {
    *   An associative array, keyed by entity type, each value an indexed array
    *   of bundle IDs.
    */
-  public function getAllGroupBundles($entity_type = NULL) {
+  public function getAllGroupBundles() {
+    return $this->getGroupMap();
+  }
+
+  /**
+   * Get group bundles of an entity type.
+   *
+   * @param string $entity_type_id
+   *   The entity type ID.
+   *
+   * @return array
+   *   An associative array of bundle IDs, or an empty array if none found.
+   */
+  public function getGroupBundlesByEntityType($entity_type_id) {
     $group_map = $this->getGroupMap();
-    return !empty($group_map[$entity_type]) ? $group_map[$entity_type] : $group_map;
+    return isset($group_map[$entity_type_id]) ? $group_map[$entity_type_id] : [];
   }
 
   /**
