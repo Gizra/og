@@ -30,14 +30,12 @@ class GroupTypeTest extends KernelTestBase {
   protected function setUp() {
     parent::setUp();
 
-    // Installing needed schema.
     $this->installConfig(['og']);
-
     $this->groupTypeManager = $this->container->get('og.group_type_manager');
   }
 
   /**
-   * Testing OG role creation.
+   * Test creation and deletion of a group type.
    */
   public function testGroupType() {
     // Create a content type.
@@ -45,7 +43,7 @@ class GroupTypeTest extends KernelTestBase {
     $group_type = NodeType::create(['type' => 'group', 'name' => 'Group']);
     $group_type->save();
 
-    // Initially it is not a group.
+    // Initially it should not be a group.
     $this->assertFalse($this->groupTypeManager->isGroup('node', 'group'));
 
     // Turn it into a group.
