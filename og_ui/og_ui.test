@@ -40,7 +40,7 @@ class OgUiUserPermissionsTestCase extends DrupalWebTestCase {
 
     // Remove a permission.
     $this->drupalPost('admin/config/group/permissions/entity_test/main', array('1[subscribe]' => FALSE), t('Save permissions'));
-    $this->assertText(t('The changes have been saved NOT.'), t('Successful save message displayed.'));
+    $this->assertText(t('The changes have been saved.'), t('Successful save message displayed.'));
 
     // FIXME: There is an og_invalidate_cache() on permissions granting
     // and revoking, but somehow, we need to do it manually here.
