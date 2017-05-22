@@ -48,6 +48,13 @@ class OgRoleManagerTest extends KernelTestBase {
   protected $roleName;
 
   /**
+   * The OG role manager.
+   *
+   * @var \Drupal\og\OgRoleManagerInterface
+   */
+  protected $ogRoleManager;
+
+  /**
    * {@inheritdoc}
    */
   public function setUp() {
@@ -58,6 +65,8 @@ class OgRoleManagerTest extends KernelTestBase {
     $this->installEntitySchema('node');
     $this->bundle = Unicode::strtolower($this->randomMachineName());
     $this->roleName = Unicode::strtolower($this->randomMachineName());
+
+    $this->ogRoleManager = $this->container->get('og.role_manager');
 
     // Create a group entity type.
     NodeType::create([
@@ -89,9 +98,10 @@ class OgRoleManagerTest extends KernelTestBase {
       'node-' . $this->bundle . '-' . $this->roleName,
     ];
 
-    $role_manager = $this->container->get('og.role_manager');
-    $roles = $role_manager->getRolesByBundle('node', $this->bundle);
+    $roles = $this->ogRoleManager->getRolesByBundle('node', $this->bundle);
     $role_ids = array_keys($roles);
+    sort($expected_role_ids);
+    sort($role_ids);
     $this->assertEquals($expected_role_ids, $role_ids);
   }
 
