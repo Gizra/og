@@ -313,7 +313,7 @@ function og_invalidate_group_content_cache_tags(EntityInterface $entity) {
 }
 
 /**
- * Implements hook_ENTITY_TYPE_insert() for user_role entities.
+ * Implements hook_ENTITY_TYPE_insert() for OgRole entities.
  */
 function og_og_role_insert(OgRoleInterface $role) {
   // Create actions to add or remove the role, except for the required default
@@ -351,7 +351,7 @@ function og_og_role_insert(OgRoleInterface $role) {
 }
 
 /**
- * Implements hook_ENTITY_TYPE_delete() for user_role entities.
+ * Implements hook_ENTITY_TYPE_delete() for OgRole entities.
  */
 function og_og_role_delete(OgRoleInterface $role) {
   $role_name = $role->getName();
