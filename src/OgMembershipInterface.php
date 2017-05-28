@@ -189,6 +189,17 @@ interface OgMembershipInterface extends ContentEntityInterface {
   public function revokeRole(OgRoleInterface $role);
 
   /**
+   * Revokes a role from the OG membership.
+   *
+   * @param string $role_id
+   *   The OG role ID.
+   *
+   * @return \Drupal\og\OgMembershipInterface
+   *   The updated OG Membership object.
+   */
+  public function revokeRoleById($role_id);
+
+  /**
    * Gets all the referenced OG roles.
    *
    * @return \Drupal\og\Entity\OgRole[]

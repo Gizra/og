@@ -178,10 +178,17 @@ class OgMembership extends ContentEntityBase implements OgMembershipInterface {
    * {@inheritdoc}
    */
   public function revokeRole(OgRoleInterface $role) {
+    return $this->revokeRoleById($role->id());
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function revokeRoleById($role_id) {
     $roles = $this->getRoles();
 
     foreach ($roles as $key => $existing_role) {
-      if ($existing_role->id() == $role->id()) {
+      if ($existing_role->id() == $role_id) {
         unset($roles[$key]);
 
         // We can stop iterating.
