@@ -216,17 +216,6 @@ interface OgMembershipInterface extends ContentEntityInterface {
   public function getRolesIds();
 
   /**
-   * Checks if the membership has the role with the given ID.
-   *
-   * @param string $role_id
-   *   The ID of the role to check.
-   *
-   * @return bool
-   *   True if the membership has the role.
-   */
-  public function hasRole($role_id);
-
-  /**
    * Returns whether the given role is valid for this membership.
    *
    * @param \Drupal\og\OgRoleInterface $role

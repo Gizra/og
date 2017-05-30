@@ -239,13 +239,6 @@ class OgMembership extends ContentEntityBase implements OgMembershipInterface {
   /**
    * {@inheritdoc}
    */
-  public function hasRole($role_id) {
-    return in_array($role_id, $this->getRolesIds());
-  }
-
-  /**
-   * {@inheritdoc}
-   */
   public function isRoleValid(OgRoleInterface $role) {
     $group = $this->getGroup();
 
