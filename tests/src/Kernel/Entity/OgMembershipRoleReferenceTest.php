@@ -111,23 +111,17 @@ class OgMembershipRoleReferenceTest extends KernelTestBase {
       // Assign only the content editor role for now.
       ->setRoles([$content_editor])
       ->save();
-
-    $roles_ids = $membership->getRolesIds();
-    $this->assertTrue(in_array($content_editor->id(), $roles_ids), 'The membership has the content editor role.');
+    $this->assertTrue($membership->hasRole($content_editor->id()), 'The membership has the content editor role.');
 
     // Adding another role to the membership.
     $membership->addRole($group_member);
-    $roles_ids = $membership->getRolesIds();
-
-    $this->assertTrue(in_array($content_editor->id(), $roles_ids), 'The membership has the content editor role.');
-    $this->assertTrue(in_array($group_member->id(), $roles_ids), 'The membership has the group member role.');
+    $this->assertTrue($membership->hasRole($content_editor->id()), 'The membership has the content editor role.');
+    $this->assertTrue($membership->hasRole($group_member->id()), 'The membership has the group member role.');
 
     // Remove a role.
     $membership->revokeRole($content_editor);
-
-    $roles_ids = $membership->getRolesIds();
-    $this->assertFalse(in_array($content_editor->id(), $roles_ids), 'The membership does not have the content editor role after is has been revoked.');
-    $this->assertTrue(in_array($group_member->id(), $roles_ids), 'The membership has the group member role.');
+    $this->assertFalse($membership->hasRole($content_editor->id()), 'The membership does not have the content editor role after is has been revoked.');
+    $this->assertTrue($membership->hasRole($group_member->id()), 'The membership has the group member role.');
 
     // Check if the role has permission from the membership.
     $this->assertFalse($membership->hasPermission('administer group'), 'The user has permission to administer groups.');

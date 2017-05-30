@@ -242,6 +242,17 @@ interface OgMembershipInterface extends ContentEntityInterface {
   public function isRoleValid(OgRoleInterface $role);
 
   /**
+   * Checks if the membership has the role with the given ID.
+   *
+   * @param string $role_id
+   *   The ID of the role to check.
+   *
+   * @return bool
+   *   True if the membership has the role.
+   */
+  public function hasRole($role_id);
+
+  /**
    * Checks if the user has a permission inside the group.
    *
    * @param string $permission
