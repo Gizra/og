@@ -125,7 +125,7 @@ interface OgMembershipInterface extends ContentEntityInterface {
   /**
    * Sets the membership state.
    *
-   * @param int $state
+   * @param string $state
    *   The state of the membership. It may be of the following constants:
    *   - OgMembershipInterface::STATE_ACTIVE
    *   - OgMembershipInterface::STATE_PENDING
@@ -139,7 +139,7 @@ interface OgMembershipInterface extends ContentEntityInterface {
   /**
    * Gets the membership state.
    *
-   * @return int
+   * @return string
    *   The state of the membership. It may be of the following constants:
    *   - OgMembershipInterface::STATE_ACTIVE
    *   - OgMembershipInterface::STATE_PENDING
