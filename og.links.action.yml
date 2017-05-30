@@ -1,0 +1,5 @@
+og_membership.type_add:
+  route_name: og_membership.type_add
+  title: 'Add membership type'
+  appears_on:
+    - entity.og_membership_type.collection
