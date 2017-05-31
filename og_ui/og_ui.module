@@ -328,12 +328,7 @@ function og_ui_user_access_group($perm, $group_type, $gid) {
     return FALSE;
   }
 
-  $entity_info = entity_get_info($group_type);
-  if (!$group_type || !$entity_info) {
-    // Not a valid entity type.
-    return FALSE;
-  }
-  return og_is_group($group_type, $group) && og_user_access($group_type, $gid, $perm);
+  return og_user_access($group_type, $gid, $perm);
 }
 
 /**
