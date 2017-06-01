@@ -31,6 +31,7 @@ class OgGroupContentOperationAccessTest extends KernelTestBase {
     'field',
     'node',
     'og',
+    'options',
     'system',
     'user',
   ];

@@ -27,6 +27,7 @@ class GetGroupContentTest extends KernelTestBase {
     'field',
     'node',
     'og',
+    'options',
     'system',
     'user',
   ];

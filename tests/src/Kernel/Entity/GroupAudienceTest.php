@@ -30,6 +30,7 @@ class GroupAudienceTest extends KernelTestBase {
     'entity_test',
     'field',
     'og',
+    'options',
     'system',
     'user',
   ];
