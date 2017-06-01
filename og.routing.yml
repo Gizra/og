@@ -5,7 +5,7 @@ og.subscribe:
   defaults:
     _controller: '\Drupal\og\Controller\SubscriptionController::subscribe'
     _title: 'Join Group'
-    membership_type: default
+    og_membership_type: default
   requirements:
     # Only authenticated users can subscribe to group, but we do allow anonymous
     # users to reach this route. They will be redirect to login page or be given
@@ -66,8 +66,6 @@ entity.og_membership.add_form:
     parameters:
       group:
         type: entity:{entity_type_id}
-      og_membership_type:
-        type: entity:og_membership_type
 
 # The canonical route is the same as the edit-form route because we need a
 # canonical route for various functionality to work properly, but a standard
@@ -81,8 +79,6 @@ entity.og_membership.canonical:
     parameters:
       group:
         type: entity:{entity_type_id}
-      og_membership:
-        type: entity:og_membership
   requirements:
     _entity_access: 'og_membership.edit'
 
@@ -95,8 +91,6 @@ entity.og_membership.edit_form:
     parameters:
       group:
         type: entity:{entity_type_id}
-      og_membership:
-        type: entity:og_membership
   requirements:
     _entity_access: 'og_membership.edit'
 
@@ -109,8 +103,6 @@ entity.og_membership.delete_form:
     parameters:
       group:
         type: entity:{entity_type_id}
-      og_membership:
-        type: entity:og_membership
   requirements:
     _entity_access: 'og_membership.delete'
 

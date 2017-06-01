@@ -66,14 +66,14 @@ class SubscriptionController extends ControllerBase {
    *   The entity type of the group entity.
    * @param \Drupal\Core\Entity\EntityInterface $group
    *   The entity ID of the group entity.
-   * @param \Drupal\og\OgMembershipTypeInterface $membership_type
+   * @param \Drupal\og\OgMembershipTypeInterface $og_membership_type
    *   The membership type to be used for creating the membership.
    *
    * @return mixed
    *   Redirect user or show access denied if they are not allowed to subscribe,
    *   otherwise provide a subscribe confirmation form.
    */
-  public function subscribe($entity_type_id, EntityInterface $group, OgMembershipTypeInterface $membership_type) {
+  public function subscribe($entity_type_id, EntityInterface $group, OgMembershipTypeInterface $og_membership_type) {
     if (!$group instanceof ContentEntityInterface) {
       // Not a valid entity.
       throw new AccessDeniedHttpException();
@@ -138,7 +138,7 @@ class SubscriptionController extends ControllerBase {
       throw new AccessDeniedHttpException();
     }
 
-    $membership = Og::createMembership($group, $user, $membership_type->id());
+    $membership = Og::createMembership($group, $user, $og_membership_type->id());
     $form = $this->entityFormBuilder()->getForm($membership, 'subscribe');
     return $form;
 
