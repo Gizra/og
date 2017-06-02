@@ -52,6 +52,13 @@ class SelectionHandlerTest extends KernelTestBase {
   protected $user2;
 
   /**
+   * A user object.
+   *
+   * @var User
+   */
+  protected $user3;
+
+  /**
    * The machine name of the group node type.
    *
    * @var string
@@ -116,6 +123,9 @@ class SelectionHandlerTest extends KernelTestBase {
 
     $this->user2 = User::create(['name' => $this->randomString()]);
     $this->user2->save();
+
+    $this->user3 = User::create(['name' => $this->randomString()]);
+    $this->user3->save();
   }
 
   /**
@@ -140,26 +150,40 @@ class SelectionHandlerTest extends KernelTestBase {
   public function testSelectionHandlerResults() {
     $user1_groups = $this->createGroups(2, $this->user1);
     $user2_groups = $this->createGroups(2, $this->user2);
+    $user3_groups = $this->createGroups(2, $this->user3);
 
-    // Checking that the user get the groups he mange.
+    // $user1 has uid 1, so it is the implicit super user.
+    // They have access to all groups.
+    $all_groups = array_merge($user1_groups, $user2_groups, $user3_groups);
+
+    // Checking that the user get the groups they manage.
     $this->setCurrentAccount($this->user1);
     $groups = $this->selectionHandler->getReferenceableEntities();
-    $this->assertEquals($user1_groups, array_keys($groups[$this->groupBundle]));
+    $this->assertEquals($all_groups, array_keys($groups[$this->groupBundle]));
 
     $this->setCurrentAccount($this->user2);
     $groups = $this->selectionHandler->getReferenceableEntities();
     $this->assertEquals($user2_groups, array_keys($groups[$this->groupBundle]));
+
+    $this->setCurrentAccount($this->user3);
+    $groups = $this->selectionHandler->getReferenceableEntities();
+    $this->assertEquals($user3_groups, array_keys($groups[$this->groupBundle]));
 
     // Check the other groups.
     $this->selectionHandler = Og::getSelectionHandler($this->fieldDefinition, ['handler_settings' => ['field_mode' => 'admin']]);
 
+    // The super user can still access all groups.
     $this->setCurrentAccount($this->user1);
     $groups = $this->selectionHandler->getReferenceableEntities();
-    $this->assertEquals($user2_groups, array_keys($groups[$this->groupBundle]));
+    $this->assertEquals($all_groups, array_keys($groups[$this->groupBundle]));
 
     $this->setCurrentAccount($this->user2);
     $groups = $this->selectionHandler->getReferenceableEntities();
-    $this->assertEquals($user1_groups, array_keys($groups[$this->groupBundle]));
+    $this->assertEquals(array_merge($user1_groups, $user3_groups), array_keys($groups[$this->groupBundle]));
+
+    $this->setCurrentAccount($this->user3);
+    $groups = $this->selectionHandler->getReferenceableEntities();
+    $this->assertEquals(array_merge($user1_groups, $user2_groups), array_keys($groups[$this->groupBundle]));
   }
 
   /**
@@ -184,7 +208,7 @@ class SelectionHandlerTest extends KernelTestBase {
       ]);
       $group->save();
 
-      $groups[] = $group->id();
+      $groups[] = (int) $group->id();
     }
 
     return $groups;

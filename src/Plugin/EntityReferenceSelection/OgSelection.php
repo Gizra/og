@@ -77,6 +77,11 @@ class OgSelection extends DefaultSelection {
       $query->condition($bundle_key, $bundles, 'IN');
     }
 
+    // This is a global administrator, therefore they can add any group.
+    if ($this->currentUser->hasPermission('administer group')) {
+      return $query;
+    }
+
     $user_groups = $this->getUserGroups();
     if (!$user_groups) {
       return $query;
