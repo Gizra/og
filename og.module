@@ -41,7 +41,8 @@ function og_entity_insert(EntityInterface $entity) {
     return;
   }
 
-  if (!$entity->getOwner()) {
+  $owner = $entity->getOwner();
+  if (empty($owner) || $owner->isAnonymous()) {
     // User is anonymous, se we cannot set a membership for them.
     return;
   }

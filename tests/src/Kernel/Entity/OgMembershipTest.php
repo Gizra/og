@@ -5,6 +5,8 @@ namespace Drupal\Tests\og\Kernel\Entity;
 use Drupal\Component\Utility\Unicode;
 use Drupal\entity_test\Entity\EntityTest;
 use Drupal\KernelTests\KernelTestBase;
+use Drupal\node\Entity\Node;
+use Drupal\node\Entity\NodeType;
 use Drupal\og\Entity\OgMembership;
 use Drupal\og\Entity\OgRole;
 use Drupal\og\Og;
@@ -27,6 +29,7 @@ class OgMembershipTest extends KernelTestBase {
   public static $modules = [
     'entity_test',
     'field',
+    'node',
     'og',
     'system',
     'user',
@@ -62,10 +65,15 @@ class OgMembershipTest extends KernelTestBase {
     $this->installConfig(['og']);
     $this->installEntitySchema('og_membership');
     $this->installEntitySchema('entity_test');
+    $this->installEntitySchema('node');
     $this->installEntitySchema('user');
     $this->installSchema('system', 'sequences');
 
     $this->entityTypeManager = $this->container->get('entity_type.manager');
+    $storage = $this->entityTypeManager->getStorage('user');
+    // Insert a row for the anonymous user.
+    // @see user_install().
+    $storage->create(['uid' => 0, 'status' => 0, 'name' => ''])->save();
 
     // Create a bundle and add as a group.
     $group = EntityTest::create([
@@ -158,6 +166,27 @@ class OgMembershipTest extends KernelTestBase {
     $membership
       ->setUser($this->user)
       ->save();
+  }
+
+  /**
+   * Test that it is possible to create groups without an owner.
+   */
+  public function testNoOwnerException() {
+    // Create a bundle and add as a group.
+    $bundle = Unicode::strtolower($this->randomMachineName());
+    $group = NodeType::create([
+      'type' => $bundle,
+      'label' => $this->randomString(),
+    ]);
+    $group->save();
+
+    // Add that as a group.
+    Og::groupTypeManager()->addGroup('node', $bundle);
+    $entity = Node::create([
+      'title' => $this->randomString(),
+      'type' => $bundle,
+    ]);
+    $entity->save();
   }
 
   /**
