@@ -71,6 +71,7 @@ class OgMembershipTest extends KernelTestBase {
     $this->entityTypeManager = $this->container->get('entity_type.manager');
     $storage = $this->entityTypeManager->getStorage('user');
     // Insert a row for the anonymous user.
+    // @see user_install().
     $storage->create(['uid' => 0, 'status' => 0, 'name' => ''])->save();
 
     // Create a bundle and add as a group.
@@ -167,7 +168,7 @@ class OgMembershipTest extends KernelTestBase {
   }
 
   /**
-   * Tests that a logic exception is not thrown for groups with no owner.
+   * Test that it is possible to create groups without an owner.
    */
   public function testNoOwnerException() {
     // Create a bundle and add as a group.
