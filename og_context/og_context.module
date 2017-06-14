@@ -217,77 +217,97 @@ function og_context_is_init($called = FALSE) {
  *   was found.
  */
 function og_context($group_type = 'node', $group = NULL, $account = NULL, $check_access = TRUE) {
-  global $user;
-  // User account is sent.
-  $account = $account ? $account : user_load($user->uid);
+  static $in_og_context = FALSE;
 
-  $id = FALSE;
-  if ($group) {
-    list($id) = entity_extract_ids($group_type, $group);
+  // Prevent infinite loops if we are already in the middle of calling
+  // Only allow it to continue if *setting* the context
+  if ($in_og_context && is_null($group)) {
+    return FALSE;
   }
 
-  $cache_keys = array(
-    $group_type,
-    $id,
-    $account->uid,
-    $check_access,
-  );
-  $cache_key = implode(':', $cache_keys);
+  // Set $in_og_context to TRUE to define that function is being executed.
+  $in_og_context = TRUE;
+  $result = FALSE;
 
-  $context = &drupal_static(__FUNCTION__, array());
+  try {
 
-  if (!array_key_exists($cache_key, $context)) {
-    // Mark that this context hasn't been checked yet.
-    $context[$cache_key] = FALSE;
+    global $user;
+    // User account is sent.
+    $account = $account ? $account : user_load($user->uid);
+
+    $id = FALSE;
+    if ($group) {
+      list($id) = entity_extract_ids($group_type, $group);
+    }
+
+    $cache_keys = array(
+      $group_type,
+      $id,
+      $account->uid,
+      $check_access,
+    );
+    $cache_key = implode(':', $cache_keys);
+
+    $context = &drupal_static(__FUNCTION__, array());
+
+    if (!array_key_exists($cache_key, $context)) {
+      // Mark that this context hasn't been checked yet.
+      $context[$cache_key] = FALSE;
+    }
+
+    if (empty($group) && $context[$cache_key] !== FALSE) {
+      // Set og_context_is_init to TRUE to define that function was already executed.
+      og_context_is_init(TRUE);
+      // Determine if we can return cached values.
+      if (empty($context[$cache_key])) {
+        // We already tried to find a context, but couldn't.
+        $result = FALSE;
+      }
+      elseif ($context[$cache_key]['group_type'] == $group_type) {
+        // Return the cached values.
+        $result = $context[$cache_key];
+      }
+    }
+
+    // Set the context to array, so we can know this function has been already
+    // executed.
+    $context[$cache_key] = array();
+
+    if (!empty($group)) {
+      // Set og_context_is_init to TRUE to define that function was already executed.
+      og_context_is_init(TRUE);
+      if (!og_is_group($group_type, $group)) {
+        // The passed entity isn't a valid group.
+        $result = FALSE;
+      }
+      elseif ($check_access && !entity_access('view', $group_type, $group, $account)) {
+        // User doesn't have access to the group.
+        $result = FALSE;
+      }
+      else {
+        list($id) = entity_extract_ids($group_type, $group);
+        $result = array('group_type' => $group_type, 'gid' => $id);
+      }
+    }
+    // Get context from context handlers.
+    elseif ($gid = og_context_determine_context($group_type, NULL, $check_access)) {
+      // Set og_context_is_init to TRUE to define that function was already executed.
+      og_context_is_init(TRUE);
+      $result = array('group_type' => $group_type, 'gid' => $gid);
+      if ($user->uid) {
+        // Save the group ID in the authenticated user's session.
+        $_SESSION['og_context'] = array('group_type' => $group_type, 'gid' => $gid);
+      }
+    }
   }
 
-  if (empty($group) && $context[$cache_key] !== FALSE) {
-    // Set og_context_is_init to TRUE to define that function was already executed.
-    og_context_is_init(TRUE);
-    // Determine if we can return cached values.
-    if (empty($context[$cache_key])) {
-      // We already tried to find a context, but couldn't.
-      return FALSE;
-    }
-
-    if ($context[$cache_key]['group_type'] == $group_type) {
-      // Return the cached values.
-      return $context[$cache_key];
-    }
+  catch (Exception $e) {
   }
 
-  // Set the context to array, so we can know this function has been already
-  // executed.
-  $context[$cache_key] = array();
-
-  if (!empty($group)) {
-    // Set og_context_is_init to TRUE to define that function was already executed.
-    og_context_is_init(TRUE);
-    if (!og_is_group($group_type, $group)) {
-      // The passed entity isn't a valid group.
-      return FALSE;
-    }
-
-    if ($check_access && !entity_access('view', $group_type, $group, $account)) {
-      // User doesn't have access to the group.
-      return FALSE;
-    }
-
-    list($id) = entity_extract_ids($group_type, $group);
-    $context[$cache_key] = array('group_type' => $group_type, 'gid' => $id);
-  }
-  // Get context from context handlers.
-  elseif ($gid = og_context_determine_context($group_type, NULL, $check_access)) {
-    // Set og_context_is_init to TRUE to define that function was already executed.
-    og_context_is_init(TRUE);
-    $context[$cache_key] = array('group_type' => $group_type, 'gid' => $gid);
-    if ($user->uid) {
-      // Save the group ID in the authenticated user's session.
-      $_SESSION['og_context'] = array('group_type' => $group_type, 'gid' => $gid);
-    }
-  }
-
-  return $context[$cache_key];
+  // Ensure $in_context is unset to FALSE since we are done.
+  $in_og_context = FALSE;
+  $context[$cache_key] = $result;
+  return $result;
 }
 
 /**
