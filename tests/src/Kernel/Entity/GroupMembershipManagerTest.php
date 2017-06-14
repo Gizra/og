@@ -3,7 +3,6 @@
 namespace Drupal\Tests\og\Kernel\Entity;
 
 use Drupal\Component\Utility\Unicode;
-use Drupal\entity_test\Entity\EntityTestNew;
 use Drupal\entity_test\Entity\EntityTestRev;
 use Drupal\entity_test\Entity\EntityTestUpdate;
 use Drupal\KernelTests\KernelTestBase;
@@ -222,7 +221,6 @@ class GroupMembershipManagerTest extends KernelTestBase {
     $group_content_update_group = $membership_manager->getGroups($group_content_update);
     $group = reset($group_content_update_group['node']);
     $this->assertEquals($this->groups['node'][1]->id(), $group->id());
-
   }
 
   /**
