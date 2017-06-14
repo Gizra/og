@@ -175,6 +175,9 @@ class GroupMembershipManagerTest extends KernelTestBase {
   /**
    * Tests that the static cache loads the appropriate group.
    *
+   * Verify that entities from different entity types with colliding Ids that
+   * point to different groups do not confuse the membership manager.
+   *
    * @covers ::getGroupIds
    */
   public function testStaticCache() {
@@ -182,7 +185,7 @@ class GroupMembershipManagerTest extends KernelTestBase {
     $membership_manager = \Drupal::service('og.membership_manager');
     $bundle_rev = Unicode::strtolower($this->randomMachineName());
     $bundle_update = Unicode::strtolower($this->randomMachineName());
-    $field_settigns = [
+    $field_settings = [
       'field_name' => 'group_audience_node',
       'field_storage_config' => [
         'settings' => [
@@ -190,8 +193,8 @@ class GroupMembershipManagerTest extends KernelTestBase {
         ],
       ],
     ];
-    Og::createField(OgGroupAudienceHelperInterface::DEFAULT_FIELD, 'entity_test_rev', $bundle_rev, $field_settigns);
-    Og::createField(OgGroupAudienceHelperInterface::DEFAULT_FIELD, 'entity_test_update', $bundle_update, $field_settigns);
+    Og::createField(OgGroupAudienceHelperInterface::DEFAULT_FIELD, 'entity_test_rev', $bundle_rev, $field_settings);
+    Og::createField(OgGroupAudienceHelperInterface::DEFAULT_FIELD, 'entity_test_update', $bundle_update, $field_settings);
 
     $group_content_rev = EntityTestRev::create([
       'type' => $bundle_rev,
