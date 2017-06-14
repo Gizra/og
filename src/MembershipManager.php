@@ -87,6 +87,7 @@ class MembershipManager implements MembershipManagerInterface {
 
     $identifier = [
       __METHOD__,
+      'user',
       $user->id(),
       $states_identifier,
     ];
@@ -154,6 +155,7 @@ class MembershipManager implements MembershipManagerInterface {
 
     $identifier = [
       __METHOD__,
+      $entity->getEntityTypeId(),
       $entity->id(),
       $group_type_id,
       $group_bundle,
