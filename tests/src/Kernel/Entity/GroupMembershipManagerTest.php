@@ -217,6 +217,10 @@ class GroupMembershipManagerTest extends KernelTestBase {
     ]);
     $group_content_update->save();
 
+    // Ensure that both entities share the same Id. This is an assertion to
+    // ensure that the next assertions are addressing the proper issue.
+    $this->assertEquals($group_content_rev->id(), $group_content_update->id());
+
     $group_content_rev_group = $membership_manager->getGroups($group_content_rev);
     /** @var \Drupal\node\NodeInterface $group */
     $group = reset($group_content_rev_group['node']);
