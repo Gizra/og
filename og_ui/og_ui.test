@@ -435,8 +435,12 @@ class OgUiManagePeopleTestCase extends DrupalWebTestCase {
     $this->drupalGet('entity_test/0x' . $this->entity->pid . '/group');
     $this->assertResponse(403);
     // Non-existing groups return 404 however.
-    $this->drupalGet('entity_test/666/group');
+    $this->drupalGet('entity_test/666');
     $this->assertResponse(404);
+    // For the same, admin area returns 403.
+    $this->drupalGet('entity_test/666/group');
+    $this->assertResponse(403);
+
   }
 }
 
