@@ -640,7 +640,7 @@ function _group_context_handler_entity($entity_type = 'node', $entity = NULL, $p
   }
 
   // Check if the entity is itself a group.
-  if ($group = og_is_group($entity_type, $id)) {
+  if (og_is_group($entity_type, $entity)) {
     $contexts[$entity_type][] = $id;
   }
   elseif ($gids = og_get_entity_groups($entity_type, $entity)) {

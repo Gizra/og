@@ -333,7 +333,7 @@ function og_ui_user_access_group($perm, $group_type, $gid) {
     // Not a valid entity type.
     return FALSE;
   }
-  return og_is_group($group_type, $gid) && og_user_access($group_type, $gid, $perm);
+  return og_is_group($group_type, $group) && og_user_access($group_type, $gid, $perm);
 }
 
 /**
