@@ -106,6 +106,9 @@ class OgRoleTest extends KernelTestBase {
     // Checking creation of the role.
     $this->assertEquals($og_role->getPermissions(), ['administer group']);
 
+    // Check if the role is correctly recognized as a non-default role.
+    $this->assertFalse($og_role->isDefaultRole());
+
     // Try to create the same role again.
     try {
       $og_role = OgRole::create();
@@ -214,6 +217,9 @@ class OgRoleTest extends KernelTestBase {
         $this->assertEquals($group_type, $default_role->getGroupType());
         $this->assertEquals('group', $default_role->getGroupBundle());
         $this->assertEquals($role_name, $default_role->getName());
+
+        // Check that the role is recognized as a default role.
+        $this->assertTrue($default_role->isDefaultRole());
 
         // Keep track of the role so we can later test if they can be deleted.
         $default_roles[] = $default_role;
