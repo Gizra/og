@@ -162,6 +162,17 @@ class OgRole extends Role implements OgRoleInterface {
   /**
    * {@inheritdoc}
    */
+  public static function loadRolesByGroupType($group_entity_type_id, $group_bundle_id) {
+    $properties = [
+      'group_type' => $group_entity_type_id,
+      'group_bundle' => $group_bundle_id,
+    ];
+    return \Drupal::entityTypeManager()->getStorage('og_role')->loadByProperties($properties);
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   public function save() {
     // The ID of a new OgRole has to consist of the entity type ID, bundle ID
     // and role name, separated by dashes.
