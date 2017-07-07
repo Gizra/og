@@ -24,9 +24,9 @@ class OgRemoveMultipleRolesForm extends OgChangeMultipleRolesFormBase {
     $options = [];
     foreach ($this->getMemberships() as $membership) {
       foreach ($membership->getRoles() as $role) {
-        // Only add the role to the list if it is not a default role, these
+        // Only add the role to the list if it is not a required role, these
         // cannot be removed.
-        if (!$role->isDefaultRole()) {
+        if (!$role->isRequired()) {
           $options[$role->id()] = $role->label();
         }
       }
