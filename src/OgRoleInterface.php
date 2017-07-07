@@ -191,6 +191,6 @@ interface OgRoleInterface {
    * @return bool
    *   True if this is a default role. False otherwise.
    */
-  public function isDefaultRole();
+  public function isRequired();
 
 }
