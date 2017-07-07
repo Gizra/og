@@ -11,6 +11,7 @@ use Symfony\Component\Console\Helper\HelperSet;
  * Tests CLI integration for fields creation.
  *
  * @group og
+ * @group console
  * @coversDefaultClass \Drupal\og\Og
  */
 class DrupalConsoleAddFieldTest extends KernelTestBase {
