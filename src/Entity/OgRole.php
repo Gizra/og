@@ -242,7 +242,7 @@ class OgRole extends Role implements OgRoleInterface {
     // The default roles are required. Prevent them from being deleted for as
     // long as the group still exists, unless the group itself is in the process
     // of being removed.
-    if (!$this->parentEntityIsBeingRemoved && $this->isDefaultRole() && $this->groupTypeManager()->isGroup($this->getGroupType(), $this->getGroupBundle())) {
+    if (!$this->parentEntityIsBeingRemoved && $this->isRequired() && $this->groupTypeManager()->isGroup($this->getGroupType(), $this->getGroupBundle())) {
       throw new OgRoleException('The default roles "non-member" and "member" cannot be deleted.');
     }
 
@@ -254,8 +254,8 @@ class OgRole extends Role implements OgRoleInterface {
   /**
    * {@inheritdoc}
    */
-  public function isDefaultRole() {
-    return in_array($this->getName(), [self::ANONYMOUS, self::AUTHENTICATED]);
+  public function isRequired() {
+    return static::getRoleTypeByName($this->getName()) === OgRoleInterface::ROLE_TYPE_REQUIRED;
   }
 
   /**
