@@ -45,6 +45,14 @@ class OgRole extends Role implements OgRoleInterface {
   protected $name;
 
   /**
+   * Whether or not the parent entity we depend on is being removed.
+   *
+   * @var bool
+   *   TRUE if the entity is being removed.
+   */
+  protected $parentEntityIsBeingRemoved = FALSE;
+
+  /**
    * Constructs an OgRole object.
    *
    * @param array $values
@@ -232,8 +240,9 @@ class OgRole extends Role implements OgRoleInterface {
    */
   public function delete() {
     // The default roles are required. Prevent them from being deleted for as
-    // long as the group still exists.
-    if (in_array($this->id(), [self::ANONYMOUS, self::AUTHENTICATED]) && $this->groupTypeManager()->isGroup($this->getGroupType(), $this->getGroupBundle())) {
+    // long as the group still exists, unless the group itself is in the process
+    // of being removed.
+    if (!$this->parentEntityIsBeingRemoved && in_array($this->getName(), [self::ANONYMOUS, self::AUTHENTICATED]) && $this->groupTypeManager()->isGroup($this->getGroupType(), $this->getGroupBundle())) {
       throw new OgRoleException('The default roles "non-member" and "member" cannot be deleted.');
     }
 
@@ -304,6 +313,16 @@ class OgRole extends Role implements OgRoleInterface {
     // Create a dependency on the group bundle.
     $bundle_config_dependency = \Drupal::entityTypeManager()->getDefinition($this->getGroupType())->getBundleConfigDependency($this->getGroupBundle());
     $this->addDependency($bundle_config_dependency['type'], $bundle_config_dependency['name']);
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function onDependencyRemoval(array $dependencies) {
+    // The parent entity we depend on is being removed. Set a flag so we can
+    // allow removal of required roles.
+    $this->parentEntityIsBeingRemoved = TRUE;
+    return parent::onDependencyRemoval($dependencies);
   }
 
 }
