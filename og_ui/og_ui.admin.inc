@@ -470,8 +470,8 @@ function og_ui_group_types_overview($type) {
  * Menu callback: administer roles.
  *
  * @ingroup forms
- * @see og_user_admin_roles_validate()
- * @see og_user_admin_roles_submit()
+ * @see og_ui_admin_roles_validate()
+ * @see og_ui_admin_roles_submit()
  * @see theme_group_user_admin_new_role()
  */
 function og_ui_admin_roles($form, $form_state, $group_type = '', $gid = 0, $bundle = '', $rid = 0) {
