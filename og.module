@@ -78,9 +78,13 @@ function og_entity_predelete(EntityInterface $entity) {
     // @see https://github.com/amitaibu/og/issues/175
     // og_delete_user_roles_by_group($entity_type, $entity);
   }
+  // If a user is being deleted, also delete its memberships.
   if ($entity instanceof UserInterface) {
-    // @todo Delete memberships when deleting users.
-    // @see https://github.com/amitaibu/og/issues/176
+    /** @var \Drupal\og\MembershipManagerInterface $membership_manager */
+    $membership_manager = \Drupal::service('og.membership_manager');
+    foreach ($membership_manager->getMemberships($entity, []) as $membership) {
+      $membership->delete();
+    }
   }
 }
 
