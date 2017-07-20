@@ -170,7 +170,7 @@ class OgRole extends Role implements OgRoleInterface {
   /**
    * {@inheritdoc}
    */
-  public static function loadRolesByGroupType($group_entity_type_id, $group_bundle_id) {
+  public static function loadByGroupType($group_entity_type_id, $group_bundle_id) {
     $properties = [
       'group_type' => $group_entity_type_id,
       'group_bundle' => $group_bundle_id,
