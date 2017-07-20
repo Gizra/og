@@ -158,6 +158,19 @@ interface OgRoleInterface {
   public static function loadByGroupAndName(EntityInterface $group, $name);
 
   /**
+   * Returns the roles that are associated with the given group type and bundle.
+   *
+   * @param string $group_entity_type_id
+   *   The group entity type ID.
+   * @param string $group_bundle_id_id
+   *   The group bundle ID.
+   *
+   * @return \Drupal\og\OgRoleInterface[]
+   *   The roles.
+   */
+  public static function loadByGroupType($group_entity_type_id, $group_bundle_id_id);
+
+  /**
    * Get a role by the group's bundle and role name.
    *
    * @param string $entity_type_id
