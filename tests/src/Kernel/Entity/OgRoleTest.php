@@ -4,9 +4,7 @@ namespace Drupal\Tests\og\Kernel\Entity;
 
 use Drupal\Core\Config\ConfigValueException;
 use Drupal\Core\Entity\EntityStorageException;
-use Drupal\entity_test\Entity\EntityTest;
 use Drupal\KernelTests\KernelTestBase;
-use Drupal\node\Entity\NodeType;
 use Drupal\og\Entity\OgRole;
 use Drupal\og\Exception\OgRoleException;
 
@@ -30,11 +28,25 @@ class OgRoleTest extends KernelTestBase {
   ];
 
   /**
-   * The entity storage handler for OgRole entities.
+   * The group type manager.
    *
-   * @var \Drupal\Core\Entity\EntityStorageInterface
+   * @var \Drupal\og\GroupTypeManager
    */
-  protected $roleStorage;
+  protected $groupTypeManager;
+
+  /**
+   * The entity type manager.
+   *
+   * @var \Drupal\Core\Entity\EntityTypeManagerInterface
+   */
+  protected $entityTypeManager;
+
+  /**
+   * An array of test group types.
+   *
+   * @var \Drupal\Core\Entity\EntityInterface[]
+   */
+  protected $groupTypes;
 
   /**
    * {@inheritdoc}
@@ -46,12 +58,20 @@ class OgRoleTest extends KernelTestBase {
     $this->installConfig(['og']);
     $this->installEntitySchema('entity_test');
 
-    $this->roleStorage = $this->container->get('entity_type.manager')->getStorage('og_role');
+    $this->groupTypeManager = $this->container->get('og.group_type_manager');
+    $this->entityTypeManager = $this->container->get('entity_type.manager');
 
     // Create two test group types.
-    $values = ['type' => 'group', 'name' => 'Group'];
-    NodeType::create($values)->save();
-    EntityTest::create($values)->save();
+    foreach (['node_type', 'entity_test_bundle'] as $entity_type_id) {
+      $definition = $this->entityTypeManager->getDefinition($entity_type_id);
+      $values = [
+        $definition->getKey('id') => 'group',
+        $definition->getKey('label') => 'Group',
+      ];
+      $group_type = $this->entityTypeManager->getStorage($entity_type_id)->create($values);
+      $group_type->save();
+      $this->groupTypes[$entity_type_id] = $group_type;
+    }
   }
 
   /**
@@ -79,7 +99,7 @@ class OgRoleTest extends KernelTestBase {
       ->save();
 
     /** @var \Drupal\og\Entity\OgRole $saved_role */
-    $saved_role = $this->roleStorage->loadUnchanged('node-group-content_editor');
+    $saved_role = $this->loadUnchangedOgRole('node-group-content_editor');
     $this->assertNotEmpty($saved_role, 'The role was created with the expected ID.');
     $this->assertEquals($og_role->id(), $saved_role->id());
 
@@ -108,11 +128,11 @@ class OgRoleTest extends KernelTestBase {
     $og_role
       ->setName('content_editor')
       ->setLabel('Content editor')
-      ->setGroupType('entity_test')
+      ->setGroupType('entity_test_with_bundle')
       ->setGroupBundle('group')
       ->save();
 
-    $this->assertEquals('entity_test-group-content_editor', $og_role->id());
+    $this->assertEquals('entity_test_with_bundle-group-content_editor', $og_role->id());
 
     // Confirm role can be re-saved.
     $og_role->save();
@@ -131,7 +151,7 @@ class OgRoleTest extends KernelTestBase {
       $og_role
         ->setName('content_editor')
         ->setLabel('Content editor')
-        ->setGroupType('entity_test')
+        ->setGroupType('entity_test_with_bundle')
         ->setGroupBundle('group')
         ->save();
 
@@ -144,14 +164,14 @@ class OgRoleTest extends KernelTestBase {
     // Try to save a role with an ID instead of a name. This is how the Config
     // system will create a role from data stored in a YAML file.
     $og_role = OgRole::create([
-      'id' => 'entity_test-group-configurator',
+      'id' => 'entity_test_with_bundle-group-configurator',
       'label' => 'Configurator',
-      'group_type' => 'entity_test',
+      'group_type' => 'entity_test_with_bundle',
       'group_bundle' => 'group',
     ]);
     $og_role->save();
 
-    $this->assertNotEmpty($this->roleStorage->loadUnchanged('entity_test-group-configurator'));
+    $this->assertNotEmpty($this->loadUnchangedOgRole('entity_test_with_bundle-group-configurator'));
 
     // Check that we can retrieve the role name correctly. This was not
     // explicitly saved but it should be possible to derive this from the ID.
@@ -162,10 +182,10 @@ class OgRoleTest extends KernelTestBase {
     try {
       $og_role = OgRole::create();
       $og_role
-        ->setId('entity_test-group-wrong_id')
+        ->setId('entity_test_with_bundle-group-wrong_id')
         ->setName('content_editor')
         ->setLabel('Content editor')
-        ->setGroupType('entity_test')
+        ->setGroupType('entity_test_with_bundle')
         ->setGroupBundle('group')
         ->save();
 
@@ -174,6 +194,65 @@ class OgRoleTest extends KernelTestBase {
     catch (ConfigValueException $e) {
       $this->assertTrue(TRUE, "OG role with a non-matching ID can not be saved.");
     }
+  }
+
+  /**
+   * Tests the creation and deletion of default roles.
+   */
+  public function testDefaultRoles() {
+    // Check that the default roles are created when a new group type is
+    // declared.
+    foreach (['node', 'entity_test_with_bundle'] as $entity_type_id) {
+      $this->groupTypeManager->addGroup($entity_type_id, 'group');
+    }
+
+    $default_roles = [];
+    foreach ([OgRole::ANONYMOUS, OgRole::AUTHENTICATED] as $role_name) {
+      foreach (['node', 'entity_test_with_bundle'] as $group_type) {
+        $role_id = "$group_type-group-$role_name";
+        $default_role = OgRole::load($role_id);
+        $this->assertEquals($group_type, $default_role->getGroupType());
+        $this->assertEquals('group', $default_role->getGroupBundle());
+        $this->assertEquals($role_name, $default_role->getName());
+
+        // Keep track of the role so we can later test if they can be deleted.
+        $default_roles[] = $default_role;
+      }
+    }
+
+    // Default roles cannot be deleted, so an exception should be thrown when
+    // trying to delete a default role for a group type that still exists.
+    foreach ($default_roles as $default_role) {
+      try {
+        $default_role->delete();
+        $this->fail('A default role cannot be deleted.');
+      }
+      catch (OgRoleException $e) {
+      }
+    }
+
+    // Delete the group types.
+    foreach ($this->groupTypes as $group_type) {
+      $group_type->delete();
+    }
+    // The default roles are dependent on the group types so this action should
+    // result in the deletion of the default roles.
+    foreach ($default_roles as $default_role) {
+      $this->assertEmpty($this->loadUnchangedOgRole($default_role->id()));
+    }
+  }
+
+  /**
+   * Loads the unchanged OgRole directly from the database.
+   *
+   * @param string $id
+   *   The ID of the role to load.
+   *
+   * @return \Drupal\Core\Entity\EntityInterface|null
+   *   The role, or NULL if there is no such role.
+   */
+  protected function loadUnchangedOgRole($id) {
+    return $this->entityTypeManager->getStorage('og_role')->loadUnchanged($id);
   }
 
 }
