@@ -106,6 +106,9 @@ class OgRoleTest extends KernelTestBase {
     // Checking creation of the role.
     $this->assertEquals($og_role->getPermissions(), ['administer group']);
 
+    // Check if the role is correctly recognized as a non-default role.
+    $this->assertFalse($og_role->isRequired());
+
     // Try to create the same role again.
     try {
       $og_role = OgRole::create();
@@ -197,34 +200,39 @@ class OgRoleTest extends KernelTestBase {
   }
 
   /**
-   * Tests the creation and deletion of default roles.
+   * Tests the creation and deletion of required roles.
    */
-  public function testDefaultRoles() {
-    // Check that the default roles are created when a new group type is
+  public function testRequiredRoles() {
+    // Check that the required roles are created when a new group type is
     // declared.
     foreach (['node', 'entity_test_with_bundle'] as $entity_type_id) {
       $this->groupTypeManager->addGroup($entity_type_id, 'group');
     }
 
-    $default_roles = [];
+    $required_roles = [];
     foreach ([OgRole::ANONYMOUS, OgRole::AUTHENTICATED] as $role_name) {
       foreach (['node', 'entity_test_with_bundle'] as $group_type) {
         $role_id = "$group_type-group-$role_name";
-        $default_role = OgRole::load($role_id);
-        $this->assertEquals($group_type, $default_role->getGroupType());
-        $this->assertEquals('group', $default_role->getGroupBundle());
-        $this->assertEquals($role_name, $default_role->getName());
+        $required_role = OgRole::load($role_id);
+
+        // Check that the role is actually a required role.
+        $this->assertTrue($required_role->isRequired());
+
+        // Check that the other data is correct.
+        $this->assertEquals($group_type, $required_role->getGroupType());
+        $this->assertEquals('group', $required_role->getGroupBundle());
+        $this->assertEquals($role_name, $required_role->getName());
 
         // Keep track of the role so we can later test if they can be deleted.
-        $default_roles[] = $default_role;
+        $required_roles[] = $required_role;
       }
     }
 
-    // Default roles cannot be deleted, so an exception should be thrown when
-    // trying to delete a default role for a group type that still exists.
-    foreach ($default_roles as $default_role) {
+    // Required roles cannot be deleted, so an exception should be thrown when
+    // trying to delete them when the group type still exists.
+    foreach ($required_roles as $required_role) {
       try {
-        $default_role->delete();
+        $required_role->delete();
         $this->fail('A default role cannot be deleted.');
       }
       catch (OgRoleException $e) {
@@ -235,10 +243,10 @@ class OgRoleTest extends KernelTestBase {
     foreach ($this->groupTypes as $group_type) {
       $group_type->delete();
     }
-    // The default roles are dependent on the group types so this action should
-    // result in the deletion of the default roles.
-    foreach ($default_roles as $default_role) {
-      $this->assertEmpty($this->loadUnchangedOgRole($default_role->id()));
+    // The required roles are dependent on the group types so this action should
+    // result in the deletion of the roles.
+    foreach ($required_roles as $required_role) {
+      $this->assertEmpty($this->loadUnchangedOgRole($required_role->id()));
     }
   }
 

@@ -185,4 +185,12 @@ interface OgRoleInterface {
    */
   public static function getRole($entity_type_id, $bundle, $role_name);
 
+  /**
+   * Returns if this is a default role which is required and cannot be deleted.
+   *
+   * @return bool
+   *   True if this is a default role. False otherwise.
+   */
+  public function isRequired();
+
 }
