@@ -10,7 +10,6 @@ use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\og\Entity\OgRole;
 use Drupal\og\OgAccessInterface;
-use Drupal\og\OgRoleInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
