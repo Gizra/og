@@ -125,7 +125,7 @@ abstract class ChangeSingleOgMembershipRoleBase extends ConfigurableActionBase i
     // required and cannot be added to or removed from a membership.
     $role_names = [];
     foreach ($roles as $role) {
-      if ($role->getRoleType() !== OgRoleInterface::ROLE_TYPE_REQUIRED) {
+      if (!$role->isRequired()) {
         $role_names[$role->getName()] = $role->label();
       }
     }
