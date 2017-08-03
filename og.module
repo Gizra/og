@@ -329,7 +329,7 @@ function og_og_role_insert(OgRoleInterface $role) {
     $action = Action::create([
       'id' => $add_id,
       'type' => 'og_membership',
-      'label' => t('Add the @label role to the selected members', ['@label' => $role->label()]),
+      'label' => t('Add the @label role to the selected members', ['@label' => $role->getName()]),
       'configuration' => [
         'role_name' => $role->getName(),
       ],
@@ -342,7 +342,7 @@ function og_og_role_insert(OgRoleInterface $role) {
     $action = Action::create([
       'id' => $remove_id,
       'type' => 'og_membership',
-      'label' => t('Remove the @label role from the selected members', ['@label' => $role->label()]),
+      'label' => t('Remove the @label role from the selected members', ['@label' => $role->getName()]),
       'configuration' => [
         'role_name' => $role->getName(),
       ],
