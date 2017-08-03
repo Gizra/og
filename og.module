@@ -47,8 +47,11 @@ function og_entity_insert(EntityInterface $entity) {
     return;
   }
 
-  $membership = Og::createMembership($entity, $entity->getOwner());
-  $membership->save();
+  // Other modules might interfere and create a membership.
+  if (!Og::getMembership($entity, $entity->getOwner())) {
+    $membership = Og::createMembership($entity, $entity->getOwner());
+    $membership->save();
+  }
 }
 
 /**
