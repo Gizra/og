@@ -24,7 +24,7 @@ class OgAddMultipleRolesForm extends OgChangeMultipleRolesFormBase {
     $options = [];
     foreach ($this->getGroupTypes() as $group_type) {
       /** @var \Drupal\og\OgRoleInterface $role */
-      foreach (OgRole::loadRolesByGroupType($group_type['entity_type_id'], $group_type['bundle_id']) as $role) {
+      foreach (OgRole::loadByGroupType($group_type['entity_type_id'], $group_type['bundle_id']) as $role) {
         // Only add the role to the list if it is not a required role, these
         // cannot be added.
         if (!$role->isRequired()) {
