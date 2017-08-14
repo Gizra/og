@@ -71,6 +71,10 @@ class PendingOgMembershipActionTest extends ActionTestBase {
       ['group_moderator', 'blocked'],
       ['group_moderator', 'group_administrator'],
       ['group_moderator', 'group_moderator'],
+      ['group_owner', 'member', TRUE],
+      ['group_owner', 'blocked', TRUE],
+      ['group_owner', 'group_administrator', TRUE],
+      ['group_owner', 'group_moderator', TRUE],
     ];
   }
 
@@ -80,36 +84,53 @@ class PendingOgMembershipActionTest extends ActionTestBase {
   public function noAccessProvider() {
     return [
       // Access is denied to users that are not privileged, and if the
-      // membership is already pending.
+      // membership is already pending. Also changing the state of the group
+      // owner is not permitted.
       ['uid1', 'pending'],
+      ['uid1', 'group_owner'],
       ['administrator', 'pending'],
+      ['administrator', 'group_owner'],
       ['group_administrator', 'pending'],
+      ['group_administrator', 'group_owner'],
       ['group_moderator', 'pending'],
+      ['group_moderator', 'group_owner'],
+      ['group_owner', 'pending', TRUE],
+      ['group_owner', 'group_owner', TRUE],
       ['anonymous', 'member'],
       ['anonymous', 'pending'],
       ['anonymous', 'blocked'],
       ['anonymous', 'group_administrator'],
       ['anonymous', 'group_moderator'],
+      ['anonymous', 'group_owner'],
       ['authenticated', 'member'],
       ['authenticated', 'pending'],
       ['authenticated', 'blocked'],
       ['authenticated', 'group_administrator'],
       ['authenticated', 'group_moderator'],
+      ['authenticated', 'group_owner'],
       ['member', 'member'],
       ['member', 'pending'],
       ['member', 'blocked'],
       ['member', 'group_administrator'],
       ['member', 'group_moderator'],
+      ['member', 'group_owner'],
       ['pending', 'member'],
       ['pending', 'pending'],
       ['pending', 'blocked'],
       ['pending', 'group_administrator'],
       ['pending', 'group_moderator'],
+      ['pending', 'group_owner'],
       ['blocked', 'member'],
       ['blocked', 'pending'],
       ['blocked', 'blocked'],
       ['blocked', 'group_administrator'],
       ['blocked', 'group_moderator'],
+      ['blocked', 'group_owner'],
+      ['group_owner', 'member', FALSE],
+      ['group_owner', 'pending', FALSE],
+      ['group_owner', 'blocked', FALSE],
+      ['group_owner', 'group_administrator', FALSE],
+      ['group_owner', 'group_moderator', FALSE],
     ];
   }
 

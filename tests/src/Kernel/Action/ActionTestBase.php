@@ -88,6 +88,13 @@ abstract class ActionTestBase extends KernelTestBase {
     $this->membershipManager = $this->container->get('og.membership_manager');
     $this->groupTypeManager = $this->container->get('og.group_type_manager');
 
+    // The first user created (with UID 1) is the super user.
+    $this->users['uid1'] = $this->createUser();
+
+    // Create the group owner. This user will have all rights in the group if
+    // the 'group_manager_full_access' configuration option is set.
+    $this->users['group_owner'] = $this->createUser();
+
     // Create a group entity type.
     $group_bundle = Unicode::strtolower($this->randomMachineName());
     NodeType::create([
@@ -100,8 +107,13 @@ abstract class ActionTestBase extends KernelTestBase {
     $this->group = Node::create([
       'title' => $this->randomString(),
       'type' => $group_bundle,
+      'uid' => $this->users['group_owner']->id(),
     ]);
     $this->group->save();
+
+    // Store a reference to the group owner membership that is automatically
+    // created along with the group.
+    $this->memberships['group_owner'] = $this->membershipManager->getMembership($this->group, $this->users['group_owner']);
 
     // Store a reference to the administrator role for our group type.
     $this->roles['administrator'] = OgRole::getRole('node', $group_bundle, OgRoleInterface::ADMINISTRATOR);
@@ -115,7 +127,7 @@ abstract class ActionTestBase extends KernelTestBase {
       ->grantPermission('manage members')
       ->save();
 
-    // Create test users.
+    // Create the remainder of the test users.
     $this->createUsers();
   }
 
@@ -125,9 +137,6 @@ abstract class ActionTestBase extends KernelTestBase {
   protected function createUsers() {
     // An anonymous user.
     $this->users['anonymous'] = new AnonymousUserSession();
-
-    // The first user created (with UID 1) is the super user.
-    $this->users['uid1'] = $this->createUser();
 
     // A normal authenticated user.
     $this->users['authenticated'] = $this->createUser();
@@ -200,9 +209,15 @@ abstract class ActionTestBase extends KernelTestBase {
     foreach ($test_cases as $test_case) {
       list($user, $membership) = $test_case;
 
+      // When testing the group owner, configure whether or not they have full
+      // access.
+      if ($user === 'group_owner') {
+        $this->config('og.settings')->set('group_manager_full_access', $test_case[2])->save();
+      }
+
       $plugin = $this->getPlugin();
       $access_as_object = $plugin->access($this->memberships[$membership], $this->users[$user], TRUE);
-      $this->assertTrue($access_as_object instanceof AccessResultAllowed);
+      $this->assertTrue($access_as_object instanceof AccessResultAllowed, "$user $membership");
 
       $access_as_boolean = $plugin->access($this->memberships[$membership], $this->users[$user], FALSE);
       $this->assertTrue($access_as_boolean);
@@ -220,6 +235,13 @@ abstract class ActionTestBase extends KernelTestBase {
     $test_cases = $this->noAccessProvider();
     foreach ($test_cases as $test_case) {
       list($user, $membership) = $test_case;
+
+      // When testing the group owner, configure whether or not they have full
+      // access.
+      if ($user === 'group_owner') {
+        $this->config('og.settings')->set('group_manager_full_access', $test_case[2])->save();
+      }
+
       $plugin = $this->getPlugin();
       $access_as_object = $plugin->access($this->memberships[$membership], $this->users[$user], TRUE);
       $this->assertFalse($access_as_object instanceof AccessResultAllowed);

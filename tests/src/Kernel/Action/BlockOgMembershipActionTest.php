@@ -53,7 +53,8 @@ class BlockOgMembershipActionTest extends ActionTestBase {
   public function accessProvider() {
     return [
       // Access should be provided if the membership is not already blocked and
-      // the user executing the action is a privileged user.
+      // does not belong to the group owner, and the user executing the action
+      // is a privileged user.
       ['uid1', 'member'],
       ['uid1', 'pending'],
       ['uid1', 'group_administrator'],
@@ -70,6 +71,10 @@ class BlockOgMembershipActionTest extends ActionTestBase {
       ['group_moderator', 'pending'],
       ['group_moderator', 'group_administrator'],
       ['group_moderator', 'group_moderator'],
+      ['group_owner', 'member', TRUE],
+      ['group_owner', 'pending', TRUE],
+      ['group_owner', 'group_administrator', TRUE],
+      ['group_owner', 'group_moderator', TRUE],
     ];
   }
 
@@ -79,36 +84,53 @@ class BlockOgMembershipActionTest extends ActionTestBase {
   public function noAccessProvider() {
     return [
       // Access is denied to users that are not privileged, and if the
-      // membership is already blocked.
+      // membership is already blocked, or if it belongs to the group owner.
       ['uid1', 'blocked'],
+      ['uid1', 'group_owner'],
       ['administrator', 'blocked'],
+      ['administrator', 'group_owner'],
       ['group_administrator', 'blocked'],
+      ['group_administrator', 'group_owner'],
       ['group_moderator', 'blocked'],
+      ['group_moderator', 'group_owner'],
+      ['group_owner', 'blocked', TRUE],
+      ['group_owner', 'group_owner', TRUE],
       ['anonymous', 'member'],
       ['anonymous', 'pending'],
       ['anonymous', 'blocked'],
       ['anonymous', 'group_administrator'],
       ['anonymous', 'group_moderator'],
+      ['anonymous', 'group_owner'],
       ['authenticated', 'member'],
       ['authenticated', 'pending'],
       ['authenticated', 'blocked'],
       ['authenticated', 'group_administrator'],
       ['authenticated', 'group_moderator'],
+      ['authenticated', 'group_owner'],
       ['member', 'member'],
       ['member', 'pending'],
       ['member', 'blocked'],
       ['member', 'group_administrator'],
       ['member', 'group_moderator'],
+      ['member', 'group_owner'],
       ['pending', 'member'],
       ['pending', 'pending'],
       ['pending', 'blocked'],
       ['pending', 'group_administrator'],
       ['pending', 'group_moderator'],
+      ['pending', 'group_owner'],
       ['blocked', 'member'],
       ['blocked', 'pending'],
       ['blocked', 'blocked'],
       ['blocked', 'group_administrator'],
       ['blocked', 'group_moderator'],
+      ['blocked', 'group_owner'],
+      ['group_owner', 'member', FALSE],
+      ['group_owner', 'pending', FALSE],
+      ['group_owner', 'blocked', FALSE],
+      ['group_owner', 'group_administrator', FALSE],
+      ['group_owner', 'group_moderator', FALSE],
+      ['group_owner', 'group_owner', FALSE],
     ];
   }
 

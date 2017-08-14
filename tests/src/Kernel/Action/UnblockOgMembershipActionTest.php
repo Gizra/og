@@ -56,6 +56,7 @@ class UnblockOgMembershipActionTest extends ActionTestBase {
       ['administrator', 'blocked'],
       ['group_administrator', 'blocked'],
       ['group_moderator', 'blocked'],
+      ['group_owner', 'blocked', TRUE],
     ];
   }
 
@@ -82,6 +83,10 @@ class UnblockOgMembershipActionTest extends ActionTestBase {
       ['group_moderator', 'pending'],
       ['group_moderator', 'group_administrator'],
       ['group_moderator', 'group_moderator'],
+      ['group_owner', 'member', TRUE],
+      ['group_owner', 'pending', TRUE],
+      ['group_owner', 'group_administrator', TRUE],
+      ['group_owner', 'group_moderator', TRUE],
       ['anonymous', 'member'],
       ['anonymous', 'pending'],
       ['anonymous', 'blocked'],
@@ -107,6 +112,11 @@ class UnblockOgMembershipActionTest extends ActionTestBase {
       ['blocked', 'blocked'],
       ['blocked', 'group_administrator'],
       ['blocked', 'group_moderator'],
+      ['group_owner', 'member', FALSE],
+      ['group_owner', 'pending', FALSE],
+      ['group_owner', 'blocked', FALSE],
+      ['group_owner', 'group_administrator', FALSE],
+      ['group_owner', 'group_moderator', FALSE],
     ];
   }
 

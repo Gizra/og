@@ -36,6 +36,13 @@ abstract class ChangeOgMembershipActionTestBase extends ActionTestBase {
       ['group_administrator', 'blocked'],
       ['group_administrator', 'group_administrator'],
       ['group_administrator', 'group_moderator'],
+      // A group owner has access to this action for all member types, if the
+      // 'group_administrator_full_access' configuration option is set.
+      ['group_owner', 'member', TRUE],
+      ['group_owner', 'pending', TRUE],
+      ['group_owner', 'blocked', TRUE],
+      ['group_owner', 'group_administrator', TRUE],
+      ['group_owner', 'group_moderator', TRUE],
     ];
   }
 
@@ -74,6 +81,13 @@ abstract class ChangeOgMembershipActionTestBase extends ActionTestBase {
       ['blocked', 'blocked'],
       ['blocked', 'group_administrator'],
       ['blocked', 'group_moderator'],
+      // A group owner doesn't have access if the
+      // 'group_administrator_full_access' configuration option is not set.
+      ['group_owner', 'member', FALSE],
+      ['group_owner', 'pending', FALSE],
+      ['group_owner', 'blocked', FALSE],
+      ['group_owner', 'group_administrator', FALSE],
+      ['group_owner', 'group_moderator', FALSE],
     ];
   }
 

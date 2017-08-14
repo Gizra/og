@@ -75,6 +75,12 @@ abstract class ChangeOgMembershipStateBase extends ActionBase implements Contain
     elseif ($object->getState() === $this->getTargetState()) {
       $access = AccessResult::forbidden();
     }
+    // Deny access if the membership belongs to the group owner. The membership
+    // state of the group owner should not be changed, it should always remain
+    // active.
+    elseif ($object->isOwner()) {
+      $access = AccessResult::forbidden();
+    }
     // Only grant access if the user can manage members in this group.
     else {
       $access = $this->ogAccess->userAccess($object->getGroup(), 'manage members', $account);
