@@ -256,7 +256,7 @@ interface OgMembershipInterface extends ContentEntityInterface {
    * Returns TRUE if the OG membership is active.
    *
    * @return bool
-   *   TRUE if the OG membership is active, false otherwise.
+   *   TRUE if the OG membership is active, FALSE otherwise.
    */
   public function isActive();
 
@@ -264,7 +264,7 @@ interface OgMembershipInterface extends ContentEntityInterface {
    * Returns TRUE if the OG membership is pending.
    *
    * @return bool
-   *   TRUE if the OG membership is pending, false otherwise.
+   *   TRUE if the OG membership is pending, FALSE otherwise.
    */
   public function isPending();
 
@@ -272,7 +272,7 @@ interface OgMembershipInterface extends ContentEntityInterface {
    * Returns TRUE if the OG membership is blocked.
    *
    * @return bool
-   *   TRUE if the OG membership is blocked, false otherwise.
+   *   TRUE if the OG membership is blocked, FALSE otherwise.
    */
   public function isBlocked();
 
