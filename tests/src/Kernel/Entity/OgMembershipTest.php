@@ -43,6 +43,13 @@ class OgMembershipTest extends KernelTestBase {
   protected $group;
 
   /**
+   * Test group owner.
+   *
+   * @var \Drupal\user\UserInterface
+   */
+  protected $owner;
+
+  /**
    * Test user.
    *
    * @var \Drupal\user\UserInterface
@@ -75,10 +82,16 @@ class OgMembershipTest extends KernelTestBase {
     // @see user_install().
     $storage->create(['uid' => 0, 'status' => 0, 'name' => ''])->save();
 
+    // Create the group owner.
+    $owner = User::create(['name' => $this->randomString()]);
+    $owner->save();
+    $this->owner = $owner;
+
     // Create a bundle and add as a group.
     $group = EntityTest::create([
       'type' => Unicode::strtolower($this->randomMachineName()),
       'name' => $this->randomString(),
+      'user_id' => $owner->id(),
     ]);
 
     $group->save();
@@ -442,6 +455,21 @@ class OgMembershipTest extends KernelTestBase {
 
     $this->assertEquals(1, count($roles));
     $this->assertEquals(OgRoleInterface::AUTHENTICATED, $role->getName());
+  }
+
+  /**
+   * Tests that the membership can return if it belongs to the group owner.
+   *
+   * @covers ::isOwner
+   */
+  public function testIsOwner() {
+    // Check the membership of the group owner.
+    $membership = Og::createMembership($this->group, $this->owner);
+    $this->assertTrue($membership->isOwner());
+
+    // Check the membership of a normal user.
+    $membership = Og::createMembership($this->group, $this->user);
+    $this->assertFalse($membership->isOwner());
   }
 
   /**

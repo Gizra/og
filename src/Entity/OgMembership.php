@@ -12,6 +12,7 @@ use Drupal\Core\Session\AccountInterface;
 use Drupal\og\Og;
 use Drupal\og\OgMembershipInterface;
 use Drupal\og\OgRoleInterface;
+use Drupal\user\EntityOwnerInterface;
 
 /**
  * The membership entity that connects a group and a user.
@@ -459,6 +460,14 @@ class OgMembership extends ContentEntityBase implements OgMembershipInterface {
    */
   public function isBlocked() {
     return $this->getState() === OgMembershipInterface::STATE_BLOCKED;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function isOwner() {
+    $group = $this->getGroup();
+    return $group instanceof EntityOwnerInterface && $group->getOwnerId() == $this->getUser()->id();
   }
 
 }

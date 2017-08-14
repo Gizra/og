@@ -276,4 +276,12 @@ interface OgMembershipInterface extends ContentEntityInterface {
    */
   public function isBlocked();
 
+  /**
+   * Returns TRUE if the OG membership belongs to the group owner.
+   *
+   * @return bool
+   *   TRUE if the OG membership belongs to the group owner, FALSE otherwise.
+   */
+  public function isOwner();
+
 }
