@@ -149,6 +149,7 @@ class GroupAudienceTest extends KernelTestBase {
       'field_name' => $field_name1,
       'field_config' => [
         'settings' => [
+          'handler' => 'default',
           'handler_settings' => [
             'target_bundles' => [$group_bundle1 => $group_bundle1],
           ],
