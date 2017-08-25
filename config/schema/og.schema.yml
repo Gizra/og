@@ -193,3 +193,11 @@ condition.plugin.og_group_type:
       type: sequence
       sequence:
         type: string
+
+views.access.og_perm:
+  type: mapping
+  label: 'Permission'
+  mapping:
+    perm:
+      type: string
+      label: 'Permission'
