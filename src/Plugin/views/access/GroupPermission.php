@@ -183,7 +183,7 @@ class GroupPermission extends AccessPluginBase implements CacheableDependencyInt
    * {@inheritdoc}
    */
   public function getCacheContexts() {
-    return ['og_role'];
+    return ['user.permissions'];
   }
 
   /**
