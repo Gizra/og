@@ -124,15 +124,14 @@ class OgMembership extends ContentEntityBase implements OgMembershipInterface {
    * {@inheritdoc}
    */
   public function getUser() {
-    return $this->get('uid')->entity;
+    return $this->getOwner();
   }
 
   /**
    * {@inheritdoc}
    */
   public function setUser(AccountInterface $user) {
-    $this->set('uid', $user->id());
-    return $this;
+    return $this->setOwner($user);
   }
 
   /**
