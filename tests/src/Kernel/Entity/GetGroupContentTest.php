@@ -126,6 +126,7 @@ class GetGroupContentTest extends KernelTestBase {
           ],
           'field_config' => [
             'settings' => [
+              'handler' => 'default',
               'handler_settings' => [
                 'target_bundles' => [$groups[$target_group_type]->bundle() => $groups[$target_group_type]->bundle()],
               ],
