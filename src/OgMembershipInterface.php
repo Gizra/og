@@ -5,11 +5,12 @@ namespace Drupal\og;
 use Drupal\Core\Entity\ContentEntityInterface;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Session\AccountInterface;
+use Drupal\user\EntityOwnerInterface;
 
 /**
  * Provides an interface for OG memberships.
  */
-interface OgMembershipInterface extends ContentEntityInterface {
+interface OgMembershipInterface extends ContentEntityInterface, EntityOwnerInterface {
 
   /**
    * Define active group content states.
