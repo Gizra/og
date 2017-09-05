@@ -129,6 +129,9 @@ interface OgRoleInterface {
   /**
    * Returns the role name.
    *
+   * A role's name consists of the portion of the ID after the group entity type
+   * ID and the group bundle ID.
+   *
    * @return string
    *   The role name.
    */
