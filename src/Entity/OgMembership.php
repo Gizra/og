@@ -12,6 +12,7 @@ use Drupal\Core\Session\AccountInterface;
 use Drupal\og\Og;
 use Drupal\og\OgMembershipInterface;
 use Drupal\og\OgRoleInterface;
+use Drupal\user\EntityOwnerInterface;
 
 /**
  * The membership entity that connects a group and a user.
@@ -327,6 +328,11 @@ class OgMembership extends ContentEntityBase implements OgMembershipInterface {
       ->setLabel(t('Roles'))
       ->setDescription(t('The OG roles related to an OG membership entity.'))
       ->setCardinality(FieldStorageDefinitionInterface::CARDINALITY_UNLIMITED)
+      ->setDisplayOptions('view', [
+        'label' => 'hidden',
+        'type' => 'entity_reference_label',
+        'weight' => 0,
+      ])
       ->setSetting('target_type', 'og_role');
 
     $fields['created'] = BaseFieldDefinition::create('created')
@@ -454,6 +460,14 @@ class OgMembership extends ContentEntityBase implements OgMembershipInterface {
    */
   public function isBlocked() {
     return $this->getState() === OgMembershipInterface::STATE_BLOCKED;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function isOwner() {
+    $group = $this->getGroup();
+    return $group instanceof EntityOwnerInterface && $group->getOwnerId() == $this->getUser()->id();
   }
 
 }
