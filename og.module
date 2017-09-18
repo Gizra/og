@@ -16,6 +16,7 @@ use Drupal\Core\Session\AccountInterface;
 use Drupal\og\Entity\OgRole;
 use Drupal\og\Og;
 use Drupal\og\OgGroupAudienceHelperInterface;
+use Drupal\og\OgMembershipInterface;
 use Drupal\og\OgRoleInterface;
 use Drupal\system\Entity\Action;
 use Drupal\user\EntityOwnerInterface;
@@ -51,7 +52,11 @@ function og_entity_insert(EntityInterface $entity) {
   }
 
   // Other modules might interfere and create a membership.
-  if (!Og::getMembership($entity, $entity->getOwner())) {
+  if (!Og::getMembership($entity, $entity->getOwner(), [
+    OgMembershipInterface::STATE_ACTIVE,
+    OgMembershipInterface::STATE_PENDING,
+    OgMembershipInterface::STATE_BLOCKED,
+  ])) {
     $membership = Og::createMembership($entity, $entity->getOwner());
     $membership->save();
   }
