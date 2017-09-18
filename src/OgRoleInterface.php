@@ -129,6 +129,9 @@ interface OgRoleInterface {
   /**
    * Returns the role name.
    *
+   * A role's name consists of the portion of the ID after the group entity type
+   * ID and the group bundle ID.
+   *
    * @return string
    *   The role name.
    */
@@ -184,5 +187,13 @@ interface OgRoleInterface {
    *   The OG role object, or NULL if a matching role was not found.
    */
   public static function getRole($entity_type_id, $bundle, $role_name);
+
+  /**
+   * Returns if this is a default role which is required and cannot be deleted.
+   *
+   * @return bool
+   *   True if this is a default role. False otherwise.
+   */
+  public function isRequired();
 
 }

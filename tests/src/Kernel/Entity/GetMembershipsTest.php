@@ -44,6 +44,13 @@ class GetMembershipsTest extends KernelTestBase {
   protected $users;
 
   /**
+   * The entity type manager.
+   *
+   * @var \Drupal\Core\Entity\EntityTypeManagerInterface
+   */
+  protected $entityTypeManager;
+
+  /**
    * {@inheritdoc}
    */
   protected function setUp() {
@@ -54,6 +61,9 @@ class GetMembershipsTest extends KernelTestBase {
     $this->installEntitySchema('og_membership');
     $this->installEntitySchema('user');
     $this->installSchema('system', 'sequences');
+    $this->installSchema('user', ['users_data']);
+
+    $this->entityTypeManager = $this->container->get('entity_type.manager');
 
     // Create group admin user.
     $group_admin = User::create(['name' => $this->randomString()]);
@@ -246,6 +256,27 @@ class GetMembershipsTest extends KernelTestBase {
       ], [],
       ],
     ];
+  }
+
+  /**
+   * Tests that memberships are deleted when a user is deleted.
+   */
+  public function testOrphanedMembershipsDeletion() {
+    foreach ($this->users as $user) {
+      // Keep track of the user ID before deleting the user.
+      $user_id = $user->id();
+
+      $user->delete();
+
+      // Check that the memberships for the user are deleted from the database.
+      $memberships = $this->entityTypeManager
+        ->getStorage('og_membership')
+        ->getQuery()
+        ->condition('uid', $user_id)
+        ->execute();
+
+      $this->assertEmpty($memberships);
+    }
   }
 
 }

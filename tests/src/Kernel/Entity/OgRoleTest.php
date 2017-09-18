@@ -7,6 +7,7 @@ use Drupal\Core\Entity\EntityStorageException;
 use Drupal\KernelTests\KernelTestBase;
 use Drupal\og\Entity\OgRole;
 use Drupal\og\Exception\OgRoleException;
+use Drupal\system\Entity\Action;
 
 /**
  * Test OG role creation.
@@ -28,6 +29,13 @@ class OgRoleTest extends KernelTestBase {
   ];
 
   /**
+   * The entity storage handler for Action entities.
+   *
+   * @var \Drupal\Core\Entity\EntityStorageInterface
+   */
+  protected $actionStorage;
+
+  /**
    * The group type manager.
    *
    * @var \Drupal\og\GroupTypeManager
@@ -42,9 +50,9 @@ class OgRoleTest extends KernelTestBase {
   protected $entityTypeManager;
 
   /**
-   * An array of test group types.
+   * Test group types.
    *
-   * @var \Drupal\Core\Entity\EntityInterface[]
+   * @var \Drupal\Core\Config\Entity\ConfigEntityBundleBase[]
    */
   protected $groupTypes;
 
@@ -58,6 +66,7 @@ class OgRoleTest extends KernelTestBase {
     $this->installConfig(['og']);
     $this->installEntitySchema('entity_test');
 
+    $this->actionStorage = $this->container->get('entity_type.manager')->getStorage('action');
     $this->groupTypeManager = $this->container->get('og.group_type_manager');
     $this->entityTypeManager = $this->container->get('entity_type.manager');
 
@@ -105,6 +114,22 @@ class OgRoleTest extends KernelTestBase {
 
     // Checking creation of the role.
     $this->assertEquals($og_role->getPermissions(), ['administer group']);
+
+    // Check if the role is correctly recognized as a non-default role.
+    $this->assertFalse($og_role->isRequired());
+
+    // When a role is created the two accompanying actions to add or remove this
+    // role to a membership should also be created.
+    $action_ids = [
+      'og_membership_add_single_role_action.content_editor',
+      'og_membership_remove_single_role_action.content_editor',
+    ];
+    /** @var \Drupal\Core\Action\ActionInterface[] $actions */
+    $actions = Action::loadMultiple($action_ids);
+    foreach ($action_ids as $action_id) {
+      $this->assertTrue(array_key_exists($action_id, $actions));
+      $this->assertEquals($action_id, $actions[$action_id]->id());
+    }
 
     // Try to create the same role again.
     try {
@@ -194,37 +219,64 @@ class OgRoleTest extends KernelTestBase {
     catch (ConfigValueException $e) {
       $this->assertTrue(TRUE, "OG role with a non-matching ID can not be saved.");
     }
+
+    // Delete the first group type. Doing this should automatically delete the
+    // role that depends on the group type. The actions should still be present
+    // since there still is one role left that references this role name.
+    $this->groupTypes['node_type']->delete();
+
+    $role = OgRole::getRole('node', 'group', 'content_editor');
+    $this->assertEmpty($role);
+
+    foreach ($action_ids as $action_id) {
+      $action = $this->actionStorage->loadUnchanged($action_id);
+      $this->assertEquals($action_id, $action->id());
+    }
+
+    // Delete the last role that references the content editor. Now the two
+    // actions should also be deleted.
+    OgRole::getRole('entity_test_with_bundle', 'group', 'content_editor')->delete();
+
+    foreach ($action_ids as $action_id) {
+      $action = $this->actionStorage->loadUnchanged($action_id);
+      $this->assertEmpty($action);
+    }
   }
 
   /**
-   * Tests the creation and deletion of default roles.
+   * Tests the creation and deletion of required roles.
    */
-  public function testDefaultRoles() {
-    // Check that the default roles are created when a new group type is
+  public function testRequiredRoles() {
+    // Check that the required roles are created when a new group type is
     // declared.
     foreach (['node', 'entity_test_with_bundle'] as $entity_type_id) {
       $this->groupTypeManager->addGroup($entity_type_id, 'group');
     }
 
-    $default_roles = [];
+    $required_roles = [];
     foreach ([OgRole::ANONYMOUS, OgRole::AUTHENTICATED] as $role_name) {
       foreach (['node', 'entity_test_with_bundle'] as $group_type) {
         $role_id = "$group_type-group-$role_name";
-        $default_role = OgRole::load($role_id);
-        $this->assertEquals($group_type, $default_role->getGroupType());
-        $this->assertEquals('group', $default_role->getGroupBundle());
-        $this->assertEquals($role_name, $default_role->getName());
+        $required_role = OgRole::load($role_id);
+
+        // Check that the role is actually a required role.
+        $this->assertTrue($required_role->isRequired());
+
+        // Check that the other data is correct.
+        $this->assertEquals($group_type, $required_role->getGroupType());
+        $this->assertEquals('group', $required_role->getGroupBundle());
+        $this->assertEquals($role_name, $required_role->getName());
 
         // Keep track of the role so we can later test if they can be deleted.
-        $default_roles[] = $default_role;
+        $required_roles[] = $required_role;
       }
     }
 
-    // Default roles cannot be deleted, so an exception should be thrown when
-    // trying to delete a default role for a group type that still exists.
-    foreach ($default_roles as $default_role) {
+    // Required roles cannot be deleted, so an exception should be thrown when
+    // trying to delete them when the group type still exists.
+    foreach ($required_roles as $required_role) {
       try {
-        $default_role->delete();
+        $required_role->delete();
         $this->fail('A default role cannot be deleted.');
       }
       catch (OgRoleException $e) {
@@ -235,10 +287,10 @@ class OgRoleTest extends KernelTestBase {
     foreach ($this->groupTypes as $group_type) {
       $group_type->delete();
     }
-    // The default roles are dependent on the group types so this action should
-    // result in the deletion of the default roles.
-    foreach ($default_roles as $default_role) {
-      $this->assertEmpty($this->loadUnchangedOgRole($default_role->id()));
+    // The required roles are dependent on the group types so this action should
+    // result in the deletion of the roles.
+    foreach ($required_roles as $required_role) {
+      $this->assertEmpty($this->loadUnchangedOgRole($required_role->id()));
     }
   }
 
