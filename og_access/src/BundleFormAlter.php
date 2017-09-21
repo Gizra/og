@@ -60,7 +60,7 @@ class BundleFormAlter {
     $form['og']['og_enable_access'] = [
       '#type' => 'checkbox',
       '#title' => t('Enable OG access control'),
-      '#default_value' => $this->hasAccessControl(),
+      '#default_value' => $this->bundle ? FALSE : $this->hasAccessControl(),
       '#states' => [
         'visible' => [
           [':input[name="og_is_group"]' => ['checked' => TRUE]],
