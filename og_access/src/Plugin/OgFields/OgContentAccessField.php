@@ -2,7 +2,6 @@
 
 namespace Drupal\og_access\Plugin\OgFields;
 
-use Drupal\Core\Field\FieldStorageDefinitionInterface;
 use Drupal\og\OgFieldBase;
 use Drupal\og\OgFieldsInterface;
 
@@ -10,7 +9,7 @@ use Drupal\og\OgFieldsInterface;
  * Determine the group content visibility.
  *
  * @OgFields(
- *  id = OG_CONTENT_ACCESS_FIELD,
+ *  id = OG_ACCESS_CONTENT_FIELD,
  *  type = "node",
  *  description = @Translation("Determine the group content visibility.")
  * )
@@ -26,7 +25,7 @@ class OgContentAccessField extends OgFieldBase implements OgFieldsInterface {
       'settings' => [
         'allowed_values' => [
           0 => 'Public - accessible to all site users',
-          1 =>  'Private - accessible only to group members',
+          1 => 'Private - accessible only to group members',
         ],
         'allowed_values_function' => '',
       ],
