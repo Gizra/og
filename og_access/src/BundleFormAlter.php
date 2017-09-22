@@ -9,7 +9,7 @@ use Drupal\og\Og;
 /**
  * Helper for og_access_form_alter().
  */
-class BundleFormAlter {
+class OgAccessBundleFormAlter {
 
   /**
    * The entity bundle.
@@ -59,13 +59,14 @@ class BundleFormAlter {
 
     $form['og']['og_enable_access'] = [
       '#type' => 'checkbox',
-      '#title' => t('Enable OG access control'),
+      '#title' => t('Restrict access to group members'),
+      '#description' => t('Enable OG access control. Provides a new field that determines the group/group content visibility. Public groups can have member-only content. Any public group content belonging to a private group will be restricted to the members of that group only.'),
       '#default_value' => $this->bundle ? $this->hasAccessControl() : FALSE,
       '#states' => [
         'visible' => [
           [':input[name="og_is_group"]' => ['checked' => TRUE]],
           [':input[name="og_group_content_bundle"]' => ['checked' => TRUE]],
-        ]
+        ],
       ],
     ];
   }
@@ -87,7 +88,7 @@ class BundleFormAlter {
     }
 
     if (Og::isGroupContent($this->entityTypeId, $this->bundle)) {
-      return isset($field_definitions[OG_CONTENT_ACCESS_FIELD]);
+      return isset($field_definitions[OG_ACCESS_CONTENT_FIELD]);
     }
 
     return FALSE;

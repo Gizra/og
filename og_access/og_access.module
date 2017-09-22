@@ -17,7 +17,7 @@ use Drupal\Core\Session\AccountInterface;
 use Drupal\field\Entity\FieldConfig;
 use Drupal\node\NodeInterface;
 use Drupal\og\Og;
-use Drupal\og_access\BundleFormAlter;
+use Drupal\og_access\OgAccessBundleFormAlter;
 
 /**
  * The access realm of group member.
@@ -32,7 +32,7 @@ define('OG_ACCESS_FIELD', 'group_access');
 /**
  * Group public access field.
  */
-define('OG_CONTENT_ACCESS_FIELD', 'group_content_access');
+define('OG_ACCESS_CONTENT_FIELD', 'group_content_access');
 
 /**
  * Public group/group content access.
@@ -86,9 +86,9 @@ function og_access_node_access_records(NodeInterface $node) {
     $gids['node'][] = $node->id();
   }
 
-  if ($node->hasField(OG_CONTENT_ACCESS_FIELD) &&
-      !empty($node->get(OG_CONTENT_ACCESS_FIELD))) {
-    $content_access = $node->get(OG_CONTENT_ACCESS_FIELD)->value;
+  if ($node->hasField(OG_ACCESS_CONTENT_FIELD) &&
+      !empty($node->get(OG_ACCESS_CONTENT_FIELD))) {
+    $content_access = $node->get(OG_ACCESS_CONTENT_FIELD)->value;
   }
   else {
     $content_access = OG_ACCESS_PUBLIC;
@@ -151,7 +151,6 @@ function og_access_node_access_records(NodeInterface $node) {
     }
   }
 
-
   return !empty($grants) ? $grants : [];
 }
 
@@ -160,7 +159,7 @@ function og_access_node_access_records(NodeInterface $node) {
  */
 function og_access_form_alter(array &$form, FormStateInterface $form_state, $form_id) {
   if ($form_state->getFormObject() instanceof BundleEntityFormBase) {
-    (new BundleFormAlter($form_state->getFormObject()->getEntity()))
+    (new OgAccessBundleFormAlter($form_state->getFormObject()->getEntity()))
       ->formAlter($form, $form_state);
   }
 }
@@ -213,10 +212,10 @@ function og_access_entity_type_save(EntityInterface $entity) {
   // Add remove the relevant field to the group content bundle.
   $is_group_content = Og::isGroupContent($entity_type_id, $bundle);
   if ($entity->og_group_content_bundle || $is_group_content) {
-    $field = FieldConfig::loadByName($entity_type_id, $bundle, OG_CONTENT_ACCESS_FIELD);
+    $field = FieldConfig::loadByName($entity_type_id, $bundle, OG_ACCESS_CONTENT_FIELD);
 
     if (!$field && $enable_og_access) {
-      Og::createField(OG_CONTENT_ACCESS_FIELD, $entity_type_id, $bundle);
+      Og::createField(OG_ACCESS_CONTENT_FIELD, $entity_type_id, $bundle);
     }
     elseif ($field) {
       if (!$enable_og_access || $is_group_content && !$entity->og_group_content_bundle) {

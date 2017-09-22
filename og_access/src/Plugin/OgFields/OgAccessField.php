@@ -2,7 +2,6 @@
 
 namespace Drupal\og_access\Plugin\OgFields;
 
-use Drupal\Core\Field\FieldStorageDefinitionInterface;
 use Drupal\og\OgFieldBase;
 use Drupal\og\OgFieldsInterface;
 
@@ -26,7 +25,7 @@ class OgAccessField extends OgFieldBase implements OgFieldsInterface {
       'settings' => [
         'allowed_values' => [
           0 => 'Public - accessible to all site users',
-          1 =>  'Private - accessible only to group members',
+          1 => 'Private - accessible only to group members',
         ],
         'allowed_values_function' => '',
       ],
