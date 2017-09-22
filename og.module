@@ -51,7 +51,8 @@ function og_entity_insert(EntityInterface $entity) {
     return;
   }
 
-  // Other modules might interfere and create a membership.
+  // Other modules that implement hook_entity_insert() might already have
+  // created a membership ahead of us.
   if (!Og::getMembership($entity, $entity->getOwner(), [
     OgMembershipInterface::STATE_ACTIVE,
     OgMembershipInterface::STATE_PENDING,
