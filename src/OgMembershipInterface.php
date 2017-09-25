@@ -209,6 +209,14 @@ interface OgMembershipInterface extends ContentEntityInterface, EntityOwnerInter
   public function getRoles();
 
   /**
+   * Gets all the referenced OG role IDs.
+   *
+   * @return string[]
+   *   List of OG role IDs that are granted in the membership.
+   */
+  public function getRolesIds();
+
+  /**
    * Returns whether the given role is valid for this membership.
    *
    * @param \Drupal\og\OgRoleInterface $role
@@ -249,7 +257,7 @@ interface OgMembershipInterface extends ContentEntityInterface, EntityOwnerInter
    * Returns TRUE if the OG membership is active.
    *
    * @return bool
-   *   TRUE if the OG membership is active, false otherwise.
+   *   TRUE if the OG membership is active, FALSE otherwise.
    */
   public function isActive();
 
@@ -257,7 +265,7 @@ interface OgMembershipInterface extends ContentEntityInterface, EntityOwnerInter
    * Returns TRUE if the OG membership is pending.
    *
    * @return bool
-   *   TRUE if the OG membership is pending, false otherwise.
+   *   TRUE if the OG membership is pending, FALSE otherwise.
    */
   public function isPending();
 
@@ -265,8 +273,16 @@ interface OgMembershipInterface extends ContentEntityInterface, EntityOwnerInter
    * Returns TRUE if the OG membership is blocked.
    *
    * @return bool
-   *   TRUE if the OG membership is blocked, false otherwise.
+   *   TRUE if the OG membership is blocked, FALSE otherwise.
    */
   public function isBlocked();
+
+  /**
+   * Returns TRUE if the OG membership belongs to the group owner.
+   *
+   * @return bool
+   *   TRUE if the OG membership belongs to the group owner, FALSE otherwise.
+   */
+  public function isOwner();
 
 }

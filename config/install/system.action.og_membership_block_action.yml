@@ -1,0 +1,10 @@
+langcode: en
+status: true
+dependencies:
+  module:
+    - og
+id: og_membership_block_action
+label: 'Block the selected membership(s)'
+type: og_membership
+plugin: og_membership_block_action
+configuration: {  }

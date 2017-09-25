@@ -179,7 +179,7 @@ class GroupMembershipManagerTest extends KernelTestBase {
    * Verify that entities from different entity types with colliding Ids that
    * point to different groups do not confuse the membership manager.
    *
-   * @covers ::getGroupIds
+   * @covers ::getGroups
    */
   public function testStaticCache() {
     /** @var \Drupal\og\MembershipManagerInterface $membership_manager */
