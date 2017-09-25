@@ -148,7 +148,7 @@ class BundleFormAlter {
     $form['og']['og_group_content_bundle'] = [
       '#type' => 'checkbox',
       '#title' => t('Group content'),
-      '#default_value' => Og::isGroupContent($this->entityTypeId, $this->bundle),
+      '#default_value' => $this->bundle ? Og::isGroupContent($this->entityTypeId, $this->bundle) : FALSE,
       '#description' => empty($target_bundles) ? t('There are no group bundles defined.') : '',
     ];
 
