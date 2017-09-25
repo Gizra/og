@@ -108,16 +108,46 @@ class OgMembershipTest extends KernelTestBase {
   }
 
   /**
-   * Tests getting and setting users on OgMemberships.
+   * Tests getting and setting owners on OgMemberships.
    *
    * @covers ::getOwner
    * @covers ::getOwnerId
    * @covers ::setOwner
    */
   public function testGetSetOwner() {
-    $membership = Og::createMembership($this->group, $this->user);
-    $membership->save();
+    $membership = OgMembership::create();
+    $membership
+      ->setOwner($this->user)
+      ->setGroup($this->group)
+      ->save();
 
+    $this->assertOwner($membership);
+  }
+
+  /**
+   * Tests getting and setting owners by ID on OgMemberships.
+   *
+   * @covers ::getOwner
+   * @covers ::getOwnerId
+   * @covers ::setOwnerId
+   */
+  public function testGetSetOwnerId() {
+    $membership = OgMembership::create();
+    $membership
+      ->setOwnerId($this->user->id())
+      ->setGroup($this->group)
+      ->save();
+
+    $this->assertOwner($membership);
+  }
+
+  /**
+   * Asserts that the test user is set as the owner of the given membership.
+   *
+   * @param \Drupal\og\OgMembershipInterface $membership
+   *   The membership to check.
+   */
+  protected function assertOwner(OgMembershipInterface $membership) {
     // Check the user is returned.
     $this->assertInstanceOf(UserInterface::class, $membership->getOwner());
     $this->assertEquals($this->user->id(), $membership->getOwnerId());
