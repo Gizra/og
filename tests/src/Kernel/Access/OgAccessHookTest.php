@@ -158,7 +158,7 @@ class OgAccessHookTest extends KernelTestBase {
       /** @var \Drupal\og\Entity\OgMembership $membership */
       $membership = OgMembership::create();
       $membership
-        ->setUser($this->users[$membership_type])
+        ->setOwner($this->users[$membership_type])
         ->setGroup($this->group)
         ->addRole($role)
         ->setState($state)

@@ -135,10 +135,11 @@ class MembershipManager implements MembershipManagerInterface {
    * {@inheritdoc}
    */
   public function createMembership(EntityInterface $group, AccountInterface $user, $membership_type = OgMembershipInterface::TYPE_DEFAULT) {
-    /** @var \Drupal\og\Entity\OgMembershipInterface $membership */
+    /** @var \Drupal\user\UserInterface|\Drupal\Core\Session\AccountInterface $user */
+    /** @var \Drupal\og\OgMembershipInterface $membership */
     $membership = OgMembership::create(['type' => $membership_type]);
     $membership
-      ->setUser($user)
+      ->setOwner($user)
       ->setGroup($group);
 
     return $membership;

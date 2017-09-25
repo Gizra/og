@@ -110,22 +110,24 @@ class OgMembershipTest extends KernelTestBase {
   /**
    * Tests getting and setting users on OgMemberships.
    *
-   * @covers ::getUser
-   * @covers ::setUser
+   * @covers ::getOwner
+   * @covers ::getOwnerId
+   * @covers ::setOwner
    */
-  public function testGetSetUser() {
+  public function testGetSetOwner() {
     $membership = Og::createMembership($this->group, $this->user);
     $membership->save();
 
     // Check the user is returned.
-    $this->assertInstanceOf(UserInterface::class, $membership->getUser());
-    $this->assertEquals($this->user->id(), $membership->getUser()->id());
+    $this->assertInstanceOf(UserInterface::class, $membership->getOwner());
+    $this->assertEquals($this->user->id(), $membership->getOwnerId());
 
     // And after re-loading.
+    /** @var OgMembershipInterface $membership */
     $membership = $this->entityTypeManager->getStorage('og_membership')->loadUnchanged($membership->id());
 
-    $this->assertInstanceOf(UserInterface::class, $membership->getUser());
-    $this->assertEquals($this->user->id(), $membership->getUser()->id());
+    $this->assertInstanceOf(UserInterface::class, $membership->getOwner());
+    $this->assertEquals($this->user->id(), $membership->getOwnerId());
   }
 
   /**
@@ -177,7 +179,7 @@ class OgMembershipTest extends KernelTestBase {
     /** @var \Drupal\og\OgMembershipInterface $membership */
     $membership = OgMembership::create();
     $membership
-      ->setUser($this->user)
+      ->setOwner($this->user)
       ->save();
   }
 

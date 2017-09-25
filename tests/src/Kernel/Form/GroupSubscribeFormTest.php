@@ -138,14 +138,14 @@ class GroupSubscribeFormTest extends KernelTestBase {
   public function testIsStateActive() {
     $user = $this->createUser(['access content']);
 
-    /** @var GroupSubscribeForm $form */
+    /** @var \Drupal\og\Form\GroupSubscribeForm $form */
     $form = \Drupal::entityManager()->getFormObject('og_membership', 'subscribe');
 
     // Pending membership.
     $membership_pending = OgMembership::create();
     $membership_pending
       ->setGroup($this->group1)
-      ->setUser($user);
+      ->setOwner($user);
 
     $form->setEntity($membership_pending);
     $this->assertFalse($form->isStateActive());
@@ -154,7 +154,7 @@ class GroupSubscribeFormTest extends KernelTestBase {
     $membership_active = OgMembership::create();
     $membership_active
       ->setGroup($this->group2)
-      ->setUser($user);
+      ->setOwner($user);
 
     $form->setEntity($membership_active);
     $this->assertTrue($form->isStateActive());
@@ -167,7 +167,7 @@ class GroupSubscribeFormTest extends KernelTestBase {
     $membership = OgMembership::create();
     $membership
       ->setGroup($this->group3)
-      ->setUser($user);
+      ->setOwner($user);
 
     // Confirm user doesn't have access to the unpublished group node.
     $this->assertFalse($this->group3->access('view', $user));

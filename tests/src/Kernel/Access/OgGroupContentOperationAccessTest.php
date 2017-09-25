@@ -171,7 +171,7 @@ class OgGroupContentOperationAccessTest extends KernelTestBase {
         /** @var \Drupal\og\Entity\OgMembership $membership */
         $membership = OgMembership::create();
         $membership
-          ->setUser($this->users[$role_name])
+          ->setOwner($this->users[$role_name])
           ->setGroup($this->group)
           ->addRole($this->roles[$role_name])
           ->setState(OgMembershipInterface::STATE_ACTIVE)
@@ -185,7 +185,7 @@ class OgGroupContentOperationAccessTest extends KernelTestBase {
     $this->users['blocked']->save();
     $membership = OgMembership::create();
     $membership
-      ->setUser($this->users['blocked'])
+      ->setOwner($this->users['blocked'])
       ->setGroup($this->group)
       ->addRole($this->roles[OgRoleInterface::AUTHENTICATED])
       ->setState(OgMembershipInterface::STATE_BLOCKED)

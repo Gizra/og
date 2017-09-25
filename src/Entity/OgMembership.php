@@ -125,20 +125,6 @@ class OgMembership extends ContentEntityBase implements OgMembershipInterface {
   /**
    * {@inheritdoc}
    */
-  public function getUser() {
-    return $this->getOwner();
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function setUser(AccountInterface $user) {
-    return $this->setOwner($user);
-  }
-
-  /**
-   * {@inheritdoc}
-   */
   public function setGroup(EntityInterface $group) {
     $this->set('entity_type', $group->getEntityTypeId());
     $this->set('entity_id', $group->id());
@@ -497,7 +483,7 @@ class OgMembership extends ContentEntityBase implements OgMembershipInterface {
    */
   public function isOwner() {
     $group = $this->getGroup();
-    return $group instanceof EntityOwnerInterface && $group->getOwnerId() == $this->getUser()->id();
+    return $group instanceof EntityOwnerInterface && $group->getOwnerId() == $this->getOwnerId();
   }
 
 }

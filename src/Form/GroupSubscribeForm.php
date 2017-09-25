@@ -172,7 +172,7 @@ class GroupSubscribeForm extends ContentEntityForm {
 
     /** @var EntityInterface $group */
     $group = $membership->getGroup();
-    $user = $membership->getUser();
+    $user = $membership->getOwner();
 
     $skip_approval = $this->ogAccess->userAccess($group, 'subscribe without approval', $user)->isAllowed();
 

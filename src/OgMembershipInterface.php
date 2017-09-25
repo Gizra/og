@@ -69,25 +69,6 @@ interface OgMembershipInterface extends ContentEntityInterface, EntityOwnerInter
   public function setCreatedTime($timestamp);
 
   /**
-   * Sets the membership's owner.
-   *
-   * @param \Drupal\Core\Session\AccountInterface $user
-   *   The user object.
-   *
-   * @return \Drupal\og\OgMembershipInterface
-   *   The updated OG Membership object.
-   */
-  public function setUser(AccountInterface $user);
-
-  /**
-   * Gets the membership's owner.
-   *
-   * @return \Drupal\Core\Session\AccountInterface
-   *   The user object referenced by the membership.
-   */
-  public function getUser();
-
-  /**
    * Sets the group associated with the membership.
    *
    * @param \Drupal\Core\Entity\EntityInterface $group

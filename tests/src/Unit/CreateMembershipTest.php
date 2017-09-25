@@ -106,6 +106,7 @@ class CreateMembershipTest extends UnitTestCase {
       ->willReturn('og_membership');
 
     // Create a mocked Og Membership entity.
+    /** @var \Drupal\og\OgMembershipInterface|\Prophecy\Prophecy\ObjectProphecy $membership_entity */
     $membership_entity = $this->prophesize(OgMembershipInterface::class);
 
     $this->entityStorage
@@ -119,7 +120,7 @@ class CreateMembershipTest extends UnitTestCase {
     $this->user = $this->prophesize(AccountInterface::class);
 
     $membership_entity
-      ->setUser($this->user)
+      ->setOwner($this->user)
       ->willReturn($membership_entity->reveal());
 
     $membership_entity
