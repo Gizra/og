@@ -409,9 +409,6 @@ class GroupTypeManager {
       $editable->set('groups', $groups);
       $editable->save();
 
-      // Remove all roles associated with this group type.
-      $this->ogRoleManager->removeRoles($entity_type_id, $bundle_id);
-
       $this->resetGroupMap();
 
       // Routes will need to be rebuilt.

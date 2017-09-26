@@ -106,3 +106,47 @@ og.og_role.*:
     role_type:
       type: string
       label: 'Role type'
+
+views.field.og_membership_bulk_form:
+  type: views_field_bulk_form
+  label: 'OG Membership bulk form'
+
+action.configuration.og_membership_add_multiple_roles_action:
+  type: action_configuration_default
+  label: 'Add roles to the selected membership(s)'
+
+action.configuration.og_membership_add_single_role_action:
+  type: action_configuration_default
+  label: 'Add a role to a group member'
+
+action.configuration.og_membership_approve_pending_action:
+  type: action_configuration_default
+  label: 'Approve the pending membership(s)'
+
+action.configuration.og_membership_block_action:
+  type: action_configuration_default
+  label: 'Block the selected membership(s)'
+
+action.configuration.og_membership_delete_action:
+  type: action_configuration_default
+  label: 'Delete the selected membership(s)'
+
+action.configuration.og_membership_remove_single_role_action:
+  type: action_configuration_default
+  label: 'Remove a role to a group member'
+
+action.configuration.og_membership_remove_multiple_roles_action:
+  type: action_configuration_default
+  label: 'Remove roles from the selected membership(s)'
+
+action.configuration.og_membership_unblock_action:
+  type: action_configuration_default
+  label: 'Unblock the selected membership(s)'
+
+condition.plugin.og_group_type:
+  type: condition.plugin
+  mapping:
+    group_types:
+      type: sequence
+      sequence:
+        type: string

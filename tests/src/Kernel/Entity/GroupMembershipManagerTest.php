@@ -3,6 +3,9 @@
 namespace Drupal\Tests\og\Kernel\Entity;
 
 use Drupal\Component\Utility\Unicode;
+use Drupal\entity_test\Entity\EntityTestBundle;
+use Drupal\entity_test\Entity\EntityTestRev;
+use Drupal\entity_test\Entity\EntityTestWithBundle;
 use Drupal\KernelTests\KernelTestBase;
 use Drupal\entity_test\Entity\EntityTest;
 use Drupal\node\Entity\Node;
@@ -60,6 +63,8 @@ class GroupMembershipManagerTest extends KernelTestBase {
 
     $this->installConfig(['og']);
     $this->installEntitySchema('entity_test');
+    $this->installEntitySchema('entity_test_rev');
+    $this->installEntitySchema('entity_test_with_bundle');
     $this->installEntitySchema('node');
     $this->installEntitySchema('og_membership');
     $this->installEntitySchema('user');
@@ -166,6 +171,65 @@ class GroupMembershipManagerTest extends KernelTestBase {
         $this->assertTrue(in_array($this->groups[$expected_type][$expected_key]->id(), $result[$expected_type]));
       }
     }
+  }
+
+  /**
+   * Tests that the static cache loads the appropriate group.
+   *
+   * Verify that entities from different entity types with colliding Ids that
+   * point to different groups do not confuse the membership manager.
+   *
+   * @covers ::getGroups
+   */
+  public function testStaticCache() {
+    /** @var \Drupal\og\MembershipManagerInterface $membership_manager */
+    $membership_manager = \Drupal::service('og.membership_manager');
+    $bundle_rev = Unicode::strtolower($this->randomMachineName());
+    $bundle_with_bundle = Unicode::strtolower($this->randomMachineName());
+    EntityTestBundle::create(['id' => $bundle_with_bundle, 'label' => $bundle_with_bundle])->save();
+    $field_settings = [
+      'field_name' => 'group_audience_node',
+      'field_storage_config' => [
+        'settings' => [
+          'target_type' => 'node',
+        ],
+      ],
+    ];
+    Og::createField(OgGroupAudienceHelperInterface::DEFAULT_FIELD, 'entity_test_rev', $bundle_rev, $field_settings);
+    Og::createField(OgGroupAudienceHelperInterface::DEFAULT_FIELD, 'entity_test_with_bundle', $bundle_with_bundle, $field_settings);
+
+    $group_content_rev = EntityTestRev::create([
+      'type' => $bundle_rev,
+      'name' => $this->randomString(),
+      'group_audience_node' => [
+        0 => [
+          'target_id' => $this->groups['node'][0]->id(),
+        ],
+      ],
+    ]);
+    $group_content_rev->save();
+    $group_content_with_bundle = EntityTestWithBundle::create([
+      'type' => $bundle_with_bundle,
+      'name' => $this->randomString(),
+      'group_audience_node' => [
+        0 => [
+          'target_id' => $this->groups['node'][1]->id(),
+        ],
+      ],
+    ]);
+    $group_content_with_bundle->save();
+
+    // Ensure that both entities share the same Id. This is an assertion to
+    // ensure that the next assertions are addressing the proper issue.
+    $this->assertEquals($group_content_rev->id(), $group_content_with_bundle->id());
+
+    $group_content_rev_group = $membership_manager->getGroups($group_content_rev);
+    /** @var \Drupal\node\NodeInterface $group */
+    $group = reset($group_content_rev_group['node']);
+    $this->assertEquals($this->groups['node'][0]->id(), $group->id());
+    $group_content_with_bundle_group = $membership_manager->getGroups($group_content_with_bundle);
+    $group = reset($group_content_with_bundle_group['node']);
+    $this->assertEquals($this->groups['node'][1]->id(), $group->id());
   }
 
   /**

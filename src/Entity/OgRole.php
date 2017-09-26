@@ -45,6 +45,14 @@ class OgRole extends Role implements OgRoleInterface {
   protected $name;
 
   /**
+   * Whether or not the parent entity we depend on is being removed.
+   *
+   * @var bool
+   *   TRUE if the entity is being removed.
+   */
+  protected $parentEntityIsBeingRemoved = FALSE;
+
+  /**
    * Constructs an OgRole object.
    *
    * @param array $values
@@ -55,12 +63,7 @@ class OgRole extends Role implements OgRoleInterface {
   }
 
   /**
-   * Sets the ID of the role.
-   *
-   * @param string $id
-   *   The machine name of the role.
-   *
-   * @return $this
+   * {@inheritdoc}
    */
   public function setId($id) {
     $this->set('id', $id);
@@ -68,22 +71,14 @@ class OgRole extends Role implements OgRoleInterface {
   }
 
   /**
-   * Returns the label.
-   *
-   * @return string
-   *   The label.
+   * {@inheritdoc}
    */
   public function getLabel() {
     return $this->get('label');
   }
 
   /**
-   * Sets the label.
-   *
-   * @param string $label
-   *   The label to set.
-   *
-   * @return $this
+   * {@inheritdoc}
    */
   public function setLabel($label) {
     $this->set('label', $label);
@@ -91,45 +86,14 @@ class OgRole extends Role implements OgRoleInterface {
   }
 
   /**
-   * Returns the group ID.
-   *
-   * @return int
-   *   The group ID.
-   */
-  public function getGroupId() {
-    return $this->get('group_id');
-  }
-
-  /**
-   * Sets the group ID.
-   *
-   * @param int $group_id
-   *   The group ID to set.
-   *
-   * @return $this
-   */
-  public function setGroupId($group_id) {
-    $this->set('group_id', $group_id);
-    return $this;
-  }
-
-  /**
-   * Returns the group type.
-   *
-   * @return string
-   *   The group type.
+   * {@inheritdoc}
    */
   public function getGroupType() {
     return $this->get('group_type');
   }
 
   /**
-   * Sets the group type.
-   *
-   * @param string $group_type
-   *   The group type to set.
-   *
-   * @return $this
+   * {@inheritdoc}
    */
   public function setGroupType($group_type) {
     $this->set('group_type', $group_type);
@@ -137,22 +101,14 @@ class OgRole extends Role implements OgRoleInterface {
   }
 
   /**
-   * Returns the group bundle.
-   *
-   * @return string
-   *   The group bundle.
+   * {@inheritdoc}
    */
   public function getGroupBundle() {
     return $this->get('group_bundle');
   }
 
   /**
-   * Sets the group bundle.
-   *
-   * @param string $group_bundle
-   *   The group bundle to set.
-   *
-   * @return $this
+   * {@inheritdoc}
    */
   public function setGroupBundle($group_bundle) {
     $this->set('group_bundle', $group_bundle);
@@ -160,27 +116,14 @@ class OgRole extends Role implements OgRoleInterface {
   }
 
   /**
-   * Returns the role type.
-   *
-   * @return string
-   *   The role type. One of OgRoleInterface::ROLE_TYPE_REQUIRED or
-   *   OgRoleInterface::ROLE_TYPE_STANDARD.
+   * {@inheritdoc}
    */
   public function getRoleType() {
     return $this->get('role_type') ?: OgRoleInterface::ROLE_TYPE_STANDARD;
   }
 
   /**
-   * Sets the role type.
-   *
-   * @param string $role_type
-   *   The role type to set. One of OgRoleInterface::ROLE_TYPE_REQUIRED or
-   *   OgRoleInterface::ROLE_TYPE_STANDARD.
-   *
-   * @return $this
-   *
-   * @throws \InvalidArgumentException
-   *   Thrown when an invalid role type is given.
+   * {@inheritdoc}
    */
   public function setRoleType($role_type) {
     if (!in_array($role_type, [
@@ -227,6 +170,17 @@ class OgRole extends Role implements OgRoleInterface {
   /**
    * {@inheritdoc}
    */
+  public static function loadByGroupType($group_entity_type_id, $group_bundle_id) {
+    $properties = [
+      'group_type' => $group_entity_type_id,
+      'group_bundle' => $group_bundle_id,
+    ];
+    return \Drupal::entityTypeManager()->getStorage('og_role')->loadByProperties($properties);
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   public function save() {
     // The ID of a new OgRole has to consist of the entity type ID, bundle ID
     // and role name, separated by dashes.
@@ -255,10 +209,6 @@ class OgRole extends Role implements OgRoleInterface {
       // When assigning a role to group we need to add a prefix to the ID in
       // order to prevent duplicate IDs.
       $prefix = $this->getGroupType() . '-' . $this->getGroupBundle() . '-';
-
-      if ($this->getGroupId()) {
-        $prefix .= $this->getGroupId() . '-';
-      }
 
       $this->setId($prefix . $this->getName());
     }
@@ -301,14 +251,22 @@ class OgRole extends Role implements OgRoleInterface {
    */
   public function delete() {
     // The default roles are required. Prevent them from being deleted for as
-    // long as the group still exists.
-    if (in_array($this->id(), [self::ANONYMOUS, self::AUTHENTICATED]) && $this->groupTypeManager()->isGroup($this->getGroupType(), $this->getGroupBundle())) {
+    // long as the group still exists, unless the group itself is in the process
+    // of being removed.
+    if (!$this->parentEntityIsBeingRemoved && $this->isRequired() && $this->groupTypeManager()->isGroup($this->getGroupType(), $this->getGroupBundle())) {
       throw new OgRoleException('The default roles "non-member" and "member" cannot be deleted.');
     }
 
     // Reset access cache, as the role is no longer present.
     $this->ogAccess()->reset();
     parent::delete();
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function isRequired() {
+    return static::getRoleTypeByName($this->getName()) === OgRoleInterface::ROLE_TYPE_REQUIRED;
   }
 
   /**
@@ -362,6 +320,27 @@ class OgRole extends Role implements OgRoleInterface {
    */
   protected function ogAccess() {
     return \Drupal::service('og.access');
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function calculateDependencies() {
+    parent::calculateDependencies();
+
+    // Create a dependency on the group bundle.
+    $bundle_config_dependency = \Drupal::entityTypeManager()->getDefinition($this->getGroupType())->getBundleConfigDependency($this->getGroupBundle());
+    $this->addDependency($bundle_config_dependency['type'], $bundle_config_dependency['name']);
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function onDependencyRemoval(array $dependencies) {
+    // The parent entity we depend on is being removed. Set a flag so we can
+    // allow removal of required roles.
+    $this->parentEntityIsBeingRemoved = TRUE;
+    return parent::onDependencyRemoval($dependencies);
   }
 
 }

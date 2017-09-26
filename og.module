@@ -7,13 +7,17 @@
 
 use Drupal\Core\Access\AccessResult;
 use Drupal\Core\Cache\Cache;
+use Drupal\Core\Config\Entity\ConfigEntityBundleBase;
 use Drupal\Core\Entity\ContentEntityInterface;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Field\BaseFieldDefinition;
 use Drupal\Core\Session\AccountInterface;
+use Drupal\og\Entity\OgRole;
 use Drupal\og\Og;
 use Drupal\og\OgGroupAudienceHelperInterface;
+use Drupal\og\OgRoleInterface;
+use Drupal\system\Entity\Action;
 use Drupal\user\EntityOwnerInterface;
 use Drupal\user\UserInterface;
 
@@ -40,7 +44,8 @@ function og_entity_insert(EntityInterface $entity) {
     return;
   }
 
-  if (!$entity->getOwner()) {
+  $owner = $entity->getOwner();
+  if (empty($owner) || $owner->isAnonymous()) {
     // User is anonymous, se we cannot set a membership for them.
     return;
   }
@@ -76,9 +81,13 @@ function og_entity_predelete(EntityInterface $entity) {
     // @see https://github.com/amitaibu/og/issues/175
     // og_delete_user_roles_by_group($entity_type, $entity);
   }
+  // If a user is being deleted, also delete its memberships.
   if ($entity instanceof UserInterface) {
-    // @todo Delete memberships when deleting users.
-    // @see https://github.com/amitaibu/og/issues/176
+    /** @var \Drupal\og\MembershipManagerInterface $membership_manager */
+    $membership_manager = \Drupal::service('og.membership_manager');
+    foreach ($membership_manager->getMemberships($entity, []) as $membership) {
+      $membership->delete();
+    }
   }
 }
 
@@ -93,12 +102,26 @@ function og_entity_delete(EntityInterface $entity) {
   if (Og::isGroup($entity->getEntityTypeId(), $entity->bundle()) || Og::isGroupContent($entity->getEntityTypeId(), $entity->bundle())) {
     Og::invalidateCache();
   }
+
+  // If a group content type is deleted, make sure to remove it from the list of
+  // groups.
+  if ($entity instanceof ConfigEntityBundleBase) {
+    $bundle = $entity->id();
+    $entity_type_id = \Drupal::entityTypeManager()->getDefinition($entity->getEntityTypeId())->getBundleOf();
+    if (Og::isGroup($entity_type_id, $bundle)) {
+      Og::groupTypeManager()->removeGroup($entity_type_id, $bundle);
+    }
+  }
 }
 
 /**
  * Implements hook_entity_access().
  */
 function og_entity_access(EntityInterface $entity, $operation, AccountInterface $account) {
+  // Grant access to view roles, so that they can be shown in listings.
+  if ($entity instanceof OgRoleInterface && $operation == 'view') {
+    return AccessResult::allowed();
+  }
   // We only care about content entities that are groups or group content.
   if (!$entity instanceof ContentEntityInterface) {
     return AccessResult::neutral();
@@ -309,5 +332,66 @@ function og_invalidate_group_content_cache_tags(EntityInterface $entity) {
       }
     }
     Cache::invalidateTags(Cache::buildTags('og-group-content', $tags));
+  }
+}
+
+/**
+ * Implements hook_ENTITY_TYPE_insert() for OgRole entities.
+ */
+function og_og_role_insert(OgRoleInterface $role) {
+  // Create actions to add or remove the role, except for the required default
+  // roles 'member' and 'non-member'. These cannot be added or removed.
+  if ($role->getRoleType() === OgRoleInterface::ROLE_TYPE_REQUIRED) {
+    return;
+  }
+
+  $add_id = 'og_membership_add_single_role_action.' . $role->getName();
+  if (!Action::load($add_id)) {
+    $action = Action::create([
+      'id' => $add_id,
+      'type' => 'og_membership',
+      'label' => t('Add the @label role to the selected members', ['@label' => $role->getName()]),
+      'configuration' => [
+        'role_name' => $role->getName(),
+      ],
+      'plugin' => 'og_membership_add_single_role_action',
+    ]);
+    $action->trustData()->save();
+  }
+  $remove_id = 'og_membership_remove_single_role_action.' . $role->getName();
+  if (!Action::load($remove_id)) {
+    $action = Action::create([
+      'id' => $remove_id,
+      'type' => 'og_membership',
+      'label' => t('Remove the @label role from the selected members', ['@label' => $role->getName()]),
+      'configuration' => [
+        'role_name' => $role->getName(),
+      ],
+      'plugin' => 'og_membership_remove_single_role_action',
+    ]);
+    $action->trustData()->save();
+  }
+}
+
+/**
+ * Implements hook_ENTITY_TYPE_delete() for OgRole entities.
+ */
+function og_og_role_delete(OgRoleInterface $role) {
+  $role_name = $role->getName();
+  /** @var \Drupal\system\ActionConfigEntityInterface[] $actions */
+  $actions = Action::loadMultiple([
+    'og_membership_add_single_role_action.' . $role_name,
+    'og_membership_remove_single_role_action.' . $role_name,
+  ]);
+
+  // Only remove the actions when the role name is not used by any other roles.
+  foreach (OgRole::loadMultiple() as $role) {
+    if ($role->getName() === $role_name) {
+      return;
+    }
+  }
+
+  foreach ($actions as $action) {
+    $action->delete();
   }
 }

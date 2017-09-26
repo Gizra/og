@@ -136,6 +136,7 @@ class GetBundleByBundleTest extends KernelTestBase {
             if (!empty($group_bundle_ids)) {
               $settings['field_config'] = [
                 'settings' => [
+                  'handler' => 'default',
                   'handler_settings' => [
                     'target_bundles' => array_combine($group_bundle_ids, $group_bundle_ids),
                   ],

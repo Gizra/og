@@ -12,6 +12,7 @@ use Drupal\Core\Session\AccountInterface;
 use Drupal\og\Og;
 use Drupal\og\OgMembershipInterface;
 use Drupal\og\OgRoleInterface;
+use Drupal\user\EntityOwnerInterface;
 
 /**
  * The membership entity that connects a group and a user.
@@ -134,6 +135,11 @@ class OgMembership extends ContentEntityBase implements OgMembershipInterface {
   public function getGroup() {
     $entity_type = $this->get('entity_type')->value;
     $entity_id = $this->get('entity_id')->value;
+
+    if (empty($entity_type) || empty($entity_id)) {
+      return NULL;
+    }
+
     return \Drupal::entityTypeManager()->getStorage($entity_type)->load($entity_id);
   }
 
@@ -162,7 +168,7 @@ class OgMembership extends ContentEntityBase implements OgMembershipInterface {
   /**
    * {@inheritdoc}
    */
-  public function addRole(OgRole $role) {
+  public function addRole(OgRoleInterface $role) {
     $roles = $this->getRoles();
     $roles[] = $role;
 
@@ -172,11 +178,18 @@ class OgMembership extends ContentEntityBase implements OgMembershipInterface {
   /**
    * {@inheritdoc}
    */
-  public function revokeRole(OgRole $role) {
+  public function revokeRole(OgRoleInterface $role) {
+    return $this->revokeRoleById($role->id());
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function revokeRoleById($role_id) {
     $roles = $this->getRoles();
 
     foreach ($roles as $key => $existing_role) {
-      if ($existing_role->id() == $role->id()) {
+      if ($existing_role->id() == $role_id) {
         unset($roles[$key]);
 
         // We can stop iterating.
@@ -222,6 +235,39 @@ class OgMembership extends ContentEntityBase implements OgMembershipInterface {
     return array_map(function (OgRole $role) {
       return $role->id();
     }, $this->getRoles());
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function isRoleValid(OgRoleInterface $role) {
+    $group = $this->getGroup();
+
+    // If there is no group yet then we cannot determine whether the role is
+    // valid.
+    if (!$group) {
+      throw new \LogicException('Cannot determine whether a role is valid for a membership that doesn\'t have a group.');
+    }
+
+    // Non-member roles are never valid for any membership.
+    if ($role->getName() == OgRoleInterface::ANONYMOUS) {
+      return FALSE;
+    }
+
+    // If the entity type and bundle of the role doesn't match the group then
+    // the role is intended for a different group type.
+    elseif ($role->getGroupType() !== $group->getEntityTypeId() || $role->getGroupBundle() !== $group->bundle()) {
+      return FALSE;
+    }
+
+    return TRUE;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function hasRole($role_id) {
+    return in_array($role_id, $this->getRolesIds());
   }
 
   /**
@@ -282,6 +328,11 @@ class OgMembership extends ContentEntityBase implements OgMembershipInterface {
       ->setLabel(t('Roles'))
       ->setDescription(t('The OG roles related to an OG membership entity.'))
       ->setCardinality(FieldStorageDefinitionInterface::CARDINALITY_UNLIMITED)
+      ->setDisplayOptions('view', [
+        'label' => 'hidden',
+        'type' => 'entity_reference_label',
+        'weight' => 0,
+      ])
       ->setSetting('target_type', 'og_role');
 
     $fields['created'] = BaseFieldDefinition::create('created')
@@ -324,14 +375,20 @@ class OgMembership extends ContentEntityBase implements OgMembershipInterface {
       throw new \LogicException(sprintf('Entity type %s with ID %s is not an OG group.', $entity_type_id, $group->id()));
     }
 
-    // Make sure we don't save non-member or member role with a membership.
+    // Check if the roles are valid.
     foreach ($this->getRoles() as $role) {
       /** @var \Drupal\og\Entity\OgRole $role */
+      // Make sure we don't save a membership for a non-member.
       if ($role->getName() == OgRoleInterface::ANONYMOUS) {
         throw new \LogicException('Cannot save an OgMembership with reference to a non-member role.');
       }
+      // The regular membership is implied, we do not need to store it.
       elseif ($role->getName() == OgRoleInterface::AUTHENTICATED) {
         $this->revokeRole($role);
+      }
+      // The roles should apply to the group type.
+      elseif (!$this->isRoleValid($role)) {
+        throw new \LogicException(sprintf('The role with ID %s does not match the group type of the membership.', $role->id()));
       }
     }
 
@@ -404,6 +461,14 @@ class OgMembership extends ContentEntityBase implements OgMembershipInterface {
    */
   public function isBlocked() {
     return $this->getState() === OgMembershipInterface::STATE_BLOCKED;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function isOwner() {
+    $group = $this->getGroup();
+    return $group instanceof EntityOwnerInterface && $group->getOwnerId() == $this->getUser()->id();
   }
 
 }

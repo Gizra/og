@@ -5,7 +5,6 @@ namespace Drupal\og;
 use Drupal\Core\Entity\ContentEntityInterface;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Session\AccountInterface;
-use Drupal\og\Entity\OgRole;
 
 /**
  * Provides an interface for OG memberships.
@@ -101,8 +100,9 @@ interface OgMembershipInterface extends ContentEntityInterface {
   /**
    * Gets the group associated with the membership.
    *
-   * @return \Drupal\Core\Entity\EntityInterface
-   *   The group object which the membership reference to.
+   * @return \Drupal\Core\Entity\EntityInterface|null
+   *   The group object which is referenced by the membership, or NULL if no
+   *   group has been set yet.
    */
   public function getGroup();
 
@@ -125,7 +125,7 @@ interface OgMembershipInterface extends ContentEntityInterface {
   /**
    * Sets the membership state.
    *
-   * @param int $state
+   * @param string $state
    *   The state of the membership. It may be of the following constants:
    *   - OgMembershipInterface::STATE_ACTIVE
    *   - OgMembershipInterface::STATE_PENDING
@@ -139,7 +139,7 @@ interface OgMembershipInterface extends ContentEntityInterface {
   /**
    * Gets the membership state.
    *
-   * @return int
+   * @return string
    *   The state of the membership. It may be of the following constants:
    *   - OgMembershipInterface::STATE_ACTIVE
    *   - OgMembershipInterface::STATE_PENDING
@@ -169,24 +169,35 @@ interface OgMembershipInterface extends ContentEntityInterface {
   /**
    * Adds a role to the user membership.
    *
-   * @param \Drupal\og\Entity\OgRole $role
+   * @param \Drupal\og\OgRoleInterface $role
    *   The OG role.
    *
    * @return \Drupal\og\OgMembershipInterface
    *   The updated OG Membership object.
    */
-  public function addRole(OgRole $role);
+  public function addRole(OgRoleInterface $role);
 
   /**
    * Revokes a role from the OG membership.
    *
-   * @param \Drupal\og\Entity\OgRole $role
+   * @param \Drupal\og\OgRoleInterface $role
    *   The OG role.
    *
    * @return \Drupal\og\OgMembershipInterface
    *   The updated OG Membership object.
    */
-  public function revokeRole(OgRole $role);
+  public function revokeRole(OgRoleInterface $role);
+
+  /**
+   * Revokes a role from the OG membership.
+   *
+   * @param string $role_id
+   *   The OG role ID.
+   *
+   * @return \Drupal\og\OgMembershipInterface
+   *   The updated OG Membership object.
+   */
+  public function revokeRoleById($role_id);
 
   /**
    * Gets all the referenced OG roles.
@@ -195,6 +206,40 @@ interface OgMembershipInterface extends ContentEntityInterface {
    *   List of OG roles the user own for the current membership instance.
    */
   public function getRoles();
+
+  /**
+   * Gets all the referenced OG role IDs.
+   *
+   * @return string[]
+   *   List of OG role IDs that are granted in the membership.
+   */
+  public function getRolesIds();
+
+  /**
+   * Returns whether the given role is valid for this membership.
+   *
+   * @param \Drupal\og\OgRoleInterface $role
+   *   The role to check.
+   *
+   * @return bool
+   *   True if the role is valid, false otherwise.
+   *
+   * @throws \LogicException
+   *   Thrown when the validity of the role cannot be established, for example
+   *   because the group hasn't yet been set on the membership.
+   */
+  public function isRoleValid(OgRoleInterface $role);
+
+  /**
+   * Checks if the membership has the role with the given ID.
+   *
+   * @param string $role_id
+   *   The ID of the role to check.
+   *
+   * @return bool
+   *   True if the membership has the role.
+   */
+  public function hasRole($role_id);
 
   /**
    * Checks if the user has a permission inside the group.
@@ -211,7 +256,7 @@ interface OgMembershipInterface extends ContentEntityInterface {
    * Returns TRUE if the OG membership is active.
    *
    * @return bool
-   *   TRUE if the OG membership is active, false otherwise.
+   *   TRUE if the OG membership is active, FALSE otherwise.
    */
   public function isActive();
 
@@ -219,7 +264,7 @@ interface OgMembershipInterface extends ContentEntityInterface {
    * Returns TRUE if the OG membership is pending.
    *
    * @return bool
-   *   TRUE if the OG membership is pending, false otherwise.
+   *   TRUE if the OG membership is pending, FALSE otherwise.
    */
   public function isPending();
 
@@ -227,8 +272,16 @@ interface OgMembershipInterface extends ContentEntityInterface {
    * Returns TRUE if the OG membership is blocked.
    *
    * @return bool
-   *   TRUE if the OG membership is blocked, false otherwise.
+   *   TRUE if the OG membership is blocked, FALSE otherwise.
    */
   public function isBlocked();
+
+  /**
+   * Returns TRUE if the OG membership belongs to the group owner.
+   *
+   * @return bool
+   *   TRUE if the OG membership belongs to the group owner, FALSE otherwise.
+   */
+  public function isOwner();
 
 }
