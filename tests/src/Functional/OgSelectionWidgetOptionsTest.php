@@ -158,7 +158,7 @@ class OgSelectionWidgetOptionsTest extends BrowserTestBase {
     // The user can't post group content site wide so the audience is required
     // field.
     // todo: is that correct?
-    // $this->assertSession()->optionExists('Groups audience', '_none');
+    // $this->assertSession()->optionExists('Groups audience', '_none');.
     $this->assertSession()->optionExists('Groups audience', $this->group1->label());
     $this->assertSession()->optionNotExists('Groups audience', $this->group2->label());
 

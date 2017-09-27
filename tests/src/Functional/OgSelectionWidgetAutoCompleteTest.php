@@ -131,6 +131,7 @@ class OgSelectionWidgetAutoCompleteTest extends BrowserTestBase {
 
     $this->drupalGet('node/add/group_content');
     $this->submitForm($edit, 'Save');
+    var_dump($this->getSession()->getPage()->getContent());
     $this->assertSession()->pageTextContains('You are not allowed to post content in the group ' . $this->group2->label());
 
     // Add the member to the group.
