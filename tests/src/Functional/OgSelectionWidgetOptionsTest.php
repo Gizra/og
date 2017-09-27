@@ -4,6 +4,7 @@ namespace Drupal\Tests\og\Functional;
 
 use Drupal\node\Entity\Node;
 use Drupal\node\Entity\NodeType;
+use Drupal\node\NodeInterface;
 use Drupal\og\Entity\OgRole;
 use Drupal\og\Og;
 use Drupal\og\OgGroupAudienceHelper;
@@ -124,7 +125,7 @@ class OgSelectionWidgetOptionsTest extends BrowserTestBase {
       'type' => 'group_type2',
       'title' => 'unpublished group',
       'uid' => $this->groupOwnerUser->id(),
-      'status' => NODE_NOT_PUBLISHED,
+      'status' => NodeInterface::NOT_PUBLISHED,
     ]);
     $this->unpublishedGroup->save();
 
@@ -157,7 +158,7 @@ class OgSelectionWidgetOptionsTest extends BrowserTestBase {
     // The user can't post group content site wide so the audience is required
     // field.
     // todo: is that correct?
-//    $this->assertSession()->optionExists('Groups audience', '_none');
+    // $this->assertSession()->optionExists('Groups audience', '_none');
     $this->assertSession()->optionExists('Groups audience', $this->group1->label());
     $this->assertSession()->optionNotExists('Groups audience', $this->group2->label());
 
