@@ -2,6 +2,7 @@
 
 namespace Drupal\Tests\og\Functional;
 
+use Behat\Mink\Exception\ResponseTextException;
 use Drupal\node\Entity\Node;
 use Drupal\node\Entity\NodeType;
 use Drupal\og\Entity\OgRole;
@@ -134,13 +135,15 @@ class OgSelectionWidgetAutoCompleteTest extends BrowserTestBase {
 
     // When using 8.4, ValidReferenceConstraintValidator is prevent from
     // ValidOgMembershipReferenceConstraintValidator message to appear. We need
-    // to see how we can override that so the user would have a better
-    // understanding why the reference is invalid.
-    $text = strpos(\Drupal::VERSION, '8.4') === 0 ?
-      'This entity (node: ' . $this->group2->id() . ') cannot be referenced.' :
-      'You are not allowed to post content in the group ' . $this->group2->label();
-
-    $this->assertSession()->pageTextContains($text);
+    // to see how we can override that so the user would have a better understanding
+    // why the reference is invalid.
+    try {
+      $this->assertSession()->pageTextContains('You are not allowed to post content in the group ' . $this->group2->label());
+    } catch (ResponseTextException $e) {
+      $this->assertSession()->pageTextContains('This entity (node: ' . $this->group2->id() . ') cannot be referenced.');
+    } catch (\Exception $e) {
+      throw new \Exception('Both of the errors for the invalid group reference did not appear on the screen.');
+    }
 
     // Add the member to the group.
     Og::createMembership($this->group2, $this->user1)->addRole($this->role)->save();
