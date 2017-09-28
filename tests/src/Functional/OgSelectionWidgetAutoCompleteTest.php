@@ -131,8 +131,16 @@ class OgSelectionWidgetAutoCompleteTest extends BrowserTestBase {
 
     $this->drupalGet('node/add/group_content');
     $this->submitForm($edit, 'Save');
-    var_dump($this->getSession()->getPage()->getContent());
-    $this->assertSession()->pageTextContains('You are not allowed to post content in the group ' . $this->group2->label());
+
+    // When using 8.4, ValidReferenceConstraintValidator is prevent from
+    // ValidOgMembershipReferenceConstraintValidator message to appear. We need
+    // to see how we can override that so the user would have a better
+    // understanding why the reference is invalid.
+    $text = strpos(\Drupal::VERSION, '8.4') === 0 ?
+      'This entity (node: ' . $this->group2->id() . ') cannot be referenced.' :
+      'You are not allowed to post content in the group ' . $this->group2->label();
+
+    $this->assertSession()->pageTextContains($text);
 
     // Add the member to the group.
     Og::createMembership($this->group2, $this->user1)->addRole($this->role)->save();
