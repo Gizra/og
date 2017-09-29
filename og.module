@@ -147,15 +147,19 @@ function og_entity_access(EntityInterface $entity, $operation, AccountInterface 
   /** @var \Drupal\Core\Access\AccessResult $access */
   $access = \Drupal::service('og.access')->userAccessEntity($operation, $entity, $account);
 
-  $field_definitions = \Drupal::service('entity_field.manager')->getFieldDefinitions($entity_type_id, $bundle_id);
-  foreach ($field_definitions as $field_name => $field_definition) {
-    /** @var \Drupal\Core\Field\FieldDefinitionInterface $field_definition */
-    if (!\Drupal::service('og.group_audience_helper')->isGroupAudienceField($field_definition)) {
-      continue;
-    }
+  $audience_fields = \Drupal::service('og.group_audience_helper')->getAllGroupAudienceFields($entity_type_id, $bundle_id);
+  if (count($audience_fields) === 1) {
+    $field_definitions = \Drupal::service('entity_field.manager')->getFieldDefinitions($entity_type_id, $bundle_id);
+    foreach ($field_definitions as $field_name => $field_definition) {
 
-    // Check if the field need to be required.
-    og_check_audience_field_is_required($field_definition, $entity_type_id, $bundle_id, $account);
+      /** @var \Drupal\Core\Field\FieldDefinitionInterface $field_definition */
+      if (!in_array($field_definition->getName(), array_keys($audience_fields))) {
+        continue;
+      }
+
+      // Check if the field need to be required.
+      og_check_audience_field_is_required($field_definition, $entity_type_id, $bundle_id, $account);
+    }
   }
 
   if ($access->isAllowed()) {
@@ -207,18 +211,29 @@ function og_entity_create_access(AccountInterface $account, array $context, $bun
   // @see \Drupal\og\Plugin\EntityReferenceSelection\OgSelection::buildEntityQuery()
   $required = FALSE;
 
+  /** @var \Drupal\og\OgGroupAudienceHelperInterface $audience_helper */
+  $audience_helper = \Drupal::service('og.group_audience_helper');
+  $audience_fields = $audience_helper->getAllGroupAudienceFields($entity_type_id, $bundle);
   $field_definitions = \Drupal::service('entity_field.manager')->getFieldDefinitions($entity_type_id, $bundle);
+
   foreach ($field_definitions as $field_name => $field_definition) {
     /** @var \Drupal\Core\Field\FieldDefinitionInterface $field_definition */
-    if (!\Drupal::service('og.group_audience_helper')->isGroupAudienceField($field_definition)) {
+    if (!in_array($field_definition->getName(), array_keys($audience_fields))) {
       continue;
     }
 
-    // Check if the field need to be required.
-    og_check_audience_field_is_required($field_definition, $entity_type_id, $bundle, $account);
+    if (count($audience_fields) === 1) {
+      // Set the field to required only if we have a single audience field. If
+      // we multiple fields then the require logic will perform at the entity
+      // constraint level.
+      og_check_audience_field_is_required($field_definition, $entity_type_id, $bundle, $account);
+    }
 
     $handler = Og::getSelectionHandler($field_definition);
     if ($handler->countReferenceableEntities()) {
+      // At least one of the fields has a referenceable groups. That mean that
+      // the user can create a group content when reference the group content in
+      // at least one the fields.
       return AccessResult::allowed();
     }
 
