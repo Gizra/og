@@ -158,7 +158,7 @@ function og_entity_access(EntityInterface $entity, $operation, AccountInterface 
       }
 
       // Check if the field need to be required.
-      og_check_audience_field_is_required($field_definition, $entity_type_id, $bundle_id, $account);
+      $field_definition->setRequired($access);
     }
   }
 
@@ -226,7 +226,9 @@ function og_entity_create_access(AccountInterface $account, array $context, $bun
       // Set the field to required only if we have a single audience field. If
       // we multiple fields then the require logic will perform at the entity
       // constraint level.
-      og_check_audience_field_is_required($field_definition, $entity_type_id, $bundle, $account);
+      $field_definition->setRequired(!\Drupal::entityTypeManager()
+        ->getAccessControlHandler($entity_type_id)
+        ->createAccess($bundle, $account, ['skip_og_permission' => TRUE]));
     }
 
     $handler = Og::getSelectionHandler($field_definition);
@@ -244,33 +246,6 @@ function og_entity_create_access(AccountInterface $account, array $context, $bun
 
   // Otherwise, ignore or deny based on whether strict entity access is set.
   return $required ? AccessResult::forbiddenIf($node_access_strict) : AccessResult::neutral();
-}
-
-/**
- * Check if an OG group audience field is required or not.
- *
- * There could be two cases:
- * 1. There is only one OG group audience field. In that case we need to check
- *    if the user has access to create that content type.
- * 2. There are more then one audience field. In that case, the field isn't
- *    required. The validation will occurs at the entity validation level. When
- *    the field is required we need to make sure that at least one field is
- *    populated.
- *
- * @param FieldDefinitionInterface $field_definition
- *   The field definition object.
- * @param $entity_type_id
- *   The entity type ID - node, user etc. etc.
- * @param $bundle
- *   The bundle of the entity - page, article etc. etc.
- * @param AccountInterface $account
- */
-function og_check_audience_field_is_required(FieldDefinitionInterface $field_definition, $entity_type_id, $bundle, AccountInterface $account) {
-  // todo: check how this affect rest request and check if we have two fields.
-  $field_definition->setRequired(!\Drupal::entityTypeManager()
-    ->getAccessControlHandler($entity_type_id)
-    ->createAccess($bundle, $account, ['skip_og_permission' => TRUE])
-  );
 }
 
 /**
