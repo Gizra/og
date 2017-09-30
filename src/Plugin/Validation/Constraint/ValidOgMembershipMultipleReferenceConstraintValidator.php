@@ -2,13 +2,12 @@
 
 namespace Drupal\og\Plugin\Validation\Constraint;
 
-use Drupal\Core\Entity\ContentEntityBase;
 use Drupal\og\Og;
 use Symfony\Component\Validator\Constraint;
 use Symfony\Component\Validator\ConstraintValidator;
 
 /**
- * Checks if referenced entities are valid.
+ * Make sure that at least one audience field is populated.
  */
 class ValidOgMembershipMultipleReferenceConstraintValidator extends ConstraintValidator {
 
@@ -18,6 +17,22 @@ class ValidOgMembershipMultipleReferenceConstraintValidator extends ConstraintVa
   public function validate($entity, Constraint $constraint) {
     /* @var \Drupal\Core\Entity\ContentEntityBase $entity */
     if (!Og::isGroupContent($entity->getEntityTypeId(), $entity->bundle())) {
+      return;
+    }
+
+    /** @var \Drupal\Core\Session\AccountProxy $current_user */
+    $current_user = \Drupal::service('current_user');
+
+    $access_control = \Drupal::entityTypeManager()->getAccessControlHandler($entity->getEntityTypeId());
+
+    $account = $current_user->getAccount();
+    $account->skip_og_permission = TRUE;
+
+    $access = $entity->isNew() ?
+      $access_control->createAccess($entity->bundle(), $current_user->getAccount(), ['skip_og_permission' => TRUE]) :
+      $access_control->access($entity, 'update', $account);
+
+    if ($access) {
       return;
     }
 
@@ -44,7 +59,7 @@ class ValidOgMembershipMultipleReferenceConstraintValidator extends ConstraintVa
     }
 
     if ($fields_are_empty) {
-      $this->context->addViolation('The fields @fields cannot be empty!', [
+      $this->context->addViolation('One of the fields @fields is required.', [
         '@fields' => implode(', ', $fields),
       ]);
     }

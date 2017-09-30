@@ -5,9 +5,11 @@ namespace Drupal\og\Plugin\Validation\Constraint;
 use Symfony\Component\Validator\Constraint;
 
 /**
- * Entity Reference valid reference constraint.
+ * Entity Reference valid references constraint.
  *
- * Verifies that referenced entities are valid.
+ * Make sure that when user that can only post content inside a group populated
+ * one of the audience fields. After the fields are populated the constraint for
+ * checking valid references will make sure the values are OK.
  *
  * @Constraint(
  *   id = "ValidOgMembershipMultipleReference",

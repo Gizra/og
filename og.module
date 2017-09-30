@@ -119,6 +119,11 @@ function og_entity_delete(EntityInterface $entity) {
  * Implements hook_entity_access().
  */
 function og_entity_access(EntityInterface $entity, $operation, AccountInterface $account) {
+
+  if (!empty($account->skip_og_permission)) {
+    return AccessResult::neutral();
+  }
+
   // Grant access to view roles, so that they can be shown in listings.
   if ($entity instanceof OgRoleInterface && $operation == 'view') {
     return AccessResult::allowed();
@@ -321,21 +326,23 @@ function og_field_widget_info_alter(array &$info) {
 
 /**
  * Implements hook_entity_type_alter().
- *
- * Add link template to groups. We add it to all the entity types, and later on
- * return the correct access, depending if the bundle is indeed a group and
- * accessible. We do not filter here the entity type by groups, so whenever
- * GroupTypeManager::addGroup is called, it's enough to mark route to be rebuilt
- * via RouteBuilder::setRebuildNeeded.
  */
 function og_entity_type_alter(array &$entity_types) {
 
   /** @var \Drupal\Core\Entity\EntityTypeInterface $entity_type */
   foreach ($entity_types as $entity_type_id => $entity_type) {
+
+    // Add link template to groups. We add it to all the entity types, and later
+    // on return the correct access, depending if the bundle is indeed a group
+    // and accessible. We do not filter here the entity type by groups, so
+    // whenever GroupTypeManager::addGroup is called, it's enough to mark route
+    // to be rebuilt via RouteBuilder::setRebuildNeeded.
     $entity_type->setLinkTemplate('og-admin-routes', "/group/$entity_type_id/{{$entity_type_id}}/admin");
 
-    // Add the valid og.
-    // todo describe better.
+    // We check if an entity might be a group content because we need to check
+    // if that entity has any bundle that could be group entity. Adding the
+    // constraint validation and we will check there if the entity is a group
+    // content or not.
     if ($entity_type->entityClassImplements(ContentEntityInterface::class)) {
       $entity_type->addConstraint('ValidOgMembershipMultipleReference');
     }
