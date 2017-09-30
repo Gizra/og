@@ -1,0 +1,33 @@
+<?php
+
+namespace Drupal\og\Plugin\Validation\Constraint;
+
+use Symfony\Component\Validator\Constraint;
+
+/**
+ * Entity Reference valid reference constraint.
+ *
+ * Verifies that referenced entities are valid.
+ *
+ * @Constraint(
+ *   id = "ValidOgMembershipMultipleReference",
+ *   label = @Translation("Organic Groups valid reference", context = "Validation")
+ * )
+ */
+class ValidOgMembershipMultipleReferenceConstraint extends Constraint {
+
+  /**
+   * Not a valid group message.
+   *
+   * @var string
+   */
+  public $NotValidGroup = 'The entity %label is not defined as a group.';
+
+  /**
+   * Not a valid group message.
+   *
+   * @var string
+   */
+  public $NotAllowedToPostInGroup = 'You are not allowed to post content in the group %label';
+
+}
