@@ -65,12 +65,18 @@ class OgMultipleSelectionWidgetAutoCompleteTest extends BrowserTestBase {
 
     NodeType::create(['type' => 'group_content'])->save();
 
-    // Use a select list widget for the audience field, so it's easier to get
-    // all the values.
+    // Set the field widget as autocomplete..
     $settings = [
       'form_display' => [
         'type' => 'entity_reference_autocomplete',
       ],
+    ];
+    Og::createField(OgGroupAudienceHelper::DEFAULT_FIELD, 'node', 'group_content', $settings);
+
+    // Add another field.
+    $settings += [
+      'field_name' => 'override_name',
+      'field_config' => ['label' => 'Second group reference'],
     ];
     Og::createField(OgGroupAudienceHelper::DEFAULT_FIELD, 'node', 'group_content', $settings);
 
@@ -81,7 +87,7 @@ class OgMultipleSelectionWidgetAutoCompleteTest extends BrowserTestBase {
     $this->group = Node::create([
       'type' => 'group_type',
       'title' => 'group1',
-      'uid' => $this->user1->id(),
+      'uid' => $this->user->id(),
     ]);
     $this->group->save();
 
@@ -94,45 +100,94 @@ class OgMultipleSelectionWidgetAutoCompleteTest extends BrowserTestBase {
       ->setGroupBundle('group_type')
       ->grantPermission('create node group_content')
       ->save();
+
+    // Create a role.
+    $role_storage = $this->container->get('entity.manager')->getStorage('user_role');
+    $role_storage->create([
+      'id' => 'dummy_role',
+      'permissions' => [
+        'create group_content content',
+        'edit own group_content content',
+        'edit any group_content content',
+      ]
+    ])->save();
   }
 
   /**
    * Test the auto complete widget for non group member.
    */
   public function testAutoCompleteForNonGroupMember() {
-    // Login as the user.
+    $this->drupalLogin($this->user);
 
     // Submit a form without any group.
+    $edit = [
+      'title[0][value]' => 'First group name',
+    ];
+
+    $this->drupalGet('node/add/group_content');
+    $this->submitForm($edit, 'Save');
 
     // Verify the error appeared.
+    $this->assertSession()->pageTextContains('One of the fields Groups audience, Second group reference is required.');
 
     // Submit the form when the first field is populated.
+    $edit = [
+      'title[0][value]' => 'First group name',
+      'og_audience[0][target_id]' => $this->group->label() . ' (' . $this->group->id() . ')',
+    ];
+
+    $this->drupalGet('node/add/group_content');
+    $this->submitForm($edit, 'Save');
 
     // Make sure the node has created.
+    $this->assertSession()->pageTextContains('First group name has been created.');
+
+    $query = $this->container->get('entity.query')->get('node');
+    $result = $query
+      ->condition('type', 'group_content')
+      ->range(0, 1)
+      ->sort('nid', 'DESC')
+      ->execute();
+    $gcid = reset($result);
 
     // Edit the node and remove the reference.
+    $edit = [
+      'title[0][value]' => 'Second group name',
+      'og_audience[0][target_id]' => '',
+    ];
+
+    $this->drupalGet('node/' . $gcid . '/edit');
+    $this->submitForm($edit, 'Save');
 
     // Make sure the error appeared.
-
-    // Assign the group content to the same group but in another field.
-
-    // Make sure the node updated.
+    $this->assertSession()->pageTextContains('One of the fields Groups audience, Second group reference is required.');
 
     // Grant to the user site wide permission.
+    $this->user->addRole('dummy_role');
+    $this->user->save();
 
-    // Remove the reference and make sure the node was updated.
+    // Remove the reference.
+    $edit = [
+      'title[0][value]' => 'Second group name',
+      'og_audience[0][target_id]' => '',
+    ];
 
-    // Create a new group content without any group and make sure the node was
-    // created.
+    $this->drupalGet('node/' . $gcid . '/edit');
+    $this->submitForm($edit, 'Save');
 
-    // Remove the site wide permissions to the user.
+    // Make sure the node was updated
+    $this->assertSession()->pageTextContains('Second group name has been updated.');
 
-    // Edit the node.
+    // Create a new group content without any group.
+    $edit = [
+      'title[0][value]' => 'Third group name',
+    ];
 
-    // Make sure the error appeared.
+    $this->drupalGet('node/add/group_content');
+    $this->submitForm($edit, 'Save');
 
-    // Update the node with a group reference and make sure the node was
-    // updated.
+    // Make sure the node was created.
+    $this->assertSession()->pageTextContains('Third group name has been created.');
   }
 
 }
