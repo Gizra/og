@@ -22,15 +22,18 @@ class ValidOgMembershipMultipleReferenceConstraintValidator extends ConstraintVa
 
     /** @var \Drupal\Core\Session\AccountProxy $current_user */
     $current_user = \Drupal::service('current_user');
-
-    $access_control = \Drupal::entityTypeManager()->getAccessControlHandler($entity->getEntityTypeId());
-
     $account = $current_user->getAccount();
-    $account->skip_og_permission = TRUE;
+    $bundle = $entity->bundle();
 
-    $access = $entity->isNew() ?
-      $access_control->createAccess($entity->bundle(), $current_user->getAccount(), ['skip_og_permission' => TRUE]) :
-      $access_control->access($entity, 'update', $account);
+    // Check if the user has site wide permission. If the the user has a site
+    // wide permission we don't need to enforce the assign the content to a
+    // group.
+    if ($entity->isNew()) {
+      $access = $account->hasPermission("create $bundle content");
+    }
+    else {
+      $access = $account->hasPermission("edit own $bundle content") || $account->hasPermission("edit any $bundle content");
+    }
 
     if ($access) {
       return;

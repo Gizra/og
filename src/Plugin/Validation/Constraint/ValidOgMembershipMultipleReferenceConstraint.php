@@ -19,17 +19,10 @@ use Symfony\Component\Validator\Constraint;
 class ValidOgMembershipMultipleReferenceConstraint extends Constraint {
 
   /**
-   * Not a valid group message.
+   * Fields are not populated.
    *
    * @var string
    */
-  public $NotValidGroup = 'The entity %label is not defined as a group.';
-
-  /**
-   * Not a valid group message.
-   *
-   * @var string
-   */
-  public $NotAllowedToPostInGroup = 'You are not allowed to post content in the group %label';
+  public $AudienceFieldsAreNotPopulated = 'One of the fields @fields is required.';
 
 }

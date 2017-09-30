@@ -120,10 +120,6 @@ function og_entity_delete(EntityInterface $entity) {
  */
 function og_entity_access(EntityInterface $entity, $operation, AccountInterface $account) {
 
-  if (!empty($account->skip_og_permission)) {
-    return AccessResult::neutral();
-  }
-
   // Grant access to view roles, so that they can be shown in listings.
   if ($entity instanceof OgRoleInterface && $operation == 'view') {
     return AccessResult::allowed();
