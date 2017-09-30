@@ -160,7 +160,6 @@ class OgSelectionWidgetAutoCompleteTest extends BrowserTestBase {
     $this->drupalGet('node/add/group_content');
     $this->submitForm($edit, 'Save');
     $this->assertSession()->pageTextContains($edit['title[0][value]'] . ' has been created.');
-
   }
 
 }
