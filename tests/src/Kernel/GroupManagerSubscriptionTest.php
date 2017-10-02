@@ -118,7 +118,7 @@ class GroupManagerSubscriptionTest extends KernelTestBase {
   /**
    * Checks if the membership is overridden by a custom hook implementation.
    *
-   * @param OgMembershipInterface $membership
+   * @param \Drupal\og\OgMembershipInterface $membership
    *   The OG Membership to check. If empty the membership does not exist.
    *
    * @return bool
