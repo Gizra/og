@@ -2,7 +2,6 @@
 
 namespace Drupal\Tests\og\Functional;
 
-use Behat\Mink\Exception\ResponseTextException;
 use Drupal\node\Entity\Node;
 use Drupal\node\Entity\NodeType;
 use Drupal\og\Entity\OgRole;
@@ -109,7 +108,7 @@ class OgMultipleSelectionWidgetAutoCompleteTest extends BrowserTestBase {
         'create group_content content',
         'edit own group_content content',
         'edit any group_content content',
-      ]
+      ],
     ])->save();
   }
 
@@ -175,7 +174,7 @@ class OgMultipleSelectionWidgetAutoCompleteTest extends BrowserTestBase {
     $this->drupalGet('node/' . $gcid . '/edit');
     $this->submitForm($edit, 'Save');
 
-    // Make sure the node was updated
+    // Make sure the node was updated.
     $this->assertSession()->pageTextContains('Second group name has been updated.');
 
     // Create a new group content without any group.

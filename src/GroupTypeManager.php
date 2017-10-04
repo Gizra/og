@@ -228,7 +228,7 @@ class GroupTypeManager {
    *   of bundle IDs.
    */
   public function getAllGroupBundles() {
-    // todo - should be remove since this method don't do any thing.
+    // Todo - should be remove since this method don't do any thing.
     return $this->getGroupMap();
   }
 
