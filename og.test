@@ -768,6 +768,29 @@ class OgPermissionsTestCase extends DrupalWebTestCase {
     $this->assertEqual($roles,  array(), 'Blocked member has no roles.');
     $this->assertFalse(og_user_access('entity_test', $entity->pid, 'update group', $user2), 'Blocked member has no access.');
   }
+
+  function testGrantRolesTwiceForPendingUsers() {
+    // Create user.
+    $user1 = $this->drupalCreateUser();
+
+    // Create an entity.
+    $entity = entity_create('entity_test', array('name' => 'main', 'uid' => $user1->uid));
+    $wrapper = entity_metadata_wrapper('entity_test', $entity);
+    $wrapper->{OG_GROUP_FIELD}->set(1);
+    $wrapper->save();
+
+    $og_roles = og_roles('entity_test', 'main');
+
+    //Add the user to the group.
+    $values = array('entity_type' => 'user', 'entity' => $user1, 'state' => OG_STATE_PENDING);
+    $rid = array_search(OG_ADMINISTRATOR_ROLE, $og_roles);
+    og_group('entity_test', $entity->pid, $values);
+
+    // Try granting the admin role to a pending user twice.
+    og_role_grant('entity_test', $entity->pid, $user1->uid, $rid);
+    og_role_grant('entity_test', $entity->pid, $user1->uid, $rid);
+    $this->pass('Granting a role twice should not throw an exception.');
+  }
 }
 
 class OgDefaultAccessFieldTestCase extends DrupalWebTestCase {

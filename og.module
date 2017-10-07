@@ -3074,7 +3074,7 @@ function og_role_grant($group_type, $gid, $uid, $rid) {
   }
 
   // Get the existing user roles.
-  $user_roles = og_get_user_roles($group_type, $gid, $uid);
+  $user_roles = og_get_user_roles($group_type, $gid, $uid, TRUE, FALSE);
   if (empty($user_roles[$rid])) {
     $role = new stdClass();
     $role->uid = $uid;
