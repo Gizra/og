@@ -153,7 +153,7 @@ class OgMembershipTest extends KernelTestBase {
     $this->assertEquals($this->user->id(), $membership->getOwnerId());
 
     // And after re-loading.
-    /** @var OgMembershipInterface $membership */
+    /** @var \Drupal\og\OgMembershipInterface $membership */
     $membership = $this->entityTypeManager->getStorage('og_membership')->loadUnchanged($membership->id());
 
     $this->assertInstanceOf(UserInterface::class, $membership->getOwner());

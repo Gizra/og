@@ -4,7 +4,6 @@ namespace Drupal\og;
 
 use Drupal\Core\Entity\ContentEntityInterface;
 use Drupal\Core\Entity\EntityInterface;
-use Drupal\Core\Session\AccountInterface;
 use Drupal\user\EntityOwnerInterface;
 
 /**
