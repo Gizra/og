@@ -311,6 +311,7 @@ function og_ui_edit_membership($form, &$form_state, $group_type, $gid, $og_membe
       '#options' => $og_roles,
       '#title' => t('Roles'),
       '#default_value' => array_keys(og_get_user_roles($group_type, $gid, $account->uid)),
+      '#disabled' => $og_membership->state != OG_STATE_ACTIVE,
     );
   }
 
