@@ -27,7 +27,7 @@ use Symfony\Component\EventDispatcher\EventDispatcherInterface;
  * @group og
  * @coversDefaultClass \Drupal\og\GroupTypeManager
  */
-class GroupManagerTest extends UnitTestCase {
+class GroupTypeManagerTest extends UnitTestCase {
 
   /**
    * The config prophecy used in the test.
