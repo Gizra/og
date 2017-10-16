@@ -36,8 +36,8 @@ class UniqueOgMembershipConstraintValidator extends ConstraintValidator {
     $new_member_uid = $value[0]['target_id'];
     $membership_manager = \Drupal::service('og.membership_manager');
     foreach ($membership_manager->getGroupMemberships($entity->getGroup()) as $membership) {
-      if ((string) $membership->getUser()->id() === (string) $new_member_uid) {
-        $this->context->addViolation($constraint->NotUniqueMembership, ['%user' => $membership->getUser()->getDisplayName()]);
+      if ((string) $membership->getOwner()->id() === (string) $new_member_uid) {
+        $this->context->addViolation($constraint->NotUniqueMembership, ['%user' => $membership->getOwner()->getDisplayName()]);
         return;
       }
     }

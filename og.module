@@ -201,7 +201,7 @@ function og_og_membership_access(OgMembershipInterface $entity, $operation, Acco
   if (
     isset($group_fields['uid'])
     && $operation === 'delete'
-    && $group_fields['uid']->entity->id() === $entity->getUser()->id()
+    && $group_fields['uid']->entity->id() === $entity->getOwner()->id()
   ) {
     return AccessResult::forbidden();
   }

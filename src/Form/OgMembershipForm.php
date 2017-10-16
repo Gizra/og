@@ -83,7 +83,7 @@ class OgMembershipForm extends ContentEntityForm {
       $form['member'] = [
         '#title' => $this->t('Member name'),
         '#type' => 'item',
-        '#markup' => $entity->getUser()->getDisplayName(),
+        '#markup' => $entity->getOwner()->getDisplayName(),
         '#weight' => -10,
       ];
     }
@@ -108,14 +108,14 @@ class OgMembershipForm extends ContentEntityForm {
 
     $context = [
       '@membership_type' => $membership->getType(),
-      '@uid' => $membership->getUser()->id(),
+      '@uid' => $membership->getOwner()->id(),
       '@group_type' => $membership->getGroupEntityType(),
       '@gid' => $membership->getGroupId(),
       'link' => $membership_link,
     ];
 
     $t_args = [
-      '%user' => $membership->getUser()->link(),
+      '%user' => $membership->getOwner()->link(),
       '%group' => $membership->getGroup()->link(),
     ];
 

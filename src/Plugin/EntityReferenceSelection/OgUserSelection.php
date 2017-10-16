@@ -145,7 +145,7 @@ class OgUserSelection extends DefaultSelection {
     $member_uids = [];
     /** @var \Drupal\og\Entity\OgMembership $membership */
     foreach ($this->membershipManager->getGroupMemberships($group) as $membership) {
-      $member_uids[] = $membership->getUser()->id();
+      $member_uids[] = $membership->getOwner()->id();
     }
 
     if (count($member_uids) > 0) {

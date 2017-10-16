@@ -54,7 +54,7 @@ class OgMembershipAccessControlHandler extends EntityAccessControlHandler implem
     $group = $entity->getGroup();
 
     // Do not allow deleting the group owner's membership.
-    if (($operation === 'delete') && ($group instanceof EntityOwnerInterface) && ($group->getOwnerId() == $entity->getUser()->id())) {
+    if (($operation === 'delete') && ($group instanceof EntityOwnerInterface) && ($group->getOwnerId() == $entity->getOwner()->id())) {
       return AccessResult::forbidden();
     }
 
