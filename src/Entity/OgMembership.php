@@ -8,7 +8,7 @@ use Drupal\Core\Entity\EntityStorageInterface;
 use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Field\BaseFieldDefinition;
 use Drupal\Core\Field\FieldStorageDefinitionInterface;
-use Drupal\Core\Session\AccountInterface;
+use Drupal\user\UserInterface;
 use Drupal\og\Og;
 use Drupal\og\OgMembershipInterface;
 use Drupal\og\OgRoleInterface;
@@ -94,15 +94,30 @@ class OgMembership extends ContentEntityBase implements OgMembershipInterface {
   /**
    * {@inheritdoc}
    */
-  public function getUser() {
+  public function getOwner() {
     return $this->get('uid')->entity;
   }
 
   /**
    * {@inheritdoc}
    */
-  public function setUser(AccountInterface $user) {
-    $this->set('uid', $user->id());
+  public function getOwnerId() {
+    return $this->get('uid')->target_id;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function setOwner(UserInterface $account) {
+    $this->set('uid', $account->id());
+    return $this;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function setOwnerId($uid) {
+    $this->set('uid', $uid);
     return $this;
   }
 
@@ -467,7 +482,7 @@ class OgMembership extends ContentEntityBase implements OgMembershipInterface {
    */
   public function isOwner() {
     $group = $this->getGroup();
-    return $group instanceof EntityOwnerInterface && $group->getOwnerId() == $this->getUser()->id();
+    return $group instanceof EntityOwnerInterface && $group->getOwnerId() == $this->getOwnerId();
   }
 
 }

@@ -7,11 +7,11 @@ use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Entity\EntityManagerInterface;
 use Drupal\Core\Entity\EntityStorageInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
-use Drupal\Core\Session\AccountInterface;
 use Drupal\og\MembershipManager;
 use Drupal\og\OgGroupAudienceHelperInterface;
 use Drupal\og\OgMembershipInterface;
 use Drupal\Tests\UnitTestCase;
+use Drupal\user\UserInterface;
 use Prophecy\Argument;
 
 /**
@@ -106,6 +106,7 @@ class CreateMembershipTest extends UnitTestCase {
       ->willReturn('og_membership');
 
     // Create a mocked Og Membership entity.
+    /** @var \Drupal\og\OgMembershipInterface|\Prophecy\Prophecy\ObjectProphecy $membership_entity */
     $membership_entity = $this->prophesize(OgMembershipInterface::class);
 
     $this->entityStorage
@@ -116,10 +117,10 @@ class CreateMembershipTest extends UnitTestCase {
     $this->group = $this->prophesize(EntityInterface::class);
 
     // Create a mocked test user.
-    $this->user = $this->prophesize(AccountInterface::class);
+    $this->user = $this->prophesize(UserInterface::class);
 
     $membership_entity
-      ->setUser($this->user)
+      ->setOwner($this->user)
       ->willReturn($membership_entity->reveal());
 
     $membership_entity

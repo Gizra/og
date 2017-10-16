@@ -146,7 +146,7 @@ class AccessByOgMembershipTest extends KernelTestBase {
       /** @var \Drupal\og\Entity\OgMembership $membership */
       $membership = OgMembership::create();
       $membership
-        ->setUser($this->users[$membership_type])
+        ->setOwner($this->users[$membership_type])
         ->setGroup($this->group)
         ->addRole($role)
         ->setState($state)
@@ -200,7 +200,7 @@ class AccessByOgMembershipTest extends KernelTestBase {
 
     $membership = OgMembership::create();
     $membership
-      ->setUser($this->users['non-member'])
+      ->setOwner($this->users['non-member'])
       ->setGroup($this->group)
       ->addRole($role)
       ->setState(OgMembershipInterface::STATE_ACTIVE)
