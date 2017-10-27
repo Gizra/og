@@ -404,6 +404,69 @@ class GroupTypeManager {
   }
 
   /**
+   * Get the membership type to use for a group.
+   *
+   * If there is no setting for this, falls back to 'default'.
+   *
+   * @param $entity_type_id
+   *   The entity type ID for the group.
+   * @param $bundle_id
+   *   The bundle ID for the group.
+   *
+   * @return
+   *   The membership type ID to use for this group type.
+   */
+  public function getGroupMembershipType($entity_type_id, $bundle_id) {
+    $editable = $this->configFactory->getEditable('og.settings');
+    $group_membership_types = $editable->get('group_membership_types');
+
+    if (isset($group_membership_types["$entity_type_id:$bundle_id"])) {
+      return $group_membership_types["$entity_type_id:$bundle_id"];
+    }
+    else {
+      return OgMembershipInterface::TYPE_DEFAULT;
+    }
+  }
+
+  /**
+   * Set the membership type for a group type.
+   *
+   * @param $entity_type_id
+   *   The entity type ID for the group.
+   * @param $bundle_id
+   *   The bundle ID for the group.
+   * @param $membership_type_id
+   *   The membership type ID to use for this group type.
+   */
+  public function setGroupMembershipType($entity_type_id, $bundle_id, $membership_type_id) {
+    $editable = $this->configFactory->getEditable('og.settings');
+    $group_membership_types = $editable->get('group_membership_types');
+
+    $group_membership_types["$entity_type_id:$bundle_id"] = $membership_type_id;
+
+    $editable->set('group_membership_types', $group_membership_types);
+    $editable->save();
+  }
+
+  /**
+   * Clear the membership type setting for a group type.
+   *
+   * @param $entity_type_id
+   *   The entity type ID for the group.
+   * @param $bundle_id
+   *   The bundle ID for the group.
+   */
+  public function removeGroupMembershipType($entity_type_id, $bundle_id) {
+    $editable = $this->configFactory->getEditable('og.settings');
+    $group_membership_types = $editable->get('group_membership_types');
+
+    unset($group_membership_types["$entity_type_id:$bundle_id"]);
+
+    $editable->set('group_membership_types', $group_membership_types);
+    $editable->save();
+  }
+
+  /**
    * Resets all locally stored data.
    */
   public function reset() {
