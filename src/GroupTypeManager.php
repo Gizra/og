@@ -408,12 +408,12 @@ class GroupTypeManager {
    *
    * If there is no setting for this, falls back to 'default'.
    *
-   * @param $entity_type_id
+   * @param string $entity_type_id
    *   The entity type ID for the group.
-   * @param $bundle_id
+   * @param string $bundle_id
    *   The bundle ID for the group.
    *
-   * @return
+   * @return string
    *   The membership type ID to use for this group type.
    */
   public function getGroupMembershipType($entity_type_id, $bundle_id) {
@@ -431,11 +431,11 @@ class GroupTypeManager {
   /**
    * Set the membership type for a group type.
    *
-   * @param $entity_type_id
+   * @param string $entity_type_id
    *   The entity type ID for the group.
-   * @param $bundle_id
+   * @param string $bundle_id
    *   The bundle ID for the group.
-   * @param $membership_type_id
+   * @param string $membership_type_id
    *   The membership type ID to use for this group type.
    */
   public function setGroupMembershipType($entity_type_id, $bundle_id, $membership_type_id) {
@@ -451,9 +451,9 @@ class GroupTypeManager {
   /**
    * Clear the membership type setting for a group type.
    *
-   * @param $entity_type_id
+   * @param string $entity_type_id
    *   The entity type ID for the group.
-   * @param $bundle_id
+   * @param string $bundle_id
    *   The bundle ID for the group.
    */
   public function removeGroupMembershipType($entity_type_id, $bundle_id) {
