@@ -51,7 +51,7 @@ class GroupSubscribeFormatter extends FormatterBase implements ContainerFactoryP
   /**
    * The group manager.
    *
-   * @var \Drupal\og\GroupTypeManager
+   * @var \Drupal\og\GroupTypeManagerInterface
    */
   protected $groupTypeManager;
 
@@ -78,7 +78,7 @@ class GroupSubscribeFormatter extends FormatterBase implements ContainerFactoryP
    *   The current user.
    * @param \Drupal\og\OgAccessInterface $og_access
    *   The OG access service.
-   * @param \Drupal\og\GroupTypeManager $group_manager
+   * @param \Drupal\og\GroupTypeManagerInterface $group_manager
    *   The group manager.
    */
   public function __construct($plugin_id, $plugin_definition, FieldDefinitionInterface $field_definition, array $settings, $label, $view_mode, array $third_party_settings, EntityManagerInterface $entity_manager, AccountInterface $current_user, OgAccessInterface $og_access, GroupTypeManagerInterface $group_manager) {
