@@ -54,6 +54,15 @@ og.settings:
       type: sequence
       sequence:
         type: og.settings.group.[%key]
+    group_membership_types:
+      type: mapping
+      mapping:
+        group_type_bundle:
+          type: string
+          label: 'Group type and bundle'
+        membership_type:
+          type: string
+          label: 'Membership type'
     group_manager_full_access:
       type: boolean
       label: 'Full access for group managers'
