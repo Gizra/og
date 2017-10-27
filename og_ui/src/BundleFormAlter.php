@@ -124,6 +124,26 @@ class BundleFormAlter {
       '#default_value' => Og::isGroup($this->entityTypeId, $this->bundle),
       '#description' => $description,
     ];
+
+    $membership_types = \Drupal::service('entity_type.manager')->getStorage('og_membership_type')->loadMultiple();
+    $membership_type_options = [];
+    foreach ($membership_types as $id => $type) {
+      $membership_type_options[$id] = $type->label();
+    }
+    $form['og']['og_membership_type'] = [
+      '#type' => 'select',
+      '#title' => t('Membership type'),
+      // TODO: when https://github.com/Gizra/og/pull/231 gets in, add a link to
+      // the 'collection' link for the membership type entity in the text here.
+      '#description' => t('The type of membership to use when creating memberships in groups of this type.'),
+      '#options' => $membership_type_options,
+      '#default_value' => \Drupal::service('og.group_type_manager')->getGroupMembershipType($this->entityTypeId, $this->bundle),
+      '#states' => [
+        'visible' => [
+          ':input[name="og_is_group"]' => ['checked' => TRUE],
+        ],
+      ],
+    ];
   }
 
   /**
