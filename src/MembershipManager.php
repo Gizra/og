@@ -48,12 +48,12 @@ class MembershipManager implements MembershipManagerInterface {
    *
    * @param \Drupal\core\Entity\EntityTypeManagerInterface $entity_type_manager
    *   The entity type manager.
-   * @param \Drupal\og\GroupTypeManager $group_manager
+   * @param \Drupal\og\GroupTypeManagerInterface $group_manager
    *   The group manager.
    * @param \Drupal\og\OgGroupAudienceHelperInterface $group_audience_helper
    *   The OG group audience helper.
    */
-  public function __construct(EntityTypeManagerInterface $entity_type_manager, GroupTypeManager $group_manager, OgGroupAudienceHelperInterface $group_audience_helper) {
+  public function __construct(EntityTypeManagerInterface $entity_type_manager, GroupTypeManagerInterface $group_manager, OgGroupAudienceHelperInterface $group_audience_helper) {
     $this->entityTypeManager = $entity_type_manager;
     $this->groupTypeManager = $group_manager;
     $this->groupAudienceHelper = $group_audience_helper;
