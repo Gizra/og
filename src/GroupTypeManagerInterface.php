@@ -205,5 +205,5 @@ interface GroupTypeManagerInterface {
    *   The group map.
    */
   public function getGroupMap();
-  
+
 }
