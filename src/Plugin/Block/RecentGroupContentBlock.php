@@ -206,8 +206,7 @@ class RecentGroupContentBlock extends BlockBase implements ContainerFactoryPlugi
   public function getCacheTags() {
     $tags = parent::getCacheTags();
     if ($group = $this->ogContext->getGroup()) {
-      $tag = $group->getEntityTypeId() . ':' . $group->id();
-      $tags = Cache::mergeTags(Cache::buildTags('og-group-content', [$tag]), $tags);
+      $tags = Cache::mergeTags(Cache::buildTags('og-group-content', $group->getCacheTagsToInvalidate()), $tags);
     }
     return $tags;
   }
