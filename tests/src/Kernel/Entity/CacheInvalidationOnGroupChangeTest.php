@@ -37,7 +37,7 @@ class CacheInvalidationOnGroupChangeTest extends KernelTestBase {
 
     // Add a OG group audience.
     Og::groupTypeManager()->addGroup('entity_test', 'group');
-    $settings =       [
+    $settings = [
       'field_storage_config' => [
         'field_name' => OgGroupAudienceHelperInterface::DEFAULT_FIELD,
         'settings' => [
