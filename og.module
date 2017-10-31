@@ -340,7 +340,7 @@ function og_invalidate_group_content_cache_tags(EntityInterface $entity) {
         }
       }
       if ($audience_has_changed) {
-        // If at least group has changed, we clear tha static cache of the
+        // If at least a group has changed, we clear tha static cache of the
         // membership manager which stores such relations. This is important
         // when the membership manager was used previously in the same request.
         $membership_manager->reset();
