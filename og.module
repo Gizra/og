@@ -320,8 +320,9 @@ function og_invalidate_group_content_cache_tags(EntityInterface $entity) {
     $tags = [];
 
     // If the entity is a group content and we came here as an effect of an
-    // update, check if any of the OG audience fields has been changed (AKA 'the
-    // group of the entity has changed') and add also the tags of the old group.
+    // update, check if any of the OG audience fields have been changed. This
+    // means the group(s) of the entity changed and we should also invalidate
+    // the tags of the old group(s).
     /** @var \Drupal\Core\Entity\FieldableEntityInterface $entity */
     $original = !empty($entity->original) ? $entity->original : NULL;
     if ($is_group_content && $original) {
@@ -341,7 +342,7 @@ function og_invalidate_group_content_cache_tags(EntityInterface $entity) {
         }
       }
       if ($audience_has_changed) {
-        // If at least a group has changed, we clear tha static cache of the
+        // If at least a group has changed, we clear the static cache of the
         // membership manager which stores such relations. This is important
         // when the membership manager was used previously in the same request.
         $membership_manager->reset();
