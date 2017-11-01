@@ -312,13 +312,50 @@ function og_invalidate_group_content_cache_tags(EntityInterface $entity) {
   // group listings to be cached effectively. Also invalidate the tags if the
   // group itself changes. The cache tag format is
   // 'og-group-content:{group entity type}:{group entity id}'.
-  if (Og::isGroup($entity->getEntityTypeId(), $entity->bundle()) || Og::isGroupContent($entity->getEntityTypeId(), $entity->bundle())) {
+  $is_group_content = Og::isGroupContent($entity->getEntityTypeId(), $entity->bundle());
+  $group_is_updated = Og::isGroup($entity->getEntityTypeId(), $entity->bundle()) && !empty($entity->original);
+  if ($group_is_updated || $is_group_content) {
+    /** @var \Drupal\og\MembershipManagerInterface $membership_manager */
+    $membership_manager = \Drupal::service('og.membership_manager');
     $tags = [];
-    foreach (\Drupal::service('og.membership_manager')->getGroupIds($entity) as $entity_type => $ids) {
-      foreach ($ids as $id) {
-        $tags[] = "$entity_type:$id";
+
+    // If the entity is a group content and we came here as an effect of an
+    // update, check if any of the OG audience fields have been changed. This
+    // means the group(s) of the entity changed and we should also invalidate
+    // the tags of the old group(s).
+    /** @var \Drupal\Core\Entity\FieldableEntityInterface $entity */
+    $original = !empty($entity->original) ? $entity->original : NULL;
+    if ($is_group_content && $original) {
+      /** @var \Drupal\og\OgGroupAudienceHelperInterface $group_audience_helper */
+      $group_audience_helper = \Drupal::service('og.group_audience_helper');
+      $audience_has_changed = FALSE;
+      /** @var \Drupal\Core\Entity\FieldableEntityInterface $original */
+      foreach ($group_audience_helper->getAllGroupAudienceFields($entity->getEntityTypeId(), $entity->bundle()) as $field) {
+        $field_name = $field->getName();
+        /** @var \Drupal\Core\Field\EntityReferenceFieldItemListInterface $original_field_item_list */
+        $original_field_item_list = $original->get($field_name);
+        if (!$entity->get($field_name)->equals($original_field_item_list)) {
+          foreach ($original_field_item_list->referencedEntities() as $old_group) {
+            $tags = Cache::mergeTags($tags, $old_group->getCacheTagsToInvalidate());
+          }
+          $audience_has_changed = TRUE;
+        }
+      }
+      if ($audience_has_changed) {
+        // If at least a group has changed, we clear the static cache of the
+        // membership manager which stores such relations. This is important
+        // when the membership manager was used previously in the same request.
+        $membership_manager->reset();
       }
     }
+
+    foreach ($membership_manager->getGroups($entity) as $group_entity_type_id => $groups) {
+      /** @var \Drupal\Core\Entity\ContentEntityInterface $group */
+      foreach ($groups as $group) {
+        $tags = Cache::mergeTags($tags, $group->getCacheTagsToInvalidate());
+      }
+    }
+
     Cache::invalidateTags(Cache::buildTags('og-group-content', $tags));
   }
 }
