@@ -313,7 +313,7 @@ function og_invalidate_group_content_cache_tags(EntityInterface $entity) {
   // group itself changes. The cache tag format is
   // 'og-group-content:{group entity type}:{group entity id}'.
   $is_group_content = Og::isGroupContent($entity->getEntityTypeId(), $entity->bundle());
-  $group_is_updated = Og::isGroup($entity->getEntityTypeId(), $entity->bundle()) && $entity->original;
+  $group_is_updated = Og::isGroup($entity->getEntityTypeId(), $entity->bundle()) && !empty($entity->original);
   if ($group_is_updated || $is_group_content) {
     /** @var \Drupal\og\MembershipManagerInterface $membership_manager */
     $membership_manager = \Drupal::service('og.membership_manager');
@@ -323,7 +323,8 @@ function og_invalidate_group_content_cache_tags(EntityInterface $entity) {
     // update, check if any of the OG audience fields has been changed (AKA 'the
     // group of the entity has changed') and add also the tags of the old group.
     /** @var \Drupal\Core\Entity\FieldableEntityInterface $entity */
-    if ($is_group_content && $original = $entity->original) {
+    $original = !empty($entity->original) ? $entity->original : NULL;
+    if ($is_group_content && $original) {
       /** @var \Drupal\og\OgGroupAudienceHelperInterface $group_audience_helper */
       $group_audience_helper = \Drupal::service('og.group_audience_helper');
       $audience_has_changed = FALSE;
