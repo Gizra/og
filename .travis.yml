@@ -29,8 +29,7 @@ before_script:
 
   # Create new site, stubbing sendmail path with true to prevent delivery errors
   - mysql -e 'CREATE DATABASE drupal'
-  - export PHP_OPTIONS="-d sendmail_path=`which true`"
-  - drush --yes core-quick-drupal --core=drupal-7.x --profile=testing --no-server --db-url=mysql://root:@127.0.0.1/drupal --enable=simpletest og
+  - export PHP_OPTIONS="-d sendmail_path=`which true`" && export PATH=$PATH:~/.composer/vendor/bin && drush --yes core-quick-drupal --core=drupal-7.x --profile=testing --no-server --db-url=mysql://root:@127.0.0.1/drupal --enable=simpletest og
   - export DRUPAL_ROOT=og/drupal-7.x
 
   # Reference and enable module in build site
