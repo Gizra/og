@@ -43,7 +43,7 @@ class OgAdminRoutesEvent extends Event implements OgAdminRoutesEventInterface {
 
       // Add default values. NestedArray::mergeDeep allows deep data to not be
       // overwritten with the defaults.
-      $routes_info[$name] = NestedArray::mergeDeep($routes_info[$name], [
+      $defaults = [
         'description' => '',
 
         'requirements' => [
@@ -65,7 +65,9 @@ class OgAdminRoutesEvent extends Event implements OgAdminRoutesEventInterface {
           '_controller' => $route_info['controller'],
           '_title' => $route_info['title'],
         ],
-      ]);
+      ];
+
+      $routes_info[$name] = NestedArray::mergeDeep($defaults, $routes_info[$name]);
     }
 
     return $routes_info;
