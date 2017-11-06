@@ -78,7 +78,7 @@ class GroupPermission extends AccessPluginBase implements CacheableDependencyInt
   protected $groupTypeManager;
 
   /**
-   * Constructs a Permission object.
+   * Constructs a GroupPermission object.
    *
    * @param array $configuration
    *   A configuration array containing information about the plugin instance.
@@ -127,7 +127,7 @@ class GroupPermission extends AccessPluginBase implements CacheableDependencyInt
    */
   public function access(AccountInterface $account) {
     $group = $this->getGroup();
-    if ($group instanceof ContentEntityInterface) {
+    if ($group) {
       list(, $permission) = explode(':', $this->options['perm']);
       return $this->ogAccess->userAccess($group, $permission, $account);
     }
