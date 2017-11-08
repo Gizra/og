@@ -415,6 +415,9 @@ function og_context_determine_context($group_type, $item = NULL, $check_access =
     $item = menu_get_item();
   }
 
+  $session_gid = !empty($_SESSION['og_context']['gid']) ? $_SESSION['og_context']['gid'] : NULL;
+  $session_type = !empty($_SESSION['og_context']['group_type']) ? $_SESSION['og_context']['group_type'] : NULL;
+
   $providers = og_context_negotiation_info();
   foreach ($enabled_providers as $name => $ignore) {
     if (empty($providers[$name])) {
@@ -436,26 +439,29 @@ function og_context_determine_context($group_type, $item = NULL, $check_access =
       $invoke = TRUE;
     }
 
-    $gids = array();
-
     if ($invoke && ($contexts = call_user_func($provider['callback'])) && !empty($contexts[$group_type])) {
-      // Check if one of the group IDs already exists in the session, and if
-      // so use it.
-      $gids = $contexts[$group_type];
-      if (!empty($_SESSION['og_context']['group_type']) && $_SESSION['og_context']['group_type'] == $group_type && in_array($_SESSION['og_context']['gid'], $gids)) {
-        $check_gid = $_SESSION['og_context']['gid'];
-      }
-      else {
-        // Grab the first group ID.
-        $check_gid = reset($gids);
+      $gids = array_values($contexts[$group_type]);
+
+      // Check if one of the group IDs already exists in the session,
+      // and if so give it priority over the other IDs.
+      // If the gid in the session is already the first in the $gids array,
+      // no change is necessary.
+      if ($session_type === $group_type && in_array($session_gid, $gids) && $gids[0] != $session_gid) {
+        array_unshift($gids, $session_gid);
       }
 
-      // Check if user has access to the group.
-      $group = entity_load_single($group_type, $check_gid);
-      if (!$check_access || entity_access('view', $group_type, $group)) {
-        // We found an accessible context, so we can break.
-        $gid = $check_gid;
-        break;
+      foreach ($gids as $check_gid) {
+        // Check if the group still exists the user has access to the group.
+        $group = entity_load_single($group_type, $check_gid);
+        if (!$group) {
+          continue;
+        }
+
+        if (!$check_access || entity_access('view', $group_type, $group)) {
+          // We found an accessible context, so we can break.
+          $gid = $check_gid;
+          break 2;
+        }
       }
     }
   }
