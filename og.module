@@ -370,6 +370,12 @@ function og_og_role_insert(OgRoleInterface $role) {
     return;
   }
 
+  if ($role instanceof \Drupal\Core\Config\Entity\ConfigEntityInterface) {
+    if ($role->isSyncing()) {
+      return;
+    }
+  }
+
   $add_id = 'og_membership_add_single_role_action.' . $role->getName();
   if (!Action::load($add_id)) {
     $action = Action::create([
