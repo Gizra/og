@@ -88,8 +88,12 @@ abstract class OgRouteGroupResolverBase extends OgGroupResolverBase implements C
    *   The entity, or NULL if we are not on a content entity path.
    */
   protected function getContentEntity() {
+    $route = $this->routeMatch->getRouteObject();
+    if (!$route) {
+      return NULL;
+    }
     // Check if we are on a content entity path.
-    $path = $this->routeMatch->getRouteObject()->getPath();
+    $path = $route->getPath();
     $paths = $this->getContentEntityPaths();
     if (array_key_exists($path, $paths)) {
       // Return the entity.
