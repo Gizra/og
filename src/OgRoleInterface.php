@@ -126,7 +126,7 @@ interface OgRoleInterface {
    */
   public function setRoleType($role_type);
 
-  /*
+  /**
    * Returns whether or not a role can be changed.
    *
    * This will return FALSE for all roles except the default roles 'non-member'
