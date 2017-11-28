@@ -119,4 +119,21 @@ interface PermissionInterface {
    */
   public function setRestrictAccess($access);
 
+  /**
+   * Returns the provider.
+   *
+   * @return string
+   *   The provider.
+   */
+  public function getProvider();
+
+  /**
+   * Sets the provider.
+   *
+   * @param string $description
+   *   The provider.
+   *
+   * @return $this
+   */
+  public function setProvider($description);
 }
