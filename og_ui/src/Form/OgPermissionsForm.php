@@ -2,6 +2,7 @@
 
 namespace Drupal\og_ui\Form;
 
+use Drupal\Component\Utility\Html;
 use Drupal\Core\Entity\EntityTypeBundleInfoInterface;
 use Drupal\Core\Form\FormBase;
 use Drupal\Core\Form\FormStateInterface;
@@ -178,21 +179,41 @@ class OgPermissionsForm extends FormBase {
     $group_content_permissions = $this->permissionManager->getDefaultEntityOperationPermissions($entity_type_id, $bundle_id, $bundles);
 
     $permissions_by_provider = [
-      'Group' => $group_permissions,
+      'Group' => [],
+      'Group content' => [],
     ];
 
-    if (!empty($group_content_permissions)) {
-      $permissions_by_provider['Group content'] = $group_content_permissions;
+    foreach ($group_permissions as $permission) {
+      if (!empty($permission->getProvider())) {
+        $permissions_by_provider[$permission->getProvider()][$permission->getName()] = $permission;
+      }
+      else {
+        $permissions_by_provider['Group'][$permission->getName()] = $permission;
+      }
+    }
+
+    foreach ($group_content_permissions as $permission) {
+      if (!empty($permission->getProvider())) {
+        $permissions_by_provider[$permission->getProvider()][$permission->getName()] = $permission;
+      }
+      else {
+        $permissions_by_provider['Group content'][$permission->getName()] = $permission;
+      }
     }
 
     foreach ($permissions_by_provider as $provider => $permissions) {
+      // Skip empty permission provider groups.
+      if (empty($permissions)) {
+        continue;
+      }
+
       // Provider.
       $form['permissions'][$provider] = [
         [
           '#wrapper_attributes' => [
             'colspan' => count($roles) + 1,
             'class' => ['module'],
-            'id' => 'provider-' . $provider,
+            'id' => 'provider-' . Html::getId($provider),
           ],
           '#markup' => $provider,
         ],
@@ -221,6 +242,7 @@ class OgPermissionsForm extends FormBase {
           $form['permissions'][$perm]['description']['#context']['description'] = $perm_item['description'];
           $form['permissions'][$perm]['description']['#context']['warning'] = $perm_item['warning'];
         }
+
         foreach ($roles as $rid => $role) {
           list(,, $rid_simple) = explode('-', $rid, 3);
 
