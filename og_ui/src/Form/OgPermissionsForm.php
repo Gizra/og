@@ -166,6 +166,13 @@ class OgPermissionsForm extends FormBase {
 
     $roles = $this->getGroupRoles($entity_type_id, $bundle_id);
 
+    uasort($roles, function ($a, $b) {
+      if ($a->getWeight() == $b->getWeight()) {
+        return 0;
+      }
+      return ($a->getWeight() < $b->getWeight()) ? -1 : 1;
+    });
+
     /** @var \Drupal\og\Entity\OgRole $role */
     foreach ($roles as $role) {
       $form['permissions']['#header'][] = [
