@@ -130,10 +130,11 @@ interface PermissionInterface {
   /**
    * Sets the provider.
    *
-   * @param string $description
+   * @param string $provider
    *   The provider.
    *
    * @return $this
    */
-  public function setProvider($description);
+  public function setProvider($provider);
+
 }
