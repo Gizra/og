@@ -146,4 +146,19 @@ class Membership extends ArgumentDefaultPluginBase implements CacheableDependenc
     return [];
   }
 
+  /**
+   * Returns the group from the runtime context.
+   *
+   * @return \Drupal\Core\Entity\ContentEntityInterface|null
+   *   The group from context if found.
+   */
+  protected function getGroup() {
+    $contexts = $this->ogContext->getRuntimeContexts(['og']);
+    if (!empty($contexts['og']) && $group = $contexts['og']->getContextValue()) {
+      if ($group instanceof ContentEntityInterface) {
+        return $group;
+      }
+    }
+  }
+
 }
