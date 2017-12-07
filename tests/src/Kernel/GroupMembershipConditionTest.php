@@ -44,6 +44,7 @@ class GroupMembershipConditionTest extends KernelTestBase {
 
   /**
    * OG group node.
+   *
    * @var \Drupal\node\Entity\node
    */
   protected $group;
@@ -67,7 +68,7 @@ class GroupMembershipConditionTest extends KernelTestBase {
    *
    * @var \Drupal\user\entity\User
    */
-  protected $non_member;
+  protected $nonMember;
 
   /**
    * @var \Drupal\og\Entity\OgMembership
@@ -77,7 +78,6 @@ class GroupMembershipConditionTest extends KernelTestBase {
   /**
    * {@inheritdoc}
    */
-
   protected function setUp() {
     parent::setUp();
 
@@ -100,11 +100,11 @@ class GroupMembershipConditionTest extends KernelTestBase {
     $this->groupTypeManager->addGroup('node', 'node_group');
 
     // Create a group node.
-    $this->group  = Node::create([
+    $this->group = Node::create([
       'title' => $this->randomString(),
       'type' => 'node_group',
     ]);
-    $this->group ->save();
+    $this->group->save();
 
     // Create a custom role for the group.
     $role_name = $this->randomMachineName();
@@ -129,10 +129,10 @@ class GroupMembershipConditionTest extends KernelTestBase {
     $this->membership->save();
 
     // Create a non-member user.
-    $this->non_member = User::create([
+    $this->nonMember = User::create([
       'name' => $this->randomString(),
     ]);
-    $this->non_member->save();
+    $this->nonMember->save();
   }
 
   /**
@@ -170,7 +170,7 @@ class GroupMembershipConditionTest extends KernelTestBase {
       ->setConfig('og_membership', TRUE)
       ->setConfig('negate', FALSE)
       ->setContextValue('og', $this->group)
-      ->setContextValue('user', $this->non_member);
+      ->setContextValue('user', $this->nonMember);
 
     $this->assertEquals(FALSE, $plugin_instance->execute());
   }
