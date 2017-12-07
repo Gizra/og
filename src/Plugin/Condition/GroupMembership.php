@@ -35,7 +35,7 @@ class GroupMembership extends ConditionPluginBase {
 
     $roles = [];
     foreach (OgRole::loadMultiple() as $role) {
-      /** @var Drupal\og\Entity\OgRole $role */
+      /** @var \Drupal\og\Entity\OgRole $role */
       $roles[$role->id()] = $role->getLabel();
     }
 
@@ -106,9 +106,8 @@ class GroupMembership extends ConditionPluginBase {
     // Validate that the membership contains one of
     // the roles defined by the condition.
     if (!empty($this->configuration['og_roles'])) {
-      foreach ($membership->getRoles() as $member_role) {
-        /** @var \Drupal\og\Entity\OgRole $member_role */
-        if (in_array($member_role->id(), $this->configuration['og_roles'])) {
+      foreach ($this->configuration['og_roles'] as $role_id => $role) {
+        if ($membership->hasRole($role_id)) {
           return TRUE;
         }
       }
