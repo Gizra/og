@@ -193,3 +193,13 @@ condition.plugin.og_group_type:
       type: sequence
       sequence:
         type: string
+
+condition.plugin.og_group_membership:
+  type: condition.plugin
+  mapping:
+    og_membership:
+      type: boolean
+    og_roles:
+      type: sequence
+      sequence:
+        type: string
