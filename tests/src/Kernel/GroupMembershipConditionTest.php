@@ -71,6 +71,8 @@ class GroupMembershipConditionTest extends KernelTestBase {
   protected $nonMember;
 
   /**
+   * Og Membership.
+   *
    * @var \Drupal\og\Entity\OgMembership
    */
   protected $membership;
