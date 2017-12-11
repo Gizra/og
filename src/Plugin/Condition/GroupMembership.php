@@ -61,13 +61,7 @@ class GroupMembership extends ConditionPluginBase {
    * {@inheritdoc}
    */
   public function submitConfigurationForm(array &$form, FormStateInterface $form_state) {
-    $this->configuration['og_membership'] = $form_state->getValue('og_membership');
-    if (!empty($this->configuration['og_membership'])) {
-      $this->configuration['og_roles'] = $form_state->getValue('og_roles');
-    }
-    else {
-      $this->configuration['og_membership'] = [];
-    }
+    $this->configuration['og_roles'] = array_filter($form_state->getValue('og_roles'));
     parent::submitConfigurationForm($form, $form_state);
   }
 
