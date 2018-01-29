@@ -43,13 +43,6 @@ class GroupTypeManager {
   protected $configFactory;
 
   /**
-   * The entity storage for OgRole entities.
-   *
-   * @var \Drupal\Core\Entity\EntityStorageInterface
-   */
-  protected $ogRoleStorage;
-
-  /**
    * The service providing information about bundles.
    *
    * @var \Drupal\Core\Entity\EntityTypeBundleInfoInterface
@@ -162,7 +155,6 @@ class GroupTypeManager {
    */
   public function __construct(ConfigFactoryInterface $config_factory, EntityTypeManagerInterface $entity_type_manager, EntityTypeBundleInfoInterface $entity_type_bundle_info, EventDispatcherInterface $event_dispatcher, StateInterface $state, PermissionManagerInterface $permission_manager, OgRoleManagerInterface $og_role_manager, RouteBuilderInterface $route_builder, OgGroupAudienceHelperInterface $group_audience_helper) {
     $this->configFactory = $config_factory;
-    $this->ogRoleStorage = $entity_type_manager->getStorage('og_role');
     $this->entityTypeBundleInfo = $entity_type_bundle_info;
     $this->eventDispatcher = $event_dispatcher;
     $this->state = $state;

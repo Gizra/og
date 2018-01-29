@@ -325,11 +325,6 @@ class GroupTypeManagerTest extends UnitTestCase {
    *   Returns the group manager.
    */
   protected function createGroupManager() {
-    // It is expected that the role storage will be initialized.
-    $this->entityTypeManager->getStorage('og_role')
-      ->willReturn($this->entityStorage->reveal())
-      ->shouldBeCalled();
-
     return new GroupTypeManager(
       $this->configFactory->reveal(),
       $this->entityTypeManager->reveal(),
