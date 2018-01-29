@@ -219,10 +219,14 @@ class OgMembership extends ContentEntityBase implements OgMembershipInterface {
    * {@inheritdoc}
    */
   public function getRoles() {
+    $roles = [];
+
     // Add the member role.
-    $roles = [
-      OgRole::getRole($this->getGroupEntityType(), $this->getGroup()->bundle(), OgRoleInterface::AUTHENTICATED),
-    ];
+    if ($group = $this->getGroup()) {
+      $roles = [
+        OgRole::getRole($this->getGroupEntityType(), $group->bundle(), OgRoleInterface::AUTHENTICATED),
+      ];
+    }
     $roles = array_merge($roles, $this->get('roles')->referencedEntities());
     return $roles;
   }
