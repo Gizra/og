@@ -490,6 +490,21 @@ class OgMembershipTest extends KernelTestBase {
   }
 
   /**
+   * Tests that we can retrieve the (empty) roles list from a new membership.
+   *
+   * If a membership is newly created and doesn't have a group associated with
+   * it yet, it should still be possible to get the (empty) list of roles
+   * without getting any errors.
+   *
+   * @covers ::getRoles
+   */
+  public function testGetRolesFromMembershipWithoutGroup() {
+    $membership = OgMembership::create();
+    $roles = $membership->getRoles();
+    $this->assertEquals([], $roles);
+  }
+
+  /**
    * Tests that the membership can return if it belongs to the group owner.
    *
    * @covers ::isOwner
