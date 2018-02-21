@@ -3553,7 +3553,10 @@ function og_node_create_links($group_type, $gid, $field_name, $destination = NUL
  *   types will be fetched.
  *
  * @return
- *   An array with the group IDs or an empty array.
+ *   If $group_type is provided then an array of group IDs matching the
+ *   specified group type. If $group_type is not provided then an associative
+ *   array is returned containing arrays of group IDs keyed by group type. If
+ *   no results are found an empty array is returned.
  */
 function og_get_groups_by_user($account = NULL, $group_type = NULL) {
   if (empty($account)) {
@@ -3581,12 +3584,10 @@ function og_get_groups_by_user($account = NULL, $group_type = NULL) {
     }
   }
 
-  if (empty($group_type)) {
-    return $gids;
+  if (isset($group_type)) {
+    return isset($gids[$group_type]) ? $gids[$group_type] : array();
   }
-  elseif (!empty($gids[$group_type])) {
-    return $gids[$group_type];
-  }
+  return $gids;
 }
 
 /**
