@@ -16,7 +16,7 @@ before_script:
   - cd ../..
 
   # Install Drush
-  - composer global require drush/drush
+  - composer global require drush/drush:8
   - export PATH=$PATH:~/.composer/vendor/bin
 
   # Install php packages required for running Drupal
