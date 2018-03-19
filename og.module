@@ -159,14 +159,10 @@ function og_entity_access(EntityInterface $entity, $operation, AccountInterface 
     return $access;
   }
 
-  if ($entity_type_id == 'node') {
-    $node_access_strict = \Drupal::config('og.settings')->get('node_access_strict');
+  $entity_access_strict = \Drupal::config('og.settings')->get('entity_access_strict');
 
-    // Otherwise, ignore or deny based on whether strict node access is set.
-    return AccessResult::forbiddenIf($node_access_strict);
-  }
-
-  return AccessResult::forbidden();
+  // Otherwise, ignore or deny based on whether strict node access is set.
+  return AccessResult::forbiddenIf($entity_access_strict);
 }
 
 /**
@@ -185,10 +181,19 @@ function og_entity_create_access(AccountInterface $account, array $context, $bun
     return $access_result;
   }
 
-  $node_access_strict = \Drupal::config('og.settings')->get('node_access_strict');
-  if ($entity_type_id == 'node' && !$node_access_strict && $account->hasPermission("create $bundle content")) {
-    // The user has the core permission and strict node access is not set.
-    return AccessResult::neutral();
+  $entity_access_strict = \Drupal::config('og.settings')->get('entity_access_strict');
+  if (!$entity_access_strict) {
+    if ($entity_type_id == 'node' && $account->hasPermission("create $bundle content")) {
+      // The user has the core permission and strict entity access is not set.
+      return AccessResult::neutral();
+    }
+
+    // Handle other entities.
+    if ($account->hasPermission("create $entity_type_id") ||
+        $account->hasPermission("create {$bundle} {$entity_type_id}")) {
+      // The user has the core permission and strict entity access is not set.
+      return AccessResult::neutral();
+    }
   }
 
   // We can't check if user has create permissions, as there is no group
@@ -218,7 +223,7 @@ function og_entity_create_access(AccountInterface $account, array $context, $bun
   }
 
   // Otherwise, ignore or deny based on whether strict entity access is set.
-  return $required ? AccessResult::forbiddenIf($node_access_strict) : AccessResult::neutral();
+  return $required ? AccessResult::forbiddenIf($entity_access_strict) : AccessResult::neutral();
 }
 
 /**
