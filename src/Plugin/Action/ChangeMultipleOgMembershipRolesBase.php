@@ -7,7 +7,7 @@ use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\og\OgAccessInterface;
 use Drupal\og\OgMembershipInterface;
-use Drupal\user\PrivateTempStoreFactory;
+use Drupal\Core\TempStore\PrivateTempStoreFactory;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
@@ -25,7 +25,7 @@ abstract class ChangeMultipleOgMembershipRolesBase extends ActionBase implements
   /**
    * The private temporary storage.
    *
-   * @var \Drupal\user\PrivateTempStore
+   * @var \Drupal\Core\TempStore\PrivateTempStore
    */
   protected $tempStore;
 
@@ -40,7 +40,7 @@ abstract class ChangeMultipleOgMembershipRolesBase extends ActionBase implements
    *   The plugin implementation definition.
    * @param \Drupal\og\OgAccessInterface $og_access
    *   The OG access service.
-   * @param \Drupal\user\PrivateTempStoreFactory $temp_store_factory
+   * @param \Drupal\Core\TempStore\PrivateTempStoreFactory $temp_store_factory
    *   The private temporary storage factory.
    */
   public function __construct(array $configuration, $plugin_id, $plugin_definition, OgAccessInterface $og_access, PrivateTempStoreFactory $temp_store_factory) {
@@ -58,7 +58,7 @@ abstract class ChangeMultipleOgMembershipRolesBase extends ActionBase implements
       $plugin_id,
       $plugin_definition,
       $container->get('og.access'),
-      $container->get('user.private_tempstore')
+      $container->get('tempstore.private')
     );
   }
 
