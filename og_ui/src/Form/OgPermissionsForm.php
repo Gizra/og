@@ -330,6 +330,8 @@ class OgPermissionsForm extends FormBase {
 
       $role->save();
     }
+
+    drupal_set_message($this->t('The changes have been saved.'));
   }
 
 }
