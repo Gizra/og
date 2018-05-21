@@ -30,6 +30,13 @@ class MembershipManager implements MembershipManagerInterface {
   protected $entityTypeManager;
 
   /**
+   * The group manager.
+   *
+   * @var \Drupal\og\GroupTypeManager
+   */
+  protected $groupTypeManager;
+
+  /**
    * The OG group audience helper.
    *
    * @var \Drupal\og\OgGroupAudienceHelperInterface
@@ -41,11 +48,14 @@ class MembershipManager implements MembershipManagerInterface {
    *
    * @param \Drupal\core\Entity\EntityTypeManagerInterface $entity_type_manager
    *   The entity type manager.
+   * @param \Drupal\og\GroupTypeManagerInterface $group_manager
+   *   The group manager.
    * @param \Drupal\og\OgGroupAudienceHelperInterface $group_audience_helper
    *   The OG group audience helper.
    */
-  public function __construct(EntityTypeManagerInterface $entity_type_manager, OgGroupAudienceHelperInterface $group_audience_helper) {
+  public function __construct(EntityTypeManagerInterface $entity_type_manager, GroupTypeManagerInterface $group_manager, OgGroupAudienceHelperInterface $group_audience_helper) {
     $this->entityTypeManager = $entity_type_manager;
+    $this->groupTypeManager = $group_manager;
     $this->groupAudienceHelper = $group_audience_helper;
   }
 
@@ -134,7 +144,11 @@ class MembershipManager implements MembershipManagerInterface {
   /**
    * {@inheritdoc}
    */
-  public function createMembership(EntityInterface $group, AccountInterface $user, $membership_type = OgMembershipInterface::TYPE_DEFAULT) {
+  public function createMembership(EntityInterface $group, AccountInterface $user, $membership_type = NULL) {
+    if (empty($membership_type)) {
+      $membership_type = $this->groupTypeManager->getGroupMembershipType($group->getEntityTypeId(), $group->bundle());
+    }
+
     /** @var \Drupal\user\UserInterface|\Drupal\Core\Session\AccountInterface $user */
     /** @var \Drupal\og\OgMembershipInterface $membership */
     $membership = OgMembership::create(['type' => $membership_type]);

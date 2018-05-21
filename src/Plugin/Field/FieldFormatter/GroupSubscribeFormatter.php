@@ -10,6 +10,7 @@ use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
 use Drupal\Core\Routing\RedirectDestinationTrait;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\Core\Url;
+use Drupal\og\GroupTypeManagerInterface;
 use Drupal\og\Og;
 use Drupal\og\OgAccessInterface;
 use Drupal\og\OgMembershipInterface;
@@ -48,6 +49,13 @@ class GroupSubscribeFormatter extends FormatterBase implements ContainerFactoryP
   protected $ogAccess;
 
   /**
+   * The group manager.
+   *
+   * @var \Drupal\og\GroupTypeManagerInterface
+   */
+  protected $groupTypeManager;
+
+  /**
    * Constructs a new GroupSubscribeFormatter object.
    *
    * @param string $plugin_id
@@ -70,12 +78,15 @@ class GroupSubscribeFormatter extends FormatterBase implements ContainerFactoryP
    *   The current user.
    * @param \Drupal\og\OgAccessInterface $og_access
    *   The OG access service.
+   * @param \Drupal\og\GroupTypeManagerInterface $group_manager
+   *   The group manager.
    */
-  public function __construct($plugin_id, $plugin_definition, FieldDefinitionInterface $field_definition, array $settings, $label, $view_mode, array $third_party_settings, EntityManagerInterface $entity_manager, AccountInterface $current_user, OgAccessInterface $og_access) {
+  public function __construct($plugin_id, $plugin_definition, FieldDefinitionInterface $field_definition, array $settings, $label, $view_mode, array $third_party_settings, EntityManagerInterface $entity_manager, AccountInterface $current_user, OgAccessInterface $og_access, GroupTypeManagerInterface $group_manager) {
     parent::__construct($plugin_id, $plugin_definition, $field_definition, $settings, $label, $view_mode, $third_party_settings, $entity_manager);
 
     $this->currentUser = $current_user;
     $this->ogAccess = $og_access;
+    $this->groupTypeManager = $group_manager;
   }
 
   /**
@@ -92,7 +103,8 @@ class GroupSubscribeFormatter extends FormatterBase implements ContainerFactoryP
       $configuration['third_party_settings'],
       $container->get('entity.manager'),
       $container->get('current_user'),
-      $container->get('og.access')
+      $container->get('og.access'),
+      $container->get('og.group_type_manager')
     );
   }
 
@@ -141,6 +153,7 @@ class GroupSubscribeFormatter extends FormatterBase implements ContainerFactoryP
         $parameters = [
           'entity_type_id' => $group->getEntityTypeId(),
           'group' => $group->id(),
+          'membership_type' => $this->groupTypeManager->getGroupMembershipType($group->getEntityTypeId(), $group->bundle()),
         ];
 
         $url = Url::fromRoute('og.subscribe', $parameters);

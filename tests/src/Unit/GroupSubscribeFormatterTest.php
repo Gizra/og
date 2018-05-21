@@ -11,7 +11,7 @@ use Drupal\Core\Field\FieldDefinitionInterface;
 use Drupal\Core\Field\FieldItemListInterface;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\Core\Session\AccountProxyInterface;
-use Drupal\og\GroupTypeManager;
+use Drupal\og\GroupTypeManagerInterface;
 use Drupal\og\MembershipManagerInterface;
 use Drupal\og\OgAccessInterface;
 use Drupal\og\OgMembershipInterface;
@@ -155,7 +155,7 @@ class GroupSubscribeFormatterTest extends UnitTestCase {
     $this->fieldDefinitionInterface = $this->prophesize(FieldDefinitionInterface::class);
     $this->fieldItemList = $this->prophesize(FieldItemListInterface::class);
     $this->group = $this->prophesize(EntityInterface::class);
-    $this->groupTypeManager = $this->prophesize(GroupTypeManager::class);
+    $this->groupTypeManager = $this->prophesize(GroupTypeManagerInterface::class);
     $this->membershipManager = $this->prophesize(MembershipManagerInterface::class);
     $this->ogAccess = $this->prophesize(OgAccessInterface::class);
     $this->user = $this->prophesize(AccountInterface::class);
@@ -185,7 +185,12 @@ class GroupSubscribeFormatterTest extends UnitTestCase {
       ->id()
       ->willReturn($this->entityId);
 
-    $this->groupTypeManager->isGroup($this->entityTypeId, $this->bundle)->willReturn(TRUE);
+    $this->groupTypeManager->isGroup($this->entityTypeId, $this->bundle)
+      ->willReturn(TRUE);
+
+    $this->groupTypeManager->getGroupMembershipType($this->entityTypeId, $this->bundle)
+      ->willReturn('default');
+
     $this->entityManager->getStorage('user')
       ->willReturn($this->entityStorage->reveal());
 
@@ -353,7 +358,8 @@ class GroupSubscribeFormatterTest extends UnitTestCase {
       [],
       $this->entityManager->reveal(),
       $this->accountProxy->reveal(),
-      $this->ogAccess->reveal()
+      $this->ogAccess->reveal(),
+      $this->groupTypeManager->reveal()
     );
     return $formatter->viewElements($this->fieldItemList->reveal(), $this->randomMachineName());
   }

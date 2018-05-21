@@ -65,6 +65,16 @@ function og_ui_entity_type_save(EntityInterface $entity) {
     }
   }
 
+  if ($entity->og_is_group) {
+    $group_membership_type = $entity->og_membership_type;
+    Og::groupTypeManager()->setGroupMembershipType($entity_type_id, $bundle, $group_membership_type);
+  }
+  elseif ($is_group) {
+    // Remove the membership type setting, as this bundle has been demoted
+    // from being a group.
+    Og::groupTypeManager()->removeGroupMembershipType($entity_type_id, $bundle);
+  }
+
   // Add remove the relevant field.
   $is_group_content = Og::isGroupContent($entity_type_id, $bundle);
   if ($entity->og_group_content_bundle != $is_group_content) {
