@@ -16,7 +16,7 @@ use Drupal\og\MembershipManagerInterface;
 use Drupal\og\OgGroupAudienceHelperInterface;
 use Drupal\og\OgMembershipInterface;
 use Drupal\Tests\UnitTestCase;
-use Drupal\og\GroupTypeManager;
+use Drupal\og\GroupTypeManagerInterface;
 use Drupal\og\OgAccess;
 use Drupal\og\PermissionManager;
 use Drupal\user\EntityOwnerInterface;
@@ -73,7 +73,7 @@ class OgAccessTestBase extends UnitTestCase {
   /**
    * The mocked group manager.
    *
-   * @var \Drupal\og\GroupTypeManager|\Prophecy\Prophecy\ObjectProphecy
+   * @var \Drupal\og\GroupTypeManagerInterface|\Prophecy\Prophecy\ObjectProphecy
    */
   protected $groupTypeManager;
 
@@ -138,7 +138,7 @@ class OgAccessTestBase extends UnitTestCase {
     $this->membership = $this->prophesize(OgMembershipInterface::class);
     $this->ogRole = $this->prophesize(RoleInterface::class);
 
-    $this->groupTypeManager = $this->prophesize(GroupTypeManager::class);
+    $this->groupTypeManager = $this->prophesize(GroupTypeManagerInterface::class);
     $this->groupTypeManager->isGroup($this->entityTypeId, $this->bundle)->willReturn(TRUE);
 
     $cache_contexts_manager = $this->prophesize(CacheContextsManager::class);

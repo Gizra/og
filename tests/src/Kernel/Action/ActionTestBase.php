@@ -70,7 +70,7 @@ abstract class ActionTestBase extends KernelTestBase {
   /**
    * The OG group type manager.
    *
-   * @var \Drupal\og\GroupTypeManager
+   * @var \Drupal\og\GroupTypeManagerInterface
    */
   protected $groupTypeManager;
 

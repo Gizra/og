@@ -10,7 +10,7 @@ use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
 use Drupal\field\Entity\FieldStorageConfig;
 use Drupal\field\FieldStorageConfigInterface;
-use Drupal\og\GroupTypeManager;
+use Drupal\og\GroupTypeManagerInterface;
 use Drupal\og\OgContextInterface;
 use Drupal\og\OgGroupAudienceHelperInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
@@ -42,7 +42,7 @@ class RecentGroupContentBlock extends BlockBase implements ContainerFactoryPlugi
   /**
    * The OG group type manager.
    *
-   * @var \Drupal\og\GroupTypeManager
+   * @var \Drupal\og\GroupTypeManagerInterface
    */
   protected $groupTypeManager;
 
@@ -66,12 +66,12 @@ class RecentGroupContentBlock extends BlockBase implements ContainerFactoryPlugi
    *   The OG context provider.
    * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entity_type_manager
    *   The entity type manager.
-   * @param \Drupal\og\GroupTypeManager $group_type_manager
+   * @param \Drupal\og\GroupTypeManagerInterface $group_type_manager
    *   The OG group type manager.
    * @param \Drupal\Core\Entity\EntityTypeBundleInfoInterface $entity_type_bundle_info
    *   The bundle info service.
    */
-  public function __construct(array $configuration, $plugin_id, $plugin_definition, OgContextInterface $og_context, EntityTypeManagerInterface $entity_type_manager, GroupTypeManager $group_type_manager, EntityTypeBundleInfoInterface $entity_type_bundle_info) {
+  public function __construct(array $configuration, $plugin_id, $plugin_definition, OgContextInterface $og_context, EntityTypeManagerInterface $entity_type_manager, GroupTypeManagerInterface $group_type_manager, EntityTypeBundleInfoInterface $entity_type_bundle_info) {
     $this->ogContext = $og_context;
     $this->entityTypeManager = $entity_type_manager;
     $this->groupTypeManager = $group_type_manager;
