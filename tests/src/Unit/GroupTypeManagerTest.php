@@ -12,6 +12,7 @@ use Drupal\Core\State\StateInterface;
 use Drupal\og\Event\GroupCreationEvent;
 use Drupal\og\Event\GroupCreationEventInterface;
 use Drupal\og\GroupTypeManager;
+use Drupal\og\GroupTypeManagerInterface;
 use Drupal\og\OgGroupAudienceHelperInterface;
 use Drupal\og\PermissionManagerInterface;
 use Drupal\og\OgRoleManagerInterface;
@@ -148,7 +149,7 @@ class GroupTypeManagerTest extends UnitTestCase {
     // Just creating an instance should be lightweight, no methods should be
     // called.
     $group_manager = $this->createGroupManager();
-    $this->assertInstanceOf(GroupTypeManager::class, $group_manager);
+    $this->assertInstanceOf(GroupTypeManagerInterface::class, $group_manager);
   }
 
   /**
@@ -321,7 +322,7 @@ class GroupTypeManagerTest extends UnitTestCase {
   /**
    * Creates a group manager instance with a mock config factory.
    *
-   * @return \Drupal\og\GroupTypeManager
+   * @return \Drupal\og\GroupTypeManagerInterface
    *   Returns the group manager.
    */
   protected function createGroupManager() {

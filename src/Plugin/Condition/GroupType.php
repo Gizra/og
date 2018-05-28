@@ -7,7 +7,7 @@ use Drupal\Core\Entity\EntityTypeBundleInfoInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
-use Drupal\og\GroupTypeManager;
+use Drupal\og\GroupTypeManagerInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
@@ -26,7 +26,7 @@ class GroupType extends ConditionPluginBase implements ContainerFactoryPluginInt
   /**
    * The group type manager.
    *
-   * @var \Drupal\og\GroupTypeManager
+   * @var \Drupal\og\GroupTypeManagerInterface
    */
   protected $groupTypeManager;
 
@@ -56,14 +56,14 @@ class GroupType extends ConditionPluginBase implements ContainerFactoryPluginInt
    *   The plugin_id for the plugin instance.
    * @param mixed $plugin_definition
    *   The plugin implementation definition.
-   * @param \Drupal\og\GroupTypeManager $group_type_manager
+   * @param \Drupal\og\GroupTypeManagerInterface $group_type_manager
    *   The group type manager.
    * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entity_type_manager
    *   The entity type manager.
    * @param \Drupal\Core\Entity\EntityTypeBundleInfoInterface $entity_type_bundle_info
    *   The entity type bundle info service.
    */
-  public function __construct(array $configuration, $plugin_id, $plugin_definition, GroupTypeManager $group_type_manager, EntityTypeManagerInterface $entity_type_manager, EntityTypeBundleInfoInterface $entity_type_bundle_info) {
+  public function __construct(array $configuration, $plugin_id, $plugin_definition, GroupTypeManagerInterface $group_type_manager, EntityTypeManagerInterface $entity_type_manager, EntityTypeBundleInfoInterface $entity_type_bundle_info) {
     parent::__construct($configuration, $plugin_id, $plugin_definition);
     $this->groupTypeManager = $group_type_manager;
     $this->entityTypeManager = $entity_type_manager;

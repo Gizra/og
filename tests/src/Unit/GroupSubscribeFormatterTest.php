@@ -11,7 +11,7 @@ use Drupal\Core\Field\FieldDefinitionInterface;
 use Drupal\Core\Field\FieldItemListInterface;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\Core\Session\AccountProxyInterface;
-use Drupal\og\GroupTypeManager;
+use Drupal\og\GroupTypeManagerInterface;
 use Drupal\og\MembershipManagerInterface;
 use Drupal\og\OgAccessInterface;
 use Drupal\og\OgMembershipInterface;
@@ -86,7 +86,7 @@ class GroupSubscribeFormatterTest extends UnitTestCase {
   /**
    * The group manager.
    *
-   * @var \Drupal\og\GroupTypeManager|\Prophecy\Prophecy\ObjectProphecy
+   * @var \Drupal\og\GroupTypeManagerInterface|\Prophecy\Prophecy\ObjectProphecy
    */
   protected $groupTypeManager;
 
@@ -155,7 +155,7 @@ class GroupSubscribeFormatterTest extends UnitTestCase {
     $this->fieldDefinitionInterface = $this->prophesize(FieldDefinitionInterface::class);
     $this->fieldItemList = $this->prophesize(FieldItemListInterface::class);
     $this->group = $this->prophesize(EntityInterface::class);
-    $this->groupTypeManager = $this->prophesize(GroupTypeManager::class);
+    $this->groupTypeManager = $this->prophesize(GroupTypeManagerInterface::class);
     $this->membershipManager = $this->prophesize(MembershipManagerInterface::class);
     $this->ogAccess = $this->prophesize(OgAccessInterface::class);
     $this->user = $this->prophesize(AccountInterface::class);

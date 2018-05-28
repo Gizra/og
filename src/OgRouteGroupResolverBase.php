@@ -30,7 +30,7 @@ abstract class OgRouteGroupResolverBase extends OgGroupResolverBase implements C
   /**
    * The group type manager.
    *
-   * @var \Drupal\og\GroupTypeManager
+   * @var \Drupal\og\GroupTypeManagerInterface
    */
   protected $groupTypeManager;
 
@@ -52,12 +52,12 @@ abstract class OgRouteGroupResolverBase extends OgGroupResolverBase implements C
    *   The plugin implementation definition.
    * @param \Drupal\Core\Routing\RouteMatchInterface $route_match
    *   The route match service.
-   * @param \Drupal\og\GroupTypeManager $group_type_manager
+   * @param \Drupal\og\GroupTypeManagerInterface $group_type_manager
    *   The group type manager.
    * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entity_type_manager
    *   The entity type manager.
    */
-  public function __construct(array $configuration, $plugin_id, $plugin_definition, RouteMatchInterface $route_match, GroupTypeManager $group_type_manager, EntityTypeManagerInterface $entity_type_manager) {
+  public function __construct(array $configuration, $plugin_id, $plugin_definition, RouteMatchInterface $route_match, GroupTypeManagerInterface $group_type_manager, EntityTypeManagerInterface $entity_type_manager) {
     parent::__construct($configuration, $plugin_id, $plugin_definition);
     $this->routeMatch = $route_match;
     $this->groupTypeManager = $group_type_manager;

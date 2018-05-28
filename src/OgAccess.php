@@ -66,7 +66,7 @@ class OgAccess implements OgAccessInterface {
   /**
    * The group manager.
    *
-   * @var \Drupal\og\GroupTypeManager
+   * @var \Drupal\og\GroupTypeManagerInterface
    */
   protected $groupTypeManager;
 
@@ -100,7 +100,7 @@ class OgAccess implements OgAccessInterface {
    *   The service that contains the current active user.
    * @param \Drupal\Core\Extension\ModuleHandlerInterface $module_handler
    *   The module handler.
-   * @param \Drupal\og\GroupTypeManager $group_manager
+   * @param \Drupal\og\GroupTypeManagerInterface $group_manager
    *   The group manager.
    * @param \Drupal\og\PermissionManagerInterface $permission_manager
    *   The permission manager.
@@ -109,7 +109,7 @@ class OgAccess implements OgAccessInterface {
    * @param \Drupal\og\OgGroupAudienceHelperInterface $group_audience_helper
    *   The OG group audience helper.
    */
-  public function __construct(ConfigFactoryInterface $config_factory, AccountProxyInterface $account_proxy, ModuleHandlerInterface $module_handler, GroupTypeManager $group_manager, PermissionManagerInterface $permission_manager, MembershipManagerInterface $membership_manager, OgGroupAudienceHelperInterface $group_audience_helper) {
+  public function __construct(ConfigFactoryInterface $config_factory, AccountProxyInterface $account_proxy, ModuleHandlerInterface $module_handler, GroupTypeManagerInterface $group_manager, PermissionManagerInterface $permission_manager, MembershipManagerInterface $membership_manager, OgGroupAudienceHelperInterface $group_audience_helper) {
     $this->configFactory = $config_factory;
     $this->accountProxy = $account_proxy;
     $this->moduleHandler = $module_handler;

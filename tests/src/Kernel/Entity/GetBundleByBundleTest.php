@@ -45,7 +45,7 @@ class GetBundleByBundleTest extends KernelTestBase {
   /**
    * The group manager.
    *
-   * @var \Drupal\og\GroupTypeManager
+   * @var \Drupal\og\GroupTypeManagerInterface
    */
   protected $groupTypeManager;
 

@@ -299,7 +299,7 @@ class Og {
   /**
    * Returns the group manager instance.
    *
-   * @return \Drupal\og\GroupTypeManager
+   * @return \Drupal\og\GroupTypeManagerInterface
    *   Returns the group manager.
    */
   public static function groupTypeManager() {
