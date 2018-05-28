@@ -67,7 +67,7 @@ interface GroupTypeManagerInterface {
    *   An associative array of group content bundle IDs, keyed by entity type
    *   ID.
    *
-   * @see \Drupal\og\GroupTypeManager::getGroupRelationMap()
+   * @see \Drupal\og\GroupTypeManagerInterface::getGroupRelationMap()
    */
   public function getAllGroupContentBundles();
 
@@ -88,7 +88,7 @@ interface GroupTypeManagerInterface {
    *   Thrown when the passed in entity type ID does not have any group content
    *   bundles defined.
    *
-   * @see \Drupal\og\GroupTypeManager::getGroupRelationMap()
+   * @see \Drupal\og\GroupTypeManagerInterface::getGroupRelationMap()
    */
   public function getAllGroupContentBundlesByEntityType($entity_type_id);
 
