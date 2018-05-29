@@ -17,6 +17,7 @@ case "$1" in
         ln -s $MODULE_DIR $DRUPAL_DIR/modules/og
         cd $DRUPAL_DIR
         for i in ${TEST_DIRS[@]}; do
+          echo " > Executing tests from $i"
           ./vendor/bin/phpunit -c ./core/phpunit.xml.dist $i || exit 1
         done
         ;;
@@ -24,6 +25,7 @@ case "$1" in
         ln -s $MODULE_DIR $DRUPAL_DIR/modules/og
         cd $DRUPAL_DIR
         for i in ${TEST_DIRS[@]}; do
+          echo " > Executing tests from $i (excluding console group)"
           ./vendor/bin/phpunit -c ./core/phpunit.xml.dist --exclude-group=console $i || exit 1
         done
 esac
