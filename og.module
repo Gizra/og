@@ -207,7 +207,7 @@ function og_og_membership_access(OgMembershipInterface $entity, $operation, Acco
   }
 
   // Ensure that there's at least one member in the group.
-  if ($operation === 'delete' && count(Og::getGroupMemberships($group)) === 1) {
+  if ($operation === 'delete' && \Drupal::service('og.membership_manager')->getGroupMembershipCount($group) === 1) {
     return AccessResult::forbidden();
   }
 
