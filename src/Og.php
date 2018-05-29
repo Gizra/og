@@ -278,10 +278,10 @@ class Og {
    * @param object $entity
    *   The entity object.
    *
-   * @return bool
-   *   True or false if the given entity is group content.
+   * @return array
+   *   List of groups where the entity belongs.
    */
-  public static function isEntityGroupContent($entity) {
+  public static function getEntityGroups($entity) {
     $can_be_group_content = \Drupal::service('og.group_audience_helper')->hasGroupAudienceField($entity->type, $entity->bundle);
     if (!$can_be_group_content) {
       return FALSE;
@@ -289,14 +289,12 @@ class Og {
 
     $audience_fields = \Drupal::service('og.group_audience_helper')->getAllGroupAudienceFields($entity->type, $entity->bundle);
 
+    $groups = [];
     foreach ($audience_fields as $field_name => $field) {
-      $groups = $entity->get($field_name)->referencedEntities();
-      if (!empty($groups)) {
-        return TRUE;
-      }
+      $groups += $entity->get($field_name)->referencedEntities();
     }
 
-    return FALSE;
+    return $groups;
   }
 
   /**
