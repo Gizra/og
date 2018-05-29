@@ -173,6 +173,23 @@ class MembershipManager implements MembershipManagerInterface {
   /**
    * {@inheritdoc}
    */
+  public function getGroupMembershipCount(EntityInterface $group, array $states = [OgMembershipInterface::STATE_ACTIVE]) {
+    $query = $this->entityTypeManager
+      ->getStorage('og_membership')
+      ->getQuery()
+      ->condition('entity_id', $group->id());
+
+    if ($states) {
+      $query->condition('state', $states, 'IN');
+    }
+
+    $query->count();
+    return $query->execute();
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   public function createMembership(EntityInterface $group, AccountInterface $user, $membership_type = OgMembershipInterface::TYPE_DEFAULT) {
     /** @var \Drupal\user\UserInterface|\Drupal\Core\Session\AccountInterface $user */
     /** @var \Drupal\og\OgMembershipInterface $membership */
