@@ -7,6 +7,13 @@ use Symfony\Component\Validator\ConstraintValidator;
 
 /**
  * Ensures that new members added to a group do not already exist.
+ *
+ * Note that in typical operation, this validation constraint will not come into
+ * play, as the membership entity's uid field is already validated by core's
+ * ValidReferenceConstraint, which hands over to the entity reference selection
+ * plugin. In our case, that is
+ * \Drupal\og\Plugin\EntityReferenceSelection\OgUserSelection, which already
+ * checks an existing member cannot be added to the group again.
  */
 class UniqueOgMembershipConstraintValidator extends ConstraintValidator {
 
