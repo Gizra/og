@@ -97,7 +97,7 @@ class GroupContentAccessTest extends BrowserTestBase {
     $this->node = Node::create([
      'type' => 'post',
      'title' => $this->randomString(),
-     'uid' => $this->user->id,
+     'uid' => $this->user->id(),
     ]);
   }
 
@@ -105,8 +105,8 @@ class GroupContentAccessTest extends BrowserTestBase {
    * Tests the access of content that does not belong to a group.
    */
   public function testGroupContentAccess() {
-    $this->drupalLogin($this->user1);
-    $this->drupalGet('node/' . $this->node->nid . '/edit');
+    $this->drupalLogin($this->user);
+    $this->drupalGet('node/' . $this->node->id() . '/edit');
     $this->assertSession()->statusCodeEquals(200);
   }
 
