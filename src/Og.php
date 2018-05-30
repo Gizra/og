@@ -270,18 +270,18 @@ class Og {
   }
 
   /**
-   * Check if the given entity is a group content.
+   * Gets the Group entities where an entity belongs.
    *
    * This works by checking if the bundle has at least one group audience field
    * filled.
    *
-   * @param object $entity
+   * @param \Drupal\Core\Entity\EntityInterface $entity
    *   The entity object.
    *
    * @return array
    *   List of groups where the entity belongs.
    */
-  public static function getEntityGroups($entity) {
+  public static function getEntityGroups(EntityInterface $entity) {
     $can_be_group_content = \Drupal::service('og.group_audience_helper')->hasGroupAudienceField($entity->getEntityTypeId(), $entity->bundle());
     if (!$can_be_group_content) {
       return FALSE;
