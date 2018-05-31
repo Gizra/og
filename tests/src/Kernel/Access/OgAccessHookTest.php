@@ -48,6 +48,13 @@ class OgAccessHookTest extends KernelTestBase {
   protected $groupContent;
 
   /**
+   * Test non group content entity.
+   *
+   * @var \Drupal\Core\Entity\EntityInterface
+   */
+  protected $nonGroupContent;
+
+  /**
    * Test users.
    *
    * @var \Drupal\Core\Session\AccountInterface[]
@@ -176,6 +183,14 @@ class OgAccessHookTest extends KernelTestBase {
       ]);
       $this->groupContent[$membership_type]->save();
     }
+
+    $this->nonGroupContent = Node::create([
+      'title' => $this->randomString(),
+      'type' => 'group_content',
+      'uid' => $this->users['member']->id(),
+      OgGroupAudienceHelperInterface::DEFAULT_FIELD => [],
+    ]);
+    $this->nonGroupContent->save();
   }
 
   /**
@@ -195,6 +210,9 @@ class OgAccessHookTest extends KernelTestBase {
       $result = og_entity_access($this->groupContent[$group_content], 'update', $this->users[$user]);
       $this->assertEquals($expected_result, $result->isAllowed());
     }
+
+    $result = og_entity_access($this->nonGroupContent, 'update', $this->users['member']);
+    $this->assertEquals(TRUE, $result->isNeutral());
   }
 
   /**
