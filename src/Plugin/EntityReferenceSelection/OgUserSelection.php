@@ -3,6 +3,7 @@
 namespace Drupal\og\Plugin\EntityReferenceSelection;
 
 use Drupal\Core\Database\Connection;
+use Drupal\Core\Database\Query\SelectInterface;
 use Drupal\Core\Entity\EntityManagerInterface;
 use Drupal\Core\Entity\Plugin\EntityReferenceSelection\DefaultSelection;
 use Drupal\Core\Extension\ModuleHandlerInterface;
@@ -122,6 +123,17 @@ class OgUserSelection extends DefaultSelection {
       $query->condition('status', 1);
     }
 
+    return $query;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function entityQueryAlter(SelectInterface $query) {
+    // Exclude users who are already in the current group.
+    // This has to be done on the SQL query rather than the entity query,
+    // because a reverse relationship to the OG membership entity is needed.
+
     // @todo implement an easier, more consistent way to get the group type. At
     // the moment, this works either for checkboxes or OG Autocomplete widget
     // types on entities that have a getGroup() method. It also does not work
@@ -140,19 +152,12 @@ class OgUserSelection extends DefaultSelection {
       return $query;
     }
 
-    // @todo Excluding group members with a join would perform much better than
-    // loading each membership associated with the group.
-    $member_uids = [];
-    /** @var \Drupal\og\Entity\OgMembership $membership */
-    foreach ($this->membershipManager->getGroupMemberships($group) as $membership) {
-      $member_uids[] = $membership->getOwner()->id();
-    }
+    // Left join to the OG membership base table.
+    $query->leftJoin('og_membership', 'ogm', "base_table.uid = ogm.uid");
 
-    if (count($member_uids) > 0) {
-      $query->condition('uid', $member_uids, 'NOT IN');
-    }
-
-    return $query;
+    // Exclude any users who are in the current group.
+    $query->condition('ogm.entity_type', $group->getEntityTypeId(), '!=');
+    $query->condition('ogm.entity_id', $group->id(), '!=');
   }
 
   /**
