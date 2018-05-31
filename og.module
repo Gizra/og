@@ -147,7 +147,7 @@ function og_entity_access(EntityInterface $entity, $operation, AccountInterface 
     return AccessResult::neutral();
   }
 
-  if (!empty(Og::getEntityGroups($entity))) {
+  if (empty(Og::getEntityGroups($entity))) {
     return AccessResult::neutral();
   }
 
