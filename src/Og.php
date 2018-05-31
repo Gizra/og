@@ -284,7 +284,7 @@ class Og {
   public static function getEntityGroups(EntityInterface $entity) {
     $can_be_group_content = \Drupal::service('og.group_audience_helper')->hasGroupAudienceField($entity->getEntityTypeId(), $entity->bundle());
     if (!$can_be_group_content) {
-      return FALSE;
+      return [];
     }
 
     $audience_fields = \Drupal::service('og.group_audience_helper')->getAllGroupAudienceFields($entity->getEntityTypeId(), $entity->bundle());
