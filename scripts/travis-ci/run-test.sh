@@ -16,16 +16,20 @@ case "$1" in
     8.3.x)
         ln -s $MODULE_DIR $DRUPAL_DIR/modules/og
         cd $DRUPAL_DIR
+        EXIT=0
         for i in ${TEST_DIRS[@]}; do
           echo " > Executing tests from $i"
-          ./vendor/bin/phpunit -c ./core/phpunit.xml.dist $i || exit 1
+          ./vendor/bin/phpunit -c ./core/phpunit.xml.dist $i || EXIT=1
         done
+        exit $EXIT
         ;;
     *)
         ln -s $MODULE_DIR $DRUPAL_DIR/modules/og
         cd $DRUPAL_DIR
+        EXIT=0
         for i in ${TEST_DIRS[@]}; do
           echo " > Executing tests from $i (excluding console group)"
-          ./vendor/bin/phpunit -c ./core/phpunit.xml.dist --exclude-group=console $i || exit 1
+          ./vendor/bin/phpunit -c ./core/phpunit.xml.dist --exclude-group=console $i || EXIT=1
         done
+        exit $EXIT
 esac
