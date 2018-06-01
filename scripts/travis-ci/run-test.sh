@@ -11,6 +11,8 @@ mysql_to_ramdisk() {
   sudo service mysql start
 }
 
+TEST_DIRS=($MODULE_DIR/tests $MODULE_DIR/og_ui/tests)
+
 case "$1" in
     PHP_CodeSniffer)
         cd $MODULE_DIR
@@ -23,13 +25,17 @@ case "$1" in
         mysql_to_ramdisk
         ln -s $MODULE_DIR $DRUPAL_DIR/modules/og
         cd $DRUPAL_DIR
-        ./vendor/bin/phpunit -c ./core/phpunit.xml.dist $MODULE_DIR/tests
-        exit $?
+        for i in ${TEST_DIRS[@]}; do
+          echo " > Executing tests from $i"
+          ./vendor/bin/phpunit -c ./core/phpunit.xml.dist $i || exit 1
+        done
         ;;
     *)
         mysql_to_ramdisk
         ln -s $MODULE_DIR $DRUPAL_DIR/modules/og
         cd $DRUPAL_DIR
-        ./vendor/bin/phpunit -c ./core/phpunit.xml.dist --exclude-group=console $MODULE_DIR/tests
-        exit $?
+        for i in ${TEST_DIRS[@]}; do
+          echo " > Executing tests from $i (excluding console group)"
+          ./vendor/bin/phpunit -c ./core/phpunit.xml.dist --exclude-group=console $i || exit 1
+        done
 esac

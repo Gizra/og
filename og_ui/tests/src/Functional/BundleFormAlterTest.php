@@ -6,7 +6,6 @@ use Drupal\Core\Form\FormState;
 use Drupal\node\Entity\NodeType;
 use Drupal\og\Og;
 use Drupal\og_ui\BundleFormAlter;
-use Drupal\simpletest\AssertContentTrait;
 use Drupal\Tests\BrowserTestBase;
 
 /**
@@ -15,8 +14,6 @@ use Drupal\Tests\BrowserTestBase;
  * @group og
  */
 class BundleFormAlterTest extends BrowserTestBase {
-
-  use AssertContentTrait;
 
   /**
    * {@inheritdoc}
