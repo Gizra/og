@@ -142,12 +142,13 @@ function og_entity_access(EntityInterface $entity, $operation, AccountInterface 
 
   $entity_type_id = $entity->getEntityTypeId();
   $bundle_id = $entity->bundle();
+  $is_group_content = Og::isGroupContent($entity_type_id, $bundle_id);
 
-  if (!Og::isGroup($entity_type_id, $bundle_id) && !Og::isGroupContent($entity_type_id, $bundle_id)) {
+  if (!Og::isGroup($entity_type_id, $bundle_id) && !$is_group_content) {
     return AccessResult::neutral();
   }
 
-  if (empty(Og::getEntityGroups($entity))) {
+  if (empty(Og::getEntityGroups($entity)) && $is_group_content) {
     return AccessResult::neutral();
   }
 
