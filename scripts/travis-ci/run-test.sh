@@ -3,6 +3,14 @@
 # Run either PHPUnit tests or PHP_CodeSniffer tests on Travis CI, depending
 # on the passed in parameter.
 
+mysql_to_ramdisk() {
+  echo " > Move MySQL datadir to RAM disk."
+  sudo service mysql stop
+  sudo mv /var/lib/mysql /var/run/tmpfs
+  sudo ln -s /var/run/tmpfs /var/lib/mysql
+  sudo service mysql start
+}
+
 TEST_DIRS=($MODULE_DIR/tests $MODULE_DIR/og_ui/tests)
 
 case "$1" in
@@ -14,6 +22,7 @@ case "$1" in
         ;;
     # Drupal console only works on Drupal 8.3.x.
     8.3.x)
+        mysql_to_ramdisk
         ln -s $MODULE_DIR $DRUPAL_DIR/modules/og
         cd $DRUPAL_DIR
         EXIT=0
@@ -24,6 +33,7 @@ case "$1" in
         exit $EXIT
         ;;
     *)
+        mysql_to_ramdisk
         ln -s $MODULE_DIR $DRUPAL_DIR/modules/og
         cd $DRUPAL_DIR
         EXIT=0
