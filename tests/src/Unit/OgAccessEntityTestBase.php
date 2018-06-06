@@ -48,12 +48,18 @@ class OgAccessEntityTestBase extends OgAccessTestBase {
     $this->groupContentEntity->isNew()->willReturn(FALSE);
     $this->groupContentEntity->getEntityType()->willReturn($entity_type->reveal());
     $this->groupContentEntity->getEntityTypeId()->willReturn($entity_type_id);
+    // We should be returning a field and mocking the referencedEntities there, but I do not know how to do it.
+    $this->groupContentEntity->get('test')->willReturn($this->groupContentEntity);
+    $this->groupContentEntity->referencedEntities()->willReturn(['test']);
     $this->addCache($this->groupContentEntity);
 
     // If the group audience helper is asked if the group content entity has any
     // group audience fields, it is expected that this will return TRUE.
     $this->groupAudienceHelper->hasGroupAudienceField($entity_type_id, $bundle)
       ->willReturn(TRUE);
+
+    $this->groupAudienceHelper->getAllGroupAudienceFields($entity_type_id, $bundle)
+      ->willReturn(['test' => 'test']);
 
     // It is expected that a list of entity operation permissions is retrieved
     // from the permission manager so that the passed in permission can be
