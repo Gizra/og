@@ -159,7 +159,7 @@ class OgUserSelection extends DefaultSelection {
     ]);
 
     // Exclude any users who are in the current group.
-    $query->isNull('og.id');
+    $query->isNull('ogm.id');
   }
 
   /**
