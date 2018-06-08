@@ -153,13 +153,13 @@ class OgUserSelection extends DefaultSelection {
     }
 
     // Left join to the OG membership base table.
-    $query->leftJoin('og_membership', 'ogm', "base_table.uid = ogm.uid AND ogm.entity_type != :entity_type AND ogm.entity_id != :entity_id", [
+    $query->leftJoin('og_membership', 'ogm', "base_table.uid = ogm.uid AND ogm.entity_type = :entity_type AND ogm.entity_id = :entity_id", [
       ':entity_type' => $group->getEntityTypeId(),
       ':entity_id' => $group->id(),
     ]);
 
     // Exclude any users who are in the current group.
-    $query->condition('ogm.id', NULL, 'IS');
+    $query->isNull('og.id');
   }
 
   /**
