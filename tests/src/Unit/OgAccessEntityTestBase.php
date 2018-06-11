@@ -58,7 +58,7 @@ class OgAccessEntityTestBase extends OgAccessTestBase {
     $this->groupContentEntity->isNew()->willReturn(FALSE);
     $this->groupContentEntity->getEntityType()->willReturn($entity_type->reveal());
     $this->groupContentEntity->getEntityTypeId()->willReturn($entity_type_id);
-    $this->groupContentEntity->get('og_audience')->willReturn($og_audience);
+    $this->groupContentEntity->get(OgGroupAudienceHelperInterface::DEFAULT_FIELD)->willReturn($og_audience);
     $this->addCache($this->groupContentEntity);
 
     // If the group audience helper is asked if the group content entity has any
