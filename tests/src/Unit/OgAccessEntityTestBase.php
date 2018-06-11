@@ -67,7 +67,7 @@ class OgAccessEntityTestBase extends OgAccessTestBase {
       ->willReturn(TRUE);
 
     $this->groupAudienceHelper->getAllGroupAudienceFields($entity_type_id, $bundle)
-      ->willReturn(['og_audience' => 'og_audience']);
+      ->willReturn([OgGroupAudienceHelperInterface::DEFAULT_FIELD => OgGroupAudienceHelperInterface::DEFAULT_FIELD]);
 
     // It is expected that a list of entity operation permissions is retrieved
     // from the permission manager so that the passed in permission can be
