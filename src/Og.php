@@ -282,12 +282,14 @@ class Og {
    *   List of groups where the entity belongs.
    */
   public static function getEntityGroups(EntityInterface $entity) {
-    $can_be_group_content = \Drupal::service('og.group_audience_helper')->hasGroupAudienceField($entity->getEntityTypeId(), $entity->bundle());
+    $audience_helper = \Drupal::service('og.group_audience_helper');
+
+    $can_be_group_content = $audience_helper->hasGroupAudienceField($entity->getEntityTypeId(), $entity->bundle());
     if (!$can_be_group_content) {
       return [];
     }
 
-    $audience_fields = \Drupal::service('og.group_audience_helper')->getAllGroupAudienceFields($entity->getEntityTypeId(), $entity->bundle());
+    $audience_fields = $audience_helper->getAllGroupAudienceFields($entity->getEntityTypeId(), $entity->bundle());
 
     $groups = [];
     foreach ($audience_fields as $field_name => $field) {
