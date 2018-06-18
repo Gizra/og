@@ -174,7 +174,7 @@ class OgAccessTestBase extends UnitTestCase {
     $this->membershipManager = $this->prophesize(MembershipManagerInterface::class);
     $this->membershipManager->getMembership($this->group, $this->user->reveal())->willReturn($this->membership->reveal());
     $this->membershipManager->getMembership($this->group, $this->user->reveal(), [OgMembershipInterface::STATE_ACTIVE])->willReturn($this->membership->reveal());
-    $this->membershipManager->getGroupsCount($this->group)->willReturn(0);
+    $this->membershipManager->getGroupCount($this->group)->willReturn(0);
     $this->membership->getRoles()->willReturn([$this->ogRole->reveal()]);
 
     $this->groupAudienceHelper = $this->prophesize(OgGroupAudienceHelperInterface::class);
