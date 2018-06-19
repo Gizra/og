@@ -24,7 +24,6 @@ files[] = includes/views/handlers/og_plugin_argument_validate_group.inc
 files[] = includes/views/handlers/og_plugin_argument_default_user_groups.inc
 
 ; Views fields
-files[] = includes/views/handlers/og_handler_field_group_member_count.inc
 files[] = includes/views/handlers/og_handler_field_group_audience_state.inc
 files[] = includes/views/handlers/og_handler_field_prerender_list.inc
 files[] = includes/views/handlers/og_handler_field_user_roles.inc
