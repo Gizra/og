@@ -2572,8 +2572,8 @@ function og_get_all_group_content_bundle() {
  * @param $entity
  *   The entity object. If empty the current user will be used.
  * @param $states
- *   (optional) Array with the state to return. If empty groups of all state will
- *   return.
+ *   (optional) Array with the membership states to check against. If omitted
+ *   then only active (OG_STATE_ACTIVE) memberships will be checked.
  *
  * @return
  *   TRUE if the entity (e.g. the user) belongs to a group and is not pending or
