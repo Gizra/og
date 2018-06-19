@@ -199,7 +199,7 @@ class OgUiSubscribeTestCase extends DrupalWebTestCase {
     $this->drupalGet('node/' . $node->nid);
     $this->assertText(t('Unsubscribe from group'), t('Member gets correct unsubscribe text.'));
     $this->clickLink(t('Unsubscribe from group'));
-    $this->drupalPost(NULL, array() , t('Remove'));
+    $this->drupalPost(NULL, array() , t('Unsubscribe'));
 
     $this->assertFalse(og_is_member('node', $node->nid, 'user', $user2, array(OG_STATE_ACTIVE, OG_STATE_PENDING)), t('User unsubscribed from group.'));
 
