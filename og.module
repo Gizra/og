@@ -882,7 +882,7 @@ function og_entity_update($entity, $entity_type) {
   }
 
   list($id, , $bundle) = entity_extract_ids($entity_type, $entity);
-  if (!empty($entity->uid) && !og_is_member($entity_type, $id, 'user', $entity->uid)) {
+  if (!empty($entity->uid) && !og_is_member($entity_type, $id, 'user', $entity->uid, array())) {
     // Subscribe the group manager, in case the owner changed.
     og_group($entity_type, $id, array('entity' => $entity->uid));
     // Assign roles to group manager.
