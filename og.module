@@ -148,7 +148,7 @@ function og_entity_access(EntityInterface $entity, $operation, AccountInterface 
     return AccessResult::neutral();
   }
 
-  if (\Drupal::service('og.membership_manager')->getGroupCount($entity) === 0) {
+  if ($is_group_content && \Drupal::service('og.membership_manager')->getGroupCount($entity) === 0) {
     return AccessResult::neutral();
   }
 
