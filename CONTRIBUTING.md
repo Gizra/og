@@ -14,6 +14,6 @@ marked as alpha blockers.
 - [alpha blockers]
 
 [the github issue queue]: https://github.com/gizra/og/issues
-[open issues]: https://github.com/gizra/og/issues?q=is%3Aissue+is%3Aopen+label%3A%22Drupal+8%22
-[pull requests]: https://github.com/Gizra/og/pulls?q=is%3Apr+is%3Aopen+label%3A"Drupal+8"
-[alpha blockers]: https://github.com/Gizra/og/pulls?q=is%3Aopen+label%3A%22Alpha+blocker%22
+[open issues]: https://git.io/f47tz
+[pull requests]: https://git.io/f47t5
+[alpha blockers]: https://git.io/f47td
