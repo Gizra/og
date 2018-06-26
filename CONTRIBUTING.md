@@ -1,5 +1,4 @@
 # Contributing
---------------
 
 If you like to contribute use [the github issue queue](https://github.com/gizra/og/issues) to add issues
 and pull requests.
