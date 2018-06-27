@@ -20,8 +20,7 @@ case "$1" in
         ./vendor/bin/phpcs
         exit $?
         ;;
-    # Drupal console only works on Drupal 8.3.x.
-    8.3.x)
+    *)
         mysql_to_ramdisk
         ln -s $MODULE_DIR $DRUPAL_DIR/modules/og
         cd $DRUPAL_DIR
@@ -29,17 +28,6 @@ case "$1" in
         for i in ${TEST_DIRS[@]}; do
           echo " > Executing tests from $i"
           ./vendor/bin/phpunit -c ./core/phpunit.xml.dist $i || EXIT=1
-        done
-        exit $EXIT
-        ;;
-    *)
-        mysql_to_ramdisk
-        ln -s $MODULE_DIR $DRUPAL_DIR/modules/og
-        cd $DRUPAL_DIR
-        EXIT=0
-        for i in ${TEST_DIRS[@]}; do
-          echo " > Executing tests from $i (excluding console group)"
-          ./vendor/bin/phpunit -c ./core/phpunit.xml.dist --exclude-group=console $i || EXIT=1
         done
         exit $EXIT
 esac
