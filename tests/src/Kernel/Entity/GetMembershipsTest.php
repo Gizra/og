@@ -90,7 +90,7 @@ class GetMembershipsTest extends KernelTestBase {
       $this->groups[] = $group;
     }
 
-    // Create test users with different membership statuses in the two groups.
+    // Create test users with different membership states in the two groups.
     $matrix = [
       // A user which is an active member of the first group.
       [OgMembershipInterface::STATE_ACTIVE, NULL],
@@ -109,14 +109,14 @@ class GetMembershipsTest extends KernelTestBase {
       [NULL, NULL],
     ];
 
-    foreach ($matrix as $user_key => $statuses) {
+    foreach ($matrix as $user_key => $states) {
       $user = User::create(['name' => $this->randomString()]);
       $user->save();
       $this->users[$user_key] = $user;
-      foreach ($statuses as $group_key => $status) {
+      foreach ($states as $group_key => $state) {
         $group = $this->groups[$group_key];
-        if ($status) {
-          $this->createOgMembership($group, $user, NULL, $status);
+        if ($state) {
+          $this->createOgMembership($group, $user, NULL, $state);
         }
       }
     }
