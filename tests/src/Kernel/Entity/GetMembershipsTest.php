@@ -3,6 +3,7 @@
 namespace Drupal\Tests\og\Kernel\Entity;
 
 use Drupal\KernelTests\KernelTestBase;
+use Drupal\Tests\og\Traits\OgMembershipCreationTrait;
 use Drupal\node\Entity\Node;
 use Drupal\node\Entity\NodeType;
 use Drupal\og\Og;
@@ -16,6 +17,8 @@ use Drupal\user\Entity\User;
  * @coversDefaultClass \Drupal\og\Og
  */
 class GetMembershipsTest extends KernelTestBase {
+
+  use OgMembershipCreationTrait;
 
   /**
    * {@inheritdoc}
@@ -113,10 +116,7 @@ class GetMembershipsTest extends KernelTestBase {
       foreach ($statuses as $group_key => $status) {
         $group = $this->groups[$group_key];
         if ($status) {
-          $membership = Og::createMembership($group, $user);
-          $membership
-            ->setState($status)
-            ->save();
+          $this->createOgMembership($group, $user, NULL, $status);
         }
       }
     }

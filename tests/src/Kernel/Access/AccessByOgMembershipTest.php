@@ -3,6 +3,7 @@
 namespace Drupal\Tests\og\Kernel\Access;
 
 use Drupal\KernelTests\KernelTestBase;
+use Drupal\Tests\og\Traits\OgMembershipCreationTrait;
 use Drupal\block_content\Entity\BlockContent;
 use Drupal\block_content\Entity\BlockContentType;
 use Drupal\node\Entity\Node;
@@ -25,6 +26,7 @@ use Drupal\user\Entity\User;
 class AccessByOgMembershipTest extends KernelTestBase {
 
   use ContentTypeCreationTrait;
+  use OgMembershipCreationTrait;
 
   /**
    * {@inheritdoc}
@@ -143,14 +145,7 @@ class AccessByOgMembershipTest extends KernelTestBase {
     // Subscribe the normal member and the blocked member to the group.
     foreach (['member', 'blocked'] as $membership_type) {
       $state = $membership_type === 'member' ? OgMembershipInterface::STATE_ACTIVE : OgMembershipInterface::STATE_BLOCKED;
-      /** @var \Drupal\og\Entity\OgMembership $membership */
-      $membership = OgMembership::create();
-      $membership
-        ->setOwner($this->users[$membership_type])
-        ->setGroup($this->group)
-        ->addRole($role)
-        ->setState($state)
-        ->save();
+      $this->createOgMembership($this->group, $this->users[$membership_type], NULL, $state);
     }
 
     // Create three group content items, one owned by the group owner, one by
