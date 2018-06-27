@@ -8,9 +8,11 @@ use Drupal\block_content\Entity\BlockContent;
 use Drupal\block_content\Entity\BlockContentType;
 use Drupal\node\Entity\Node;
 use Drupal\node\Entity\NodeType;
+use Drupal\og\Entity\OgRole;
 use Drupal\og\Og;
 use Drupal\og\OgGroupAudienceHelperInterface;
 use Drupal\og\OgMembershipInterface;
+use Drupal\og\OgRoleInterface;
 use Drupal\user\Entity\Role;
 use Drupal\user\Entity\User;
 
@@ -155,9 +157,7 @@ class OgAccessHookTest extends KernelTestBase {
 
     // Grant members permission to edit their own content.
     /** @var \Drupal\og\Entity\OgRole $role */
-    $role = $this->container->get('entity_type.manager')
-      ->getStorage('og_role')
-      ->load('block_content-group-member');
+    $role = OgRole::getRole('block_content', 'group', OgRoleInterface::AUTHENTICATED);
     $role->grantPermission('edit own group_content content');
     $role->save();
 
