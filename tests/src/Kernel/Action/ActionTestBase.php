@@ -5,6 +5,7 @@ namespace Drupal\Tests\og\Kernel\Action;
 use Drupal\Core\Access\AccessResultAllowed;
 use Drupal\Core\Session\AnonymousUserSession;
 use Drupal\KernelTests\KernelTestBase;
+use Drupal\Tests\og\Traits\OgMembershipCreationTrait;
 use Drupal\node\Entity\Node;
 use Drupal\node\Entity\NodeType;
 use Drupal\og\Entity\OgRole;
@@ -17,6 +18,7 @@ use Drupal\simpletest\UserCreationTrait;
  */
 abstract class ActionTestBase extends KernelTestBase {
 
+  use OgMembershipCreationTrait;
   use UserCreationTrait;
 
   /**
@@ -145,29 +147,24 @@ abstract class ActionTestBase extends KernelTestBase {
 
     // A normal member of the test group.
     $this->users['member'] = $this->createUser();
-    $this->memberships['member'] = $this->membershipManager->createMembership($this->group, $this->users['member']);
-    $this->memberships['member']->save();
+    $this->memberships['member'] = $this->createOgMembership($this->group, $this->users['member']);
 
     // A pending member of the test group.
     $this->users['pending'] = $this->createUser();
-    $this->memberships['pending'] = $this->membershipManager->createMembership($this->group, $this->users['pending'])->setState(OgMembershipInterface::STATE_PENDING);
-    $this->memberships['pending']->save();
+    $this->memberships['pending'] = $this->createOgMembership($this->group, $this->users['pending'], NULL, OgMembershipInterface::STATE_PENDING);
 
     // A blocked member of the test group.
     $this->users['blocked'] = $this->createUser();
-    $this->memberships['blocked'] = $this->membershipManager->createMembership($this->group, $this->users['blocked'])->setState(OgMembershipInterface::STATE_BLOCKED);
-    $this->memberships['blocked']->save();
+    $this->memberships['blocked'] = $this->createOgMembership($this->group, $this->users['blocked'], NULL, OgMembershipInterface::STATE_BLOCKED);
 
     // A group administrator. This is a special case since this role is
     // considered to have all permissions.
     $this->users['group_administrator'] = $this->createUser();
-    $this->memberships['group_administrator'] = $this->membershipManager->createMembership($this->group, $this->users['group_administrator'])->addRole($this->roles['administrator']);
-    $this->memberships['group_administrator']->save();
+    $this->memberships['group_administrator'] = $this->createOgMembership($this->group, $this->users['group_administrator'], [OgRoleInterface::AUTHENTICATED, OgRoleInterface::ADMINISTRATOR]);
 
     // A group moderator that has the right to administer group members.
     $this->users['group_moderator'] = $this->createUser();
-    $this->memberships['group_moderator'] = $this->membershipManager->createMembership($this->group, $this->users['group_moderator'])->addRole($this->roles['moderator']);
-    $this->memberships['group_moderator']->save();
+    $this->memberships['group_moderator'] = $this->createOgMembership($this->group, $this->users['group_moderator'], [OgRoleInterface::AUTHENTICATED, 'moderator']);
   }
 
   /**

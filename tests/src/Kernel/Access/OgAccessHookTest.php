@@ -3,11 +3,11 @@
 namespace Drupal\Tests\og\Kernel\Access;
 
 use Drupal\KernelTests\KernelTestBase;
+use Drupal\Tests\og\Traits\OgMembershipCreationTrait;
 use Drupal\block_content\Entity\BlockContent;
 use Drupal\block_content\Entity\BlockContentType;
 use Drupal\node\Entity\Node;
 use Drupal\node\Entity\NodeType;
-use Drupal\og\Entity\OgMembership;
 use Drupal\og\Og;
 use Drupal\og\OgGroupAudienceHelperInterface;
 use Drupal\og\OgMembershipInterface;
@@ -20,6 +20,8 @@ use Drupal\user\Entity\User;
  * @group og
  */
 class OgAccessHookTest extends KernelTestBase {
+
+  use OgMembershipCreationTrait;
 
   /**
    * {@inheritdoc}
@@ -162,14 +164,7 @@ class OgAccessHookTest extends KernelTestBase {
     // Subscribe the normal member and the blocked member to the group.
     foreach (['member', 'blocked'] as $membership_type) {
       $state = $membership_type === 'member' ? OgMembershipInterface::STATE_ACTIVE : OgMembershipInterface::STATE_BLOCKED;
-      /** @var \Drupal\og\Entity\OgMembership $membership */
-      $membership = OgMembership::create();
-      $membership
-        ->setOwner($this->users[$membership_type])
-        ->setGroup($this->group)
-        ->addRole($role)
-        ->setState($state)
-        ->save();
+      $this->createOgMembership($this->group, $this->users[$membership_type], NULL, $state);
     }
 
     // Create three group content items, one owned by the group owner, one by
