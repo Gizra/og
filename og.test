@@ -649,6 +649,41 @@ class OgGroupAndUngroup extends DrupalWebTestCase {
     $user_roles = og_get_user_roles('entity_test', $entity1->pid, $user1->uid, FALSE);
     $this->assertEqual($og_roles, $user_roles, t('Group manager was granted default role.'));
   }
+
+  /**
+   * Test group behaviour when the group owner is not active.
+   */
+  public function testGroupManagerNotActive() {
+    // Create the user.
+    $user1 = $this->drupalCreateUser();
+
+    // Create the group; the group owner is the previously created user.
+    $entity1 = entity_create('entity_test', array('name' => 'main', 'uid' => $user1->uid));
+    $wrapper = entity_metadata_wrapper('entity_test', $entity1);
+    $wrapper->{OG_GROUP_FIELD}->set(1);
+    $wrapper->save();
+
+    // Ensure that the user owner membership for the group has active status.
+    $og_membership = og_get_membership('entity_test', $entity1->pid, 'user', $user1->uid);
+    $this->assertEqual($og_membership->state, OG_STATE_ACTIVE, 'Owner Membership status is Active');
+
+    // Move the user owner membership to blocked.
+    $og_membership->state = OG_STATE_BLOCKED;
+    $og_membership->save();
+
+    $og_membership = og_membership_load($og_membership->identifier());
+    $this->assertEqual($og_membership->state, OG_STATE_BLOCKED, 'Owner Membership status is Blocked');
+
+    // Save the group entity.
+    $wrapper = entity_metadata_wrapper('entity_test', $entity1);
+    $wrapper->save();
+
+    // Ensure that the user owner membership for the group still has blocked
+    // status.
+    $og_membership = og_membership_load($og_membership->identifier());
+    $this->assertEqual($og_membership->state, OG_STATE_BLOCKED, 'Owner Membership status is Blocked');
+  }
+
 }
 
 class OgPermissionsTestCase extends DrupalWebTestCase {
