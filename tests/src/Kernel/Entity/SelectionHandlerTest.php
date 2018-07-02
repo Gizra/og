@@ -2,7 +2,6 @@
 
 namespace Drupal\Tests\og\Kernel\Entity;
 
-use Drupal\Component\Utility\Unicode;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\node\Entity\Node;
 use Drupal\node\Entity\NodeType;
@@ -86,8 +85,8 @@ class SelectionHandlerTest extends KernelTestBase {
     $this->installSchema('system', 'sequences');
 
     // Setting up variables.
-    $this->groupBundle = Unicode::strtolower($this->randomMachineName());
-    $this->groupContentBundle = Unicode::strtolower($this->randomMachineName());
+    $this->groupBundle = mb_strtolower($this->randomMachineName());
+    $this->groupContentBundle = mb_strtolower($this->randomMachineName());
 
     // Create a group.
     NodeType::create([

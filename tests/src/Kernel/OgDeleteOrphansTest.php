@@ -2,7 +2,6 @@
 
 namespace Drupal\Tests\og\Kernel;
 
-use Drupal\Component\Utility\Unicode;
 use Drupal\KernelTests\KernelTestBase;
 use Drupal\node\Entity\Node;
 use Drupal\node\Entity\NodeType;
@@ -69,7 +68,7 @@ class OgDeleteOrphansTest extends KernelTestBase {
     $this->ogDeleteOrphansPluginManager = $plugin_manager;
 
     // Create a group entity type.
-    $group_bundle = Unicode::strtolower($this->randomMachineName());
+    $group_bundle = mb_strtolower($this->randomMachineName());
     NodeType::create([
       'type' => $group_bundle,
       'name' => $this->randomString(),
@@ -77,7 +76,7 @@ class OgDeleteOrphansTest extends KernelTestBase {
     Og::groupTypeManager()->addGroup('node', $group_bundle);
 
     // Create a group content entity type.
-    $group_content_bundle = Unicode::strtolower($this->randomMachineName());
+    $group_content_bundle = mb_strtolower($this->randomMachineName());
     NodeType::create([
       'type' => $group_content_bundle,
       'name' => $this->randomString(),
