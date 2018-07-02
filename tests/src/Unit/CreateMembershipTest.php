@@ -4,9 +4,9 @@ namespace Drupal\Tests\og\Unit;
 
 use Drupal\Core\DependencyInjection\ContainerBuilder;
 use Drupal\Core\Entity\EntityInterface;
-use Drupal\Core\Entity\EntityManagerInterface;
 use Drupal\Core\Entity\EntityStorageInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
+use Drupal\Core\Entity\EntityTypeRepositoryInterface;
 use Drupal\og\MembershipManager;
 use Drupal\og\OgGroupAudienceHelperInterface;
 use Drupal\og\OgMembershipInterface;
@@ -23,18 +23,18 @@ use Prophecy\Argument;
 class CreateMembershipTest extends UnitTestCase {
 
   /**
-   * The entity manager used for testing.
-   *
-   * @var \Drupal\Core\Entity\EntityManagerInterface|\Prophecy\Prophecy\ObjectProphecy
-   */
-  protected $entityManager;
-
-  /**
    * The entity type manager.
    *
    * @var \Drupal\Core\Entity\EntityTypeManagerInterface|\Prophecy\Prophecy\ObjectProphecy
    */
   protected $entityTypeManager;
+
+  /**
+   * The mocked entity type repository.
+   *
+   * @var \Drupal\Core\Entity\EntityTypeRepositoryInterface|\Prophecy\Prophecy\ObjectProphecy
+   */
+  protected $entityTypeRepository;
 
   /**
    * The OG group audience helper.
@@ -95,14 +95,14 @@ class CreateMembershipTest extends UnitTestCase {
     $this->bundle = $this->randomMachineName();
 
     $this->entityStorage = $this->prophesize(EntityStorageInterface::class);
-    $this->entityManager = $this->prophesize(EntityManagerInterface::class);
     $this->entityTypeManager = $this->prophesize(EntityTypeManagerInterface::class);
+    $this->entityTypeRepository = $this->prophesize(EntityTypeRepositoryInterface::class);
     $this->groupAudienceHelper = $this->prophesize(OgGroupAudienceHelperInterface::class);
 
-    $this->entityManager->getStorage('og_membership')
+    $this->entityTypeManager->getStorage('og_membership')
       ->willReturn($this->entityStorage->reveal());
 
-    $this->entityManager->getEntityTypeFromClass('Drupal\og\Entity\OgMembership')
+    $this->entityTypeRepository->getEntityTypeFromClass('Drupal\og\Entity\OgMembership')
       ->willReturn('og_membership');
 
     // Create a mocked Og Membership entity.
@@ -128,7 +128,8 @@ class CreateMembershipTest extends UnitTestCase {
       ->willReturn($membership_entity->reveal());
 
     $container = new ContainerBuilder();
-    $container->set('entity.manager', $this->entityManager->reveal());
+    $container->set('entity_type.manager', $this->entityTypeManager->reveal());
+    $container->set('entity_type.repository', $this->entityTypeRepository->reveal());
     \Drupal::setContainer($container);
   }
 
