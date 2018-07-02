@@ -9,6 +9,9 @@
         "irc": "irc://irc.freenode.org/drupal-og",
         "source": "https://cgit.drupalcode.org/og"
     },
+    "require": {
+        "drupal/core": "~8.5"
+    },
     "require-dev": {
         "drupal/coder": "~8.2"
     }
