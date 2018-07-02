@@ -7,6 +7,8 @@ use Drupal\Core\DependencyInjection\ContainerBuilder;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Entity\EntityManagerInterface;
 use Drupal\Core\Entity\EntityStorageInterface;
+use Drupal\Core\Entity\EntityTypeManagerInterface;
+use Drupal\Core\Entity\EntityTypeRepositoryInterface;
 use Drupal\Core\Field\FieldDefinitionInterface;
 use Drupal\Core\Field\FieldItemListInterface;
 use Drupal\Core\Session\AccountInterface;
@@ -23,7 +25,7 @@ use Drupal\user\EntityOwnerInterface;
  * Tests the OG group formatter.
  *
  * @group og
- * @coversDefaultClass Drupal\og\Plugin\Field\FieldFormatter\GroupSubscribeFormatter
+ * @coversDefaultClass \Drupal\og\Plugin\Field\FieldFormatter\GroupSubscribeFormatter
  */
 class GroupSubscribeFormatterTest extends UnitTestCase {
 
@@ -40,6 +42,20 @@ class GroupSubscribeFormatterTest extends UnitTestCase {
    * @var \Drupal\Core\Entity\EntityStorageInterface|\Prophecy\Prophecy\ObjectProphecy
    */
   protected $entityStorage;
+
+  /**
+   * The mocked entity type manager.
+   *
+   * @var \Drupal\Core\Entity\EntityTypeManagerInterface|\Prophecy\Prophecy\ObjectProphecy
+   */
+  protected $entityTypeManager;
+
+  /**
+   * The mocked entity type repository service.
+   *
+   * @var \Drupal\Core\Entity\EntityTypeRepositoryInterface|\Prophecy\Prophecy\ObjectProphecy
+   */
+  protected $entityTypeRepository;
 
   /**
    * A mocked test user.
@@ -152,6 +168,8 @@ class GroupSubscribeFormatterTest extends UnitTestCase {
     $this->entityManager = $this->prophesize(EntityManagerInterface::class);
     $this->entityStorage = $this->prophesize(EntityStorageInterface::class);
     $this->entityTypeId = $this->randomMachineName();
+    $this->entityTypeManager = $this->prophesize(EntityTypeManagerInterface::class);
+    $this->entityTypeRepository = $this->prophesize(EntityTypeRepositoryInterface::class);
     $this->fieldDefinitionInterface = $this->prophesize(FieldDefinitionInterface::class);
     $this->fieldItemList = $this->prophesize(FieldItemListInterface::class);
     $this->group = $this->prophesize(EntityInterface::class);
@@ -186,7 +204,7 @@ class GroupSubscribeFormatterTest extends UnitTestCase {
       ->willReturn($this->entityId);
 
     $this->groupTypeManager->isGroup($this->entityTypeId, $this->bundle)->willReturn(TRUE);
-    $this->entityManager->getStorage('user')
+    $this->entityTypeManager->getStorage('user')
       ->willReturn($this->entityStorage->reveal());
 
     $this
@@ -194,7 +212,7 @@ class GroupSubscribeFormatterTest extends UnitTestCase {
       ->id()
       ->willReturn($this->userId);
 
-    $this->entityManager->getEntityTypeFromClass('Drupal\user\Entity\User')
+    $this->entityTypeRepository->getEntityTypeFromClass('Drupal\user\Entity\User')
       ->willReturn('user');
 
     $this->entityStorage
@@ -212,7 +230,8 @@ class GroupSubscribeFormatterTest extends UnitTestCase {
       ->willReturn($this->userId);
 
     $container = new ContainerBuilder();
-    $container->set('entity.manager', $this->entityManager->reveal());
+    $container->set('entity_type.manager', $this->entityTypeManager->reveal());
+    $container->set('entity_type.repository', $this->entityTypeRepository->reveal());
     $container->set('og.membership_manager', $this->membershipManager->reveal());
     $container->set('string_translation', $this->getStringTranslationStub());
 
