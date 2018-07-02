@@ -8,9 +8,12 @@ php:
   - 7.2
 
 env:
-  - TEST_SUITE=8.5.x
-  - TEST_SUITE=8.6.x
-  - TEST_SUITE=PHP_CodeSniffer
+  global:
+    - COMPOSER_MEMORY_LIMIT=2G
+  matrix:
+    - TEST_SUITE=8.5.x
+    - TEST_SUITE=8.6.x
+    - TEST_SUITE=PHP_CodeSniffer
 
 # Only run the coding standards check once.
 matrix:
