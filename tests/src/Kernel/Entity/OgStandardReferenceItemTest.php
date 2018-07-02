@@ -2,7 +2,6 @@
 
 namespace Drupal\Tests\og\Kernel\Entity;
 
-use Drupal\Component\Utility\Unicode;
 use Drupal\entity_test\Entity\EntityTest;
 use Drupal\KernelTests\KernelTestBase;
 use Drupal\og\Og;
@@ -41,7 +40,7 @@ class OgStandardReferenceItemTest extends KernelTestBase {
     // Create several bundles.
     for ($i = 0; $i <= 2; $i++) {
       $bundle = EntityTest::create([
-        'type' => Unicode::strtolower($this->randomMachineName()),
+        'type' => mb_strtolower($this->randomMachineName()),
         'name' => $this->randomString(),
       ]);
 
