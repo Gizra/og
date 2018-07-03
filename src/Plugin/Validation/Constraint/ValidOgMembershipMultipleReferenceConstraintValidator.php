@@ -25,9 +25,8 @@ class ValidOgMembershipMultipleReferenceConstraintValidator extends ConstraintVa
     $account = $current_user->getAccount();
     $bundle = $entity->bundle();
 
-    // Check if the user has site wide permission. If the the user has a site
-    // wide permission we don't need to enforce the assign the content to a
-    // group.
+    // Check if the user has site wide permission. If the user has global access
+    // we don't need to do any further checks.
     if ($entity->isNew()) {
       $access = $account->hasPermission("create $bundle content");
     }
