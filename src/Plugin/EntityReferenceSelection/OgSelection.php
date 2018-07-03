@@ -68,13 +68,13 @@ class OgSelection extends DefaultSelection {
     $definition = \Drupal::entityTypeManager()->getDefinition($target_type);
 
     if ($bundle_key = $definition->getKey('bundle')) {
-      $bundles = Og::groupTypeManager()->getAllGroupBundles($target_type);
+      $map = Og::groupTypeManager()->getGroupMap();
 
-      if (!$bundles) {
+      if (empty($map[$target_type])) {
         // If there are no bundles defined, we can return early.
         return $query;
       }
-      $query->condition($bundle_key, $bundles, 'IN');
+      $query->condition($bundle_key, $map[$target_type], 'IN');
     }
 
     $user_groups = $this->getUserGroups();
