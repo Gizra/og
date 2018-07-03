@@ -28,7 +28,7 @@ class DeleteOgMembershipActionTest extends ChangeOgMembershipActionTestBase {
    */
   public function testExecute($membership = NULL) {
     $membership = $this->memberships[$membership];
-    $member = $membership->getUser();
+    $member = $membership->getOwner();
     /** @var \Drupal\og\Plugin\Action\AddSingleOgMembershipRole $plugin */
     $configuration = !empty($default_role_name) ? ['role_name' => $default_role_name] : [];
     $plugin = $this->getPlugin($configuration);

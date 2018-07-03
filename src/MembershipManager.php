@@ -135,10 +135,11 @@ class MembershipManager implements MembershipManagerInterface {
    * {@inheritdoc}
    */
   public function createMembership(EntityInterface $group, AccountInterface $user, $membership_type = OgMembershipInterface::TYPE_DEFAULT) {
-    /** @var \Drupal\og\Entity\OgMembershipInterface $membership */
+    /** @var \Drupal\user\UserInterface|\Drupal\Core\Session\AccountInterface $user */
+    /** @var \Drupal\og\OgMembershipInterface $membership */
     $membership = OgMembership::create(['type' => $membership_type]);
     $membership
-      ->setUser($user)
+      ->setOwner($user)
       ->setGroup($group);
 
     return $membership;
@@ -150,7 +151,7 @@ class MembershipManager implements MembershipManagerInterface {
   public function getGroupIds(EntityInterface $entity, $group_type_id = NULL, $group_bundle = NULL) {
     // This does not work for user entities.
     if ($entity->getEntityTypeId() === 'user') {
-      throw new \InvalidArgumentException('\Drupal\og\GroupMembership::getGroupIds() cannot be used for user entities. Use \Drupal\og\GroupMembership::getUserGroups() instead.');
+      throw new \InvalidArgumentException('\Drupal\og\MembershipManager::getGroupIds() cannot be used for user entities. Use \Drupal\og\MembershipManager::getUserGroups() instead.');
     }
 
     $identifier = [

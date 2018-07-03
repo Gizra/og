@@ -91,7 +91,9 @@ class OgRoleCacheContext extends UserCacheContextBase implements CacheContextInt
         $role_names = array_map(function (OgRoleInterface $role) {
           return $role->getName();
         }, $membership->getRoles());
-        $memberships[$membership->getGroupEntityType()][$membership->getGroupId()] = $role_names;
+        if ($role_names) {
+          $memberships[$membership->getGroupEntityType()][$membership->getGroupId()] = $role_names;
+        }
       }
 
       // Sort the memberships, so that the same key can be generated, even if

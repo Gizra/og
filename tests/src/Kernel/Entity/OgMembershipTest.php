@@ -2,7 +2,6 @@
 
 namespace Drupal\Tests\og\Kernel\Entity;
 
-use Drupal\Component\Utility\Unicode;
 use Drupal\entity_test\Entity\EntityTest;
 use Drupal\KernelTests\KernelTestBase;
 use Drupal\node\Entity\Node;
@@ -89,7 +88,7 @@ class OgMembershipTest extends KernelTestBase {
 
     // Create a bundle and add as a group.
     $group = EntityTest::create([
-      'type' => Unicode::strtolower($this->randomMachineName()),
+      'type' => mb_strtolower($this->randomMachineName()),
       'name' => $this->randomString(),
       'user_id' => $owner->id(),
     ]);
@@ -108,24 +107,56 @@ class OgMembershipTest extends KernelTestBase {
   }
 
   /**
-   * Tests getting and setting users on OgMemberships.
+   * Tests getting and setting owners on OgMemberships.
    *
-   * @covers ::getUser
-   * @covers ::setUser
+   * @covers ::getOwner
+   * @covers ::getOwnerId
+   * @covers ::setOwner
    */
-  public function testGetSetUser() {
-    $membership = Og::createMembership($this->group, $this->user);
-    $membership->save();
+  public function testGetSetOwner() {
+    $membership = OgMembership::create();
+    $membership
+      ->setOwner($this->user)
+      ->setGroup($this->group)
+      ->save();
 
+    $this->assertOwner($membership);
+  }
+
+  /**
+   * Tests getting and setting owners by ID on OgMemberships.
+   *
+   * @covers ::getOwner
+   * @covers ::getOwnerId
+   * @covers ::setOwnerId
+   */
+  public function testGetSetOwnerId() {
+    $membership = OgMembership::create();
+    $membership
+      ->setOwnerId($this->user->id())
+      ->setGroup($this->group)
+      ->save();
+
+    $this->assertOwner($membership);
+  }
+
+  /**
+   * Asserts that the test user is set as the owner of the given membership.
+   *
+   * @param \Drupal\og\OgMembershipInterface $membership
+   *   The membership to check.
+   */
+  protected function assertOwner(OgMembershipInterface $membership) {
     // Check the user is returned.
-    $this->assertInstanceOf(UserInterface::class, $membership->getUser());
-    $this->assertEquals($this->user->id(), $membership->getUser()->id());
+    $this->assertInstanceOf(UserInterface::class, $membership->getOwner());
+    $this->assertEquals($this->user->id(), $membership->getOwnerId());
 
     // And after re-loading.
+    /** @var \Drupal\og\OgMembershipInterface $membership */
     $membership = $this->entityTypeManager->getStorage('og_membership')->loadUnchanged($membership->id());
 
-    $this->assertInstanceOf(UserInterface::class, $membership->getUser());
-    $this->assertEquals($this->user->id(), $membership->getUser()->id());
+    $this->assertInstanceOf(UserInterface::class, $membership->getOwner());
+    $this->assertEquals($this->user->id(), $membership->getOwnerId());
   }
 
   /**
@@ -134,7 +165,7 @@ class OgMembershipTest extends KernelTestBase {
   public function testMembershipStaticCache() {
     // Create a second bundle and add as a group.
     $another_group = EntityTest::create([
-      'type' => Unicode::strtolower($this->randomMachineName()),
+      'type' => mb_strtolower($this->randomMachineName()),
       'name' => $this->randomString(),
     ]);
     $another_group->save();
@@ -177,7 +208,7 @@ class OgMembershipTest extends KernelTestBase {
     /** @var \Drupal\og\OgMembershipInterface $membership */
     $membership = OgMembership::create();
     $membership
-      ->setUser($this->user)
+      ->setOwner($this->user)
       ->save();
   }
 
@@ -186,7 +217,7 @@ class OgMembershipTest extends KernelTestBase {
    */
   public function testNoOwnerException() {
     // Create a bundle and add as a group.
-    $bundle = Unicode::strtolower($this->randomMachineName());
+    $bundle = mb_strtolower($this->randomMachineName());
     $group = NodeType::create([
       'type' => $bundle,
       'label' => $this->randomString(),
@@ -210,7 +241,7 @@ class OgMembershipTest extends KernelTestBase {
    */
   public function testSetNonValidGroupException() {
     $non_group = EntityTest::create([
-      'type' => Unicode::strtolower($this->randomMachineName()),
+      'type' => mb_strtolower($this->randomMachineName()),
       'name' => $this->randomString(),
     ]);
 
@@ -228,7 +259,7 @@ class OgMembershipTest extends KernelTestBase {
    */
   public function testSaveExistingMembership() {
     $group = EntityTest::create([
-      'type' => Unicode::strtolower($this->randomMachineName()),
+      'type' => mb_strtolower($this->randomMachineName()),
       'name' => $this->randomString(),
     ]);
 
@@ -264,7 +295,7 @@ class OgMembershipTest extends KernelTestBase {
     $wrong_role = OgRole::create()
       ->setGroupType($group_entity_type_id)
       ->setGroupBundle($group_bundle_id)
-      ->setName(Unicode::strtolower($this->randomMachineName()));
+      ->setName(mb_strtolower($this->randomMachineName()));
     $wrong_role->save();
 
     Og::createMembership($group, $this->user)->addRole($wrong_role)->save();
@@ -385,7 +416,7 @@ class OgMembershipTest extends KernelTestBase {
    */
   public function testSaveSameMembershipTwice() {
     $group = EntityTest::create([
-      'type' => Unicode::strtolower($this->randomMachineName()),
+      'type' => mb_strtolower($this->randomMachineName()),
       'name' => $this->randomString(),
     ]);
 
@@ -455,6 +486,21 @@ class OgMembershipTest extends KernelTestBase {
 
     $this->assertEquals(1, count($roles));
     $this->assertEquals(OgRoleInterface::AUTHENTICATED, $role->getName());
+  }
+
+  /**
+   * Tests that we can retrieve the (empty) roles list from a new membership.
+   *
+   * If a membership is newly created and doesn't have a group associated with
+   * it yet, it should still be possible to get the (empty) list of roles
+   * without getting any errors.
+   *
+   * @covers ::getRoles
+   */
+  public function testGetRolesFromMembershipWithoutGroup() {
+    $membership = OgMembership::create();
+    $roles = $membership->getRoles();
+    $this->assertEquals([], $roles);
   }
 
   /**

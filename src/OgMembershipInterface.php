@@ -4,12 +4,12 @@ namespace Drupal\og;
 
 use Drupal\Core\Entity\ContentEntityInterface;
 use Drupal\Core\Entity\EntityInterface;
-use Drupal\Core\Session\AccountInterface;
+use Drupal\user\EntityOwnerInterface;
 
 /**
  * Provides an interface for OG memberships.
  */
-interface OgMembershipInterface extends ContentEntityInterface {
+interface OgMembershipInterface extends ContentEntityInterface, EntityOwnerInterface {
 
   /**
    * Define active group content states.
@@ -66,25 +66,6 @@ interface OgMembershipInterface extends ContentEntityInterface {
    *   The updated OG Membership object.
    */
   public function setCreatedTime($timestamp);
-
-  /**
-   * Sets the membership's owner.
-   *
-   * @param \Drupal\Core\Session\AccountInterface $user
-   *   The user object.
-   *
-   * @return \Drupal\og\OgMembershipInterface
-   *   The updated OG Membership object.
-   */
-  public function setUser(AccountInterface $user);
-
-  /**
-   * Gets the membership's owner.
-   *
-   * @return \Drupal\Core\Session\AccountInterface
-   *   The user object referenced by the membership.
-   */
-  public function getUser();
 
   /**
    * Sets the group associated with the membership.

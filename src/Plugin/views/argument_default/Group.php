@@ -106,8 +106,7 @@ class Group extends ArgumentDefaultPluginBase implements CacheableDependencyInte
   public function getCacheTags() {
     $group = $this->getGroup();
     if ($group instanceof ContentEntityInterface) {
-      $tag = $group->getEntityTypeId() . ':' . $group->id();
-      return Cache::buildTags('og-group-content', [$tag]);
+      return Cache::buildTags('og-group-content', $group->getCacheTagsToInvalidate());
     }
     return [];
   }

@@ -14,7 +14,7 @@ use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 /**
  * A manager to keep track of which entity type/bundles are OG group enabled.
  */
-class GroupTypeManager {
+class GroupTypeManager implements GroupTypeManagerInterface {
 
   /**
    * The key used to identify the cached version of the group relation map.
@@ -41,13 +41,6 @@ class GroupTypeManager {
    * @var \Drupal\Core\Config\ConfigFactoryInterface
    */
   protected $configFactory;
-
-  /**
-   * The entity storage for OgRole entities.
-   *
-   * @var \Drupal\Core\Entity\EntityStorageInterface
-   */
-  protected $ogRoleStorage;
 
   /**
    * The service providing information about bundles.
@@ -162,7 +155,6 @@ class GroupTypeManager {
    */
   public function __construct(ConfigFactoryInterface $config_factory, EntityTypeManagerInterface $entity_type_manager, EntityTypeBundleInfoInterface $entity_type_bundle_info, EventDispatcherInterface $event_dispatcher, StateInterface $state, PermissionManagerInterface $permission_manager, OgRoleManagerInterface $og_role_manager, RouteBuilderInterface $route_builder, OgGroupAudienceHelperInterface $group_audience_helper) {
     $this->configFactory = $config_factory;
-    $this->ogRoleStorage = $entity_type_manager->getStorage('og_role');
     $this->entityTypeBundleInfo = $entity_type_bundle_info;
     $this->eventDispatcher = $event_dispatcher;
     $this->state = $state;
@@ -173,15 +165,7 @@ class GroupTypeManager {
   }
 
   /**
-   * Determines whether an entity type ID and bundle ID are group enabled.
-   *
-   * @param string $entity_type_id
-   *   The entity type name.
-   * @param string $bundle
-   *   The bundle name.
-   *
-   * @return bool
-   *   TRUE if a bundle is a group.
+   * {@inheritdoc}
    */
   public function isGroup($entity_type_id, $bundle) {
     $group_map = $this->getGroupMap();
@@ -189,31 +173,14 @@ class GroupTypeManager {
   }
 
   /**
-   * Checks if the given entity bundle is group content.
-   *
-   * This is provided as a convenient sister method to ::isGroup(). It is a
-   * simple wrapper for OgGroupAudienceHelperInterface::hasGroupAudienceField().
-   *
-   * @param string $entity_type_id
-   *   The entity type ID.
-   * @param string $bundle
-   *   The bundle name.
-   *
-   * @return bool
-   *   TRUE if the entity bundle is group content.
+   * {@inheritdoc}
    */
   public function isGroupContent($entity_type_id, $bundle) {
     return $this->groupAudienceHelper->hasGroupAudienceField($entity_type_id, $bundle);
   }
 
   /**
-   * Returns the group of an entity type.
-   *
-   * @param string $entity_type_id
-   *   The entity type name.
-   *
-   * @return \Drupal\Core\Entity\EntityInterface[]
-   *   Array of groups, or an empty array if none found
+   * {@inheritdoc}
    */
   public function getGroupsForEntityType($entity_type_id) {
     $group_map = $this->getGroupMap();
@@ -221,11 +188,7 @@ class GroupTypeManager {
   }
 
   /**
-   * Get all group bundles keyed by entity type.
-   *
-   * @return array
-   *   An associative array, keyed by entity type, each value an indexed array
-   *   of bundle IDs.
+   * {@inheritdoc}
    */
   public function getAllGroupBundles() {
     // Todo - should be remove since this method don't do any thing.
@@ -247,17 +210,7 @@ class GroupTypeManager {
   }
 
   /**
-   * Returns a list of all group content bundles keyed by entity type.
-   *
-   * This will return a simple list of group content bundles. If you need
-   * information about the relations between groups and group content bundles
-   * then use getGroupRelationMap() instead.
-   *
-   * @return array
-   *   An associative array of group content bundle IDs, keyed by entity type
-   *   ID.
-   *
-   * @see \Drupal\og\GroupTypeManager::getGroupRelationMap()
+   * {@inheritdoc}
    */
   public function getAllGroupContentBundles() {
     $bundles = [];
@@ -272,23 +225,7 @@ class GroupTypeManager {
   }
 
   /**
-   * Returns a list of all group content bundles filtered by entity type.
-   *
-   * This will return a simple list of group content bundles. If you need
-   * information about the relations between groups and group content bundles
-   * then use getGroupRelationMap() instead.
-   *
-   * @param string $entity_type_id
-   *   Entity type ID to filter the bundles by.
-   *
-   * @return array
-   *   An array of group content bundle IDs.
-   *
-   * @throws \InvalidArgumentException
-   *   Thrown when the passed in entity type ID does not have any group content
-   *   bundles defined.
-   *
-   * @see \Drupal\og\GroupTypeManager::getGroupRelationMap()
+   * {@inheritdoc}
    */
   public function getAllGroupContentBundlesByEntityType($entity_type_id) {
     $bundles = $this->getAllGroupContentBundles();
@@ -299,17 +236,7 @@ class GroupTypeManager {
   }
 
   /**
-   * Returns all group bundles that are referenced by the given group content.
-   *
-   * @param string $group_content_entity_type_id
-   *   The entity type ID of the group content type for which to return
-   *   associated group bundle IDs.
-   * @param string $group_content_bundle_id
-   *   The bundle ID of the group content type for which to return associated
-   *   group bundle IDs.
-   *
-   * @return array
-   *   An array of group bundle IDs, keyed by group entity type ID.
+   * {@inheritdoc}
    */
   public function getGroupBundleIdsByGroupContentBundle($group_content_entity_type_id, $group_content_bundle_id) {
     $bundles = [];
@@ -334,18 +261,7 @@ class GroupTypeManager {
   }
 
   /**
-   * Returns group content bundles that are referencing the given group content.
-   *
-   * @param string $group_entity_type_id
-   *   The entity type ID of the group type for which to return associated group
-   *   content bundle IDs.
-   * @param string $group_bundle_id
-   *   The bundle ID of the group type for which to return associated group
-   *   content bundle IDs.
-   *
-   * @return array
-   *   An array of group content bundle IDs, keyed by group content entity type
-   *   ID.
+   * {@inheritdoc}
    */
   public function getGroupContentBundleIdsByGroupBundle($group_entity_type_id, $group_bundle_id) {
     $group_relation_map = $this->getGroupRelationMap();
@@ -353,15 +269,7 @@ class GroupTypeManager {
   }
 
   /**
-   * Declares a bundle of an entity type as being an OG group.
-   *
-   * @param string $entity_type_id
-   *   The entity type ID of the bundle to declare as being a group.
-   * @param string $bundle_id
-   *   The bundle ID of the bundle to declare as being a group.
-   *
-   * @throws \InvalidArgumentException
-   *   Thrown when the given bundle is already a group.
+   * {@inheritdoc}
    */
   public function addGroup($entity_type_id, $bundle_id) {
     // Throw an error if the entity type is already defined as a group.
@@ -390,7 +298,7 @@ class GroupTypeManager {
   }
 
   /**
-   * Removes an entity type instance as being an OG group.
+   * {@inheritdoc}
    */
   public function removeGroup($entity_type_id, $bundle_id) {
     $editable = $this->configFactory->getEditable('og.settings');
@@ -418,7 +326,7 @@ class GroupTypeManager {
   }
 
   /**
-   * Resets all locally stored data.
+   * {@inheritdoc}
    */
   public function reset() {
     $this->resetGroupMap();
@@ -426,19 +334,14 @@ class GroupTypeManager {
   }
 
   /**
-   * Resets the cached group map.
-   *
-   * Call this after adding or removing a group type.
+   * {@inheritdoc}
    */
   public function resetGroupMap() {
     $this->groupMap = [];
   }
 
   /**
-   * Resets the cached group relation map.
-   *
-   * Call this after making a change to the relationship between a group type
-   * and a group content type.
+   * {@inheritdoc}
    */
   public function resetGroupRelationMap() {
     $this->groupRelationMap = [];
@@ -446,10 +349,7 @@ class GroupTypeManager {
   }
 
   /**
-   * Returns the group map.
-   *
-   * @return array
-   *   The group map.
+   * {@inheritdoc}
    */
   public function getGroupMap() {
     if (empty($this->groupMap)) {

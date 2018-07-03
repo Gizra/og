@@ -2,7 +2,6 @@
 
 namespace Drupal\Tests\og\Kernel\Access;
 
-use Drupal\Component\Utility\Unicode;
 use Drupal\entity_test\Entity\EntityTest;
 use Drupal\KernelTests\KernelTestBase;
 use Drupal\og\Entity\OgRole;
@@ -65,6 +64,13 @@ class OgEntityAccessTest extends KernelTestBase {
   protected $adminUser;
 
   /**
+   * A second administrator which has an alternative administration role.
+   *
+   * @var \Drupal\user\Entity\User
+   */
+  protected $alternativeAdminUser;
+
+  /**
    * A group entity.
    *
    * @var \Drupal\entity_test\Entity\EntityTest
@@ -121,6 +127,13 @@ class OgEntityAccessTest extends KernelTestBase {
   protected $ogAdminRole;
 
   /**
+   * A custom OG admin role.
+   *
+   * @var \Drupal\og\Entity\OgRole
+   */
+  protected $ogAlternativeAdminRole;
+
+  /**
    * {@inheritdoc}
    */
   protected function setUp() {
@@ -132,7 +145,7 @@ class OgEntityAccessTest extends KernelTestBase {
     $this->installEntitySchema('entity_test');
     $this->installSchema('system', 'sequences');
 
-    $this->groupBundle = Unicode::strtolower($this->randomMachineName());
+    $this->groupBundle = mb_strtolower($this->randomMachineName());
 
     // Create users, and make sure user ID 1 isn't used.
     User::create(['name' => $this->randomString()]);
@@ -159,6 +172,10 @@ class OgEntityAccessTest extends KernelTestBase {
     // Admin user.
     $this->adminUser = User::create(['name' => $this->randomString()]);
     $this->adminUser->save();
+
+    // Second admin user which uses an alternative administration role.
+    $this->alternativeAdminUser = User::create(['name' => $this->randomString()]);
+    $this->alternativeAdminUser->save();
 
     // Declare the test entity as being a group.
     Og::groupTypeManager()->addGroup('entity_test', $this->groupBundle);
@@ -218,8 +235,14 @@ class OgEntityAccessTest extends KernelTestBase {
       ->grantPermission($this->randomMachineName())
       ->save();
 
-    $this->ogAdminRole = OgRole::create();
-    $this->ogAdminRole
+    // The administrator role is added automatically when the group is created.
+    // @see \Drupal\og\EventSubscriber\OgEventSubscriber::provideDefaultRoles()
+    $this->ogAdminRole = OgRole::loadByGroupAndName($this->group1, OgRoleInterface::ADMINISTRATOR);
+
+    // Create a second administration role, since this is a supported use case.
+    // It is possible to have multiple administration roles.
+    $this->ogAlternativeAdminRole = OgRole::create();
+    $this->ogAlternativeAdminRole
       ->setName($this->randomMachineName())
       ->setLabel($this->randomString())
       ->setGroupType($this->group1->getEntityTypeId())
@@ -254,6 +277,11 @@ class OgEntityAccessTest extends KernelTestBase {
     $membership = Og::createMembership($this->group1, $this->adminUser);
     $membership
       ->addRole($this->ogAdminRole)
+      ->save();
+
+    $membership = Og::createMembership($this->group1, $this->alternativeAdminUser);
+    $membership
+      ->addRole($this->ogAlternativeAdminRole)
       ->save();
   }
 
@@ -294,6 +322,16 @@ class OgEntityAccessTest extends KernelTestBase {
     // Group admin user should have access regardless.
     $this->assertTrue($og_access->userAccess($this->group1, 'some_perm', $this->adminUser)->isAllowed());
     $this->assertTrue($og_access->userAccess($this->group1, $this->randomMachineName(), $this->adminUser)->isAllowed());
+
+    // Also group admins that have a custom admin role should have access.
+    $this->assertTrue($og_access->userAccess($this->group1, 'some_perm', $this->alternativeAdminUser)->isAllowed());
+    $this->assertTrue($og_access->userAccess($this->group1, $this->randomMachineName(), $this->alternativeAdminUser)->isAllowed());
+
+    // The admin user should no longer have access if the role is demoted from
+    // being an admin role.
+    $this->ogAdminRole->setIsAdmin(FALSE)->save();
+    $this->assertFalse($og_access->userAccess($this->group1, 'some_perm', $this->adminUser)->isAllowed());
+    $this->assertFalse($og_access->userAccess($this->group1, $this->randomMachineName(), $this->adminUser)->isAllowed());
 
     // Add membership to user 3.
     $membership = Og::createMembership($this->group1, $this->user3);

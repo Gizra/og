@@ -2,7 +2,7 @@
 
 namespace Drupal\Tests\og\Kernel;
 
-use Drupal\Component\Utility\SafeMarkup;
+use Drupal\Component\Render\FormattableMarkup;
 use Drupal\KernelTests\KernelTestBase;
 use Drupal\node\Entity\NodeType;
 use Drupal\og\Event\PermissionEvent;
@@ -209,7 +209,7 @@ class PermissionEventTest extends KernelTestBase {
    * @see t()
    */
   public function t($string, array $args = [], array $options = []) {
-    return SafeMarkup::format($string, $args);
+    return new FormattableMarkup($string, $args);
   }
 
   /**

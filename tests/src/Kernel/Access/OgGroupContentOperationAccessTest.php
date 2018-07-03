@@ -3,7 +3,6 @@
 namespace Drupal\Tests\og\Kernel\Access;
 
 use Drupal\comment\Entity\CommentType;
-use Drupal\Component\Utility\Unicode;
 use Drupal\entity_test\Entity\EntityTest;
 use Drupal\KernelTests\KernelTestBase;
 use Drupal\node\Entity\NodeType;
@@ -95,7 +94,7 @@ class OgGroupContentOperationAccessTest extends KernelTestBase {
 
     $this->entityTypeManager = $this->container->get('entity_type.manager');
 
-    $this->groupBundle = Unicode::strtolower($this->randomMachineName());
+    $this->groupBundle = mb_strtolower($this->randomMachineName());
 
     // Create a test user with UID 1. This user has universal access.
     $this->users['uid1'] = User::create(['name' => $this->randomString()]);
@@ -171,7 +170,7 @@ class OgGroupContentOperationAccessTest extends KernelTestBase {
         /** @var \Drupal\og\Entity\OgMembership $membership */
         $membership = OgMembership::create();
         $membership
-          ->setUser($this->users[$role_name])
+          ->setOwner($this->users[$role_name])
           ->setGroup($this->group)
           ->addRole($this->roles[$role_name])
           ->setState(OgMembershipInterface::STATE_ACTIVE)
@@ -185,7 +184,7 @@ class OgGroupContentOperationAccessTest extends KernelTestBase {
     $this->users['blocked']->save();
     $membership = OgMembership::create();
     $membership
-      ->setUser($this->users['blocked'])
+      ->setOwner($this->users['blocked'])
       ->setGroup($this->group)
       ->addRole($this->roles[OgRoleInterface::AUTHENTICATED])
       ->setState(OgMembershipInterface::STATE_BLOCKED)

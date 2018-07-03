@@ -2,7 +2,6 @@
 
 namespace Drupal\Tests\og\Kernel\Action;
 
-use Drupal\Component\Utility\Unicode;
 use Drupal\Core\Access\AccessResultAllowed;
 use Drupal\Core\Session\AnonymousUserSession;
 use Drupal\KernelTests\KernelTestBase;
@@ -70,7 +69,7 @@ abstract class ActionTestBase extends KernelTestBase {
   /**
    * The OG group type manager.
    *
-   * @var \Drupal\og\GroupTypeManager
+   * @var \Drupal\og\GroupTypeManagerInterface
    */
   protected $groupTypeManager;
 
@@ -96,7 +95,7 @@ abstract class ActionTestBase extends KernelTestBase {
     $this->users['group_owner'] = $this->createUser();
 
     // Create a group entity type.
-    $group_bundle = Unicode::strtolower($this->randomMachineName());
+    $group_bundle = mb_strtolower($this->randomMachineName());
     NodeType::create([
       'type' => $group_bundle,
       'name' => $this->randomString(),

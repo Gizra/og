@@ -17,6 +17,10 @@ field.field_settings.og_standard_reference:
       type: entity_reference_selection.[%parent.handler]
       label: 'Organic Groups reference selection plugin settings'
 
+entity_reference_selection.og:default:
+  type: entity_reference_selection.default
+  label: 'The OG selection handler settings'
+
 og.settings:
   type: config_object
   label: 'Organic Groups settings'

@@ -2,7 +2,6 @@
 
 namespace Drupal\Tests\og\Kernel\Entity;
 
-use Drupal\Component\Utility\Unicode;
 use Drupal\entity_test\Entity\EntityTestBundle;
 use Drupal\entity_test\Entity\EntityTestRev;
 use Drupal\entity_test\Entity\EntityTestWithBundle;
@@ -111,7 +110,7 @@ class GroupMembershipManagerTest extends KernelTestBase {
 
     // Create a group content type with two group audience fields, one for each
     // group.
-    $bundle = Unicode::strtolower($this->randomMachineName());
+    $bundle = mb_strtolower($this->randomMachineName());
     foreach (['entity_test', 'node'] as $target_type) {
       $settings = [
         'field_name' => 'group_audience_' . $target_type,
@@ -184,8 +183,8 @@ class GroupMembershipManagerTest extends KernelTestBase {
   public function testStaticCache() {
     /** @var \Drupal\og\MembershipManagerInterface $membership_manager */
     $membership_manager = \Drupal::service('og.membership_manager');
-    $bundle_rev = Unicode::strtolower($this->randomMachineName());
-    $bundle_with_bundle = Unicode::strtolower($this->randomMachineName());
+    $bundle_rev = mb_strtolower($this->randomMachineName());
+    $bundle_with_bundle = mb_strtolower($this->randomMachineName());
     EntityTestBundle::create(['id' => $bundle_with_bundle, 'label' => $bundle_with_bundle])->save();
     $field_settings = [
       'field_name' => 'group_audience_node',

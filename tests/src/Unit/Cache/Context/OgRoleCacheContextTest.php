@@ -62,6 +62,36 @@ class OgRoleCacheContextTest extends OgCacheContextTestBase {
   }
 
   /**
+   * Tests that no cache context key is returned if a user has lost membership.
+   *
+   * This can happen if for example if a user is a member with a certain role in
+   * a group, and then the role is removed from config. In this case the
+   * membership entity will still exist, but the user will not have any roles,
+   * so no cache context key should be generated.
+   *
+   * @covers ::getContext
+   */
+  public function testMembershipsWithOrphanedRole() {
+    // Mock the membership with the orphaned role. It will return a group and
+    // group entity type, but no roles.
+    /** @var \Drupal\og\OgMembershipInterface|\Prophecy\Prophecy\ObjectProphecy $membership */
+    $membership = $this->prophesize(OgMembershipInterface::class);
+    $membership->getGroupEntityType()->willReturn('test_entity');
+    $membership->getGroupId()->willReturn('test_id');
+    $membership->getRoles()->willReturn([]);
+
+    // The membership with the orphaned role will be returned by the membership
+    // manager.
+    /** @var \Drupal\Core\Session\AccountInterface|\Prophecy\Prophecy\ObjectProphecy $user */
+    $user = $this->prophesize(AccountInterface::class)->reveal();
+    $this->membershipManager->getMemberships($user)->willReturn([$membership]);
+
+    // The result should be the predefined 'NO_CONTEXT' value.
+    $result = $this->getContextResult($user);
+    $this->assertEquals(OgRoleCacheContext::NO_CONTEXT, $result);
+  }
+
+  /**
    * Tests that the correct cache context key is returned for group members.
    *
    * Different users might have the identical roles across a number of different

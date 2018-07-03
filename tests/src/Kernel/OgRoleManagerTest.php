@@ -2,7 +2,6 @@
 
 namespace Drupal\Tests\og\Kernel;
 
-use Drupal\Component\Utility\Unicode;
 use Drupal\KernelTests\KernelTestBase;
 use Drupal\node\Entity\NodeType;
 use Drupal\og\Entity\OgRole;
@@ -63,8 +62,8 @@ class OgRoleManagerTest extends KernelTestBase {
     // Add membership and config schema.
     $this->installConfig(['og']);
     $this->installEntitySchema('node');
-    $this->bundle = Unicode::strtolower($this->randomMachineName());
-    $this->roleName = Unicode::strtolower($this->randomMachineName());
+    $this->bundle = mb_strtolower($this->randomMachineName());
+    $this->roleName = mb_strtolower($this->randomMachineName());
 
     $this->ogRoleManager = $this->container->get('og.role_manager');
 
