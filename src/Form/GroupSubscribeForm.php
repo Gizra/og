@@ -42,8 +42,11 @@ class GroupSubscribeForm extends ContentEntityForm {
    * @param \Drupal\Component\Datetime\TimeInterface $time
    *   The time service.
    *
-   * @todo Set the correct type hint on the second argument when Drupal 8.6.0 is
-   *   released. It is currently omitted to preserve backwards compatibility.
+   * @todo Set the `EntityRepositoryInterface` type hint on the second argument
+   *   once Drupal 8.6.0 is released. It is currently omitted to preserve
+   *   backwards compatibility with Drupal 8.5.x and earlier.
+   *
+   * @see https://github.com/Gizra/og/issues/397
    */
   public function __construct(OgAccessInterface $og_access, $entity_repository, EntityTypeBundleInfoInterface $entity_type_bundle_info = NULL, TimeInterface $time = NULL) {
     parent::__construct($entity_repository, $entity_type_bundle_info, $time);
