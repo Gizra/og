@@ -4,7 +4,6 @@ namespace Drupal\Tests\og\Kernel\Entity;
 
 use Drupal\entity_test\Entity\EntityTest;
 use Drupal\KernelTests\KernelTestBase;
-use Drupal\Component\Utility\Unicode;
 use Drupal\og\Og;
 use Drupal\og\OgMembershipInterface;
 use Drupal\user\Entity\User;
@@ -88,8 +87,8 @@ class GetUserGroupsTest extends KernelTestBase {
     $this->installEntitySchema('entity_test');
     $this->installSchema('system', 'sequences');
 
-    $this->groupBundle = Unicode::strtolower($this->randomMachineName());
-    $this->groupContentBundle = Unicode::strtolower($this->randomMachineName());
+    $this->groupBundle = mb_strtolower($this->randomMachineName());
+    $this->groupContentBundle = mb_strtolower($this->randomMachineName());
 
     // Create users.
     $this->user1 = User::create(['name' => $this->randomString()]);
