@@ -99,7 +99,7 @@ class RecentGroupContentBlock extends BlockBase implements ContainerFactoryPlugi
    */
   public function defaultConfiguration() {
     // Default to the first entity type in the list.
-    $bundles = $this->groupTypeManager->getAllGroupContentBundles();
+    $bundles = $this->groupTypeManager->getAllGroupContentBundleIds();
     reset($bundles);
     $entity_type_default = key($bundles);
 
@@ -130,7 +130,7 @@ class RecentGroupContentBlock extends BlockBase implements ContainerFactoryPlugi
     ];
 
     $entity_type_options = [];
-    foreach ($this->groupTypeManager->getAllGroupContentBundles() as $entity_type_id => $bundle_ids) {
+    foreach ($this->groupTypeManager->getAllGroupContentBundleIds() as $entity_type_id => $bundle_ids) {
       $entity_definition = $this->entityTypeManager->getDefinition($entity_type_id);
       $entity_type_options[$entity_type_id] = $entity_definition->getLabel();
 
