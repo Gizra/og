@@ -93,9 +93,9 @@ provide a quick way to get started with Organic groups.
 
 1. Enable the Group and the Group UI modules.
 2. Create a new content type via admin/structure/types/add. Call it "Group",
-   and click on tab "Organic group" then define it to be of Group type.
+   and click on tab "Organic groups" then define it to be of Group type.
 3. Create a second content type. Call it "Group content", and click on tab 
-   "Organic group" then set it to be of Group content type.
+   "Organic groups" then set it to be of Group content type.
 4. Add a Group by going to node/add/group. Call it First group.
 5. Add a Group Content by going to node/add/group-content. In the Groups
    audience field, select First group. In the group content view a link was
