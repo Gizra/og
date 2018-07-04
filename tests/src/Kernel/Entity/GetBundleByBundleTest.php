@@ -83,9 +83,10 @@ class GetBundleByBundleTest extends KernelTestBase {
    *
    * This tests the retrieval of the relations between groups and group content
    * and vice versa. The retrieval of groups that are referenced by group
-   * content is done by GroupTypeManager::getGroupBundleIdsByGroupContenBundle()
-   * while GroupTypeManager::getGroupContentBundleIdsByGroupBundle() handles the
-   * opposite case.
+   * content is done by
+   * GroupTypeManagerInterface::getGroupBundleIdsByGroupContenBundle()
+   * while GroupTypeManagerInterface::getGroupContentBundleIdsByGroupBundle()
+   * handles the opposite case.
    *
    * Both methods are tested here in a single test since they are very similar,
    * and not having to set up the entire relationship structure twice reduces

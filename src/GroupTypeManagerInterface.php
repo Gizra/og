@@ -48,9 +48,18 @@ interface GroupTypeManagerInterface {
   public function getGroupsForEntityType($entity_type_id);
 
   /**
-   * Returns a list of all group content bundles keyed by entity type.
+   * Get all group bundles keyed by entity type.
    *
-   * This will return a simple list of group content bundles. If you need
+   * @return array
+   *   An associative array, keyed by entity type, each value an indexed array
+   *   of bundle IDs.
+   */
+  public function getAllGroupBundles($entity_type = NULL);
+
+  /**
+   * Returns a list of all group content bundles IDs keyed by entity type.
+   *
+   * This will return a simple list of group content bundles IDs. If you need
    * information about the relations between groups and group content bundles
    * then use getGroupRelationMap() instead.
    *
@@ -60,7 +69,7 @@ interface GroupTypeManagerInterface {
    *
    * @see \Drupal\og\GroupTypeManagerInterface::getGroupRelationMap()
    */
-  public function getAllGroupContentBundles();
+  public function getAllGroupContentBundleIds();
 
   /**
    * Returns a list of all group content bundles filtered by entity type.
