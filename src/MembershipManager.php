@@ -186,10 +186,15 @@ class MembershipManager implements MembershipManagerInterface {
         continue;
       }
 
+      // Clean up empty items.
+      $values = array_filter($entity->get($field->getName())->getValue(), function ($value) {
+        return isset($value['target_id']);
+      });
+
       // Compile a list of group target IDs.
       $target_ids = array_map(function ($value) {
         return $value['target_id'];
-      }, $entity->get($field->getName())->getValue());
+      }, $values);
 
       if (empty($target_ids)) {
         continue;
