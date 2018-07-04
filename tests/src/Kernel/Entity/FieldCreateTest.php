@@ -2,7 +2,6 @@
 
 namespace Drupal\Tests\og\Kernel\Entity;
 
-use Drupal\Component\Utility\Unicode;
 use Drupal\field\Entity\FieldConfig;
 use Drupal\node\Entity\NodeType;
 use Drupal\KernelTests\KernelTestBase;
@@ -52,7 +51,7 @@ class FieldCreateTest extends KernelTestBase {
     // Create several bundles.
     for ($i = 0; $i <= 4; $i++) {
       $bundle = NodeType::create([
-        'type' => Unicode::strtolower($this->randomMachineName()),
+        'type' => mb_strtolower($this->randomMachineName()),
         'name' => $this->randomString(),
       ]);
 

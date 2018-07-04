@@ -2,7 +2,6 @@
 
 namespace Drupal\Tests\og\Kernel\Entity;
 
-use Drupal\Component\Utility\Unicode;
 use Drupal\entity_test\Entity\EntityTest;
 use Drupal\KernelTests\KernelTestBase;
 use Drupal\node\Entity\Node;
@@ -89,7 +88,7 @@ class OgMembershipTest extends KernelTestBase {
 
     // Create a bundle and add as a group.
     $group = EntityTest::create([
-      'type' => Unicode::strtolower($this->randomMachineName()),
+      'type' => mb_strtolower($this->randomMachineName()),
       'name' => $this->randomString(),
       'user_id' => $owner->id(),
     ]);
@@ -166,7 +165,7 @@ class OgMembershipTest extends KernelTestBase {
   public function testMembershipStaticCache() {
     // Create a second bundle and add as a group.
     $another_group = EntityTest::create([
-      'type' => Unicode::strtolower($this->randomMachineName()),
+      'type' => mb_strtolower($this->randomMachineName()),
       'name' => $this->randomString(),
     ]);
     $another_group->save();
@@ -218,7 +217,7 @@ class OgMembershipTest extends KernelTestBase {
    */
   public function testNoOwnerException() {
     // Create a bundle and add as a group.
-    $bundle = Unicode::strtolower($this->randomMachineName());
+    $bundle = mb_strtolower($this->randomMachineName());
     $group = NodeType::create([
       'type' => $bundle,
       'label' => $this->randomString(),
@@ -242,7 +241,7 @@ class OgMembershipTest extends KernelTestBase {
    */
   public function testSetNonValidGroupException() {
     $non_group = EntityTest::create([
-      'type' => Unicode::strtolower($this->randomMachineName()),
+      'type' => mb_strtolower($this->randomMachineName()),
       'name' => $this->randomString(),
     ]);
 
@@ -260,7 +259,7 @@ class OgMembershipTest extends KernelTestBase {
    */
   public function testSaveExistingMembership() {
     $group = EntityTest::create([
-      'type' => Unicode::strtolower($this->randomMachineName()),
+      'type' => mb_strtolower($this->randomMachineName()),
       'name' => $this->randomString(),
     ]);
 
@@ -296,7 +295,7 @@ class OgMembershipTest extends KernelTestBase {
     $wrong_role = OgRole::create()
       ->setGroupType($group_entity_type_id)
       ->setGroupBundle($group_bundle_id)
-      ->setName(Unicode::strtolower($this->randomMachineName()));
+      ->setName(mb_strtolower($this->randomMachineName()));
     $wrong_role->save();
 
     Og::createMembership($group, $this->user)->addRole($wrong_role)->save();
@@ -417,7 +416,7 @@ class OgMembershipTest extends KernelTestBase {
    */
   public function testSaveSameMembershipTwice() {
     $group = EntityTest::create([
-      'type' => Unicode::strtolower($this->randomMachineName()),
+      'type' => mb_strtolower($this->randomMachineName()),
       'name' => $this->randomString(),
     ]);
 

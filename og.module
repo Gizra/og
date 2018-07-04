@@ -294,8 +294,8 @@ function og_field_widget_info_alter(array &$info) {
  * Add link template to groups. We add it to all the entity types, and later on
  * return the correct access, depending if the bundle is indeed a group and
  * accessible. We do not filter here the entity type by groups, so whenever
- * GroupTypeManager::addGroup is called, it's enough to mark route to be rebuilt
- * via RouteBuilder::setRebuildNeeded.
+ * GroupTypeManagerInterface::addGroup is called, it's enough to mark route to
+ * be rebuilt via RouteBuilder::setRebuildNeeded.
  */
 function og_entity_type_alter(array &$entity_types) {
   /** @var \Drupal\Core\Entity\EntityTypeInterface $entity_type */

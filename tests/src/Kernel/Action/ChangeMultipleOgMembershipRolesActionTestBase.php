@@ -10,7 +10,7 @@ class ChangeMultipleOgMembershipRolesActionTestBase extends ChangeOgMembershipAc
   /**
    * The factory for private temporary storage objects.
    *
-   * @var \Drupal\user\PrivateTempStoreFactory
+   * @var \Drupal\Core\TempStore\PrivateTempStoreFactory
    */
   protected $tempStorageFactory;
 
@@ -29,7 +29,7 @@ class ChangeMultipleOgMembershipRolesActionTestBase extends ChangeOgMembershipAc
 
     $this->installSchema('system', ['key_value_expire']);
 
-    $this->tempStorageFactory = $this->container->get('user.private_tempstore');
+    $this->tempStorageFactory = $this->container->get('tempstore.private');
 
     // Set up the group administrator as the user that will be logged in during
     // the tests.
