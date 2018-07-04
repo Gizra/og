@@ -5,11 +5,13 @@ namespace Drupal\og_access;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\og\Og;
+use Drupal\Core\StringTranslation\TranslationInterface;
 
 /**
  * Helper for og_access_form_alter().
  */
 class OgAccessBundleFormAlter {
+  use StringTranslationTrait;
 
   /**
    * The entity bundle.
@@ -37,9 +39,12 @@ class OgAccessBundleFormAlter {
    *
    * @param \Drupal\Core\Entity\EntityInterface $entity
    *   The entity object.
+   * @param Drupal\Core\StringTranslation\TranslationInterface $string_translation
+   *   The string translation object.
    */
-  public function __construct(EntityInterface $entity) {
+  public function __construct(EntityInterface $entity, TranslationInterface $string_translation) {
     $this->entity = $entity;
+    $this->stringTranslation = $string_translation;
   }
 
   /**
@@ -59,8 +64,8 @@ class OgAccessBundleFormAlter {
 
     $form['og']['og_enable_access'] = [
       '#type' => 'checkbox',
-      '#title' => t('Restrict access to group members'),
-      '#description' => t('Enable OG access control. Provides a new field that determines the group/group content visibility. Public groups can have member-only content. Any public group content belonging to a private group will be restricted to the members of that group only.'),
+      '#title' => $this->t('Restrict access to group members'),
+      '#description' => $this->t('Enable OG access control. Provides a new field that determines the group/group content visibility. Public groups can have member-only content. Any public group content belonging to a private group will be restricted to the members of that group only.'),
       '#default_value' => $this->bundle ? $this->hasAccessControl() : FALSE,
       '#states' => [
         'visible' => [
@@ -75,7 +80,7 @@ class OgAccessBundleFormAlter {
    * Checks whether the existing bundle has OG access control enabled.
    *
    * @return bool
-   *   True if the group bundle has the OG_ACCESS_FIELD field -OR-
+   *   True if the group bundle has the OgAccess::OG_ACCESS_FIELD field -OR-
    *        if the group content bundle has the OG_CONTENT_ACCESS_FIELD field.
    *   False otherwise.
    */
@@ -84,11 +89,11 @@ class OgAccessBundleFormAlter {
       ->getFieldDefinitions($this->entityTypeId, $this->bundle);
 
     if (Og::isGroup($this->entityTypeId, $this->bundle)) {
-      return isset($field_definitions[OG_ACCESS_FIELD]);
+      return isset($field_definitions[OgAccess::OG_ACCESS_FIELD]);
     }
 
     if (Og::isGroupContent($this->entityTypeId, $this->bundle)) {
-      return isset($field_definitions[OG_ACCESS_CONTENT_FIELD]);
+      return isset($field_definitions[OgAccess::OG_ACCESS_CONTENT_FIELD]);
     }
 
     return FALSE;

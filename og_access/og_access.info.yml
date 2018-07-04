@@ -7,4 +7,3 @@ type: module
 
 dependencies:
   - og
-  - og_ui
