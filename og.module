@@ -166,7 +166,7 @@ function og_entity_access(EntityInterface $entity, $operation, AccountInterface 
     return AccessResult::forbiddenIf($node_access_strict);
   }
 
-  return AccessResult::forbidden();
+  return AccessResult::neutral();
 }
 
 /**
