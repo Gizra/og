@@ -207,15 +207,4 @@ interface OgRoleInterface {
    */
   public function isRequired();
 
-  /**
-   * Returns whether or not a role can be changed.
-   *
-   * This will return FALSE for all roles except the default roles 'non-member'
-   * and 'member'.
-   *
-   * @return bool
-   *   Whether or not the role is locked.
-   */
-  public function isLocked();
-
 }
