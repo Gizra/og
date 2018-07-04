@@ -18,31 +18,7 @@ use Drupal\field\Entity\FieldConfig;
 use Drupal\node\NodeInterface;
 use Drupal\og\Og;
 use Drupal\og_access\OgAccessBundleFormAlter;
-
-/**
- * The access realm of group member.
- */
-define('OG_ACCESS_REALM', 'og_access');
-
-/**
- * Group public access field.
- */
-define('OG_ACCESS_FIELD', 'group_access');
-
-/**
- * Group public access field.
- */
-define('OG_ACCESS_CONTENT_FIELD', 'group_content_access');
-
-/**
- * Public group/group content access.
- */
-define('OG_ACCESS_PUBLIC', 0);
-
-/**
- * Private group/group content access.
- */
-define('OG_ACCESS_PRIVATE', 1);
+use Drupal\og_access\OgAccess;
 
 /**
  * Implements hook_node_grants().
@@ -58,7 +34,7 @@ function og_access_node_grants(AccountInterface $account, $op) {
     foreach ($groups as $group_type => $entity_groups) {
       /** @var \Drupal\core\Entity\EntityInterface $group */
       foreach ($entity_groups as $group) {
-        $realm = OG_ACCESS_REALM . ':' . $group_type;
+        $realm = OgAccess::OG_ACCESS_REALM . ':' . $group_type;
         $grants[$realm][] = $group->id();
       }
     }
@@ -72,7 +48,7 @@ function og_access_node_grants(AccountInterface $account, $op) {
  */
 function og_access_node_access_records(NodeInterface $node) {
   if (!$node->isPublished()) {
-    // Node is unpublished, so we don't allow every group member to see it.
+    // Node is unpublished, so we don't allow any group member to see it.
     return [];
   }
 
@@ -80,22 +56,22 @@ function og_access_node_access_records(NodeInterface $node) {
   $gids = [];
 
   if (Og::isGroup('node', $node->getType()) &&
-      $node->hasField(OG_ACCESS_FIELD) &&
-      !empty($node->{OG_ACCESS_FIELD}) && $node->{OG_ACCESS_FIELD}->value) {
+      $node->hasField(OgAccess::OG_ACCESS_FIELD) &&
+      !empty($node->{OgAccess::OG_ACCESS_FIELD}) && $node->{OgAccess::OG_ACCESS_FIELD}->value) {
     // Private group.
     $gids['node'][] = $node->id();
   }
 
-  if ($node->hasField(OG_ACCESS_CONTENT_FIELD) &&
-      !empty($node->get(OG_ACCESS_CONTENT_FIELD))) {
-    $content_access = $node->get(OG_ACCESS_CONTENT_FIELD)->value;
+  if ($node->hasField(OgAccess::OG_ACCESS_CONTENT_FIELD) &&
+      !empty($node->get(OgAccess::OG_ACCESS_CONTENT_FIELD))) {
+    $content_access = $node->get(OgAccess::OG_ACCESS_CONTENT_FIELD)->value;
   }
   else {
-    $content_access = OG_ACCESS_PUBLIC;
+    $content_access = OgAccess::OG_ACCESS_PUBLIC;
   }
 
   switch ($content_access) {
-    case OG_ACCESS_PUBLIC:
+    case OgAccess::OG_ACCESS_PUBLIC:
       // Skip non-group content nodes.
       if (!Og::isGroupContent('node', $node->getType())) {
         break;
@@ -114,8 +90,8 @@ function og_access_node_access_records(NodeInterface $node) {
             continue;
           }
 
-          if ($group->hasField(OG_ACCESS_FIELD) && !empty($group->get(OG_ACCESS_FIELD)) &&
-              $group->get(OG_ACCESS_FIELD)->value) {
+          if ($group->hasField(OgAccess::OG_ACCESS_FIELD) && !empty($group->get(OgAccess::OG_ACCESS_FIELD)) &&
+              $group->get(OgAccess::OG_ACCESS_FIELD)->value) {
             $has_private = TRUE;
           }
         }
@@ -125,7 +101,7 @@ function og_access_node_access_records(NodeInterface $node) {
       }
       break;
 
-    case OG_ACCESS_PRIVATE:
+    case OgAccess::OG_ACCESS_PRIVATE:
       $list_gids = [];
       /** @var \Drupal\og\OgGroupAudienceHelper $audience_helper */
       $audience_helper = \Drupal::service('og.group_audience_helper');
@@ -142,7 +118,7 @@ function og_access_node_access_records(NodeInterface $node) {
   foreach ($gids as $group_type => $values) {
     foreach ($values as $gid) {
       $grants[] = [
-        'realm' => OG_ACCESS_REALM . ':' . $group_type,
+        'realm' => OgAccess::OG_ACCESS_REALM . ':' . $group_type,
         'gid' => $gid,
         'grant_view' => 1,
         'grant_update' => 0,
@@ -198,9 +174,9 @@ function og_access_entity_type_save(EntityInterface $entity) {
   // Add/remove on the group itself.
   $is_group = Og::isGroup($entity_type_id, $bundle);
   if ($entity->og_is_group || $is_group) {
-    $field = FieldConfig::loadByName($entity_type_id, $bundle, OG_ACCESS_FIELD);
+    $field = FieldConfig::loadByName($entity_type_id, $bundle, OgAccess::OG_ACCESS_FIELD);
     if (!$field && $enable_og_access) {
-      Og::createField(OG_ACCESS_FIELD, $entity_type_id, $bundle);
+      Og::createField(OgAccess::OG_ACCESS_FIELD, $entity_type_id, $bundle);
     }
     elseif ($field) {
       if (!$enable_og_access || $is_group && !$entity->og_is_group) {
@@ -212,10 +188,10 @@ function og_access_entity_type_save(EntityInterface $entity) {
   // Add remove the relevant field to the group content bundle.
   $is_group_content = Og::isGroupContent($entity_type_id, $bundle);
   if ($entity->og_group_content_bundle || $is_group_content) {
-    $field = FieldConfig::loadByName($entity_type_id, $bundle, OG_ACCESS_CONTENT_FIELD);
+    $field = FieldConfig::loadByName($entity_type_id, $bundle, OgAccess::OG_ACCESS_CONTENT_FIELD);
 
     if (!$field && $enable_og_access) {
-      Og::createField(OG_ACCESS_CONTENT_FIELD, $entity_type_id, $bundle);
+      Og::createField(OgAccess::OG_ACCESS_CONTENT_FIELD, $entity_type_id, $bundle);
     }
     elseif ($field) {
       if (!$enable_og_access || $is_group_content && !$entity->og_group_content_bundle) {

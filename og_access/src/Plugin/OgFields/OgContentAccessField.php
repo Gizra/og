@@ -9,7 +9,7 @@ use Drupal\og\OgFieldsInterface;
  * Determine the group content visibility.
  *
  * @OgFields(
- *  id = OG_ACCESS_CONTENT_FIELD,
+ *  id = OgAccess::OG_ACCESS_CONTENT_FIELD,
  *  type = "node",
  *  description = @Translation("Determine the group content visibility.")
  * )
@@ -24,8 +24,8 @@ class OgContentAccessField extends OgFieldBase implements OgFieldsInterface {
       'cardinality' => 1,
       'settings' => [
         'allowed_values' => [
-          0 => 'Public - accessible to all site users',
-          1 => 'Private - accessible only to group members',
+          0 => $this->t('Public - accessible to all site users'),
+          1 => $this->t('Private - accessible only to group members'),
         ],
         'allowed_values_function' => '',
       ],
