@@ -48,15 +48,6 @@ interface GroupTypeManagerInterface {
   public function getGroupsForEntityType($entity_type_id);
 
   /**
-   * Get all group bundles keyed by entity type.
-   *
-   * @return array
-   *   An associative array, keyed by entity type, each value an indexed array
-   *   of bundle IDs.
-   */
-  public function getAllGroupBundles($entity_type = NULL);
-
-  /**
    * Returns a list of all group content bundles IDs keyed by entity type.
    *
    * This will return a simple list of group content bundles IDs. If you need

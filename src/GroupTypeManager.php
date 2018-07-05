@@ -190,14 +190,6 @@ class GroupTypeManager implements GroupTypeManagerInterface {
   /**
    * {@inheritdoc}
    */
-  public function getAllGroupBundles($entity_type = NULL) {
-    $group_map = $this->getGroupMap();
-    return !empty($group_map[$entity_type]) ? $group_map[$entity_type] : $group_map;
-  }
-
-  /**
-   * {@inheritdoc}
-   */
   public function getAllGroupContentBundleIds() {
     $bundles = [];
     foreach ($this->getGroupRelationMap() as $group_entity_type_id => $group_bundle_ids) {
