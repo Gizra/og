@@ -45,7 +45,7 @@ interface GroupTypeManagerInterface {
    * @return \Drupal\Core\Entity\EntityInterface[]
    *   Array of groups, or an empty array if none found
    */
-  public function getGroupsForEntityType($entity_type_id);
+  public function getGroupBundleIdsByEntityType($entity_type_id);
 
   /**
    * Returns a list of all group content bundles IDs keyed by entity type.
