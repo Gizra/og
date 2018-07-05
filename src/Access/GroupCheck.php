@@ -84,6 +84,10 @@ class GroupCheck implements AccessInterface {
         return AccessResult::forbidden();
       }
 
+      if(is_string($group)) {
+        $group = entity_load($parameter_name, $group);
+      }
+
       $entity_type_id = $group->getEntityTypeId();
     }
 
