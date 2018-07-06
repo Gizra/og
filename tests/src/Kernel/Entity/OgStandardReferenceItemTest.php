@@ -18,7 +18,14 @@ class OgStandardReferenceItemTest extends KernelTestBase {
   /**
    * {@inheritdoc}
    */
-  public static $modules = ['user', 'entity_test', 'field', 'og', 'system'];
+  public static $modules = [
+    'user',
+    'entity_test',
+    'field',
+    'og',
+    'options',
+    'system',
+  ];
 
   protected $bundles;
   protected $fieldName;

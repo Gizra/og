@@ -22,6 +22,7 @@ class GroupTypeConditionTest extends KernelTestBase {
     'field',
     'node',
     'og',
+    'options',
     'system',
     'user',
   ];

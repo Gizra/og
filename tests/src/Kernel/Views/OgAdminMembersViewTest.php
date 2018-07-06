@@ -27,6 +27,7 @@ class OgAdminMembersViewTest extends ViewsKernelTestBase {
     'field',
     'node',
     'og',
+    'options',
     'views',
   ];
 
