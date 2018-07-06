@@ -25,18 +25,49 @@ og_ui.roles_permissions_overview:
     _permission: 'administer group'
     type: '^(roles|permissions)$'
 
-og_ui.roles_form:
-  path: 'admin/config/group/roles/{entity_type}/{bundle}'
+entity.og_role.collection:
+  path: 'admin/config/group/roles/{entity_type_id}/{bundle_id}'
   defaults:
-    _form: '\Drupal\og_ui\Form\OgRolesForm'
-    _title: '@todo - create title callback'
+    _entity_list: 'og_role'
+    _title_callback: '\Drupal\og_ui\Controller\OgUiController::rolesOverviewPageTitleCallback'
   requirements:
     _permission: 'administer group'
 
-og_ui.permissions_form:
-  path: 'admin/config/group/permissions/{entity_type}/{bundle}'
+entity.og_role.add_form:
+  path: 'admin/config/group/roles/{entity_type_id}/{bundle_id}/add'
+  defaults:
+    _entity_form: og_role.default
+    _title: 'Add role'
+  requirements:
+    _permission: 'administer group'
+
+entity.og_role.edit_form:
+  path: 'admin/config/group/role/{og_role}/edit'
+  defaults:
+    _entity_form: og_role.default
+    _title_callback: '\Drupal\og_ui\Form\OgRoleForm::editRoleTitleCallback'
+  requirements:
+    _entity_access: 'og_role.update'
+
+entity.og_role.delete_form:
+  path: 'admin/config/group/role/{og_role}/delete'
+  defaults:
+    _entity_form: og_role.delete
+  requirements:
+    _entity_access: 'og_role.delete'
+
+og_ui.permissions_overview:
+  path: 'admin/config/group/permissions/{entity_type_id}/{bundle_id}'
   defaults:
     _form: '\Drupal\og_ui\Form\OgPermissionsForm'
-    _title: '@todo - create title callback'
+    _title_callback: '\Drupal\og_ui\Form\OgPermissionsForm::titleCallback'
+  requirements:
+    _permission: 'administer group'
+
+og_ui.permissions_edit_form:
+  path: 'admin/config/group/permissions/{entity_type_id}/{bundle_id}/{role_name}'
+  defaults:
+    _form: '\Drupal\og_ui\Form\OgRolePermissionsForm'
+    _title_callback: '\Drupal\og_ui\Form\OgRolePermissionsForm::rolePermissionTitleCallback'
   requirements:
     _permission: 'administer group'

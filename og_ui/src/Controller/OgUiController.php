@@ -72,6 +72,7 @@ class OgUiController extends ControllerBase {
    *   The overview as a render array.
    */
   public function rolesPermissionsOverviewPage($type) {
+    $route = $type === 'roles' ? 'entity.og_role.collection' : 'og_ui.permissions_overview';
     $action = $type === 'roles' ? t('Edit roles') : t('Edit permissions');
     $header = [t('Group type'), t('Operations')];
     $rows = [];
@@ -86,9 +87,9 @@ class OgUiController extends ControllerBase {
             'data' => $definition->getLabel() . ' - ' . $bundle_info[$bundle]['label'],
           ],
           [
-            'data' => Link::createFromRoute($action, 'og_ui.' . $type . '_form', [
-              'entity_type' => $entity_type,
-              'bundle' => $bundle,
+            'data' => Link::createFromRoute($action, $route, [
+              'entity_type_id' => $entity_type,
+              'bundle_id' => $bundle,
             ]),
           ],
         ];
@@ -106,7 +107,7 @@ class OgUiController extends ControllerBase {
   }
 
   /**
-   * Title callback for rolesPermissionsOverviewPage.
+   * Title callback for rolesPermissionsOverviewPage().
    *
    * @param string $type
    *   The type of overview, either 'roles' or 'permissions'.
@@ -116,6 +117,24 @@ class OgUiController extends ControllerBase {
    */
   public function rolesPermissionsOverviewTitleCallback($type) {
     return $this->t('OG @type overview', ['@type' => $type]);
+  }
+
+  /**
+   * Title callback for the roles overview page.
+   *
+   * @param string $entity_type_id
+   *   The group entity type.
+   * @param string $bundle_id
+   *   The group bundle.
+   *
+   * @return \Drupal\Core\StringTranslation\TranslatableMarkup
+   *   The roles overview page title.
+   */
+  public function rolesOverviewPageTitleCallback($entity_type_id, $bundle_id) {
+    return $this->t('OG @type - @bundle roles', [
+      '@type' => $this->entityTypeManager->getDefinition($entity_type_id)->getLabel(),
+      '@bundle' => $this->entityTypeBundleInfo->getBundleInfo($entity_type_id)[$bundle_id]['label'],
+    ]);
   }
 
 }
