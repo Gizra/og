@@ -1,25 +1,3 @@
-field.storage_settings.og_membership_reference:
-  type: mapping
-  label: 'Organic Groups reference field storage settings'
-  mapping:
-    target_type:
-      type: string
-      label: 'Type of entity to reference'
-
-field.field_settings.og_membership_reference:
-  type: mapping
-  label: 'Organic Groups reference field settings'
-  mapping:
-    handler:
-      type: string
-      label: 'Reference method'
-    handler_settings:
-      type: entity_reference_selection.[%parent.handler]
-      label: 'Organic Groups reference selection plugin settings'
-    access_override:
-      type: boolean
-      label: 'Access Override'
-
 field.storage_settings.og_standard_reference:
   type: mapping
   label: 'Organic Groups reference field storage settings'
@@ -38,9 +16,6 @@ field.field_settings.og_standard_reference:
     handler_settings:
       type: entity_reference_selection.[%parent.handler]
       label: 'Organic Groups reference selection plugin settings'
-    access_override:
-      type: boolean
-      label: 'Access Override'
 
 entity_reference_selection.og:default:
   type: entity_reference_selection.default
@@ -135,20 +110,6 @@ og.og_role.*:
     role_type:
       type: string
       label: 'Role type'
-
-field.widget.settings.og_complex:
-  type: mapping
-  label: 'OG Group Audience field widget'
-  mapping:
-    match_operator:
-      type: string
-      label: 'Autocomplete matching'
-    size:
-      type: integer
-      label: 'Size of textfield'
-    placeholder:
-      type: label
-      label: 'Placeholder'
 
 views.field.og_membership_bulk_form:
   type: views_field_bulk_form
