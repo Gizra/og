@@ -1,11 +1,11 @@
 # Routes for Organic groups.
 
 og.subscribe:
-  path: 'group/{entity_type_id}/{group}/subscribe/{membership_type}'
+  path: 'group/{entity_type_id}/{group}/subscribe/{og_membership_type}'
   defaults:
     _controller: '\Drupal\og\Controller\SubscriptionController::subscribe'
     _title: 'Join Group'
-    membership_type: default
+    og_membership_type: default
   requirements:
     # Only authenticated users can subscribe to group, but we do allow anonymous
     # users to reach this route. They will be redirect to login page or be given
@@ -15,8 +15,6 @@ og.subscribe:
     parameters:
       group:
         type: entity:{entity_type_id}
-      membership_type:
-        type: entity:og_membership_type
 
 og.unsubscribe:
   path: 'group/{entity_type_id}/{group}/unsubscribe'
@@ -43,3 +41,99 @@ og.remove_multiple_roles_confirm:
     _form: '\Drupal\og\Form\OgRemoveMultipleRolesForm'
   requirements:
     _custom_access: '\Drupal\og\Form\OgRemoveMultipleRolesForm::access'
+
+og.entity_autocomplete:
+  path: '/group/{entity_type_id}/{group}/autocomplete/{target_type}/{selection_handler}/{selection_settings_key}'
+  defaults:
+    _controller: '\Drupal\og\Controller\OgAutocompleteController:handleAutocomplete'
+  requirements:
+    _access: 'TRUE'
+  options:
+    parameters:
+      group:
+        type: entity:{entity_type_id}
+
+# OG Membership entity routes
+entity.og_membership.add_form:
+  path: 'group/{entity_type_id}/{group}/admin/members/add/{og_membership_type}'
+  defaults:
+    _controller: '\Drupal\og\Controller\OgAdminMembersController::addForm'
+    _title: 'Add member'
+  requirements:
+    _og_membership_add_access: 'TRUE'
+  options:
+    _admin_route: 'TRUE'
+    parameters:
+      group:
+        type: entity:{entity_type_id}
+
+# The canonical route is the same as the edit-form route because we need a
+# canonical route for various functionality to work properly, but a standard
+# entity view for OG memberships tends to feel quite stub-like.
+entity.og_membership.canonical:
+  path: 'group/{entity_type_id}/{group}/admin/members/{og_membership}/edit'
+  defaults:
+    _entity_form: 'og_membership.edit'
+  options:
+    _admin_route: 'TRUE'
+    parameters:
+      group:
+        type: entity:{entity_type_id}
+  requirements:
+    _entity_access: 'og_membership.edit'
+
+entity.og_membership.edit_form:
+  path: 'group/{entity_type_id}/{group}/admin/members/{og_membership}/edit'
+  defaults:
+    _entity_form: 'og_membership.edit'
+  options:
+    _admin_route: 'TRUE'
+    parameters:
+      group:
+        type: entity:{entity_type_id}
+  requirements:
+    _entity_access: 'og_membership.edit'
+
+entity.og_membership.delete_form:
+  path: 'group/{entity_type_id}/{group}/admin/members/{og_membership}/delete'
+  defaults:
+    _entity_form: 'og_membership.delete'
+  options:
+    _admin_route: 'TRUE'
+    parameters:
+      group:
+        type: entity:{entity_type_id}
+  requirements:
+    _entity_access: 'og_membership.delete'
+
+# OG Membership type entity routes
+entity.og_membership_type.collection:
+  path: '/admin/structure/membership-types'
+  defaults:
+    _entity_list: 'og_membership_type'
+    _title: 'Membership types'
+  requirements:
+    _permission: 'administer group'
+
+entity.og_membership_type.edit_form:
+  path: '/admin/structure/membership-types/manage/{og_membership_type}'
+  defaults:
+    _entity_form: 'og_membership_type.edit'
+  requirements:
+    _permission: 'administer group'
+
+entity.og_membership_type.delete_form:
+  path: '/admin/structure/membership-types/manage/{og_membership_type}/delete'
+  defaults:
+    _entity_form: 'og_membership_type.delete'
+    _title: 'Delete'
+  requirements:
+     _permission: 'og_membership_type.delete'
+
+og_membership.type_add:
+  path: '/admin/structure/membership-types/add'
+  defaults:
+    _entity_form: 'og_membership_type.add'
+    _title: 'Add membership type'
+  requirements:
+    _permission: 'administer group'

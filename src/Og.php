@@ -165,6 +165,23 @@ class Og {
   }
 
   /**
+   * Returns the group memberships for a given group.
+   *
+   * @param \Drupal\Core\Entity\EntityInterface $group
+   *   The group to get the membership for.
+   * @param array $states
+   *   (optional) Array with the state to return. Defaults to active.
+   *
+   * @return \Drupal\og\OgMembershipInterface[]
+   *   An array of OgMembership entities, keyed by ID.
+   */
+  public static function getGroupMemberships(EntityInterface $group, array $states = [OgMembershipInterface::STATE_ACTIVE]) {
+    /** @var \Drupal\og\MembershipManagerInterface $membership_manager */
+    $membership_manager = \Drupal::service('og.membership_manager');
+    return $membership_manager->getGroupMemberships($group, $states);
+  }
+
+  /**
    * Creates an OG membership.
    *
    * @param \Drupal\Core\Entity\EntityInterface $group
@@ -371,8 +388,6 @@ class Og {
    *
    * @param \Drupal\Core\Field\FieldDefinitionInterface $field_definition
    *   The field definition.
-   * @param array $options
-   *   Overriding the default options of the selection handler.
    *
    * @return \Drupal\og\Plugin\EntityReferenceSelection\OgSelection
    *   Returns the OG selection handler.
@@ -381,22 +396,28 @@ class Og {
    *   Thrown when the passed in field definition is not of a group audience
    *   field.
    */
-  public static function getSelectionHandler(FieldDefinitionInterface $field_definition, array $options = []) {
+  public static function getSelectionHandler(FieldDefinitionInterface $field_definition) {
     if (!\Drupal::service('og.group_audience_helper')->isGroupAudienceField($field_definition)) {
       $field_name = $field_definition->getName();
-      throw new \Exception("The field $field_name is not an audience field.");
+      throw new \Exception("The field $field_name is not a group audience field.");
     }
 
-    $options = NestedArray::mergeDeep([
+    $entity_type_id = $field_definition->getTargetEntityTypeId();
+    $definition = \Drupal::entityTypeManager()->getDefinition($entity_type_id);
+
+    $values = [];
+    if ($bundle_key = $definition->getKey('bundle')) {
+      $values[$bundle_key] = $field_definition->getTargetBundle();
+    }
+
+    $entity = \Drupal::entityTypeManager()->getStorage($entity_type_id)->create($values);
+
+    $options = [
       'target_type' => $field_definition->getFieldStorageDefinition()->getSetting('target_type'),
       'handler' => $field_definition->getSetting('handler'),
-      'handler_settings' => [
-        'field_mode' => 'default',
-      ],
-    ], $options);
-
-    // Deep merge the handler settings.
-    $options['handler_settings'] = NestedArray::mergeDeep($field_definition->getSetting('handler_settings'), $options['handler_settings']);
+      'handler_settings' => $field_definition->getSetting('handler_settings'),
+      'entity' => $entity,
+    ];
 
     return \Drupal::service('plugin.manager.entity_reference_selection')->createInstance('og:default', $options);
   }
@@ -406,6 +427,9 @@ class Og {
    */
   public static function reset() {
     static::$cache = [];
+
+    \Drupal::service('og.access')->reset();
+    \Drupal::service('og.membership_manager')->reset();
   }
 
 }

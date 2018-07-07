@@ -2,6 +2,7 @@
 
 namespace Drupal\og\Event;
 
+use Drupal\Component\Utility\NestedArray;
 use Symfony\Component\EventDispatcher\Event;
 
 /**
@@ -40,8 +41,9 @@ class OgAdminRoutesEvent extends Event implements OgAdminRoutesEventInterface {
 
       $routes_info[$name] = $route_info;
 
-      // Add default values.
-      $routes_info[$name] += [
+      // Add default values. NestedArray::mergeDeep allows deep data to not be
+      // overwritten with the defaults.
+      $defaults = [
         'description' => '',
 
         'requirements' => [
@@ -64,6 +66,8 @@ class OgAdminRoutesEvent extends Event implements OgAdminRoutesEventInterface {
           '_title' => $route_info['title'],
         ],
       ];
+
+      $routes_info[$name] = NestedArray::mergeDeep($defaults, $routes_info[$name]);
     }
 
     return $routes_info;

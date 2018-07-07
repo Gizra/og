@@ -19,10 +19,16 @@ use Drupal\og_ui\BundleFormAlter;
  * Implements hook_form_alter().
  */
 function og_ui_form_alter(array &$form, FormStateInterface $form_state, $form_id) {
-  if ($form_state->getFormObject() instanceof BundleEntityFormBase) {
-    (new BundleFormAlter($form_state->getFormObject()->getEntity()))
-      ->formAlter($form, $form_state);
+  if (!$form_state->getFormObject() instanceof BundleEntityFormBase) {
+    return;
   }
+
+  $entity_type = $form_state->getFormObject()->getEntity();
+  if ($entity_type->getEntityTypeId() === 'og_membership_type') {
+    return;
+  }
+
+  (new BundleFormAlter($entity_type))->formAlter($form, $form_state);
 }
 
 /**

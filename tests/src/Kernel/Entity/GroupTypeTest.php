@@ -15,7 +15,7 @@ class GroupTypeTest extends KernelTestBase {
   /**
    * {@inheritdoc}
    */
-  public static $modules = ['field', 'node', 'og', 'system', 'user'];
+  public static $modules = ['field', 'node', 'og', 'options', 'system', 'user'];
 
   /**
    * The group type manager.

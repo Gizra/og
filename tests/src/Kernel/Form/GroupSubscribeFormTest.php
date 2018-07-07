@@ -29,6 +29,7 @@ class GroupSubscribeFormTest extends KernelTestBase {
     'field',
     'node',
     'og',
+    'options',
   ];
 
   /**
