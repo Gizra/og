@@ -143,8 +143,16 @@ function og_entity_access(EntityInterface $entity, $operation, AccountInterface 
 
   $entity_type_id = $entity->getEntityTypeId();
   $bundle_id = $entity->bundle();
+  $is_group_content = Og::isGroupContent($entity_type_id, $bundle_id);
 
-  if (!Og::isGroup($entity_type_id, $bundle_id) && !Og::isGroupContent($entity_type_id, $bundle_id)) {
+  // If the entity is neither a group or group content, then we have no opinion.
+  if (!Og::isGroup($entity_type_id, $bundle_id) && !$is_group_content) {
+    return AccessResult::neutral();
+  }
+
+  // If the entity type is a group content type, but the entity is not
+  // associated with any groups, we have no opinion.
+  if ($is_group_content && \Drupal::service('og.membership_manager')->getGroupCount($entity) === 0) {
     return AccessResult::neutral();
   }
 
@@ -330,6 +338,12 @@ function og_field_widget_info_alter(array &$info) {
 
 /**
  * Implements hook_entity_type_alter().
+ *
+ * Add link template to groups. We add it to all the entity types, and later on
+ * return the correct access, depending if the bundle is indeed a group and
+ * accessible. We do not filter here the entity type by groups, so whenever
+ * GroupTypeManagerInterface::addGroup is called, it's enough to mark route to
+ * be rebuilt via RouteBuilder::setRebuildNeeded.
  */
 function og_entity_type_alter(array &$entity_types) {
 

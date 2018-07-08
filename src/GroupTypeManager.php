@@ -182,7 +182,7 @@ class GroupTypeManager implements GroupTypeManagerInterface {
   /**
    * {@inheritdoc}
    */
-  public function getGroupsForEntityType($entity_type_id) {
+  public function getGroupBundleIdsByEntityType($entity_type_id) {
     $group_map = $this->getGroupMap();
     return isset($group_map[$entity_type_id]) ? $group_map[$entity_type_id] : [];
   }
@@ -212,7 +212,7 @@ class GroupTypeManager implements GroupTypeManagerInterface {
   /**
    * {@inheritdoc}
    */
-  public function getAllGroupContentBundles() {
+  public function getAllGroupContentBundleIds() {
     $bundles = [];
     foreach ($this->getGroupRelationMap() as $group_entity_type_id => $group_bundle_ids) {
       foreach ($group_bundle_ids as $group_content_entity_type_ids) {
@@ -228,7 +228,7 @@ class GroupTypeManager implements GroupTypeManagerInterface {
    * {@inheritdoc}
    */
   public function getAllGroupContentBundlesByEntityType($entity_type_id) {
-    $bundles = $this->getAllGroupContentBundles();
+    $bundles = $this->getAllGroupContentBundleIds();
     if (!isset($bundles[$entity_type_id])) {
       throw new \InvalidArgumentException("The '$entity_type_id' entity type has no group content bundles.");
     }

@@ -2,8 +2,9 @@
 
 namespace Drupal\Tests\og\Kernel\Entity;
 
-use Drupal\entity_test\Entity\EntityTest;
 use Drupal\KernelTests\KernelTestBase;
+use Drupal\Tests\og\Traits\OgMembershipCreationTrait;
+use Drupal\entity_test\Entity\EntityTest;
 use Drupal\og\Og;
 use Drupal\og\OgMembershipInterface;
 use Drupal\user\Entity\User;
@@ -14,6 +15,8 @@ use Drupal\user\Entity\User;
  * @group og
  */
 class GetUserGroupsTest extends KernelTestBase {
+
+  use OgMembershipCreationTrait;
 
   /**
    * {@inheritdoc}
@@ -163,7 +166,7 @@ class GetUserGroupsTest extends KernelTestBase {
     Og::invalidateCache();
 
     // Add user to group 1 should now return that group only.
-    $this->createMembership($this->user3, $this->group1);
+    $this->createOgMembership($this->group1, $this->user3);
 
     $actual = $membership_manager->getUserGroups($this->user3);
 
@@ -176,7 +179,7 @@ class GetUserGroupsTest extends KernelTestBase {
     Og::invalidateCache();
 
     // Add to group 2 should also return that.
-    $this->createMembership($this->user3, $this->group2);
+    $this->createOgMembership($this->group2, $this->user3);
 
     $actual = $membership_manager->getUserGroups($this->user3);
 
@@ -193,7 +196,7 @@ class GetUserGroupsTest extends KernelTestBase {
    */
   public function testIsMemberStates() {
     // Add user to group 1 should now return that group only.
-    $membership = $this->createMembership($this->user3, $this->group1);
+    $membership = $this->createOgMembership($this->group1, $this->user3);
 
     // Default param is ACTIVE.
     $this->assertTrue(Og::isMember($this->group1, $this->user3));
@@ -229,30 +232,6 @@ class GetUserGroupsTest extends KernelTestBase {
     $this->assertFalse(Og::isMember($this->group1, $this->user3));
     $this->assertFalse(Og::isMember($this->group1, $this->user3, [OgMembershipInterface::STATE_PENDING]));
     $this->assertFalse(Og::isMemberPending($this->group1, $this->user3));
-  }
-
-  /**
-   * Creates an Og membership entity.
-   *
-   * @todo This is a temp function, which will be later replaced by Og::group().
-   *
-   * @param \Drupal\user\Entity\User $user
-   *   The user object to create membership for.
-   * @param \Drupal\entity_test\Entity\EntityTest $group
-   *   The entity to create the membership for.
-   * @param int $state
-   *   The state of the membership.
-   *
-   * @return \Drupal\og\OgMembershipInterface
-   *   The saved OG membership entity.
-   */
-  protected function createMembership(User $user, EntityTest $group, $state = OgMembershipInterface::STATE_ACTIVE) {
-    $membership = Og::createMembership($group, $user);
-    $membership
-      ->setState($state)
-      ->save();
-
-    return $membership;
   }
 
   /**
