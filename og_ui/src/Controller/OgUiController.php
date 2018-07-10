@@ -4,6 +4,7 @@ declare(strict_types = 1);
 
 namespace Drupal\og_ui\Controller;
 
+use Drupal\Component\Plugin\Exception\PluginNotFoundException;
 use Drupal\Core\Controller\ControllerBase;
 use Drupal\Core\Entity\EntityTypeBundleInfoInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
@@ -80,8 +81,20 @@ class OgUiController extends ControllerBase {
     $rows = [];
     $build = [];
 
-    foreach ($this->groupTypeManager->getGroupMap() as $entity_type => $bundles) {
-      $definition = $this->entityTypeManager->getDefinition($entity_type);
+    foreach ($this->groupTypeManager->getAllGroupBundles() as $entity_type => $bundles) {
+      try {
+        $definition = $this->entityTypeManager->getDefinition($entity_type);
+      }
+      catch (PluginNotFoundException $e) {
+        // The entity type manager might throw this exception if the entity type
+        // is not defined. If this happens it means there is a discrepancy
+        // between the group types in config, and the modules that providing
+        // these entity types. This is not something we can rectify here but it
+        // does not block the rendering of the page. In the rare case that this
+        // occurs, let's log an error and exclude the entity type from the page.
+        $this->getLogger('og')->error('Error: the %entity_type entity type is not defined but is supposed to have group bundles.', ['%entity_type' => $entity_type]);
+        continue;
+      }
       $bundle_info = $this->entityTypeBundleInfo->getBundleInfo($entity_type);
       foreach ($bundles as $bundle) {
         $rows[] = [
