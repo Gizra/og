@@ -110,7 +110,7 @@ class OgUiController extends ControllerBase {
       }
     }
 
-    $build['roles_table'] = [
+    $build['roles_permissions_table'] = [
       '#theme' => 'table',
       '#header' => $header,
       '#rows' => $rows,
