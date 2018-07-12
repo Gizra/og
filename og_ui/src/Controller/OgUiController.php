@@ -137,12 +137,15 @@ class OgUiController extends ControllerBase {
    * Title callback for the roles overview page.
    *
    * @param string $entity_type_id
-   *   The group entity type.
+   *   The group entity type ID.
    * @param string $bundle_id
-   *   The group bundle.
+   *   The group bundle ID.
    *
    * @return \Drupal\Core\StringTranslation\TranslatableMarkup
    *   The roles overview page title.
+   *
+   * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundException
+   *   Thrown when the entity type with the given ID is not defined.
    */
   public function rolesOverviewPageTitleCallback($entity_type_id, $bundle_id) {
     return $this->t('OG @type - @bundle roles', [
