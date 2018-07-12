@@ -10,6 +10,7 @@ use Drupal\og\GroupTypeManager;
 use Drupal\og\Og;
 use Drupal\og\OgRoleManagerInterface;
 use Drupal\og\PermissionManagerInterface;
+use Drupal\user\RoleInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
@@ -166,7 +167,7 @@ class OgPermissionsForm extends FormBase {
 
     $roles = $this->getGroupRoles($entity_type_id, $bundle_id);
 
-    uasort($roles, function ($a, $b) {
+    uasort($roles, function (RoleInterface $a, RoleInterface $b) {
       if ($a->getWeight() == $b->getWeight()) {
         return 0;
       }
