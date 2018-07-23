@@ -20,6 +20,14 @@ function og_views_data_alter(array &$data) {
     'title' => t('OG Membership'),
     'id' => 'standard',
   ];
+  $data['og_membership']['node']['relationship'] = [
+    'real field' => 'entity_id',
+    'base' => 'node',
+    'base field' => 'nid',
+    'label' => t('OG Membership Content'),
+    'title' => t('OG Membership Content'),
+    'id' => 'standard',
+  ];
 }
 
 /**
