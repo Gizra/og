@@ -89,7 +89,7 @@ class GroupUserSubscribeForm extends ContentEntityForm {
     $membership = $this->entity;
     $form['uid'] = [
       '#type' => 'entity_autocomplete',
-      '#title' => $this->t('User'),
+      '#title' => $this->t('Member'),
       '#target_type' => 'user',
     ];
     $options = [];
