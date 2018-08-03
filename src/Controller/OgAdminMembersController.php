@@ -4,6 +4,8 @@ namespace Drupal\og\Controller;
 
 use Drupal\Core\Controller\ControllerBase;
 use Drupal\Core\Routing\RouteMatchInterface;
+use Drupal\og\Entity\OgMembership;
+use Drupal\og\OgMembershipInterface;
 use Drupal\views\Views;
 
 /**
@@ -28,6 +30,24 @@ class OgAdminMembersController extends ControllerBase {
 
     $arguments = [$group->getEntityTypeId(), $group->id()];
     return Views::getView('og_members_overview')->executeDisplay('default', $arguments);
+  }
+
+  /**
+   * Display subscribe form.
+   *
+   * @param \Drupal\Core\Routing\RouteMatchInterface $route_match
+   *   The route match service.
+   *
+   * @return array
+   *   The subscribe form.
+   */
+  public function addMember(RouteMatchInterface $route_match) {
+    $parameter_name = $route_match->getRouteObject()->getOption('_og_entity_type_id');
+    /** @var \Drupal\Core\Entity\EntityInterface $group */
+    $group = $route_match->getParameter($parameter_name);
+    $membership = OgMembership::create(['type' => OgMembershipInterface::TYPE_DEFAULT]);
+    $membership->setGroup($group);
+    return $this->entityFormBuilder()->getForm($membership, 'user-subscribe');
   }
 
 }

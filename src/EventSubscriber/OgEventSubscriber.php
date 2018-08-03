@@ -362,6 +362,15 @@ class OgEventSubscriber implements EventSubscriberInterface {
         '_module_dependencies' => 'views',
       ],
     ];
+    $routes_info['add_member'] = [
+      'controller' => '\Drupal\og\Controller\OgAdminMembersController::addMember',
+      'title' => 'Add Member',
+      'description' => 'Add group membership',
+      'path' => 'add-member',
+      'requirements' => [
+        '_og_user_access_group' => 'administer group',
+      ],
+    ];
 
     $event->setRoutesInfo($routes_info);
   }
