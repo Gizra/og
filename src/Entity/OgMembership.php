@@ -164,7 +164,7 @@ class OgMembership extends ContentEntityBase implements OgMembershipInterface {
    *   Whether or not the group is already present.
    */
   protected function hasGroup() {
-    return !empty($this->get('entity_type')) && !empty($this->get('entity_id'));
+    return !empty($this->get('entity_type')->value) && !empty($this->get('entity_id')->value);
   }
 
   /**
