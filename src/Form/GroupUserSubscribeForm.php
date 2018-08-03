@@ -7,52 +7,11 @@ use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Url;
 use Drupal\og\Entity\OgRole;
 use Drupal\og\OgMembershipInterface;
-use Drupal\Component\Datetime\TimeInterface;
-use Drupal\Core\Entity\EntityRepositoryInterface;
-use Drupal\Core\Entity\EntityTypeBundleInfoInterface;
-use Drupal\og\OgAccessInterface;
-use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Provides a form for subscribing a user to a group.
  */
 class GroupUserSubscribeForm extends ContentEntityForm {
-
-  /**
-   * OG access service.
-   *
-   * @var \Drupal\og\OgAccessInterface
-   */
-  protected $ogAccess;
-
-  /**
-   * Constructs a GroupSubscribeForm.
-   *
-   * @param \Drupal\og\OgAccessInterface $og_access
-   *   The OG access service.
-   * @param \Drupal\Core\Entity\EntityRepositoryInterface|\Drupal\Core\Entity\EntityManagerInterface $entity_repository
-   *   The entity repository service.
-   * @param \Drupal\Core\Entity\EntityTypeBundleInfoInterface $entity_type_bundle_info
-   *   The entity type bundle service.
-   * @param \Drupal\Component\Datetime\TimeInterface $time
-   *   The time service.
-   */
-  public function __construct(OgAccessInterface $og_access, EntityRepositoryInterface $entity_repository, EntityTypeBundleInfoInterface $entity_type_bundle_info = NULL, TimeInterface $time = NULL) {
-    parent::__construct($entity_repository, $entity_type_bundle_info, $time);
-    $this->ogAccess = $og_access;
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public static function create(ContainerInterface $container) {
-    return new static(
-      $container->get('og.access'),
-      $container->get('entity.repository'),
-      $container->get('entity_type.bundle.info'),
-      $container->get('datetime.time')
-    );
-  }
 
   /**
    * {@inheritdoc}
