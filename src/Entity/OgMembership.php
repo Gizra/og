@@ -126,6 +126,7 @@ class OgMembership extends ContentEntityBase implements OgMembershipInterface {
    */
   public function setGroup(EntityInterface $group) {
     $this->set('entity_type', $group->getEntityTypeId());
+    $this->set('entity_bundle', $group->bundle());
     $this->set('entity_id', $group->id());
     return $this;
   }
@@ -140,8 +141,30 @@ class OgMembership extends ContentEntityBase implements OgMembershipInterface {
   /**
    * {@inheritdoc}
    */
+  public function getGroupBundle() {
+    return $this->get('entity_bundle')->value;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   public function getGroupId() {
     return $this->get('entity_id')->value;
+  }
+
+  /**
+   * Checks if a group has already been populated on the membership.
+   *
+   * The group is required for a membership, so it is always present if a
+   * membership has been saved. This is intended for internal use to verify if
+   * a group is present when methods are called on a membership that is possibly
+   * still under construction.
+   *
+   * @return bool
+   *   Whether or not the group is already present.
+   */
+  protected function hasGroup() {
+    return !empty($this->get('entity_type')) && !empty($this->get('entity_id'));
   }
 
   /**
@@ -223,9 +246,9 @@ class OgMembership extends ContentEntityBase implements OgMembershipInterface {
 
     // Add the member role. This is only possible if a group has been set on the
     // membership.
-    if ($group = $this->getGroup()) {
+    if ($this->hasGroup()) {
       $roles = [
-        OgRole::getRole($this->getGroupEntityType(), $group->bundle(), OgRoleInterface::AUTHENTICATED),
+        OgRole::getRole($this->getGroupEntityType(), $this->getGroupBundle(), OgRoleInterface::AUTHENTICATED),
       ];
     }
     $roles = array_merge($roles, $this->get('roles')->referencedEntities());
@@ -334,6 +357,10 @@ class OgMembership extends ContentEntityBase implements OgMembershipInterface {
     $fields['entity_type'] = BaseFieldDefinition::create('string')
       ->setLabel(t('Group entity type'))
       ->setDescription(t('The entity type of the group.'));
+
+    $fields['entity_bundle'] = BaseFieldDefinition::create('string')
+      ->setLabel(t('Group bundle id'))
+      ->setDescription(t("The bundle ID of the group."));
 
     $fields['entity_id'] = BaseFieldDefinition::create('string')
       ->setLabel(t('Group entity id'))

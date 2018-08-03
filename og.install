@@ -5,10 +5,60 @@
  * Install, update, and uninstall functions for the Organic groups module.
  */
 
+use Drupal\Core\Field\BaseFieldDefinition;
+
 /**
  * Implements hook_uninstall().
  */
 function og_uninstall() {
   \Drupal::queue('og_orphaned_group_content')->deleteQueue();
   \Drupal::queue('og_orphaned_group_content_cron')->deleteQueue();
+}
+
+/**
+ * Add a base field to store the group bundle in memberships.
+ */
+function og_update_8001(&$sandbox) {
+  $storage = \Drupal::entityTypeManager()->getStorage('og_membership');
+
+  if (!isset($sandbox['total'])) {
+    $storage_definition = BaseFieldDefinition::create('string')
+      ->setLabel(t('Group bundle id'))
+      ->setDescription(t("The bundle ID of the group."));
+    \Drupal::entityDefinitionUpdateManager()->installFieldStorageDefinition('entity_bundle', 'og_membership', 'og', $storage_definition);
+
+    $sandbox['#finished'] = 0;
+    $sandbox['current'] = 0;
+    $sandbox['total'] = $storage->getQuery()->count()->execute();
+    $sandbox['batch_size'] = 500;
+  }
+
+  // Update the existing memberships to include the group bundle ID.
+  $membership_ids = $storage->getQuery()
+    ->range($sandbox['current'], $sandbox['batch_size'])
+    ->sort('id')
+    ->execute();
+
+  /** @var \Drupal\og\Entity\OgMembership $membership */
+  foreach ($storage->loadMultiple($membership_ids) as $membership) {
+    $group = $membership->getGroup();
+    if (!empty($group)) {
+      $membership->set('entity_bundle', $group->bundle());
+      $membership->save();
+    }
+  }
+
+  $sandbox['current'] += $sandbox['batch_size'];
+  if ($sandbox['current'] >= $sandbox['total']) {
+    $sandbox['current'] = $sandbox['total'];
+  }
+  $sandbox['#finished'] = $sandbox['current'] / $sandbox['total'];
+
+  $message = t('Processed @current of @total memberships (@percentage% complete)', [
+    '@current' => $sandbox['current'],
+    '@total' => $sandbox['total'],
+    '@percentage' => number_format($sandbox['#finished'] * 100, 2),
+  ]);
+
+  return $message;
 }
