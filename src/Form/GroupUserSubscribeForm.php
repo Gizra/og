@@ -5,6 +5,7 @@ namespace Drupal\og\Form;
 use Drupal\Core\Entity\ContentEntityForm;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Url;
+use Drupal\og\Entity\OgRole;
 use Drupal\og\OgMembershipInterface;
 use Drupal\Component\Datetime\TimeInterface;
 use Drupal\Core\Entity\EntityRepositoryInterface;
@@ -69,7 +70,6 @@ class GroupUserSubscribeForm extends ContentEntityForm {
   public function getCancelUrl() {
     /** @var \Drupal\Core\Entity\ContentEntityInterface $group */
     $group = $this->entity->getGroup();
-
     // User have access to the group entity, direct to the member admin page.
     // Otherwise back to the front page.
     if ($group->access('view')) {
@@ -85,10 +85,27 @@ class GroupUserSubscribeForm extends ContentEntityForm {
    */
   public function buildForm(array $form, FormStateInterface $form_state) {
     $form = parent::buildForm($form, $form_state);
+    /** @var \Drupal\og\OgMembershipInterface $membership */
+    $membership = $this->entity;
     $form['uid'] = [
       '#type' => 'entity_autocomplete',
       '#title' => $this->t('User'),
       '#target_type' => 'user',
+    ];
+    $options = [];
+    /** @var \Drupal\og\OgRoleInterface $role */
+    foreach (OgRole::loadByGroupType($membership->getGroup()->getEntityTypeId(), $membership->getGroup()->bundle()) as $role) {
+      // Only add the role to the list if it is not a required role, these
+      // cannot be added. Nor should invalid roles be added.
+      if (!$role->isRequired() && $membership->isRoleValid($role)) {
+        $options[$role->id()] = $role->label();
+      }
+    }
+    $form['roles'] = [
+      '#type' => 'select',
+      '#title' => t('Roles'),
+      '#multiple' => TRUE,
+      '#options' => $options,
     ];
     $form[OgMembershipInterface::REQUEST_FIELD]['#access'] = FALSE;
     return $form;
@@ -100,7 +117,6 @@ class GroupUserSubscribeForm extends ContentEntityForm {
    */
   protected function actions(array $form, FormStateInterface $form_state) {
     $actions = parent::actions($form, $form_state);
-
     $actions['submit']['#value'] = $this->t('Add');
     $actions['cancel'] = [
       '#type' => 'link',
@@ -119,6 +135,27 @@ class GroupUserSubscribeForm extends ContentEntityForm {
   /**
    * {@inheritdoc}
    */
+  public function validateForm(array &$form, FormStateInterface $form_state) {
+    parent::validateForm($form, $form_state);
+    /** @var \Drupal\og\OgMembershipInterface $membership */
+    $membership = $this->entity;
+    $result = $this->entityTypeManager
+      ->getStorage($membership->getEntityTypeId())
+      ->getQuery()
+      ->condition('uid', $form_state->getValue('uid'))
+      ->condition('type', $membership->bundle())
+      ->condition('entity_type', $membership->getGroup()->getEntityTypeId())
+      ->condition('entity_id', $membership->getGroup()->id())
+      ->execute();
+    if ($result) {
+      $form_state->setErrorByName('uid', $this->t('The user is already a member of the group.'));
+    }
+  }
+
+
+  /**
+   * {@inheritdoc}
+   */
   public function submitForm(array &$form, FormStateInterface $form_state) {
     parent::submitForm($form, $form_state);
     /** @var \Drupal\og\OgMembershipInterface $membership */
@@ -127,9 +164,7 @@ class GroupUserSubscribeForm extends ContentEntityForm {
       '%name' => $membership->getOwner()->getAccountName(),
       '%group' => $membership->getGroup()->label(),
     ]));
-
     $form_state->setRedirectUrl($this->getCancelUrl());
-
   }
 
 }
