@@ -160,11 +160,17 @@ class OgMembership extends ContentEntityBase implements OgMembershipInterface {
    * a group is present when methods are called on a membership that is possibly
    * still under construction.
    *
+   * For performance reasons this avoids loading the full group entity just for
+   * this purpose, and relies only on the fact that the data for the entity is
+   * populated in the relevant fields. This should give us the same indication,
+   * but with a lower performance cost, especially for users that are a member
+   * of a large number of groups.
+   *
    * @return bool
    *   Whether or not the group is already present.
    */
   protected function hasGroup() {
-    return !empty($this->get('entity_type')->value) && !empty($this->get('entity_id')->value);
+    return !empty($this->get('entity_type')->value) && !empty($this->get('entity_bundle')->value) && !empty($this->get('entity_id')->value);
   }
 
   /**
@@ -359,12 +365,12 @@ class OgMembership extends ContentEntityBase implements OgMembershipInterface {
       ->setDescription(t('The entity type of the group.'));
 
     $fields['entity_bundle'] = BaseFieldDefinition::create('string')
-      ->setLabel(t('Group bundle id'))
-      ->setDescription(t("The bundle ID of the group."));
+      ->setLabel(t('Group bundle ID'))
+      ->setDescription(t('The bundle ID of the group.'));
 
     $fields['entity_id'] = BaseFieldDefinition::create('string')
-      ->setLabel(t('Group entity id'))
-      ->setDescription(t("The entity ID of the group."));
+      ->setLabel(t('Group entity ID'))
+      ->setDescription(t('The entity ID of the group.'));
 
     $fields['state'] = BaseFieldDefinition::create('string')
       ->setLabel(t('State'))
