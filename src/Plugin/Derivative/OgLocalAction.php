@@ -9,6 +9,9 @@ use Drupal\Core\StringTranslation\StringTranslationTrait;
 use Drupal\og\GroupTypeManagerInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
+/**
+ * Provides local action definitions for all entity bundles.
+ */
 class OgLocalAction extends DeriverBase implements ContainerDeriverInterface {
 
   use StringTranslationTrait;
@@ -49,6 +52,7 @@ class OgLocalAction extends DeriverBase implements ContainerDeriverInterface {
       $container->get('router.route_provider')
     );
   }
+
   /**
    * {@inheritdoc}
    */
@@ -76,4 +80,5 @@ class OgLocalAction extends DeriverBase implements ContainerDeriverInterface {
 
     return $derivatives;
   }
+
 }

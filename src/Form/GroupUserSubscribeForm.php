@@ -70,7 +70,6 @@ class GroupUserSubscribeForm extends ContentEntityForm {
     return $form;
   }
 
-
   /**
    * {@inheritdoc}
    */
@@ -110,7 +109,6 @@ class GroupUserSubscribeForm extends ContentEntityForm {
       $form_state->setErrorByName('uid', $this->t('The user is already a member of the group.'));
     }
   }
-
 
   /**
    * {@inheritdoc}
