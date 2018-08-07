@@ -96,6 +96,14 @@ interface OgMembershipInterface extends ContentEntityInterface, EntityOwnerInter
   public function getGroupEntityType();
 
   /**
+   * Gets the group entity bundle.
+   *
+   * @return string
+   *   The bundle.
+   */
+  public function getGroupBundle();
+
+  /**
    * Gets the group entity ID.
    *
    * @return string
