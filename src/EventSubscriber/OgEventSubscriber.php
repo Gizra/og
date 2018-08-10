@@ -362,6 +362,15 @@ class OgEventSubscriber implements EventSubscriberInterface {
         '_module_dependencies' => 'views',
       ],
     ];
+    $routes_info['content'] = [
+      'controller' => '\Drupal\og\Controller\OgAdminContentController::content',
+      'title' => 'Group content',
+      'description' => 'Listing of group content',
+      'path' => 'content',
+      'requirements' => [
+        '_og_user_access_group' => 'access content',
+      ],
+    ];
 
     $event->setRoutesInfo($routes_info);
   }
