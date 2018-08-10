@@ -370,6 +370,7 @@ class OgEventSubscriber implements EventSubscriberInterface {
       'requirements' => [
         '_og_user_access_group' => 'administer group',
       ],
+      '_overview' => FALSE,
     ];
 
     $event->setRoutesInfo($routes_info);

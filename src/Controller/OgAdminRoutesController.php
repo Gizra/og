@@ -80,6 +80,11 @@ class OgAdminRoutesController extends ControllerBase {
       $route_name = "entity.$entity_type_id.og_admin_routes.$name";
       $parameters = [$entity_type_id => $group->id()];
 
+      // Don't list items that are intentionally hidden from the overview.
+      if (array_intersect_assoc(['_overview' => FALSE], $info)) {
+        continue;
+      }
+
       // We don't use Url::fromRoute() here for the access check, as it will
       // prevent us from unit testing this method.
       if (!$this->accessManager->checkNamedRoute($route_name, $parameters)) {
