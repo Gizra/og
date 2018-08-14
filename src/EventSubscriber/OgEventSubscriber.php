@@ -132,6 +132,12 @@ class OgEventSubscriber implements EventSubscriberInterface {
         'restrict access' => TRUE,
       ]),
       new GroupPermission([
+        'name' => 'access content overview',
+        'title' => t('Access the Content overview page'),
+        'description' => t('User may see and administer content related to the group.'),
+        'default roles' => [OgRoleInterface::ADMINISTRATOR],
+      ]),
+      new GroupPermission([
         'name' => 'manage roles',
         'title' => t('Add roles'),
         'description' => t('Users may view group roles and add new roles if group default roles are overridden.'),
@@ -360,6 +366,15 @@ class OgEventSubscriber implements EventSubscriberInterface {
         '_og_user_access_group' => 'administer group',
         // Views module must be enabled.
         '_module_dependencies' => 'views',
+      ],
+    ];
+    $routes_info['content'] = [
+      'controller' => '\Drupal\og\Controller\OgAdminContentController::content',
+      'title' => 'Group content',
+      'description' => 'Listing of group content',
+      'path' => 'content',
+      'requirements' => [
+        '_og_user_access_group' => 'access content overview',
       ],
     ];
     $routes_info['content'] = [
