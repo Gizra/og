@@ -27,9 +27,17 @@ class OgAdminContentController extends ControllerBase {
    */
   protected $groupAudienceHelper;
 
-  public function __construct(GroupTypeManagerInterface $group_type_manager, OgGroupAudienceHelperInterface $group__audience_helper) {
+  /**
+   * OgAdminContentController constructor.
+   *
+   * @param \Drupal\og\GroupTypeManagerInterface $group_type_manager
+   *   The group type manager.
+   * @param \Drupal\og\OgGroupAudienceHelperInterface $group_audience_helper
+   *   The group audience helper.
+   */
+  public function __construct(GroupTypeManagerInterface $group_type_manager, OgGroupAudienceHelperInterface $group_audience_helper) {
     $this->groupTypeManager = $group_type_manager;
-    $this->groupAudienceHelper = $group__audience_helper;
+    $this->groupAudienceHelper = $group_audience_helper;
   }
 
   /**
