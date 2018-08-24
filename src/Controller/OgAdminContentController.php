@@ -109,12 +109,12 @@ class OgAdminContentController extends ControllerBase {
       $build['label'] = [
         '#type' => 'html_tag',
         '#tag' => 'h3',
-        '#value' => $entity_type->getGroupLabel(),
+        '#value' => $entity_type->getLabel(),
       ];
       $build['table'] = [
         '#type' => 'table',
         '#header' => $list_builder->buildHeader(),
-        '#title' => $entity_type->getGroupLabel(),
+        '#title' => $entity_type->getLabel(),
         '#rows' => [],
         '#empty' => $this->t('There are no @label yet.', ['@label' => $entity_type->getPluralLabel()]),
         '#cache' => [
