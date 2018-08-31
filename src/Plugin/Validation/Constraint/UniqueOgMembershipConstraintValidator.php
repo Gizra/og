@@ -45,6 +45,8 @@ class UniqueOgMembershipConstraintValidator extends ConstraintValidator {
     $query = \Drupal::service('entity_type.manager')
       ->getStorage('og_membership')
       ->getQuery()
+      ->condition('entity_type', $entity->getGroupEntityType())
+      ->condition('entity_id', $entity->getGroupId())
       ->condition('uid', $new_member_uid);
     $membership_ids = $query->execute();
 
