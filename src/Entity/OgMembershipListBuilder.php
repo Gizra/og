@@ -2,15 +2,13 @@
 
 namespace Drupal\og\Entity;
 
-use Drupal\Component\Utility\SortArray;
-use Drupal\Core\Entity\EntityListBuilder;
 use Drupal\Core\Entity\EntityInterface;
+use Drupal\Core\Entity\EntityListBuilder;
 use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Link;
 use Drupal\Core\Session\AccountProxyInterface;
 use Drupal\Core\Url;
-use Drupal\og\OgContextInterface;
-use Drupal\og\OgGroupAudienceHelperInterface;
+use Drupal\og\OgRoleInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
@@ -48,7 +46,9 @@ class OgMembershipListBuilder extends EntityListBuilder {
    * {@inheritdoc}
    */
   public function buildHeader() {
-    $header['label'] = t('Group name');
+    $header['label'] = $this->t('Group name');
+    $header['roles'] = $this->t('Roles');
+    $header['state'] = $this->t('Membership state');
     return $header + parent::buildHeader();
   }
 
@@ -75,6 +75,8 @@ class OgMembershipListBuilder extends EntityListBuilder {
   public function buildRow(EntityInterface $entity) {
     /** @var \Drupal\og\OgMembershipInterface $entity */
     $row['label'] = Link::fromTextAndUrl($entity->getGroup()->label(), $entity->getGroup()->toUrl());
+    $row['roles'] = implode(', ', array_map(function(OgRoleInterface $role) {return $role->getLabel();}, $entity->getRoles()));
+    $row['state'] = $entity->getState();
     return $row + parent::buildRow($entity);
   }
 
