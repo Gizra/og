@@ -82,6 +82,7 @@ class OgMembershipListBuilder extends EntityListBuilder {
 
   public function render() {
     $build = parent::render();
+    $build['table']['#empty'] = $this->t('There are no memberships yet.');
     uasort($build['table']['#rows'], [$this, 'sort']);
     return $build;
   }
