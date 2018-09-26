@@ -13,7 +13,7 @@ use Drupal\Core\Session\AccountInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
- * Default argument plugin to provide the group from the current context.
+ * Default argument plugin to provide the group memberships from the current context.
  *
  * @ViewsArgumentDefault(
  *   id = "og_group_membership",
@@ -44,7 +44,7 @@ class Membership extends ArgumentDefaultPluginBase implements CacheableDependenc
   protected $ogUser;
 
   /**
-   * Constructs a new User instance.
+   * Constructs a new Membership instance.
    *
    * @param array $configuration
    *   A configuration array containing information about the plugin instance.
@@ -117,6 +117,11 @@ class Membership extends ArgumentDefaultPluginBase implements CacheableDependenc
    * {@inheritdoc}
    */
   public function getCacheContexts() {
+    // This cache context is the best thing we have right now.
+    // og_role takes in consideration the user memberships and 
+    // the roles held in the corresponding groups, and while it 
+    // is one level too granular, i.e. the context will be more 
+    // fragmented than strictly needed, it works.
     return ['og_role'];
   }
 
@@ -134,6 +139,9 @@ class Membership extends ArgumentDefaultPluginBase implements CacheableDependenc
 
   /**
    * Returns groups that current user is a member of.
+   *
+   * @param string $entity_type
+   *   The entity type, defaults to 'node'.
    *
    * @return array
    *   An array of groups, or an empty array if no group is found.
