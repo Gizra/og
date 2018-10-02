@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/Gizra/og.svg?branch=7.x-2.x)](https://travis-ci.org/Gizra/og)
+[![Build Status](https://travis-ci.org/Gizra/og.svg?branch=7.x-2.x)](https://travis-ci.org/Gizra/og/branches)
 
 DESCRIPTION
 --------------------------
