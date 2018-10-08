@@ -2083,6 +2083,82 @@ class OgDeleteOrphansTestCase extends DrupalWebTestCase {
 
     $this->assertEqual($gid, $second_group->nid, 'The group content moved to another group.');
   }
+
+  /**
+   * Tests editing content that belongs to a deleted group.
+   *
+   * Tests if content belonging to multiple groups can be edited without issues
+   * after deleting one of the groups.
+   */
+  public function testEditGroupContentAfterDeletingGroup() {
+    $account = $this->drupalCreateUser(array('edit own ' . $this->node_type . ' content'));
+    $this->drupalLogin($account);
+
+    // Create two groups.
+    $first_group = $this->drupalCreateNode(array('type' => $this->group_type));
+    $second_group = $this->drupalCreateNode(array('type' => $this->group_type));
+
+    // Create group content, assign it to both groups.
+    $group_content = $this->drupalCreateNode(array(
+      'type' => $this->node_type,
+      'title' => 'Lorem ipsum',
+      'uid' => $account->uid,
+    ));
+    og_group('node', $first_group, array('entity_type' => 'node', 'entity' => $group_content));
+    og_group('node', $second_group, array('entity_type' => 'node', 'entity' => $group_content));
+
+    // Try to edit the group content node, using the UI.
+    $this->drupalPost('node/' . $group_content->nid . '/edit', array(), 'Save');
+    $this->assertText($this->node_type . ' Lorem ipsum has been updated.');
+
+    // Delete the first group.
+    node_delete($first_group->nid);
+
+    // Try again to edit the group content node.
+    $this->drupalPost('node/' . $group_content->nid . '/edit', array(), 'Save');
+    $this->assertText($this->node_type . ' Lorem ipsum has been updated.');
+  }
+
+  /**
+   * Tests calling node_access() on content that belongs to a deleted group.
+   *
+   * Tests if node_access() can be called for content that has a reference to a
+   * no longer existing group when OG is configured to use the delete queue.
+   */
+  public function testGroupContentNodeAccessAfterDeletingGroupAndWhenUsingQueue() {
+    // Configure OG to use queue for deleting pending content.
+    variable_set('og_use_queue', TRUE);
+
+    $account = $this->drupalCreateUser(array('access content', 'edit own ' . $this->node_type . ' content'));
+    $this->drupalLogin($account);
+
+    // Create two groups.
+    $first_group = $this->drupalCreateNode(array('type' => $this->group_type));
+    $second_group = $this->drupalCreateNode(array('type' => $this->group_type));
+
+    // Create group content, assign it to both groups.
+    $group_content = $this->drupalCreateNode(array(
+      'type' => $this->node_type,
+      'title' => 'Lorem ipsum',
+      'uid' => $account->uid,
+    ));
+    og_group('node', $first_group, array('entity_type' => 'node', 'entity' => $group_content));
+    og_group('node', $second_group, array('entity_type' => 'node', 'entity' => $group_content));
+
+    // Display a list of my nodes, that uses node_access() to check if links may
+    // be displayed.
+    $this->drupalGet('og_test/my_content');
+    $this->assertText('Lorem ipsum');
+
+    // Delete the first group.
+    node_delete($first_group->nid);
+
+    // Display a list of my nodes again, to ensure nothing changed.
+    $this->drupalGet('og_test/my_content');
+    $this->assertNoText('EntityMalformedException');
+    $this->assertText('Lorem ipsum');
+  }
+
 }
 
 /**
