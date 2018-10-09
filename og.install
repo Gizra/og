@@ -169,6 +169,9 @@ function og_schema() {
       ),
     ),
     'primary key' => array('rid'),
+    'indexes' => array(
+      'lookup' => array('group_type', 'group_bundle', 'gid'),
+    ),
   );
 
   $schema['og_users_roles'] = array(
@@ -1186,4 +1189,11 @@ function og_update_7204() {
  */
 function og_update_7205() {
   db_add_index('og_membership', 'group_type', array('group_type'));
+}
+
+/**
+ * Add an index to {og_role} on group_type, group_bundle and gid to improve speed of og_roles().
+ */
+function og_update_7206() {
+  db_add_index('og_role', 'lookup', array('group_type', 'group_bundle', 'gid'));
 }
