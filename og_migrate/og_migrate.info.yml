@@ -1,0 +1,9 @@
+type: module
+name: Og migrate
+description: 'Provides migration helper code for previous versions.'
+package: Og
+core: 8.x
+dependencies:
+  - drupal:migrate
+  - drupal:og
+

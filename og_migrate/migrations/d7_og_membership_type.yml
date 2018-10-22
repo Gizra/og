@@ -1,0 +1,23 @@
+id: d7_og_membership_type
+label: Group membership types
+migration_tags:
+  - Drupal 7
+source:
+  plugin: d7_og_membership_type
+process:
+  type:
+    -
+      plugin: static_map
+      source: name
+      bypass: true
+      map:
+        og_membership_type_default: default
+  name: description
+  description: description
+  status: status
+  langcode: language
+destination:
+  plugin: entity:og_membership_type
+migration_dependencies:
+  optional:
+    - d7_field_instance

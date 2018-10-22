@@ -1,0 +1,28 @@
+<?php
+
+/**
+ * @file
+ * Og Migrate module.
+ */
+
+use Drupal\migrate\MigrateSkipRowException;
+use Drupal\migrate\Row;
+use Drupal\migrate\Plugin\MigrateSourceInterface;
+use Drupal\migrate\Plugin\MigrationInterface;
+
+/**
+ * Implements hook_migrate_prepare_row().
+ *
+ * @todo https://www.drupal.org/project/drupal/issues/2952291
+ * @todo https://www.drupal.org/node/2952459
+ *
+ * @throws \Drupal\migrate\MigrateSkipRowException
+ */
+function og_migrate_migrate_prepare_row(Row $row, MigrateSourceInterface $source, MigrationInterface $migration) {
+  if (in_array($migration->id(), ['d7_field', 'd7_field_instance'])) {
+    $field_names = ['og_group_ref', 'og_user_node'];
+    if (in_array($row->getSourceProperty('field_name'), $field_names)) {
+      throw new MigrateSkipRowException('og-related fields will be migrated separately');
+    }
+  }
+}

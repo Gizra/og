@@ -1,0 +1,45 @@
+id: d6_og_node_membership
+label: Og node memberships
+migration_tags:
+  - Drupal 6
+source:
+  plugin: d6_og_ancestry
+  constants:
+    entity_type: node
+    membership_type: default
+process:
+  target_id:
+    -
+      plugin: migration_lookup
+      migration: d6_node
+      source: group_nid
+    -
+      plugin: skip_on_empty
+      method: row
+      message: 'Missing group node'
+  entity_id:
+    -
+      plugin: migration_lookup
+      migration: d6_node
+      source: nid
+    -
+      plugin: skip_on_empty
+      method: row
+      message: 'Missing group content node'
+  entity_type: constants/entity_type
+  language:
+    -
+      plugin: default_value
+      source: og_language
+      default_value: und
+  field_name:
+    -
+      plugin: default_value
+      default_value: og_audience
+destination:
+  plugin: og_entity_membership
+migration_dependencies:
+  required:
+    - d6_user
+    - d6_node
+    - d6_og_audience

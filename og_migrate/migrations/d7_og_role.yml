@@ -1,0 +1,57 @@
+id: d7_og_role
+label: Og roles
+migration_tags:
+  - Drupal 7
+source:
+  plugin: d7_og_role
+process:
+  id:
+    -
+      plugin: concat
+      source:
+        - group_type
+        - group_bundle
+        - name
+      delimiter: '-'
+    -
+      plugin: og_role_machine_name
+    -
+      plugin: make_unique_entity_field
+      entity_type: og_role
+      field: id
+      migrated: true
+  label: name
+  weight: rid
+  # This could lead to bad data on the destination if something happened to the
+  # group entity_type, bundle or entity in the source or in the migration of
+  # those things to the destination. It's not possible to use migrate_lookup
+  # because the migration could be literally any migration that deals with an
+  # entity_type in the source.
+  group_type: group_type
+  group_bundle: group_bundle
+  group_id: gid
+  # @todo How can this be detected?
+  is_admin:
+    -
+      plugin: static_map
+      source: name
+      bypass: false
+      map:
+        member: false
+        'non-member': false
+      default_value: false
+  role_type:
+    -
+      plugin: static_map
+      source: name
+      bypass: false
+      map:
+        member: required
+        'non-member': required
+      default_value: standard
+  permissions: permissions
+destination:
+  plugin: entity:og_role
+migration_dependencies:
+  optional:
+    - d7_node

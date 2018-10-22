@@ -1,0 +1,42 @@
+id: d6_og_admin_role
+label: Og admin roles
+migration_tags:
+  - Drupal 6
+source:
+  plugin: d6_og_admin_role
+  constants:
+    entity_type: node
+process:
+  id: id
+  label:
+    -
+      plugin: default_value
+      default_value: 'administrator member'
+  weight:
+    -
+      plugin: default_value
+      default_value: 0
+  is_admin: is_admin
+  group_id:
+    -
+      plugin: default_value
+      default_value: 0
+  group_type: constants/entity_type
+  group_bundle:
+    -
+      plugin: migration_lookup
+      migration: d6_node_type
+      source: type
+    -
+      plugin: skip_on_empty
+      method: row
+      message: 'Missing content type'
+  role_type:
+    -
+      plugin: default_value
+      default_value: standard
+destination:
+  plugin: entity:og_role
+migration_dependencies:
+  required:
+    - d6_og_group_type

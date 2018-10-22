@@ -1,0 +1,40 @@
+id: d7_og_entity_membership
+label: Group entity memberships
+migration_tags:
+  - Drupal 7
+source:
+  plugin: d7_og_membership
+process:
+  target_id: gid
+  entity_id: etid
+  entity_type:
+    -
+      plugin: og_entity_type_exists
+      source: entity_type
+      bundle_property: bundle
+    -
+      plugin: skip_on_empty
+      method: row
+      message: 'Missing entity type'
+  # It isn't possible to do a migration_lookup because bundle is not a source
+  # property and migration lookups only check source properties beacuse. We
+  # assume that everything will be mapped to og_audience.
+  field_name:
+    -
+      plugin: static_map
+      source: field_name
+      map:
+        og_group_ref: og_audience
+        default: og_audience
+  language: language
+destination:
+  plugin: og_entity_membership
+migration_dependencies:
+  required:
+    - d7_user
+    - d7_og_role
+    - d7_og_group
+    - d7_og_field_instance
+  optional:
+    - d7_node
+    - d7_taxonomy_term

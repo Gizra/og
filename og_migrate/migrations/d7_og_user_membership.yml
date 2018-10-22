@@ -1,0 +1,56 @@
+id: d7_og_user_membership
+label: Group user memberships
+migration_tags:
+  - Drupal 7
+source:
+  plugin: d7_og_membership
+  entity_type: user
+process:
+  id: id
+  type:
+    -
+      plugin: migration_lookup
+      migration: d7_og_membership_type
+      source: type
+    -
+      plugin: skip_on_empty
+      method: row
+      message: 'Membership type is missing'
+  uid:
+    -
+      plugin: migration_lookup
+      migration: d7_user
+      source: etid
+    -
+      plugin: skip_on_empty
+      method: row
+      message: 'User uid is missing'
+  entity_id: gid
+  entity_type:
+    -
+      plugin: og_entity_type_exists
+      source: group_type
+      bundle_property: entity_bundle
+    -
+      plugin: skip_on_empty
+      method: row
+      message: 'Entity type is missing'
+  roles:
+    -
+      plugin: migration_lookup
+      migration: d7_og_role
+      source: roles
+  state: state
+  created: created
+  language: language
+destination:
+  plugin: entity:og_membership
+migration_dependencies:
+  required:
+    - d7_user
+    - d7_content
+    - d7_og_membership_type
+    - d7_og_role
+    - d7_og_group
+    - d7_field_instance
+
