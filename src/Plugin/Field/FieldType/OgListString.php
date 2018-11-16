@@ -5,7 +5,7 @@ namespace Drupal\og\Plugin\Field\FieldType;
 use Drupal\options\Plugin\Field\FieldType\ListStringItem;
 
 /**
- * Plugin implementation of the 'list_string' field type.
+ * Plugin implementation of the 'og_list_string' field type.
  *
  * @FieldType(
  *   id = "og_list_string",
