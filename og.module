@@ -280,7 +280,7 @@ function og_entity_bundle_field_info(EntityTypeInterface $entity_type, $bundle, 
 
   $fields = [];
   $fields['og_group'] = BaseFieldDefinition::create('og_group')
-    ->setLabel(t('OG Group'))
+    ->setLabel('OG Group')
     ->setComputed(TRUE)
     ->setTranslatable(FALSE)
     ->setDefaultValue(TRUE)
