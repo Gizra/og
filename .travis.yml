@@ -84,7 +84,4 @@ before_script:
   # Export database variable for kernel tests.
   - export SIMPLETEST_DB=mysql://root:@127.0.0.1/og
 
-  # Disable all deprecations
-  - export SYMFONY_DEPRECATIONS_HELPER=disabled
-
 script: DRUPAL_DIR=$DRUPAL_DIR MODULE_DIR=$MODULE_DIR $MODULE_DIR/scripts/travis-ci/run-test.sh $TEST_SUITE
