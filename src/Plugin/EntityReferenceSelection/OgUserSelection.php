@@ -133,7 +133,6 @@ class OgUserSelection extends DefaultSelection {
     // Exclude users who are already in the current group.
     // This has to be done on the SQL query rather than the entity query,
     // because a reverse relationship to the OG membership entity is needed.
-
     // @todo implement an easier, more consistent way to get the group type. At
     // the moment, this works either for checkboxes or OG Autocomplete widget
     // types on entities that have a getGroup() method. It also does not work

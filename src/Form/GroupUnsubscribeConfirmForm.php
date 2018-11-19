@@ -15,7 +15,7 @@ class GroupUnsubscribeConfirmForm extends ContentEntityDeleteForm {
   /**
    * The messenger.
    *
-   * @var \Drupal\Core\Messenger\MessengerInterface $messenger
+   * @var \Drupal\Core\Messenger\MessengerInterface
    */
   protected $messenger;
 
@@ -37,8 +37,6 @@ class GroupUnsubscribeConfirmForm extends ContentEntityDeleteForm {
       $container->get('messenger')
     );
   }
-
-
 
   /**
    * {@inheritdoc}

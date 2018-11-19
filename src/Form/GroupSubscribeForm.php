@@ -49,6 +49,8 @@ class GroupSubscribeForm extends ContentEntityForm {
    *   The entity type bundle service.
    * @param \Drupal\Component\Datetime\TimeInterface $time
    *   The time service.
+   * @param \Drupal\Core\Messenger\MessengerInterface $messenger
+   *   The messenger.
    *
    * @todo Set the `EntityRepositoryInterface` type hint on the second argument
    *   once Drupal 8.6.0 is released. It is currently omitted to preserve
@@ -57,7 +59,8 @@ class GroupSubscribeForm extends ContentEntityForm {
    * @see https://github.com/Gizra/og/issues/397
    */
   public function __construct(
-    OgAccessInterface $og_access, $entity_repository,
+    OgAccessInterface $og_access,
+    EntityRepositoryInterface $entity_repository,
     EntityTypeBundleInfoInterface $entity_type_bundle_info = NULL,
     TimeInterface $time = NULL,
     MessengerInterface $messenger
