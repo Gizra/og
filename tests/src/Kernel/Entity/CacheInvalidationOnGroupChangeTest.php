@@ -24,6 +24,7 @@ class CacheInvalidationOnGroupChangeTest extends KernelTestBase {
     'og',
     'system',
     'user',
+    'options'
   ];
 
   /**

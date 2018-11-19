@@ -22,6 +22,7 @@ class SelectionHandlerSettingsSchemaTest extends KernelTestBase {
     'og_ui',
     'system',
     'user',
+    'options',
   ];
 
   /**
