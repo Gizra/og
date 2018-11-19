@@ -363,23 +363,23 @@ class OgMembership extends ContentEntityBase implements OgMembershipInterface {
     $fields = [];
 
     $fields['id'] = BaseFieldDefinition::create('integer')
-      ->setLabel(t('ID'))
+      ->setLabel('ID')
       ->setDescription(t("The group membership's unique ID."))
       ->setReadOnly(TRUE)
       ->setSetting('unsigned', TRUE);
 
     $fields['uuid'] = BaseFieldDefinition::create('uuid')
-      ->setLabel(t('UUID'))
+      ->setLabel('UUID')
       ->setDescription(t('The membership UUID.'))
       ->setReadOnly(TRUE);
 
     $fields['type'] = BaseFieldDefinition::create('entity_reference')
-      ->setLabel(t('Type'))
+      ->setLabel('Type')
       ->setDescription(t('The bundle of the membership'))
       ->setSetting('target_type', 'og_membership_type');
 
     $fields['uid'] = BaseFieldDefinition::create('entity_reference')
-      ->setLabel(t('Username'))
+      ->setLabel('Username')
       ->setDescription(t('The user ID of the member.'))
       ->setSetting('target_type', 'user')
       ->setSetting('handler', 'og:user')
@@ -398,19 +398,19 @@ class OgMembership extends ContentEntityBase implements OgMembershipInterface {
       ->setRequired(TRUE);
 
     $fields['entity_type'] = BaseFieldDefinition::create('string')
-      ->setLabel(t('Group entity type'))
+      ->setLabel('Group entity type')
       ->setDescription(t('The entity type of the group.'));
 
     $fields['entity_bundle'] = BaseFieldDefinition::create('string')
-      ->setLabel(t('Group bundle ID'))
+      ->setLabel('Group bundle ID')
       ->setDescription(t('The bundle ID of the group.'));
 
     $fields['entity_id'] = BaseFieldDefinition::create('string')
-      ->setLabel(t('Group entity ID'))
+      ->setLabel('Group entity ID')
       ->setDescription(t('The entity ID of the group.'));
 
     $fields['state'] = BaseFieldDefinition::create('list_string')
-      ->setLabel(t('State'))
+      ->setLabel('State')
       ->setDescription(t('The user membership state: active, pending, or blocked.'))
       ->setDefaultValue(OgMembershipInterface::STATE_ACTIVE)
       ->setSettings([
@@ -429,7 +429,7 @@ class OgMembership extends ContentEntityBase implements OgMembershipInterface {
       ->setRequired(TRUE);
 
     $fields['roles'] = BaseFieldDefinition::create('entity_reference')
-      ->setLabel(t('Roles'))
+      ->setLabel('Roles')
       ->setDescription(t('The OG roles related to an OG membership entity.'))
       ->setCardinality(FieldStorageDefinitionInterface::CARDINALITY_UNLIMITED)
       ->setSetting('target_type', 'og_role')
@@ -443,11 +443,11 @@ class OgMembership extends ContentEntityBase implements OgMembershipInterface {
       ->setDisplayConfigurable('form', TRUE);
 
     $fields['created'] = BaseFieldDefinition::create('created')
-      ->setLabel(t('Create'))
+      ->setLabel('Create')
       ->setDescription(t('The Unix timestamp when the membership was created.'));
 
     $fields['language'] = BaseFieldDefinition::create('language')
-      ->setLabel(t('Language'))
+      ->setLabel('Language')
       ->setDescription(t('The {languages}.language of this membership.'));
 
     return $fields;
