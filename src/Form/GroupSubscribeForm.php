@@ -11,6 +11,7 @@ use Drupal\Core\Url;
 use Drupal\og\OgAccessInterface;
 use Drupal\og\OgMembershipInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
+use Drupal\Core\Messenger\MessengerInterface;
 
 /**
  * Provides a form for subscribing to a group.
@@ -31,6 +32,13 @@ class GroupSubscribeForm extends ContentEntityForm {
   protected $ogAccess;
 
   /**
+   * The messenger.
+   *
+   * @var \Drupal\Core\Messenger\MessengerInterface
+   */
+  protected $messenger;
+
+  /**
    * Constructs a GroupSubscribeForm.
    *
    * @param \Drupal\og\OgAccessInterface $og_access
@@ -48,9 +56,15 @@ class GroupSubscribeForm extends ContentEntityForm {
    *
    * @see https://github.com/Gizra/og/issues/397
    */
-  public function __construct(OgAccessInterface $og_access, $entity_repository, EntityTypeBundleInfoInterface $entity_type_bundle_info = NULL, TimeInterface $time = NULL) {
+  public function __construct(
+    OgAccessInterface $og_access, $entity_repository,
+    EntityTypeBundleInfoInterface $entity_type_bundle_info = NULL,
+    TimeInterface $time = NULL,
+    MessengerInterface $messenger
+  ) {
     parent::__construct($entity_repository, $entity_type_bundle_info, $time);
     $this->ogAccess = $og_access;
+    $this->messenger = $messenger;
   }
 
   /**
@@ -72,7 +86,8 @@ class GroupSubscribeForm extends ContentEntityForm {
       $container->get('og.access'),
       $container->get($entity_repository_service),
       $container->get('entity_type.bundle.info'),
-      $container->get('datetime.time')
+      $container->get('datetime.time'),
+      $container->get('messenger')
     );
   }
 

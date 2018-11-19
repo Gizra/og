@@ -10,6 +10,7 @@ use Drupal\Core\Form\FormStateInterface;
 use Drupal\og\OgAccessInterface;
 use Drupal\og\OgMembershipInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
+use Drupal\Core\Messenger\MessengerInterface;
 
 /**
  * Form controller for the group content edit forms.
@@ -26,6 +27,13 @@ class OgMembershipForm extends ContentEntityForm {
   protected $ogAccess;
 
   /**
+   * The messenger.
+   *
+   * @var \Drupal\Core\Messenger\MessengerInterface
+   */
+  protected $messenger;
+
+  /**
    * Constructs a MessageForm object.
    *
    * @param \Drupal\Core\Entity\EntityManagerInterface $entity_manager
@@ -36,10 +44,19 @@ class OgMembershipForm extends ContentEntityForm {
    *   The time service.
    * @param \Drupal\og\OgAccessInterface $og_access
    *   The OG access service.
+   * @param \Drupal\Core\Messenger\MessengerInterface $messenger
+   *   The messenger.
    */
-  public function __construct(EntityManagerInterface $entity_manager, EntityTypeBundleInfoInterface $entity_type_bundle_info = NULL, TimeInterface $time = NULL, OgAccessInterface $og_access) {
+  public function __construct(
+    EntityManagerInterface $entity_manager,
+    EntityTypeBundleInfoInterface $entity_type_bundle_info = NULL,
+    TimeInterface $time = NULL,
+    OgAccessInterface $og_access,
+    MessengerInterface $messenger
+) {
     parent::__construct($entity_manager, $entity_type_bundle_info, $time);
     $this->ogAccess = $og_access;
+    $this->messenger = $messenger;
   }
 
   /**
@@ -50,7 +67,8 @@ class OgMembershipForm extends ContentEntityForm {
       $container->get('entity.manager'),
       $container->get('entity_type.bundle.info'),
       $container->get('datetime.time'),
-      $container->get('og.access')
+      $container->get('og.access'),
+      $container->get('messanger')
     );
   }
 
@@ -121,12 +139,12 @@ class OgMembershipForm extends ContentEntityForm {
 
     if ($insert) {
       $this->logger('og')->notice('OG Membership: added the @membership_type membership for the use uid @uid to the group of the entity-type @group_type and ID @gid.', $context);
-      drupal_set_message($this->t('Added %user to %group.', $t_args));
+      $this->messenger->addMessage($this->t('Added %user to %group.', $t_args));
       return;
     }
 
     $this->logger('og')->notice('OG Membership: updated the @membership_type membership for the use uid @uid to the group of the entity-type @group_type and ID @gid.', $context);
-    drupal_set_message($this->t('Updated the membership for %user to %group.', $t_args));
+    $this->messenger->addMessage($this->t('Updated the membership for %user to %group.', $t_args));
   }
 
 }

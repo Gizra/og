@@ -7,6 +7,7 @@ use Drupal\Core\Entity\EntityManagerInterface;
 use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
+use Drupal\Core\Messenger\MessengerInterface;
 
 /**
  * Form handler for OG membership type forms.
@@ -21,22 +22,23 @@ class OgMembershipTypeForm extends BundleEntityFormBase {
   protected $entityManager;
 
   /**
+   * The messenger.
+   *
+   * @var \Drupal\Core\Messenger\MessengerInterface
+   */
+  protected $messenger;
+
+  /**
    * Constructs the OgMembershipTypeForm object.
    *
    * @param \Drupal\Core\Entity\EntityManagerInterface $entity_manager
    *   The entity manager.
+   * @param \Drupal\Core\Messenger\MessengerInterface $messenger
+   *   The messenger.
    */
-  public function __construct(EntityManagerInterface $entity_manager) {
+  public function __construct(EntityManagerInterface $entity_manager, MessengerInterface $messenger) {
     $this->entityManager = $entity_manager;
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public static function create(ContainerInterface $container) {
-    return new static(
-      $container->get('entity.manager')
-    );
+    $this->messenger = $messenger;
   }
 
   /**
@@ -111,10 +113,10 @@ class OgMembershipTypeForm extends BundleEntityFormBase {
     $t_args = ['%name' => $type->label()];
 
     if ($status == SAVED_UPDATED) {
-      drupal_set_message($this->t('The membership type %name has been updated.', $t_args));
+      $this->messenger->addMessage($this->t('The membership type %name has been updated.', $t_args));
     }
     elseif ($status == SAVED_NEW) {
-      drupal_set_message($this->t('The membership type %name has been added.', $t_args));
+      $this->messenger->addMessage($this->t('The membership type %name has been added.', $t_args));
       $context = array_merge($t_args, ['link' => $type->link($this->t('View'), 'collection')]);
       $this->logger('og')->notice('Added membership type %name.', $context);
     }
