@@ -99,7 +99,7 @@ class SubscriptionControllerTest extends UnitTestCase {
     $container->set('entity.form_builder', $this->entityFormBuilder->reveal());
     $container->set('og.membership_manager', $this->membershipManager->reveal());
     $container->set('string_translation', $this->getStringTranslationStub());
-    $container->set('messenger'), $this->messenger->reveal();
+    $container->set('messenger', $this->messenger->reveal());
     \Drupal::setContainer($container);
 
   }
