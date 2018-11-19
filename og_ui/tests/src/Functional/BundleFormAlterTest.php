@@ -18,7 +18,7 @@ class BundleFormAlterTest extends BrowserTestBase {
   /**
    * {@inheritdoc}
    */
-  public static $modules = ['block_content', 'entity_test', 'node', 'og_ui'];
+  public static $modules = ['block_content', 'entity_test', 'node', 'og_ui', 'system', 'og', 'options'];
 
   /**
    * An administrator user.
