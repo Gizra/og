@@ -53,7 +53,7 @@ class OgMembershipForm extends ContentEntityForm {
     TimeInterface $time = NULL,
     OgAccessInterface $og_access,
     MessengerInterface $messenger
-) {
+  ) {
     parent::__construct($entity_manager, $entity_type_bundle_info, $time);
     $this->ogAccess = $og_access;
     $this->messenger = $messenger;

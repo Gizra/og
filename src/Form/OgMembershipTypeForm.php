@@ -3,7 +3,7 @@
 namespace Drupal\og\Form;
 
 use Drupal\Core\Entity\BundleEntityFormBase;
-use Drupal\Core\Entity\EntityManagerInterface;
+use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Messenger\MessengerInterface;
@@ -15,11 +15,11 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 class OgMembershipTypeForm extends BundleEntityFormBase {
 
   /**
-   * The entity manager.
+   * The entity type manager.
    *
-   * @var \Drupal\Core\Entity\EntityManagerInterface
+   * @var \Drupal\Core\Entity\EntityTypeManagerInterface
    */
-  protected $entityManager;
+  protected $entityTypeManager;
 
   /**
    * The messenger.
@@ -31,14 +31,24 @@ class OgMembershipTypeForm extends BundleEntityFormBase {
   /**
    * Constructs the OgMembershipTypeForm object.
    *
-   * @param \Drupal\Core\Entity\EntityManagerInterface $entity_manager
-   *   The entity manager.
+   * @param \Drupal\Core\Entity\entityTypeManagerInterface $entity_manager
+   *   The entity type manager.
    * @param \Drupal\Core\Messenger\MessengerInterface $messenger
    *   The messenger.
    */
-  public function __construct(EntityManagerInterface $entity_manager, MessengerInterface $messenger) {
-    $this->entityManager = $entity_manager;
+  public function __construct(entityTypeManagerInterface $entity_manager, MessengerInterface $messenger) {
+    $this->entityTypeManager = $entity_manager;
     $this->messenger = $messenger;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public static function create(ContainerInterface $container) {
+    return new static(
+      $container->get('entity_type.manager'),
+      $container->get('messenger')
+    );
   }
 
   /**
@@ -121,7 +131,7 @@ class OgMembershipTypeForm extends BundleEntityFormBase {
       $this->logger('og')->notice('Added membership type %name.', $context);
     }
 
-    $this->entityManager->clearCachedFieldDefinitions();
+    $this->entityTypeManager->clearCachedFieldDefinitions();
     $form_state->setRedirectUrl($type->urlInfo('collection'));
   }
 
