@@ -39,9 +39,9 @@ class BundleFormAlterTest extends BrowserTestBase {
   /**
    * The entity type manager.
    *
-   * @var \Drupal\Core\Entity\EntityTypeManagerInterface
+   * @var \Drupal\Core\Entity\EntityManagerInterface
    */
-  protected $entityTypeManager;
+  protected $entityManager;
 
   /**
    * {@inheritdoc}
@@ -49,7 +49,7 @@ class BundleFormAlterTest extends BrowserTestBase {
   public function setUp() {
     parent::setUp();
 
-    $this->entityTypeManager = \Drupal::entityTypeManager();
+    $this->entityManager = \Drupal::entityManager();
 
     // Log in as an administrator that can manage blocks and content types.
     $this->adminUser = $this->drupalCreateUser([
@@ -121,7 +121,7 @@ class BundleFormAlterTest extends BrowserTestBase {
     $form_state = new FormState();
     // Set the form state as if the 'entity_test' option was chosen with AJAX.
     $form_state->setValue('og_target_type', 'entity_test');
-    $entity = $this->entityTypeManager->getStorage('node_type')->create([]);
+    $entity = $this->entityManager->getStorage('node_type')->create([]);
     (new BundleFormAlter($entity))->formAlter($form, $form_state);
 
     // Check that the target bundles are set to the test entity bundle.
