@@ -26,7 +26,7 @@ class BundleFormAlterTest extends BrowserTestBase {
     'system',
     'og',
     'options',
-    'cache_test',
+    'field',
   ];
 
   /**
