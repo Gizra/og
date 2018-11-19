@@ -23,7 +23,7 @@ function og_update_8001(&$sandbox) {
 
   if (!isset($sandbox['total'])) {
     $storage_definition = BaseFieldDefinition::create('string')
-      ->setLabel('Group bundle ID')
+      ->setLabel(t('Group bundle ID'))
       ->setDescription(t('The bundle ID of the group.'));
     \Drupal::entityDefinitionUpdateManager()->installFieldStorageDefinition('entity_bundle', 'og_membership', 'og', $storage_definition);
 
