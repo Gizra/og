@@ -68,7 +68,7 @@ class OgMembershipForm extends ContentEntityForm {
       $container->get('entity_type.bundle.info'),
       $container->get('datetime.time'),
       $container->get('og.access'),
-      $container->get('messanger')
+      $container->get('messenger')
     );
   }
 
