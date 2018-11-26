@@ -42,7 +42,6 @@ class OgStandardReferenceItemTest extends KernelTestBase {
     $this->installEntitySchema('entity_test');
     $this->installEntitySchema('og_membership');
     $this->installEntitySchema('user');
-    $this->installSchema('system', 'sequences');
 
     // Create several bundles.
     for ($i = 0; $i <= 2; $i++) {

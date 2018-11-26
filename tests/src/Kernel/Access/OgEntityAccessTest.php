@@ -144,7 +144,6 @@ class OgEntityAccessTest extends KernelTestBase {
     $this->installEntitySchema('og_membership');
     $this->installEntitySchema('user');
     $this->installEntitySchema('entity_test');
-    $this->installSchema('system', 'sequences');
 
     $this->groupBundle = mb_strtolower($this->randomMachineName());
 

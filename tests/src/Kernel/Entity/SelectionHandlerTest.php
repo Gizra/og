@@ -83,7 +83,6 @@ class SelectionHandlerTest extends KernelTestBase {
     $this->installEntitySchema('og_membership');
     $this->installEntitySchema('user');
     $this->installEntitySchema('node');
-    $this->installSchema('system', 'sequences');
 
     // Setting up variables.
     $this->groupBundle = mb_strtolower($this->randomMachineName());

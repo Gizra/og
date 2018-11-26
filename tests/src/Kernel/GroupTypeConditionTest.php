@@ -62,7 +62,6 @@ class GroupTypeConditionTest extends KernelTestBase {
     $this->installEntitySchema('entity_test');
     $this->installEntitySchema('node');
     $this->installEntitySchema('user');
-    $this->installSchema('system', ['sequences']);
 
     // Create three test groups of different types.
     for ($i = 0; $i < 2; $i++) {

@@ -74,7 +74,6 @@ class OgMembershipTest extends KernelTestBase {
     $this->installEntitySchema('entity_test');
     $this->installEntitySchema('node');
     $this->installEntitySchema('user');
-    $this->installSchema('system', 'sequences');
 
     $this->entityTypeManager = $this->container->get('entity_type.manager');
     $storage = $this->entityTypeManager->getStorage('user');

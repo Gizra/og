@@ -27,8 +27,6 @@ class ChangeMultipleOgMembershipRolesActionTestBase extends ChangeOgMembershipAc
   public function setUp() {
     parent::setUp();
 
-    $this->installSchema('system', ['key_value_expire']);
-
     $this->tempStorageFactory = $this->container->get('tempstore.private');
 
     // Set up the group administrator as the user that will be logged in during

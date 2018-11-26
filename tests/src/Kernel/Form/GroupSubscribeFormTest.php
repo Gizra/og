@@ -70,7 +70,6 @@ class GroupSubscribeFormTest extends KernelTestBase {
     $this->installEntitySchema('og_membership');
     $this->installEntitySchema('user');
     $this->installEntitySchema('node');
-    $this->installSchema('system', 'sequences');
 
     // Create 3 test bundles and declare them as groups.
     $bundle_names = [];

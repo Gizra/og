@@ -61,7 +61,6 @@ class GetBundleByBundleTest extends KernelTestBase {
     $this->installEntitySchema('node');
     $this->installEntitySchema('og_membership');
     $this->installEntitySchema('user');
-    $this->installSchema('system', 'sequences');
 
     $this->groupTypeManager = $this->container->get('og.group_type_manager');
 

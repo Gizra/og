@@ -38,7 +38,6 @@ class DrupalConsoleAddFieldTest extends KernelTestBase {
     $this->installConfig(['og']);
     $this->installEntitySchema('node');
     $this->installEntitySchema('og_membership');
-    $this->installSchema('system', 'sequences');
 
     NodeType::create([
       'name' => $this->randomString(),
