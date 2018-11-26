@@ -232,6 +232,7 @@ class OgGroupContentOperationAccessTest extends KernelTestBase {
 
           case 'comment':
             $values = [
+              'field_name' => $this->randomString(),
               'subject' => 'subscribe',
               'comment_type' => $bundle_id,
               'entity_id' => $this->group->id(),
