@@ -88,7 +88,7 @@ class GroupMembershipManagerTest extends KernelTestBase {
     $this->installEntitySchema('node');
     $this->installEntitySchema('og_membership');
     $this->installEntitySchema('user');
-    $this->installSchema('system', 'sequences');
+    $this->installSchema('system', ['sequences']);
 
     $this->entityTypeManager = $this->container->get('entity_type.manager');
     $this->membershipManager = $this->container->get('og.membership_manager');

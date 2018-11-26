@@ -73,7 +73,7 @@ class AccessByOgMembershipTest extends KernelTestBase {
     $this->installEntitySchema('node');
     $this->installEntitySchema('og_membership');
     $this->installEntitySchema('user');
-    $this->installSchema('system', 'sequences');
+    $this->installSchema('system', ['sequences']);
 
     // Create a user role for a standard authenticated user.
     $role = Role::create([

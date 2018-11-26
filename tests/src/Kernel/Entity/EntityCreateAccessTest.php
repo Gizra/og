@@ -60,7 +60,7 @@ class EntityCreateAccessTest extends KernelTestBase {
     $this->installEntitySchema('node');
     $this->installEntitySchema('og_membership');
     $this->installEntitySchema('user');
-    $this->installSchema('system', 'sequences');
+    $this->installSchema('system', ['sequences']);
 
     // Create a "group" node type and turn it into a group type.
     $this->groupType = NodeType::create([
