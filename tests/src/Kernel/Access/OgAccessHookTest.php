@@ -84,6 +84,7 @@ class OgAccessHookTest extends KernelTestBase {
     $this->installEntitySchema('node');
     $this->installEntitySchema('og_membership');
     $this->installEntitySchema('user');
+    $this->installSchema('system', 'sequences');
 
     // Create two roles: one for normal users, and one for administrators.
     foreach (['authenticated', 'administrator'] as $role_id) {

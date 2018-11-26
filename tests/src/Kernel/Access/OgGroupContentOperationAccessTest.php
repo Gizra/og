@@ -93,6 +93,7 @@ class OgGroupContentOperationAccessTest extends KernelTestBase {
     $this->installEntitySchema('node');
     $this->installEntitySchema('og_membership');
     $this->installEntitySchema('user');
+    $this->installSchema('system', 'sequences');
 
     $this->entityTypeManager = $this->container->get('entity_type.manager');
 
@@ -231,7 +232,6 @@ class OgGroupContentOperationAccessTest extends KernelTestBase {
 
           case 'comment':
             $values = [
-              'name' => $this->randomString(),
               'subject' => 'subscribe',
               'comment_type' => $bundle_id,
               'entity_id' => $this->group->id(),
