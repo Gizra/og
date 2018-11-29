@@ -37,16 +37,26 @@ class MembershipManager implements MembershipManagerInterface {
   protected $groupAudienceHelper;
 
   /**
+   * The database service.
+   *
+   * @var \Drupal\Core\Database\Connection
+   */
+  protected $database;
+
+  /**
    * Constructs a MembershipManager object.
    *
    * @param \Drupal\core\Entity\EntityTypeManagerInterface $entity_type_manager
    *   The entity type manager.
    * @param \Drupal\og\OgGroupAudienceHelperInterface $group_audience_helper
    *   The OG group audience helper.
+   * @param \Drupal\Core\Database\Connection $database
+   *   The database service
    */
-  public function __construct(EntityTypeManagerInterface $entity_type_manager, OgGroupAudienceHelperInterface $group_audience_helper) {
+  public function __construct(EntityTypeManagerInterface $entity_type_manager, OgGroupAudienceHelperInterface $group_audience_helper, Connection $database) {
     $this->entityTypeManager = $entity_type_manager;
     $this->groupAudienceHelper = $group_audience_helper;
+    $this->database = $database;
   }
 
   /**
@@ -433,6 +443,22 @@ class MembershipManager implements MembershipManagerInterface {
     return $this->entityTypeManager
       ->getStorage('og_membership')
       ->loadMultiple($ids);
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getGroupMemberships(EntityInterface $group, array $states = [OgMembershipInterface::STATE_ACTIVE]) {
+    $query = $this->database->select('og_membership', 'ogm')
+      ->fields('ogm', ['uid'])
+      ->condition('entity_id', $group->id());
+
+    if ($states) {
+      $query->condition('state', $states, 'IN');
+    }
+    $member_ids = $query->execute()->fetchAssoc();
+    $members = $this->entityTypeManager->getStorage('user')->loadMultiple($member_ids);
+    return $members;
   }
 
 }

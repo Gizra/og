@@ -291,4 +291,18 @@ interface MembershipManagerInterface {
    */
   public function reset();
 
+  /**
+   * Returns all users that are active members of the group.
+   *
+   * @param \Drupal\Core\Entity\EntityInterface $group
+   *   The group entity.
+   * @param array $states
+   *   The member states.
+   *
+   * @return array
+   *   Group members
+   */
+  public function getGroupMemberships(EntityInterface $group, array $states = [OgMembershipInterface::STATE_ACTIVE]);
+
+
 }
