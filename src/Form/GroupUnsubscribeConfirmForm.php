@@ -4,39 +4,15 @@ namespace Drupal\og\Form;
 
 use Drupal\Core\Entity\ContentEntityDeleteForm;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Messenger\MessengerTrait;
 use Drupal\Core\Url;
-use Drupal\Core\Messenger\MessengerInterface;
 
 /**
  * Provides a confirmation form for unsubscribing form a group.
  */
 class GroupUnsubscribeConfirmForm extends ContentEntityDeleteForm {
 
-  /**
-   * The messenger.
-   *
-   * @var \Drupal\Core\Messenger\MessengerInterface
-   */
-  protected $messenger;
-
-  /**
-   * Constructs the GroupUnsubscribeConfirmForm object.
-   *
-   * @param \Drupal\Core\Messenger\MessengerInterface $messenger
-   *   The messenger.
-   */
-  public function __construct(MessengerInterface $messenger) {
-    $this->messenger = $messenger;
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public static function create(ContainerInterface $container) {
-    return new static(
-      $container->get('messenger')
-    );
-  }
+  use MessengerTrait;
 
   /**
    * {@inheritdoc}
