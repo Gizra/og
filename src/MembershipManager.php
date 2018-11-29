@@ -2,6 +2,7 @@
 
 namespace Drupal\og;
 
+use Drupal\Core\Database\Connection;
 use Drupal\Component\Utility\NestedArray;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
