@@ -304,5 +304,4 @@ interface MembershipManagerInterface {
    */
   public function getGroupMemberships(EntityInterface $group, array $states = [OgMembershipInterface::STATE_ACTIVE]);
 
-
 }

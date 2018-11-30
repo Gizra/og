@@ -52,7 +52,7 @@ class MembershipManager implements MembershipManagerInterface {
    * @param \Drupal\og\OgGroupAudienceHelperInterface $group_audience_helper
    *   The OG group audience helper.
    * @param \Drupal\Core\Database\Connection $database
-   *   The database service
+   *   The database service.
    */
   public function __construct(EntityTypeManagerInterface $entity_type_manager, OgGroupAudienceHelperInterface $group_audience_helper, Connection $database) {
     $this->entityTypeManager = $entity_type_manager;
