@@ -457,7 +457,8 @@ class MembershipManager implements MembershipManagerInterface {
     if ($states) {
       $query->condition('state', $states, 'IN');
     }
-    $member_ids = $query->execute()->fetchAssoc();
+    $result = $query->execute()->fetchAllAssoc('uid', 'PDO::FETCH_ASSOC');
+    $member_ids = array_keys($result);
     $members = $this->entityTypeManager->getStorage('user')->loadMultiple($member_ids);
     return $members;
   }
