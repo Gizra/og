@@ -13,6 +13,7 @@ use Drupal\og\OgMembershipInterface;
 use Drupal\Tests\UnitTestCase;
 use Drupal\user\UserInterface;
 use Prophecy\Argument;
+use Drupal\Core\Database\Connection;
 
 /**
  * Tests create membership helper function.
@@ -86,6 +87,13 @@ class CreateMembershipTest extends UnitTestCase {
   protected $membership;
 
   /**
+   * The database service.
+   *
+   * @var \Drupal\Core\Database\Connection
+   */
+  protected $database;
+
+  /**
    * {@inheritdoc}
    */
   public function setUp() {
@@ -98,6 +106,7 @@ class CreateMembershipTest extends UnitTestCase {
     $this->entityTypeManager = $this->prophesize(EntityTypeManagerInterface::class);
     $this->entityTypeRepository = $this->prophesize(EntityTypeRepositoryInterface::class);
     $this->groupAudienceHelper = $this->prophesize(OgGroupAudienceHelperInterface::class);
+    $this->database = $this->prophesize(Connection::class);
 
     $this->entityTypeManager->getStorage('og_membership')
       ->willReturn($this->entityStorage->reveal());
@@ -130,6 +139,7 @@ class CreateMembershipTest extends UnitTestCase {
     $container = new ContainerBuilder();
     $container->set('entity_type.manager', $this->entityTypeManager->reveal());
     $container->set('entity_type.repository', $this->entityTypeRepository->reveal());
+    $container->set('database', $this->database->reveal());
     \Drupal::setContainer($container);
   }
 
@@ -139,7 +149,7 @@ class CreateMembershipTest extends UnitTestCase {
    * @covers ::createMembership
    */
   public function testNewGroup() {
-    $membership_manager = new MembershipManager($this->entityTypeManager->reveal(), $this->groupAudienceHelper->reveal());
+    $membership_manager = new MembershipManager($this->entityTypeManager->reveal(), $this->groupAudienceHelper->reveal(), $this->database->reveal());
     $membership = $membership_manager->createMembership($this->group->reveal(), $this->user->reveal());
     $this->assertInstanceOf(OgMembershipInterface::class, $membership);
   }
