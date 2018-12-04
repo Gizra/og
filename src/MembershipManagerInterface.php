@@ -298,10 +298,12 @@ interface MembershipManagerInterface {
    *   The group entity.
    * @param array $states
    *   The member states.
+   * @param int $range
+   *   The number of members to get.
    *
    * @return array
    *   Group members
    */
-  public function getGroupMemberships(EntityInterface $group, array $states = [OgMembershipInterface::STATE_ACTIVE]);
+  public function getGroupMemberships(EntityInterface $group, array $states = [OgMembershipInterface::STATE_ACTIVE], $range = NULL);
 
 }

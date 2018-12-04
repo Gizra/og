@@ -449,13 +449,16 @@ class MembershipManager implements MembershipManagerInterface {
   /**
    * {@inheritdoc}
    */
-  public function getGroupMemberships(EntityInterface $group, array $states = [OgMembershipInterface::STATE_ACTIVE]) {
+  public function getGroupMemberships(EntityInterface $group, array $states = [OgMembershipInterface::STATE_ACTIVE], $range = NULL) {
     $query = $this->database->select('og_membership', 'ogm')
       ->fields('ogm', ['uid'])
       ->condition('entity_id', $group->id());
 
     if ($states) {
       $query->condition('state', $states, 'IN');
+    }
+    if ($range) {
+      $query->range(0, $range);
     }
     $result = $query->execute()->fetchAllAssoc('uid', 'PDO::FETCH_ASSOC');
     $member_ids = array_keys($result);
