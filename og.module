@@ -516,7 +516,7 @@ function og_node_access($node, $op, $account) {
       if (is_object($node) && isset($node->{$field_name})) {
         if (!empty($node->{$field_name}) && !empty($node->{$field_name}[LANGUAGE_NONE])) {
           foreach ($node->{$field_name}[LANGUAGE_NONE] as $target_id) {
-            if (og_user_access('node', $target_id['target_id'], 'create '.$type.' content')) {
+            if (og_user_access('node', $target_id['target_id'], 'create ' . $type . ' content')) {
               $accesses[] = NODE_ACCESS_ALLOW;
             }
             else {
