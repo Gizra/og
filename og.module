@@ -525,7 +525,7 @@ function og_node_access($node, $op, $account) {
           }
         }
       }
-      else {
+      elseif (entityreference_get_selection_handler($field, $instance)->countReferencableEntities()) {
         if (entityreference_get_selection_handler($field, $instance)->countReferencableEntities()) {
           $accesses[] = NODE_ACCESS_ALLOW;
         }
