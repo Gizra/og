@@ -2,6 +2,7 @@
 
 namespace Drupal\og\Entity;
 
+use Drupal;
 use Drupal\Core\Config\Entity\ConfigEntityBase;
 use Drupal\field\Entity\FieldConfig;
 use Drupal\og\OgMembershipInterface;
@@ -69,6 +70,11 @@ class OgMembershipType extends ConfigEntityBase implements OgMembershipTypeInter
    */
   public function save() {
     $status = parent::save();
+
+    if (\Drupal::isConfigSyncing()) {
+      // Do not create config while config import is in progress.
+      return;
+    }
 
     if ($status === SAVED_NEW) {
       FieldConfig::create([
