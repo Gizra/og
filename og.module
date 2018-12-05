@@ -526,9 +526,7 @@ function og_node_access($node, $op, $account) {
         }
       }
       elseif (entityreference_get_selection_handler($field, $instance)->countReferencableEntities()) {
-        if (entityreference_get_selection_handler($field, $instance)->countReferencableEntities()) {
-          $accesses[] = NODE_ACCESS_ALLOW;
-        }
+        $accesses[] = NODE_ACCESS_ALLOW;
       }
 
       // Allow users to create content outside of groups, if none of the
