@@ -2,7 +2,6 @@
 
 namespace Drupal\og\Entity;
 
-use Drupal;
 use Drupal\Core\Config\Entity\ConfigEntityBase;
 use Drupal\field\Entity\FieldConfig;
 use Drupal\og\OgMembershipInterface;
