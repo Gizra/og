@@ -81,6 +81,10 @@ class MembershipManager implements MembershipManagerInterface {
    * {@inheritdoc}
    */
   public function getMemberships(AccountInterface $user, array $states = [OgMembershipInterface::STATE_ACTIVE]) {
+    // When an empty array is passed, retrieve memberships with all possible
+    // states.
+    $states = $states ?: OgMembership::STATES;
+
     // Get a string identifier of the states, so we can retrieve it from cache.
     sort($states);
     $states_identifier = implode('|', array_unique($states));
@@ -101,11 +105,8 @@ class MembershipManager implements MembershipManagerInterface {
     $query = $this->entityTypeManager
       ->getStorage('og_membership')
       ->getQuery()
-      ->condition('uid', $user->id());
-
-    if ($states) {
-      $query->condition('state', $states, 'IN');
-    }
+      ->condition('uid', $user->id())
+      ->condition('state', $states, 'IN');
 
     $results = $query->execute();
 

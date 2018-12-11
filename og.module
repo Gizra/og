@@ -53,11 +53,7 @@ function og_entity_insert(EntityInterface $entity) {
 
   // Other modules that implement hook_entity_insert() might already have
   // created a membership ahead of us.
-  if (!Og::getMembership($entity, $entity->getOwner(), [
-    OgMembershipInterface::STATE_ACTIVE,
-    OgMembershipInterface::STATE_PENDING,
-    OgMembershipInterface::STATE_BLOCKED,
-  ])) {
+  if (!Og::getMembership($entity, $entity->getOwner(), OgMembershipInterface::STATES)) {
     $membership = Og::createMembership($entity, $entity->getOwner());
     $membership->save();
   }
