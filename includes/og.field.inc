@@ -50,15 +50,21 @@ function og_field_widget_form(&$form, &$form_state, $field, $instance, $langcode
   ctools_include('fields');
 
   $field_modes = array('default');
-  $has_admin = FALSE;
+  $has_admin = user_access('administer group');
+  $context = array(
+    'field' => $field,
+    'instance' => $instance,
+    'entity_type' => $entity_type,
+    'entity' => $entity,
+  );
+  drupal_alter('og_field_widget_has_admin', $has_admin, $context);
 
   // The group IDs that might not be accessible by the user, but we need
   // to keep even after saving.
   $element['#other_groups_ids'] = array();
   $element['#element_validate'][] = 'og_complex_widget_element_validate';
 
-  if (user_access('administer group')) {
-    $has_admin = TRUE;
+  if ($has_admin) {
     $field_modes[] = 'admin';
   }
 

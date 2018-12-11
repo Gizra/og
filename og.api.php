@@ -454,6 +454,23 @@ function hook_og_membership_delete(OgMembership $og_membership) {
     ->execute();
 }
 
+/**
+ * Alter whether the 'Other groups' field is visible for the current user.
+ *
+ * By default, this is determined using the 'administer group' permission, but
+ * using this hook it can be hidden or made visible based on the field,
+ * instance and form state.
+ *
+ * @param $has_admin
+ *   Boolean indicating whether the 'Other groups' field is visible.
+ * @param $context
+ *   Array containing field, instance, entity_type and entity.
+ */
+function hook_og_field_widget_has_admin(&$has_admin, $context) {
+  if ($context['field']['field_name'] === 'field_test' && user_access('select all groups in field_test')) {
+    $has_admin = TRUE;
+  }
+}
 
 /**
  * @} End of "addtogroup hooks".
