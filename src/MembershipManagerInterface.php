@@ -63,7 +63,7 @@ interface MembershipManagerInterface {
    * @param array $states
    *   (optional) Array with the states to return. Defaults to only returning
    *   active memberships. In order to retrieve all memberships regardless of
-   *   state, pass `OgMembershipInterface::STATES`.
+   *   state, pass `OgMembershipInterface::ALL_STATES`.
    *
    * @return \Drupal\og\OgMembershipInterface[]
    *   An array of OgMembership entities, keyed by ID.
@@ -80,7 +80,7 @@ interface MembershipManagerInterface {
    * @param array $states
    *   (optional) Array with the states to return. Defaults to only returning
    *   active memberships. In order to retrieve all memberships regardless of
-   *   state, pass `OgMembershipInterface::STATES`.
+   *   state, pass `OgMembershipInterface::ALL_STATES`.
    *
    * @return \Drupal\og\OgMembershipInterface|null
    *   The OgMembership entity. NULL will be returned if no membership is

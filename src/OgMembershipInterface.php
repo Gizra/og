@@ -41,7 +41,11 @@ interface OgMembershipInterface extends ContentEntityInterface, EntityOwnerInter
   /**
    * An array containing all possible group membership states.
    */
-  const STATES = [self::STATE_ACTIVE, self::STATE_PENDING, self::STATE_BLOCKED];
+  const ALL_STATES = [
+    self::STATE_ACTIVE,
+    self::STATE_PENDING,
+    self::STATE_BLOCKED,
+  ];
 
   /**
    * The default group membership type that is the bundle of group membership.

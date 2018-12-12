@@ -83,7 +83,7 @@ class MembershipManager implements MembershipManagerInterface {
   public function getMemberships(AccountInterface $user, array $states = [OgMembershipInterface::STATE_ACTIVE]) {
     // When an empty array is passed, retrieve memberships with all possible
     // states.
-    $states = $states ?: OgMembership::STATES;
+    $states = $states ?: OgMembership::ALL_STATES;
 
     // Get a string identifier of the states, so we can retrieve it from cache.
     sort($states);
