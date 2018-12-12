@@ -401,6 +401,10 @@ class MembershipManager implements MembershipManagerInterface {
    *   The membership entities.
    */
   protected function loadMemberships(array $ids) {
+    if (empty($ids)) {
+      return [];
+    }
+
     return $this->entityTypeManager
       ->getStorage('og_membership')
       ->loadMultiple($ids);
