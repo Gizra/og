@@ -97,25 +97,20 @@ class MembershipManager implements MembershipManagerInterface {
     ];
     $identifier = implode(':', $identifier);
 
-    // Return cached result if it exists.
-    if (isset($this->cache[$identifier])) {
-      return $this->cache[$identifier];
+    // Use cached result if it exists.
+    if (!isset($this->cache[$identifier])) {
+      $query = $this->entityTypeManager
+        ->getStorage('og_membership')
+        ->getQuery()
+        ->condition('uid', $user->id())
+        ->condition('state', $states, 'IN');
+
+      $this->cache[$identifier] = $query->execute();
     }
 
-    $query = $this->entityTypeManager
+    return $this->entityTypeManager
       ->getStorage('og_membership')
-      ->getQuery()
-      ->condition('uid', $user->id())
-      ->condition('state', $states, 'IN');
-
-    $results = $query->execute();
-
-    /** @var \Drupal\og\Entity\OgMembership[] $memberships */
-    $this->cache[$identifier] = $this->entityTypeManager
-      ->getStorage('og_membership')
-      ->loadMultiple($results);
-
-    return $this->cache[$identifier];
+      ->loadMultiple($this->cache[$identifier]);
   }
 
   /**
