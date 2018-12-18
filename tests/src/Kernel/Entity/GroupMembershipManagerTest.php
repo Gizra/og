@@ -499,7 +499,7 @@ class GroupMembershipManagerTest extends KernelTestBase {
           /** @var \Drupal\og\OgMembershipInterface[] $actual_memberships */
           $actual_memberships = $this->membershipManager->getGroupMembershipsByRoleNames($group, $role_names, $states);
 
-          $this->assertEquals(count($expected_memberships), count($actual_memberships));
+          $this->assertSameSize($expected_memberships, $actual_memberships);
 
           foreach ($expected_memberships as $expected_membership_key) {
             $expected_user_id = $this->users[$expected_membership_key]->id();
