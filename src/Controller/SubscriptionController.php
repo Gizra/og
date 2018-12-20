@@ -157,13 +157,7 @@ class SubscriptionController extends ControllerBase {
   public function unsubscribe(ContentEntityInterface $group) {
     $user = $this->currentUser();
 
-    $states = [
-      OgMembershipInterface::STATE_ACTIVE,
-      OgMembershipInterface::STATE_PENDING,
-      OgMembershipInterface::STATE_BLOCKED,
-    ];
-
-    if (!$membership = Og::getMembership($group, $user, $states)) {
+    if (!$membership = Og::getMembership($group, $user, OgMembershipInterface::ALL_STATES)) {
       // User is not a member.
       throw new AccessDeniedHttpException();
     }

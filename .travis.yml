@@ -41,9 +41,6 @@ before_script:
   # Remember the current directory for later use in the Drupal installation.
   - MODULE_DIR=$(pwd)
 
-  # Install Composer dependencies for OG.
-  - composer install
-
   # Navigate out of module directory to prevent blown stack by recursive module
   # lookup.
   - cd ..

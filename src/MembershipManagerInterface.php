@@ -61,7 +61,9 @@ interface MembershipManagerInterface {
    * @param \Drupal\Core\Session\AccountInterface $user
    *   The user to get groups for.
    * @param array $states
-   *   (optional) Array with the state to return. Defaults to active.
+   *   (optional) Array with the states to return. Defaults to only returning
+   *   active memberships. In order to retrieve all memberships regardless of
+   *   state, pass `OgMembershipInterface::ALL_STATES`.
    *
    * @return \Drupal\og\OgMembershipInterface[]
    *   An array of OgMembership entities, keyed by ID.
@@ -76,13 +78,32 @@ interface MembershipManagerInterface {
    * @param \Drupal\Core\Session\AccountInterface $user
    *   The user to get the membership for.
    * @param array $states
-   *   (optional) Array with the state to return. Defaults to active.
+   *   (optional) Array with the states to return. Defaults to only returning
+   *   active memberships. In order to retrieve all memberships regardless of
+   *   state, pass `OgMembershipInterface::ALL_STATES`.
    *
    * @return \Drupal\og\OgMembershipInterface|null
    *   The OgMembership entity. NULL will be returned if no membership is
    *   available that matches the passed in $states.
    */
   public function getMembership(EntityInterface $group, AccountInterface $user, array $states = [OgMembershipInterface::STATE_ACTIVE]);
+
+  /**
+   * Returns the memberships of the given group filtered by role name.
+   *
+   * @param \Drupal\Core\Entity\EntityInterface $group
+   *   The group entity for which to return the memberships.
+   * @param array $role_names
+   *   An array of role names to filter by.
+   * @param array $states
+   *   (optional) Array with the states to return. Defaults to only returning
+   *   active memberships. In order to retrieve all memberships regardless of
+   *   state, pass `OgMembershipInterface::ALL_STATES`.
+   *
+   * @return \Drupal\Core\Entity\EntityInterface[]
+   *   The membership entities.
+   */
+  public function getGroupMembershipsByRoleNames(EntityInterface $group, array $role_names, array $states = [OgMembershipInterface::STATE_ACTIVE]);
 
   /**
    * Creates an OG membership.
