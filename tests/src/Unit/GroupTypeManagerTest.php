@@ -331,7 +331,7 @@ class GroupTypeManagerTest extends UnitTestCase {
       $this->entityTypeManager->reveal(),
       $this->entityTypeBundleInfo->reveal(),
       $this->eventDispatcher->reveal(),
-      $this->state->reveal(),
+      $this->cache->reveal(),
       $this->permissionManager->reveal(),
       $this->ogRoleManager->reveal(),
       $this->routeBuilder->reveal(),
