@@ -374,8 +374,13 @@ function og_og_role_insert(OgRoleInterface $role) {
     return;
   }
 
+  // Do not create config while config import is in progress.
+  if (\Drupal::isConfigSyncing()) {
+    return;
+  }
+
   $add_id = 'og_membership_add_single_role_action.' . $role->getName();
-  if (!Action::load($add_id) && !\Drupal::isConfigSyncing()) {
+  if (!Action::load($add_id)) {
     $action = Action::create([
       'id' => $add_id,
       'type' => 'og_membership',
@@ -388,7 +393,7 @@ function og_og_role_insert(OgRoleInterface $role) {
     $action->trustData()->save();
   }
   $remove_id = 'og_membership_remove_single_role_action.' . $role->getName();
-  if (!Action::load($remove_id) && !\Drupal::isConfigSyncing()) {
+  if (!Action::load($remove_id)) {
     $action = Action::create([
       'id' => $remove_id,
       'type' => 'og_membership',
