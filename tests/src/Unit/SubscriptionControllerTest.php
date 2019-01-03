@@ -14,7 +14,6 @@ use Drupal\og\OgAccessInterface;
 use Drupal\og\OgMembershipInterface;
 use Drupal\Tests\UnitTestCase;
 use Drupal\user\EntityOwnerInterface;
-use Drupal\Core\Messenger\MessengerInterface;
 
 /**
  * Tests the subscription controller.
