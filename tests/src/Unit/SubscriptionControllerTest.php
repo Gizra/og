@@ -80,13 +80,6 @@ class SubscriptionControllerTest extends UnitTestCase {
   protected $user;
 
   /**
-   * The messenger.
-   *
-   * @var \Drupal\Core\Messenger\MessengerInterface
-   */
-  protected $messenger;
-
-  /**
    * {@inheritdoc}
    */
   public function setUp() {
