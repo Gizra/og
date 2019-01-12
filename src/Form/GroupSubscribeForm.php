@@ -234,7 +234,7 @@ class GroupSubscribeForm extends ContentEntityForm {
     /** @var EntityInterface $group */
     $group = $membership->getGroup();
 
-    $message = $membership->isActive() ? $this->t('Your are now subscribed to the group.') : $this->t('Your subscription request was sent.');
+    $message = $membership->isActive() ? $this->t('You are now subscribed to the group.') : $this->t('Your subscription request was sent.');
     $this->messenger()->addMessage($message);
 
     // User doesn't have access to the group entity, so redirect to front page,
