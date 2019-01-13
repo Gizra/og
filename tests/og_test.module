@@ -6,6 +6,19 @@
  */
 
 /**
+ * Implements hook_menu().
+ */
+function og_test_menu() {
+  return array(
+    'og_test/my_content' => array(
+      'page callback' => 'og_test_my_content',
+      'access arguments' => array('access content'),
+      'type' => MENU_CALLBACK,
+    ),
+  );
+}
+
+/**
  * Implements hook_node_presave().
  */
 function og_test_node_presave($node) {
@@ -62,6 +75,45 @@ function og_test_entity_delete($entity, $type) {
       'gid' => $nid,
     ),
   );
+}
+
+/**
+ * Page callback for displaying nodes for the current user.
+ */
+function og_test_my_content() {
+  global $user;
+
+  $nodes = node_load_multiple(array(), array('uid' => $user->uid));
+
+  $table = array(
+    '#theme' => 'table',
+    '#header' => array(
+      t('Title'),
+      t('Operations'),
+    ),
+    '#rows' => array(),
+  );
+
+  foreach ($nodes as $node) {
+    $operations = array();
+
+    if (node_access('view', $node)) {
+      $operations['view'] = l(t('view'), 'node/' . $node->nid);
+    }
+    if (node_access('update', $node)) {
+      $operations['update'] = l(t('edit'), 'node/' . $node->nid . '/edit');
+    }
+    if (node_access('delete', $node)) {
+      $operations['delete'] = l(t('delete'), 'node/' . $node->nid . '/delete');
+    }
+
+    $table['#rows'][$node->nid] = array(
+      check_plain($node->title),
+      implode(' | ', $operations),
+    );
+  }
+
+  return $table;
 }
 
 /**

@@ -1830,6 +1830,10 @@ function og_is_group($entity_type, $entity) {
   if (is_numeric($entity)) {
     $entity = entity_load_single($entity_type, $entity);
   }
+  if (!$entity) {
+    // The entity does not exist.
+    return FALSE;
+  }
   list(,, $bundle) = entity_extract_ids($entity_type, $entity);
   if (!field_info_instance($entity_type, OG_GROUP_FIELD, $bundle)) {
     return variable_get("og_is_group__{$entity_type}__{$bundle}", FALSE);
