@@ -83,6 +83,9 @@ class GroupCheck implements AccessInterface {
       if (!$group = $route_match->getParameter($parameter_name)) {
         return AccessResult::forbidden();
       }
+      if (is_numeric($group)) {
+        $group = $this->entityTypeManager->getStorage($parameter_name)->load($group);
+      }
 
       $entity_type_id = $group->getEntityTypeId();
     }
