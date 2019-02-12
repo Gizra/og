@@ -94,7 +94,7 @@ class OgMembershipType extends ConfigEntityBase implements OgMembershipTypeInter
    * {@inheritdoc}
    */
   public function delete() {
-    if ($this->id() === OgMembershipInterface::TYPE_DEFAULT) {
+    if ($this->id() === OgMembershipInterface::TYPE_DEFAULT && !\Drupal::isConfigSyncing()) {
       throw new \Exception("The default OG membership type cannot be deleted.");
     }
     parent::delete();
