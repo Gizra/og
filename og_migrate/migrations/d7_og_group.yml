@@ -3,7 +3,7 @@ label: Og groups
 migration_tags:
   - Drupal 7
 source:
-  plugin: d6_og_group
+  plugin: d7_og_group
 process:
   entity_type: entity_type
   bundle: bundle

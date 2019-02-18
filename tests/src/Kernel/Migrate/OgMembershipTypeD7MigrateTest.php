@@ -2,6 +2,8 @@
 
 namespace Drupal\Tests\og\Kernel\Migrate;
 
+use Drupal\Core\Entity\Entity\EntityFormDisplay;
+use Drupal\Core\Entity\Entity\EntityViewDisplay;
 use Drupal\og\Entity\OgMembershipType;
 use Drupal\Tests\migrate_drupal\Kernel\d7\MigrateDrupal7TestBase;
 
@@ -30,7 +32,7 @@ class OgMembershipTypeD7MigrateTest extends MigrateDrupal7TestBase {
   }
 
   /**
-   * Asserts that the membership type was migrated.
+   * Asserts that the membership type and its form and view displays were migrated.
    */
   public function testOgMembershipType() {
     $type = OgMembershipType::load('default');
@@ -41,6 +43,14 @@ class OgMembershipTypeD7MigrateTest extends MigrateDrupal7TestBase {
     $types = OgMembershipType::loadMultiple();
 
     $this->assertCount(1, $types, 'Migrated default migration into Drupal 8 default.');
+
+    $form_display = EntityFormDisplay::load('og_membership.default.default');
+
+    $this->assertNotEqual(NULL, $form_display);
+
+    $view_display = EntityViewDisplay::load('og_membership.default.default');
+
+    $this->assertNotEqual(null, $view_display);
   }
 
 }

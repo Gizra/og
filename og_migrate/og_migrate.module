@@ -2,7 +2,7 @@
 
 /**
  * @file
- * Og Migrate module.
+ * Organic Groups migrate module.
  */
 
 use Drupal\migrate\MigrateSkipRowException;
@@ -19,10 +19,34 @@ use Drupal\migrate\Plugin\MigrationInterface;
  * @throws \Drupal\migrate\MigrateSkipRowException
  */
 function og_migrate_migrate_prepare_row(Row $row, MigrateSourceInterface $source, MigrationInterface $migration) {
-  if (in_array($migration->id(), ['d7_field', 'd7_field_instance'])) {
+  // Use the source plugin id instead of the migration id,
+  // as the migration id can be altered when using the migration_upgrade module.
+  $plugin_id = $source->getPluginId();
+
+  if (in_array($plugin_id, ['d7_field', 'd7_field_instance'])) {
     $field_names = ['og_group_ref', 'og_user_node'];
     if (in_array($row->getSourceProperty('field_name'), $field_names)) {
       throw new MigrateSkipRowException('og-related fields will be migrated separately');
+    }
+  }
+
+  $entity_type = $row->getSourceProperty('entity_type');
+  $bundle = $row->getSourceProperty('bundle');
+
+  // The "og_membership_type_default" bundle is now "default".
+  $old_default_bundle = 'og_membership_type_default';
+  $new_default_bundle = 'default';
+
+  if ($entity_type == 'og_membership' && $bundle == $old_default_bundle) {
+    if ($plugin_id == 'd7_field_instance' && $row->getSourceProperty('field_name') == 'og_membership_request') {
+      $fields = \Drupal::service('entity_field.manager')->getFieldDefinitions($entity_type, $new_default_bundle);
+      if (isset($fields['og_membership_request'])){
+        throw new MigrateSkipRowException('the og_membership_request is auto-created in the default group membership type');
+      }
+    }
+
+    if (in_array($plugin_id, ['d7_field_instance', 'd7_field_instance_per_view_mode', 'd7_field_instance_per_form_display'])) {
+      $row->setSourceProperty('bundle', $new_default_bundle);
     }
   }
 }
