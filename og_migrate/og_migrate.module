@@ -40,7 +40,7 @@ function og_migrate_migrate_prepare_row(Row $row, MigrateSourceInterface $source
   if ($entity_type == 'og_membership' && $bundle == $old_default_bundle) {
     if ($plugin_id == 'd7_field_instance' && $row->getSourceProperty('field_name') == 'og_membership_request') {
       $fields = \Drupal::service('entity_field.manager')->getFieldDefinitions($entity_type, $new_default_bundle);
-      if (isset($fields['og_membership_request'])){
+      if (isset($fields['og_membership_request'])) {
         throw new MigrateSkipRowException('the og_membership_request is auto-created in the default group membership type');
       }
     }

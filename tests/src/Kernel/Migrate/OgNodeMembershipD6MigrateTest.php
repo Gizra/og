@@ -63,7 +63,7 @@ class OgNodeMembershipD6MigrateTest extends MigrateDrupal6TestBase {
     $this->assertCount(7, $results, 'Found 7 nodes with og_audience field data.');
 
     $node = Node::load(8);
-    $this->assertCount(2, $node->get('og_audience'),'Found migrated node in multiple groups.');
+    $this->assertCount(2, $node->get('og_audience'), 'Found migrated node in multiple groups.');
   }
 
 }

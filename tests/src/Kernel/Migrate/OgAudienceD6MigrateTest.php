@@ -2,7 +2,6 @@
 
 namespace Drupal\Tests\og\Kernel\Migrate;
 
-use Drupal\field\Entity\FieldConfig;
 use Drupal\og\Og;
 use Drupal\Tests\migrate_drupal\Kernel\d6\MigrateDrupal6TestBase;
 

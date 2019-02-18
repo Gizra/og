@@ -6,4 +6,3 @@ core: 8.x
 dependencies:
   - drupal:migrate
   - drupal:og
-

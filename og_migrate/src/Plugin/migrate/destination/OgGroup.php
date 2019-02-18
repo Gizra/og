@@ -122,4 +122,3 @@ class OgGroup extends DestinationBase implements ContainerFactoryPluginInterface
   }
 
 }
-

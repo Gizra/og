@@ -20,7 +20,7 @@ class OgMembership extends SqlBase {
    */
   public function query() {
     $op = '=';
-    $entity_type  = isset($this->configuration['entity_type']) ? $this->configuration['entity_type'] : 'any';
+    $entity_type = isset($this->configuration['entity_type']) ? $this->configuration['entity_type'] : 'any';
     if ($entity_type === 'any') {
       $op = '<>';
       $entity_type = 'user';
@@ -112,7 +112,7 @@ class OgMembership extends SqlBase {
    *   TRUE if the migration is for users.
    */
   protected function isUserMembershipMigration() {
-    $entity_type  = isset($this->configuration['entity_type']) ? $this->configuration['entity_type'] : 'any';
+    $entity_type = isset($this->configuration['entity_type']) ? $this->configuration['entity_type'] : 'any';
     return $entity_type === 'user';
   }
 

@@ -50,7 +50,7 @@ class OgMembershipTypeD7MigrateTest extends MigrateDrupal7TestBase {
 
     $view_display = EntityViewDisplay::load('og_membership.default.default');
 
-    $this->assertNotEqual(null, $view_display);
+    $this->assertNotEqual(NULL, $view_display);
   }
 
 }

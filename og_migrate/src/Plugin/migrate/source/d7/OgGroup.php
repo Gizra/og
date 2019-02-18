@@ -52,4 +52,3 @@ class OgGroup extends SqlBase {
   }
 
 }
-

@@ -56,4 +56,3 @@ class OgMigratePreSaveSubscriber implements EventSubscriberInterface {
   }
 
 }
-
