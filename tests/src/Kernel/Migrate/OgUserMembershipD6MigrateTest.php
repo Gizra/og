@@ -49,8 +49,8 @@ class OgUserMembershipD6MigrateTest extends MigrateDrupal6TestBase {
       'd6_node_settings',
       'd6_node_type',
       'd6_node',
-      'd6_og_admin_role',
       'd6_og_group_type',
+      'd6_og_admin_role',
       'd6_og_user_membership',
     ]);
   }
@@ -61,7 +61,7 @@ class OgUserMembershipD6MigrateTest extends MigrateDrupal6TestBase {
   public function testOgMembership() {
     $memberships = OgMembership::loadMultiple();
 
-    $this->assertEquals(5, count($memberships), 'Five members were migrated.');
+    $this->assertEquals(7, count($memberships), 'Seven members were migrated.');
     $bundles = array_reduce($memberships, function (&$result, OgMembershipInterface $membership) {
       if (!in_array($membership->bundle(), $result)) {
         $result[] = $membership->bundle();
@@ -84,7 +84,7 @@ class OgUserMembershipD6MigrateTest extends MigrateDrupal6TestBase {
 
     $this->assertNotNull($membership);
     $this->assertTrue($membership->hasRole('node-company-member'), 'User 2 has member role.');
-    $this->assertTrue($membership->hasRole('node-company-administrator-member'), 'User 2 has administrator member role.');
+    $this->assertTrue($membership->hasRole('node-company-administrator'), 'User 2 has administrator role.');
   }
 
 }

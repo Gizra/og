@@ -73,7 +73,7 @@ class OgUid extends SqlBase {
     $roles = [];
 
     if ($row->getSourceProperty('is_admin')) {
-      $roles[] = 'node-' . $row->getSourceProperty('type') . '-administrator-member';
+      $roles[] = 'node-' . $row->getSourceProperty('type') . '-administrator';
     }
     $row->setSourceProperty('roles', $roles);
 

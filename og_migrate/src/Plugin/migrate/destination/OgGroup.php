@@ -9,6 +9,7 @@ use Drupal\migrate\Plugin\migrate\destination\DestinationBase;
 use Drupal\migrate\Plugin\MigrationInterface;
 use Drupal\migrate\Row;
 use Drupal\og\GroupTypeManager;
+use Drupal\og\OgRoleManager;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
@@ -28,6 +29,13 @@ class OgGroup extends DestinationBase implements ContainerFactoryPluginInterface
   protected $config;
 
   /**
+   * Organic groups role manager.
+   *
+   * @var \Drupal\og\OgRoleManager
+   */
+  protected $roleManager;
+
+  /**
    * Initialize method.
    *
    * @param array $configuration
@@ -40,10 +48,13 @@ class OgGroup extends DestinationBase implements ContainerFactoryPluginInterface
    *   The migration definition.
    * @param \Drupal\Core\Config\ConfigFactoryInterface $configFactory
    *   The config.factory service.
+   * @param \Drupal\og\OgRoleManager $roleManager
+   *   The og.role_manager service.
    */
-  public function __construct(array $configuration, $plugin_id, $plugin_definition, MigrationInterface $migration, ConfigFactoryInterface $configFactory) {
+  public function __construct(array $configuration, $plugin_id, $plugin_definition, MigrationInterface $migration, ConfigFactoryInterface $configFactory, OgRoleManager $roleManager) {
     parent::__construct($configuration, $plugin_id, $plugin_definition, $migration);
     $this->config = $configFactory->getEditable(GroupTypeManager::SETTINGS_CONFIG_KEY);
+    $this->roleManager = $roleManager;
   }
 
   /**
@@ -69,6 +80,9 @@ class OgGroup extends DestinationBase implements ContainerFactoryPluginInterface
       $this->config
         ->set('groups', $groups)
         ->save();
+      if (in_array('Drupal 6', $this->migration->getMigrationTags())) {
+        $this->roleManager->createPerBundleRoles($entity_type, $bundle);
+      }
     }
     catch (ConfigValueException $e) {
       return FALSE;
@@ -117,7 +131,8 @@ class OgGroup extends DestinationBase implements ContainerFactoryPluginInterface
       $plugin_id,
       $plugin_definition,
       $migration,
-      $container->get('config.factory')
+      $container->get('config.factory'),
+      $container->get('og.role_manager')
     );
   }
 

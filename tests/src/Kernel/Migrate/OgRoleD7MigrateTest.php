@@ -47,6 +47,7 @@ class OgRoleD7MigrateTest extends MigrateDrupal7TestBase {
       'd7_node',
       'd7_taxonomy_vocabulary',
       'd7_taxonomy_term',
+      'd7_og_group',
       'd7_og_role',
     ]);
   }
@@ -57,14 +58,14 @@ class OgRoleD7MigrateTest extends MigrateDrupal7TestBase {
   public function testOgRole() {
     $roles = OgRole::loadMultiple();
 
-    $this->assertEquals(7, count($roles), 'Seven roles were migrated.');
+    $this->assertEquals(7, count($roles), '7 roles were migrated.');
 
     // Asserts that the non-member role has subscribe permission.
     $anonymousRole = OgRole::load('node-test_content_type-non-member');
     $this->assertEquals(['subscribe'], $anonymousRole->getPermissions());
 
     // Asserts permissions on administrative role.
-    $adminRole = OgRole::load('node-test_content_type-administrator-member');
+    $adminRole = OgRole::load('node-test_content_type-administrator');
     $expected = [
       'add user',
       'administer group',

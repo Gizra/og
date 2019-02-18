@@ -58,7 +58,7 @@ class OgAdminRole extends SqlBase {
    */
   public function prepareRow(Row $row) {
     if ($row->getSourceProperty('is_admin')) {
-      $id = 'node-' . $row->getSourceProperty('type') . '-administrator-member';
+      $id = 'node-' . $row->getSourceProperty('type') . '-administrator';
       $row->setSourceProperty('id', $id);
     }
     return parent::prepareRow($row);

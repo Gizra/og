@@ -11,7 +11,7 @@ process:
   label:
     -
       plugin: default_value
-      default_value: 'administrator member'
+      default_value: 'administrator'
   weight:
     -
       plugin: default_value
@@ -31,10 +31,6 @@ process:
       plugin: skip_on_empty
       method: row
       message: 'Missing content type'
-  role_type:
-    -
-      plugin: default_value
-      default_value: standard
 destination:
   plugin: entity:og_role
 migration_dependencies:

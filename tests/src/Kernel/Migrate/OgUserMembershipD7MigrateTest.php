@@ -69,8 +69,8 @@ class OgUserMembershipD7MigrateTest extends MigrateDrupal7TestBase {
       'd7_taxonomy_term',
       'd7_field',
       'd7_field_instance',
-      'd7_og_role',
       'd7_og_group',
+      'd7_og_role',
       'd7_og_membership_type',
       'd7_og_user_membership',
     ]);
@@ -104,7 +104,7 @@ class OgUserMembershipD7MigrateTest extends MigrateDrupal7TestBase {
     }, NULL);
 
     $this->assertNotNull($membership);
-    $this->assertTrue($membership->hasRole('node-test_content_type-administrator-member'), 'User 2 has administrator-member role.');
+    $this->assertTrue($membership->hasRole('node-test_content_type-administrator'), 'User 2 has administrator role.');
     $this->assertTrue($membership->hasRole('node-test_content_type-content-creator'), 'User 2 has content-creator role.');
   }
 

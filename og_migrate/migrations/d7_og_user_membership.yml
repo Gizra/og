@@ -50,6 +50,6 @@ migration_dependencies:
     - d7_user
     - d7_content
     - d7_og_membership_type
-    - d7_og_role
     - d7_og_group
+    - d7_og_role
     - d7_field_instance

@@ -47,11 +47,11 @@ class OgAdminRoleD6MigrateTest extends MigrateDrupal6TestBase {
   public function testOgAdminRole() {
     $roles = OgRole::loadByGroupType('node', 'company');
 
-    $this->assertCount(1, $roles, 'Found 1 standard role in node.company');
+    $this->assertCount(3, $roles, 'Found 3 required roles in node.company');
 
     $admin_role = array_shift($roles);
 
-    $this->assertEquals('node-company-administrator-member', $admin_role->id());
+    $this->assertEquals('node-company-administrator', $admin_role->id());
   }
 
 }

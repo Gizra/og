@@ -23,7 +23,8 @@ class OgRoleMachineName extends ProcessPluginBase {
    * {@inheritdoc}
    */
   public function transform($value, MigrateExecutableInterface $migrate_executable, Row $row, $destination_property) {
-    return str_replace(' ', '-', $value);
+    $name = str_replace(' ', '-', $value);
+    return str_replace('administrator-member', 'administrator', $name);
   }
 
 }

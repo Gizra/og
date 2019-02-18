@@ -43,6 +43,8 @@ class OgGroupD7MigrateTest extends MigrateDrupal7TestBase {
       'd7_filter_format',
       'd7_user_role',
       'd7_user',
+      'd7_taxonomy_vocabulary',
+      'd7_taxonomy_term',
       'd7_node_type',
       'd7_node',
       'd7_og_group',

@@ -39,6 +39,7 @@ process:
       map:
         member: false
         'non-member': false
+        administrator: true
       default_value: false
   role_type:
     -
@@ -48,6 +49,7 @@ process:
       map:
         member: required
         'non-member': required
+        administrator: required
       default_value: standard
   permissions: permissions
 destination:
@@ -55,3 +57,5 @@ destination:
 migration_dependencies:
   optional:
     - d7_node
+  required:
+    - d7_og_group
