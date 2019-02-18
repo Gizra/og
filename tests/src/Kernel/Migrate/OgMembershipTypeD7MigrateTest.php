@@ -32,7 +32,9 @@ class OgMembershipTypeD7MigrateTest extends MigrateDrupal7TestBase {
   }
 
   /**
-   * Asserts that the membership type and its form and view displays were migrated.
+   * Asserts that the membership types are migrated.
+   *
+   * This includes the entities, view and form displays.
    */
   public function testOgMembershipType() {
     $type = OgMembershipType::load('default');

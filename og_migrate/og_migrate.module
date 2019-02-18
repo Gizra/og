@@ -45,7 +45,12 @@ function og_migrate_migrate_prepare_row(Row $row, MigrateSourceInterface $source
       }
     }
 
-    if (in_array($plugin_id, ['d7_field_instance', 'd7_field_instance_per_view_mode', 'd7_field_instance_per_form_display'])) {
+    $field_migrations = [
+      'd7_field_instance',
+      'd7_field_instance_per_view_mode',
+      'd7_field_instance_per_form_display',
+    ];
+    if (in_array($plugin_id, $field_migrations)) {
       $row->setSourceProperty('bundle', $new_default_bundle);
     }
   }
