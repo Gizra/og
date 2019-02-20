@@ -720,6 +720,7 @@ function og_ui_admin_permissions($form, $form_state, $group_type = '', $gid = 0,
 
   if ($gid) {
     og_set_breadcrumb($group_type, $gid, array(l(t('Group'), "$group_type/$gid/group")));
+    list(, , $bundle) = entity_extract_ids($group_type, entity_load_single($group_type, $gid));
   }
 
   $form['group_type'] = array('#type' => 'value', '#value' => $group_type);
