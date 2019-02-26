@@ -40,7 +40,14 @@ process:
       plugin: migration_lookup
       migration: d7_og_role
       source: roles
-  state: state
+  state:
+    -
+      plugin: static_map
+      source: state
+      map:
+        1: active
+        2: pending
+        3: blocked
   created: created
   language: language
 destination:

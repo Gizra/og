@@ -106,6 +106,7 @@ class OgUserMembershipD7MigrateTest extends MigrateDrupal7TestBase {
     $this->assertNotNull($membership);
     $this->assertTrue($membership->hasRole('node-test_content_type-administrator'), 'User 2 has administrator role.');
     $this->assertTrue($membership->hasRole('node-test_content_type-content-creator'), 'User 2 has content-creator role.');
+    $this->assertTrue($membership->isActive());
   }
 
 }
