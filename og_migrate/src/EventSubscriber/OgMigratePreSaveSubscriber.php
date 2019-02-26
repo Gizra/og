@@ -26,31 +26,26 @@ class OgMigratePreSaveSubscriber implements EventSubscriberInterface {
    */
   public function onPreRowSave(MigratePreRowSaveEvent $event) {
     $migration = $event->getMigration();
-    if ($migration->getPluginId() === 'd7_field_instance') {
+    $plugin_id = $migration->getPluginId();
+
+    $field_migrations = [
+      'd7_field_instance',
+      'd7_field_instance_per_view_mode',
+      'd7_field_instance_per_form_display',
+    ];
+
+    if (in_array($plugin_id, $field_migrations)) {
       $row = $event->getRow();
-      if ($row->getDestinationProperty('type') === 'entity_reference') {
-        // Cleans any bad data from field config before it's saved otherwise
-        // the schema checker will barf.
-        $settings = $row->getDestinationProperty('settings');
 
-        if (isset($settings['handler_settings']['behaviors'])) {
-          unset($settings['handler_settings']['behaviors']);
-        }
-        if (isset($settings['handler_settings']['membership_type'])) {
-          unset($settings['handler_settings']['membership_type']);
-          $settings['handler'] = 'og:default';
+      // The "og_membership_type_default" bundle is now "default".
+      $old_default_bundle = 'og_membership_type_default';
+      $new_default_bundle = 'default';
 
-          $row->setDestinationProperty('type', 'og_standard_reference');
-        }
+      $entity_type = $row->getDestinationProperty('entity_type');
+      $bundle = $row->getDestinationProperty('bundle');
 
-        $row->setDestinationProperty('settings', $settings);
-      }
-    }
-    elseif ($migration->getPluginId() === 'd7_field') {
-      $field_names = ['og_group_ref', 'og_user_node'];
-      $row = $event->getRow();
-      if (in_array($row->getDestinationProperty('field_name'), $field_names)) {
-        $row->setDestinationProperty('type', 'og_standard_reference');
+      if ($entity_type === 'og_membership' && $bundle === $old_default_bundle) {
+        $row->setDestinationProperty('bundle', $new_default_bundle);
       }
     }
   }
