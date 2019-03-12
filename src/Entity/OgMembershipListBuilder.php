@@ -29,6 +29,7 @@ class OgMembershipListBuilder extends EntityListBuilder {
   public static function createInstance(ContainerInterface $container, EntityTypeInterface $entity_type) {
     $instance = parent::createInstance($container, $entity_type);
     $instance->setCurrentUser($container->get('current_user'));
+
     return $instance;
   }
 
@@ -49,6 +50,7 @@ class OgMembershipListBuilder extends EntityListBuilder {
     $header['label'] = $this->t('Group name');
     $header['roles'] = $this->t('Roles');
     $header['state'] = $this->t('Membership state');
+
     return $header + parent::buildHeader();
   }
 
@@ -66,6 +68,7 @@ class OgMembershipListBuilder extends EntityListBuilder {
       'title' => $this->t('Leave group'),
       'url' => $this->ensureDestination($url),
     ];
+
     return $operations;
   }
 
@@ -77,6 +80,7 @@ class OgMembershipListBuilder extends EntityListBuilder {
     $row['label'] = Link::fromTextAndUrl($entity->getGroup()->label(), $entity->getGroup()->toUrl());
     $row['roles'] = implode(', ', array_map(function(OgRoleInterface $role) {return $role->getLabel();}, $entity->getRoles()));
     $row['state'] = $entity->getState();
+
     return $row + parent::buildRow($entity);
   }
 
@@ -84,6 +88,7 @@ class OgMembershipListBuilder extends EntityListBuilder {
     $build = parent::render();
     $build['table']['#empty'] = $this->t('There are no memberships yet.');
     uasort($build['table']['#rows'], [$this, 'sort']);
+
     return $build;
   }
 
@@ -100,6 +105,7 @@ class OgMembershipListBuilder extends EntityListBuilder {
     $a_label = (is_array($a) && isset($a['label'])) ? $a['label'] : '';
     /** @var \Drupal\Core\Link $b_label */
     $b_label = (is_array($b) && isset($b['label'])) ? $b['label'] : '';
+
     return strnatcasecmp($a_label->getText(), $b_label->getText());
   }
 
@@ -110,6 +116,7 @@ class OgMembershipListBuilder extends EntityListBuilder {
     $query = $this->getStorage()
       ->getQuery()
       ->condition('uid', $this->currentUser->id());
+
     return $query->execute();
   }
 
