@@ -66,6 +66,7 @@ use Drupal\user\EntityOwnerInterface;
  *     "bundle" = "type",
  *   },
  *   handlers = {
+ *     "list_builder" = "Drupal\og\Entity\OgMembershipListBuilder",
  *     "views_data" = "Drupal\og\OgMembershipViewsData",
  *     "form" = {
  *       "subscribe" = "Drupal\og\Form\GroupSubscribeForm",

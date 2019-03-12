@@ -43,3 +43,16 @@ og.remove_multiple_roles_confirm:
     _form: '\Drupal\og\Form\OgRemoveMultipleRolesForm'
   requirements:
     _custom_access: '\Drupal\og\Form\OgRemoveMultipleRolesForm::access'
+
+og.user_memberships:
+  path: '/user/{user}/groups'
+  defaults:
+    _entity_list: 'og_membership'
+    _title: 'My groups'
+  requirements:
+    user: '\d+'
+    _entity_access: 'user.view'
+  options:
+    parameters:
+      user:
+        type: entity:user
