@@ -1,6 +1,6 @@
 <?php
 
-namespace Drupal\og\Entity;
+namespace Drupal\og;
 
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Entity\EntityListBuilder;
