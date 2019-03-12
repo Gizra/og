@@ -357,10 +357,10 @@ display:
           entity_type: og_membership
           entity_field: state
           plugin_id: field
-        roles:
-          id: roles
+        roles_target_id:
+          id: roles_target_id
           table: og_membership__roles
-          field: roles
+          field: roles_target_id
           relationship: none
           group_type: group
           admin_label: ''
