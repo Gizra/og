@@ -53,6 +53,7 @@ og.user_memberships:
     user: '\d+'
     _entity_access: 'user.view'
   options:
+    _admin_route: 'TRUE'
     parameters:
       user:
         type: entity:user
