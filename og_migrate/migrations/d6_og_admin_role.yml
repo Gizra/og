@@ -9,16 +9,13 @@ source:
 process:
   id: id
   label:
-    -
       plugin: default_value
       default_value: 'administrator'
   weight:
-    -
       plugin: default_value
       default_value: 0
   is_admin: is_admin
   group_id:
-    -
       plugin: default_value
       default_value: 0
   group_type: constants/entity_type

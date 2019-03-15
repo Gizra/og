@@ -6,7 +6,6 @@ source:
   plugin: d7_og_membership_type
 process:
   type:
-    -
       plugin: static_map
       source: name
       bypass: true

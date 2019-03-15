@@ -19,7 +19,6 @@ process:
   entity_type: entity_type
   entity_bundle: bundle
   settings:
-    -
       plugin: skip_on_empty
       method: process
 destination:

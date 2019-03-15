@@ -28,12 +28,10 @@ process:
       message: 'Missing group content node'
   entity_type: constants/entity_type
   language:
-    -
       plugin: default_value
       source: og_language
       default_value: und
   field_name:
-    -
       plugin: default_value
       default_value: og_audience
 destination:
