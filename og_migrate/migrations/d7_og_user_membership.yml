@@ -36,17 +36,17 @@ process:
       method: row
       message: 'Entity type is missing'
   roles:
-      plugin: migration_lookup
-      migration: d7_og_role
-      source: roles
+    plugin: migration_lookup
+    migration: d7_og_role
+    source: roles
   state:
-      plugin: static_map
-      source: state
-      map:
-        1: active
-        2: pending
-        3: blocked
-      default_value: 1
+    plugin: static_map
+    source: state
+    map:
+      1: active
+      2: pending
+      3: blocked
+    default_value: 1
   created: created
   language: language
 destination:

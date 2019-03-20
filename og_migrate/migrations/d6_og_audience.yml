@@ -12,8 +12,8 @@ process:
   entity_type: constants/entity_type
   entity_bundle: type
   settings:
-      plugin: default_value
-      default_value: ~
+    plugin: default_value
+    default_value: ~
 destination:
   plugin: og_field
 migration_dependencies:

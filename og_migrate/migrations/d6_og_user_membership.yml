@@ -38,17 +38,17 @@ process:
       method: row
       message: 'Missing content type'
   state:
-      plugin: static_map
-      source: is_active
-      map:
-        0: pending
-        1: active
+    plugin: static_map
+    source: is_active
+    map:
+      0: pending
+      1: active
   roles: roles
   created: created
   language:
-      plugin: default_value
-      source: og_language
-      default_value: und
+    plugin: default_value
+    source: og_language
+    default_value: und
 destination:
   plugin: entity:og_membership
 migration_dependencies:

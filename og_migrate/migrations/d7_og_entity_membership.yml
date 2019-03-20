@@ -20,12 +20,11 @@ process:
   # property and migration lookups only check source properties beacuse. We
   # assume that everything will be mapped to og_audience.
   field_name:
-    -
-      plugin: static_map
-      source: field_name
-      map:
-        og_group_ref: og_audience
-        default: og_audience
+    plugin: static_map
+    source: field_name
+    map:
+      og_group_ref: og_audience
+      default: og_audience
   language: language
 destination:
   plugin: og_entity_membership

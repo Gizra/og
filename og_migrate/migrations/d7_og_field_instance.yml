@@ -19,8 +19,8 @@ process:
   entity_type: entity_type
   entity_bundle: bundle
   settings:
-      plugin: skip_on_empty
-      method: process
+    plugin: skip_on_empty
+    method: process
 destination:
   plugin: og_field
 migration_dependencies:
