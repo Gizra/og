@@ -30,8 +30,8 @@ class OgMigratePreSaveSubscriber implements EventSubscriberInterface {
 
     $field_migrations = [
       'd7_field_instance',
-      'd7_field_instance_per_view_mode',
-      'd7_field_instance_per_form_display',
+      'd7_field_formatter_settings',
+      'd7_field_instance_widget_settings',
     ];
 
     if (in_array($plugin_id, $field_migrations)) {
