@@ -4,6 +4,7 @@ namespace Drupal\og_access\Plugin\OgFields;
 
 use Drupal\og\OgFieldBase;
 use Drupal\og\OgFieldsInterface;
+use Drupal\og_access\OgAccess;
 
 /**
  * Determine the group content visibility.
