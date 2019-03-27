@@ -32,6 +32,8 @@ class OgAdminRoleD6MigrateTest extends MigrateDrupal6TestBase {
 
     $this->installEntitySchema('og_role');
     $this->installEntitySchema('node');
+    $this->installEntitySchema('node_type');
+    $this->installEntitySchema('user');
     $this->installConfig(['user', 'node', 'og']);
     $this->loadFixture(__DIR__ . '/../../../fixtures/drupal6.php');
     $this->executeMigrations([

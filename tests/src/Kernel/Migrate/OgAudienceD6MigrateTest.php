@@ -31,6 +31,10 @@ class OgAudienceD6MigrateTest extends MigrateDrupal6TestBase {
     parent::setUp();
 
     $this->installEntitySchema('node');
+    $this->installEntitySchema('node_type');
+    $this->installEntitySchema('og_membership_type');
+    $this->installEntitySchema('og_membership');
+    $this->installEntitySchema('og_role');
     $this->installConfig(['node', 'og']);
     $this->loadFixture(__DIR__ . '/../../../fixtures/drupal6.php');
     $this->migrateContentTypes();
