@@ -2,6 +2,9 @@
 
 namespace Drupal\og_migrate\Plugin\migrate\source\d7;
 
+use Drupal\Component\Plugin\ConfigurableInterface;
+use Drupal\Component\Utility\NestedArray;
+use Drupal\migrate\Plugin\Exception\BadPluginDefinitionException;
 use Drupal\migrate\Plugin\migrate\source\SqlBase;
 use Drupal\migrate\Row;
 
@@ -13,19 +16,26 @@ use Drupal\migrate\Row;
  *   source_module = "og_migrate"
  * )
  */
-class OgMembership extends SqlBase {
+class OgMembership extends SqlBase implements ConfigurableInterface {
 
   /**
-   * {@inheritdoc}
+   * Returns a select query.
+   *
+   * @return \Drupal\Core\Database\Query\SelectInterface
+   *   The select query interface.
+   *
+   * @throws \Drupal\migrate\Plugin\Exception\BadPluginDefinitionException
    */
   public function query() {
-    $op = '=';
-    $entity_type = isset($this->configuration['entity_type']) ? $this->configuration['entity_type'] : 'any';
-    if ($entity_type === 'any') {
-      $op = '<>';
-      $entity_type = 'user';
+    if (!isset($this->configuration['entity_type'])) {
+      throw new BadPluginDefinitionException('d7_og_membership', 'entity_type');
+    }
+    if (!isset($this->configuration['group_type'])) {
+      throw new BadPluginDefinitionException('d7_og_membership', 'group_type');
     }
 
+    $entity_type = $this->configuration['entity_type'];
+    $group_type = $this->configuration['group_type'];
     $query = $this->select('og_membership', 'ogm');
     $query
       ->fields('ogm', [
@@ -40,7 +50,8 @@ class OgMembership extends SqlBase {
         'field_name',
         'language',
       ])
-      ->condition('ogm.entity_type', $entity_type, $op);
+      ->condition('ogm.entity_type', $entity_type)
+      ->condition('ogm.group_type', $group_type);
     return $query;
   }
 
@@ -103,6 +114,29 @@ class OgMembership extends SqlBase {
     }
 
     return parent::prepareRow($row);
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getConfiguration() {
+    return $this->configuration;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function defaultConfiguration() {
+    // Hopefully nobody depends on this returning something anything other than
+    // an empty array.
+    return [];
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function setConfiguration(array $configuration) {
+    $this->configuration = NestedArray::mergeDeep($this->configuration, $configuration);
   }
 
   /**
