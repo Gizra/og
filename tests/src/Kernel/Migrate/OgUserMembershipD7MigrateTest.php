@@ -79,7 +79,8 @@ class OgUserMembershipD7MigrateTest extends MigrateDrupal7TestBase {
       'd7_field_instance',
       'd7_og_field_instance',
       'd7_og_membership_type',
-      'd7_og_entity_membership',
+      'd7_og_entity_membership:node_user',
+      'd7_og_entity_membership:taxonomy_term_user',
     ]);
   }
 

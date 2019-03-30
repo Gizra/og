@@ -171,7 +171,18 @@ class OgEntityDeriver extends DeriverBase implements ContainerDeriverInterface {
           'message' => 'Migration entity is missing',
         ],
       ],
-      'entity_type' => 'entity_type',
+      'entity_type' => [
+        [
+          'plugin' => 'og_entity_type_exists',
+          'source' => 'group_type',
+          'bundle_property' => 'bundle',
+        ],
+        [
+          'plugin' => 'skip_on_empty',
+          'method' => 'row',
+          'message' => 'Entity type is missing',
+        ],
+      ],
       'group_type' => 'group_type',
       'field_name' => [
         'plugin' => 'static_map',
@@ -233,7 +244,18 @@ class OgEntityDeriver extends DeriverBase implements ContainerDeriverInterface {
           'message' => 'Migration group is missing',
         ],
       ],
-      'entity_type' => 'group_type',
+      'entity_type' => [
+        [
+          'plugin' => 'og_entity_type_exists',
+          'source' => 'group_type',
+          'bundle_property' => 'entity_bundle',
+        ],
+        [
+          'plugin' => 'skip_on_empty',
+          'method' => 'row',
+          'message' => 'Entity type is missing',
+        ],
+      ],
       'roles' => [
         'plugin' => 'migration_lookup',
         'migration' => 'd7_og_role',
