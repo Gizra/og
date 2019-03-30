@@ -103,9 +103,9 @@ class OgUserMembershipD7MigrateTest extends MigrateDrupal7TestBase {
     // Gets user 2, entity ID 1 membership.
     $membership = array_reduce($memberships, function (&$result, OgMembershipInterface $membership) {
       if ($result === NULL && $membership->uid->target_id == 2 &&
-          $membership->entity_id->value == 1 &&
-          $membership->entity_type->value === 'node' &&
-          $membership->entity_bundle->value === 'test_content_type') {
+          $membership->getGroupId() == 1 &&
+          $membership->getGroupEntityType() === 'node' &&
+          $membership->getGroupBundle() === 'test_content_type') {
         $result = $membership;
       }
       return $result;
