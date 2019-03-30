@@ -79,7 +79,7 @@ class OgEntityDeriver extends DeriverBase implements ContainerDeriverInterface {
           ];
 
           foreach (array_keys($supported_types) as $entity_type) {
-            if ($group_type !== $entity_type && $this->entityTypeManager->hasDefinition($entity_type)) {
+            if ($this->entityTypeManager->hasDefinition($entity_type)) {
               $derivative = $group_type . '_' . $entity_type;
               $configuration['entity_type'] = $entity_type;
               $source->setConfiguration($configuration);
@@ -174,7 +174,7 @@ class OgEntityDeriver extends DeriverBase implements ContainerDeriverInterface {
       'entity_type' => [
         [
           'plugin' => 'og_entity_type_exists',
-          'source' => 'group_type',
+          'source' => 'entity_type',
           'bundle_property' => 'bundle',
         ],
         [
@@ -183,7 +183,18 @@ class OgEntityDeriver extends DeriverBase implements ContainerDeriverInterface {
           'message' => 'Entity type is missing',
         ],
       ],
-      'group_type' => 'group_type',
+      'group_type' => [
+        [
+          'plugin' => 'og_entity_type_exists',
+          'source' => 'group_type',
+          'bundle_property' => 'bundle',
+        ],
+        [
+          'plugin' => 'skip_on_empty',
+          'method' => 'row',
+          'message' => 'Group type is missing',
+        ],
+      ],
       'field_name' => [
         'plugin' => 'static_map',
         'source' => 'field_name',
