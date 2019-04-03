@@ -2,7 +2,7 @@
 
 namespace Drupal\og_migrate\Plugin\migrate;
 
-use Drupal\Component\Plugin\ConfigurableInterface;
+use Drupal\Component\Plugin\ConfigurablePluginInterface;
 use Drupal\Component\Plugin\Derivative\DeriverBase;
 use Drupal\Component\Plugin\Exception\PluginException;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
@@ -68,7 +68,8 @@ class OgEntityDeriver extends DeriverBase implements ContainerDeriverInterface {
     $source = static::getSourcePlugin('d7_og_membership');
     try {
       $source->checkRequirements();
-      if (!($source instanceof ConfigurableInterface)) {
+      // @todo Replace with ConfigurableInterface in Drupal 9.0.0.
+      if (!($source instanceof ConfigurablePluginInterface)) {
         throw new PluginException('Source plugin is not configurable.');
       }
 
