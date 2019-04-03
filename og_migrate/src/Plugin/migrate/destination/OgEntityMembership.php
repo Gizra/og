@@ -53,10 +53,15 @@ class OgEntityMembership extends DestinationBase implements ContainerFactoryPlug
     $entity_id = $row->getDestinationProperty('entity_id');
     $langcode = $row->getDestinationProperty('language');
 
+    /** @var \Drupal\Core\Entity\EntityStorageInterface $entityStorage */
+    $entityStorage = $this->entityTypeManager->getStorage($entity_type);
+
+    // Works around https://www.drupal.org/project/drupal/issues/3008202 by
+    // refreshing entity cache for each entity migrated.
+    $entityStorage->resetCache([$entity_id]);
+
     /** @var \Drupal\Core\Entity\ContentEntityInterface $entity */
-    $entity = $this->entityTypeManager
-      ->getStorage($entity_type)
-      ->load($entity_id);
+    $entity = $entityStorage->load($entity_id);
 
     $field_name = $row->getDestinationProperty('field_name');
     $target_id = $row->getDestinationProperty('target_id');
@@ -72,9 +77,6 @@ class OgEntityMembership extends DestinationBase implements ContainerFactoryPlug
         $entity->set($field_name, [$target_id]);
       }
       catch (\InvalidArgumentException $e) {
-        // @todo https://www.drupal.org/project/drupal/issues/3008202
-        // Drupal core does not support migrating multiple field instances of
-        // entity reference fields.
         return FALSE;
       }
     }
