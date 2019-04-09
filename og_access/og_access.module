@@ -135,7 +135,7 @@ function og_access_node_access_records(NodeInterface $node) {
  */
 function og_access_form_alter(array &$form, FormStateInterface $form_state, $form_id) {
   if ($form_state->getFormObject() instanceof BundleEntityFormBase) {
-    (new OgAccessBundleFormAlter($form_state->getFormObject()->getEntity()))
+    (new OgAccessBundleFormAlter($form_state->getFormObject()->getEntity(), \Drupal::service('string_translation')))
       ->formAlter($form, $form_state);
   }
 }
