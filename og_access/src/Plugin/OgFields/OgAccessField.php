@@ -4,7 +4,6 @@ namespace Drupal\og_access\Plugin\OgFields;
 
 use Drupal\og\OgFieldBase;
 use Drupal\og\OgFieldsInterface;
-use Drupal\og_access\OgAccess;
 
 /**
  * Determine if group should use default roles and permissions.
