@@ -10,7 +10,7 @@ use Drupal\og_access\OgAccess;
  * Determine if group should use default roles and permissions.
  *
  * @OgFields(
- *  id = OG_ACCESS_FIELD,
+ *  id = \Drupal\og_access\OgAccess::OG_ACCESS_FIELD,
  *  type = "group",
  *  description = @Translation("Determine access to the group.")
  * )
