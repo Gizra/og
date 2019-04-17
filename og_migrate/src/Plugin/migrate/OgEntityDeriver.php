@@ -281,7 +281,7 @@ class OgEntityDeriver extends DeriverBase implements ContainerDeriverInterface {
           '2' => 'pending',
           '3' => 'blocked',
         ],
-        'default_value' => '1',
+        'default_value' => 'active',
       ],
       'created' => 'created',
       'language' => 'language',
