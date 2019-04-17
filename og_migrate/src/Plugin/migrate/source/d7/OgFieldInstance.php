@@ -15,7 +15,7 @@ use Drupal\migrate\Row;
  */
 class OgFieldInstance extends SqlBase {
 
-  const OG_FIELD_NAMES = ['og_group_ref', 'og_user_node'];
+  const OG_FIELD_NAMES = ['og_group_ref'];
 
   /**
    * {@inheritdoc}

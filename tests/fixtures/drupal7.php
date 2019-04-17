@@ -476,18 +476,6 @@ $connection->insert('og_membership')
   'en',
 ])
 ->values([
-  8,
-  'og_membership_type_default',
-  5,
-  'node',
-  2,
-  'taxonomy_term',
-  1,
-  1308610519,
-  'og_group_ref',
-  'en',
-])
-->values([
   10,
   'og_membership_type_default',
   7,

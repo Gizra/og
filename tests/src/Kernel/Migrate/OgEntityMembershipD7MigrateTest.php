@@ -94,7 +94,7 @@ class OgEntityMembershipD7MigrateTest extends MigrateDrupal7TestBase {
       ->exists('og_audience')
       ->execute();
 
-    $this->assertCount(4, $results, 'Group content migrated');
+    $this->assertCount(3, $results, 'Group content migrated');
   }
 
 }
