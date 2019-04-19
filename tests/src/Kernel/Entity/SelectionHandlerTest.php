@@ -140,7 +140,7 @@ class SelectionHandlerTest extends KernelTestBase {
     $user1_groups = $this->createGroups(2, $this->user1);
     $user2_groups = $this->createGroups(2, $this->user2);
 
-    // Check that the user gets the groups it manages.
+    // Check that users get the groups they manage.
     $this->setCurrentAccount($this->user1);
     $groups = $this->selectionHandler->getReferenceableEntities();
     $this->assertEquals($user1_groups, array_keys($groups[$this->groupBundle]));
