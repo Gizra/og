@@ -10,7 +10,6 @@ env:
   global:
     - COMPOSER_MEMORY_LIMIT=2G
   matrix:
-    - TEST_SUITE=8.6.x
     - TEST_SUITE=8.7.x
     - TEST_SUITE=8.8.x
     - TEST_SUITE=PHP_CodeSniffer
