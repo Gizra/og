@@ -14,5 +14,6 @@
     },
     "require-dev": {
         "drupal/coder": "~8.2"
-    }
+    },
+    "minimum-stability": "RC"
 }
