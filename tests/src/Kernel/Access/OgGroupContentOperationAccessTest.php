@@ -235,6 +235,7 @@ class OgGroupContentOperationAccessTest extends KernelTestBase {
               'comment_type' => $bundle_id,
               'entity_id' => $this->group->id(),
               'entity_type' => 'entity_test',
+              'field_name' => 'an_imaginary_field',
               OgGroupAudienceHelperInterface::DEFAULT_FIELD => [['target_id' => $this->group->id()]],
             ];
             break;
