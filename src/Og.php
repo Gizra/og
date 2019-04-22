@@ -337,6 +337,8 @@ class Og {
     static::$cache = [];
 
     // Invalidate the entity property cache.
+    // @todo We should not clear the entity type and field definition caches.
+    // @see https://github.com/Gizra/og/issues/219
     \Drupal::entityTypeManager()->clearCachedDefinitions();
     \Drupal::service('entity_field.manager')->clearCachedFieldDefinitions();
 
