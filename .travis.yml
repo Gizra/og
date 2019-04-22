@@ -12,6 +12,7 @@ env:
   matrix:
     - TEST_SUITE=8.6.x
     - TEST_SUITE=8.7.x
+    - TEST_SUITE=8.8.x
     - TEST_SUITE=PHP_CodeSniffer
 
 # Only run the coding standards check once.
@@ -22,7 +23,7 @@ matrix:
     - php: 7.2
       env: TEST_SUITE=PHP_CodeSniffer
   allow_failures:
-    - env: TEST_SUITE=8.7.x
+    - env: TEST_SUITE=8.8.x
 
 mysql:
   database: og
