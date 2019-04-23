@@ -8,7 +8,6 @@ use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Link;
 use Drupal\Core\Session\AccountProxyInterface;
 use Drupal\Core\Url;
-use Drupal\og\OgRoleInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
