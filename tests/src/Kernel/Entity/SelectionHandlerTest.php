@@ -133,8 +133,9 @@ class SelectionHandlerTest extends KernelTestBase {
   /**
    * Testing OG selection handler results.
    *
-   * We verify that each user gets the groups it owns in the normal widget
-   * and the other users group's in the other groups widget and vice versa.
+   * We need to verify that each user gets the groups they own in the normal
+   * widget and the other users' groups in the other groups widget and vice
+   * versa.
    */
   public function testSelectionHandlerResults() {
     $user1_groups = $this->createGroups(2, $this->user1);
