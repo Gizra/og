@@ -124,7 +124,7 @@ class MembershipManager implements MembershipManagerInterface {
   /**
    * {@inheritdoc}
    */
-  public function getGroupMembershipsByRoleNames(EntityInterface $group, array $role_names, array $states = [OgMembershipInterface::STATE_ACTIVE]) {
+  public function getGroupMembershipIdsByRoleNames(EntityInterface $group, array $role_names, array $states = [OgMembershipInterface::STATE_ACTIVE]) {
     if (empty($role_names)) {
       throw new \InvalidArgumentException('The array of role names should not be empty.');
     }
@@ -171,7 +171,15 @@ class MembershipManager implements MembershipManagerInterface {
       $this->cache[$identifier] = $query->execute();
     }
 
-    return $this->loadMemberships($this->cache[$identifier]);
+    return $this->cache[$identifier];
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getGroupMembershipsByRoleNames(EntityInterface $group, array $role_names, array $states = [OgMembershipInterface::STATE_ACTIVE]) {
+    $ids = $this->getGroupMembershipIdsByRoleNames($group, $role_names, $states);
+    return $this->loadMemberships($ids);
   }
 
   /**

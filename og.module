@@ -374,6 +374,11 @@ function og_og_role_insert(OgRoleInterface $role) {
     return;
   }
 
+  // Do not create config while config import is in progress.
+  if (\Drupal::isConfigSyncing()) {
+    return;
+  }
+
   $add_id = 'og_membership_add_single_role_action.' . $role->getName();
   if (!Action::load($add_id)) {
     $action = Action::create([
