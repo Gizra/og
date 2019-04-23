@@ -178,7 +178,8 @@ class MembershipManager implements MembershipManagerInterface {
    * {@inheritdoc}
    */
   public function getGroupMembershipsByRoleNames(EntityInterface $group, array $role_names, array $states = [OgMembershipInterface::STATE_ACTIVE]) {
-    return $this->loadMemberships($this->getGroupMembershipIdsByRoleNames($group, $role_names, $states));
+    $ids = $this->getGroupMembershipIdsByRoleNames($group, $role_names, $states);
+    return $this->loadMemberships($ids);
   }
 
   /**

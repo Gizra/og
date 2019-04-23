@@ -89,7 +89,7 @@ interface MembershipManagerInterface {
   public function getMembership(EntityInterface $group, AccountInterface $user, array $states = [OgMembershipInterface::STATE_ACTIVE]);
 
   /**
-   * Returns the membership IDs of the given group filtered by role name.
+   * Returns the membership IDs of the given group filtered by role names.
    *
    * @param \Drupal\Core\Entity\EntityInterface $group
    *   The group entity for which to return the memberships.
