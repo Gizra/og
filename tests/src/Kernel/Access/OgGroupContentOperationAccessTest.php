@@ -174,7 +174,7 @@ class OgGroupContentOperationAccessTest extends KernelTestBase {
     }
 
     // Create a 'blocked' user. This user is identical to the normal
-    // 'authenticated' member, except that she has the 'blocked' state.
+    // 'authenticated' member, except that they have the 'blocked' state.
     $this->users['blocked'] = User::create(['name' => $this->randomString()]);
     $this->users['blocked']->save();
     $this->createOgMembership($this->group, $this->users['blocked'], NULL, OgMembershipInterface::STATE_BLOCKED);
@@ -235,6 +235,7 @@ class OgGroupContentOperationAccessTest extends KernelTestBase {
               'comment_type' => $bundle_id,
               'entity_id' => $this->group->id(),
               'entity_type' => 'entity_test',
+              'field_name' => 'an_imaginary_field',
               OgGroupAudienceHelperInterface::DEFAULT_FIELD => [['target_id' => $this->group->id()]],
             ];
             break;

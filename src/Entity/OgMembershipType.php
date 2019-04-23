@@ -25,6 +25,11 @@ use Drupal\og\OgMembershipTypeInterface;
  *   entity_keys = {
  *     "id" = "type",
  *     "label" = "name"
+ *   },
+ *   config_export = {
+ *     "type",
+ *     "name",
+ *     "description"
  *   }
  * )
  */

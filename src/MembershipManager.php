@@ -81,40 +81,30 @@ class MembershipManager implements MembershipManagerInterface {
    * {@inheritdoc}
    */
   public function getMemberships(AccountInterface $user, array $states = [OgMembershipInterface::STATE_ACTIVE]) {
-    // Get a string identifier of the states, so we can retrieve it from cache.
-    sort($states);
-    $states_identifier = implode('|', array_unique($states));
+    // When an empty array is passed, retrieve memberships with all possible
+    // states.
+    $states = $this->prepareConditionArray($states, OgMembership::ALL_STATES);
 
     $identifier = [
       __METHOD__,
       'user',
       $user->id(),
-      $states_identifier,
+      implode('|', $states),
     ];
     $identifier = implode(':', $identifier);
 
-    // Return cached result if it exists.
-    if (isset($this->cache[$identifier])) {
-      return $this->cache[$identifier];
+    // Use cached result if it exists.
+    if (!isset($this->cache[$identifier])) {
+      $query = $this->entityTypeManager
+        ->getStorage('og_membership')
+        ->getQuery()
+        ->condition('uid', $user->id())
+        ->condition('state', $states, 'IN');
+
+      $this->cache[$identifier] = $query->execute();
     }
 
-    $query = $this->entityTypeManager
-      ->getStorage('og_membership')
-      ->getQuery()
-      ->condition('uid', $user->id());
-
-    if ($states) {
-      $query->condition('state', $states, 'IN');
-    }
-
-    $results = $query->execute();
-
-    /** @var \Drupal\og\Entity\OgMembership[] $memberships */
-    $this->cache[$identifier] = $this->entityTypeManager
-      ->getStorage('og_membership')
-      ->loadMultiple($results);
-
-    return $this->cache[$identifier];
+    return $this->loadMemberships($this->cache[$identifier]);
   }
 
   /**
@@ -129,6 +119,59 @@ class MembershipManager implements MembershipManagerInterface {
 
     // No membership matches the request.
     return NULL;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getGroupMembershipsByRoleNames(EntityInterface $group, array $role_names, array $states = [OgMembershipInterface::STATE_ACTIVE]) {
+    if (empty($role_names)) {
+      throw new \InvalidArgumentException('The array of role names should not be empty.');
+    }
+
+    // In case the 'member' role is one of the requested roles, we just need to
+    // return all memberships. We can safely ignore all other roles.
+    $retrieve_all_memberships = FALSE;
+    if (in_array(OgRoleInterface::AUTHENTICATED, $role_names)) {
+      $retrieve_all_memberships = TRUE;
+      $role_names = [OgRoleInterface::AUTHENTICATED];
+    }
+
+    $role_names = $this->prepareConditionArray($role_names);
+    $states = $this->prepareConditionArray($states, OgMembership::ALL_STATES);
+
+    $identifier = [
+      __METHOD__,
+      $group->id(),
+      implode('|', $role_names),
+      implode('|', $states),
+    ];
+    $identifier = implode(':', $identifier);
+
+    // Only query the database if no cached result exists.
+    if (!isset($this->cache[$identifier])) {
+      $entity_type_id = $group->getEntityTypeId();
+
+      $query = $this->entityTypeManager
+        ->getStorage('og_membership')
+        ->getQuery()
+        ->condition('entity_type', $entity_type_id)
+        ->condition('entity_id', $group->id())
+        ->condition('state', $states, 'IN');
+
+      if (!$retrieve_all_memberships) {
+        $bundle_id = $group->bundle();
+        $role_ids = array_map(function ($role_name) use ($entity_type_id, $bundle_id) {
+          return implode('-', [$entity_type_id, $bundle_id, $role_name]);
+        }, $role_names);
+
+        $query->condition('roles', $role_ids, 'IN');
+      }
+
+      $this->cache[$identifier] = $query->execute();
+    }
+
+    return $this->loadMemberships($this->cache[$identifier]);
   }
 
   /**
@@ -325,6 +368,51 @@ class MembershipManager implements MembershipManagerInterface {
    */
   public function reset() {
     $this->cache = [];
+  }
+
+  /**
+   * Prepares a conditional array for use in a cache identifier and query.
+   *
+   * This will filter out any duplicate values from the array and sort the
+   * values so that a consistent cache identifier can be generated. Optionally
+   * it can substitute an empty array with a default value.
+   *
+   * @param array $value
+   *   The array to prepare.
+   * @param array|null $default
+   *   An optional default value to use in case the passed in value is empty. If
+   *   set to NULL this will be ignored.
+   *
+   * @return array
+   *   The prepared array.
+   */
+  protected function prepareConditionArray(array $value, array $default = NULL) {
+    // Fall back to the default value if the passed in value is empty and a
+    // default value is given.
+    if (empty($value) && $default !== NULL) {
+      $value = $default;
+    }
+    sort($value);
+    return array_unique($value);
+  }
+
+  /**
+   * Returns the full membership entities with the given memberships IDs.
+   *
+   * @param array $ids
+   *   The IDs of the memberships to load.
+   *
+   * @return \Drupal\Core\Entity\EntityInterface[]
+   *   The membership entities.
+   */
+  protected function loadMemberships(array $ids) {
+    if (empty($ids)) {
+      return [];
+    }
+
+    return $this->entityTypeManager
+      ->getStorage('og_membership')
+      ->loadMultiple($ids);
   }
 
 }

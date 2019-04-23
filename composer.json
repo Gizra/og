@@ -10,9 +10,10 @@
         "source": "https://cgit.drupalcode.org/og"
     },
     "require": {
-        "drupal/core": "~8.5"
+        "drupal/core": "~8.7"
     },
     "require-dev": {
         "drupal/coder": "~8.2"
-    }
+    },
+    "minimum-stability": "RC"
 }

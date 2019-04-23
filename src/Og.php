@@ -133,9 +133,11 @@ class Og {
    * @param \Drupal\Core\Session\AccountInterface $user
    *   The user to get groups for.
    * @param array $states
-   *   (optional) Array with the state to return. Defaults to active.
+   *   (optional) Array with the states to return. Defaults to only returning
+   *   active memberships. In order to retrieve all memberships regardless of
+   *   state, pass `OgMembershipInterface::ALL_STATES`.
    *
-   * @return \Drupal\og\Entity\OgMembership[]
+   * @return \Drupal\og\OgMembershipInterface[]
    *   An array of OgMembership entities, keyed by ID.
    */
   public static function getMemberships(AccountInterface $user, array $states = [OgMembershipInterface::STATE_ACTIVE]) {
@@ -152,9 +154,11 @@ class Og {
    * @param \Drupal\Core\Session\AccountInterface $user
    *   The user to get the membership for.
    * @param array $states
-   *   (optional) Array with the state to return. Defaults to active.
+   *   (optional) Array with the states to return. Defaults to only returning
+   *   active memberships. In order to retrieve all memberships regardless of
+   *   state, pass `OgMembershipInterface::ALL_STATES`.
    *
-   * @return \Drupal\og\Entity\OgMembership|null
+   * @return \Drupal\og\OgMembershipInterface|null
    *   The OgMembership entity. NULL will be returned if no membership is
    *   available that matches the passed in $states.
    */
@@ -333,6 +337,8 @@ class Og {
     static::$cache = [];
 
     // Invalidate the entity property cache.
+    // @todo We should not clear the entity type and field definition caches.
+    // @see https://github.com/Gizra/og/issues/219
     \Drupal::entityTypeManager()->clearCachedDefinitions();
     \Drupal::service('entity_field.manager')->clearCachedFieldDefinitions();
 
