@@ -50,7 +50,7 @@ class OgPermissionsForm extends FormBase {
   /**
    * The group roles.
    *
-   * @var array
+   * @var \Drupal\og\OgRoleInterface[]|\Drupal\user\RoleInterface[]
    */
   protected $roles;
 
