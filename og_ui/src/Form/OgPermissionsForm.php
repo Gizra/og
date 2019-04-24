@@ -229,7 +229,7 @@ class OgPermissionsForm extends FormBase {
       ];
 
       /** @var \Drupal\og\Permission $permission */
-      foreach ($permissions as $perm => $permission) {
+      foreach ($permissions as $permission_name => $permission) {
         // Fill in default values for the permission.
         $perm_item = [
           'title' => $permission->getTitle(),
@@ -238,7 +238,7 @@ class OgPermissionsForm extends FormBase {
           'warning' => $permission->getRestrictAccess() ? $this->t('Warning: Give to trusted roles only; this permission has security implications.') : '',
         ];
 
-        $form['permissions'][$perm]['description'] = [
+        $form['permissions'][$permission_name]['description'] = [
           '#type' => 'inline_template',
           '#template' => '<div class="permission"><span class="title">{{ title }}</span>{% if description or warning %}<div class="description">{% if warning %}<em class="permission-warning">{{ warning }}</em> {% endif %}{{ description }}</div>{% endif %}</div>',
           '#context' => [
@@ -248,8 +248,8 @@ class OgPermissionsForm extends FormBase {
 
         // Show the permission description.
         if (!$hide_descriptions) {
-          $form['permissions'][$perm]['description']['#context']['description'] = $perm_item['description'];
-          $form['permissions'][$perm]['description']['#context']['warning'] = $perm_item['warning'];
+          $form['permissions'][$permission_name]['description']['#context']['description'] = $perm_item['description'];
+          $form['permissions'][$permission_name]['description']['#context']['warning'] = $perm_item['warning'];
         }
 
         foreach ($roles as $rid => $role) {
@@ -263,28 +263,28 @@ class OgPermissionsForm extends FormBase {
           }
 
           if ($permission_applies) {
-            $form['permissions'][$perm][$rid] = [
+            $form['permissions'][$permission_name][$rid] = [
               '#title' => $role->getName() . ': ' . $perm_item['title'],
               '#title_display' => 'invisible',
               '#wrapper_attributes' => [
                 'class' => ['checkbox'],
               ],
               '#type' => 'checkbox',
-              '#default_value' => $role->hasPermission($perm) ? 1 : 0,
+              '#default_value' => $role->hasPermission($permission_name) ? 1 : 0,
               '#attributes' => ['class' => ['rid-' . $rid, 'js-rid-' . $rid]],
-              '#parents' => [$rid, $perm],
+              '#parents' => [$rid, $permission_name],
             ];
 
             // Show a column of disabled but checked checkboxes.
             // Only applies to admins or default roles.
             if ($roles[$rid]->get('is_admin') ||
                 in_array($rid_simple, $permission->getDefaultRoles())) {
-              $form['permissions'][$perm][$rid]['#disabled'] = TRUE;
-              $form['permissions'][$perm][$rid]['#default_value'] = TRUE;
+              $form['permissions'][$permission_name][$rid]['#disabled'] = TRUE;
+              $form['permissions'][$permission_name][$rid]['#default_value'] = TRUE;
             }
           }
           else {
-            $form['permissions'][$perm][$rid] = [
+            $form['permissions'][$permission_name][$rid] = [
               '#title' => $role->getName() . ': ' . $perm_item['title'],
               '#title_display' => 'invisible',
               '#wrapper_attributes' => [
