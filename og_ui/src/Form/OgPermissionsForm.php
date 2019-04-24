@@ -55,7 +55,7 @@ class OgPermissionsForm extends FormBase {
   protected $roles;
 
   /**
-   * Constructs a new UserPermissionsForm.
+   * Constructs a new OgPermissionsForm.
    *
    * @param \Drupal\og\PermissionManagerInterface $permission_manager
    *   The OG permission handler.
