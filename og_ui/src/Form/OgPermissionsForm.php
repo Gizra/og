@@ -6,6 +6,7 @@ use Drupal\Component\Utility\Html;
 use Drupal\Core\Entity\EntityTypeBundleInfoInterface;
 use Drupal\Core\Form\FormBase;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\og\GroupPermission;
 use Drupal\og\GroupTypeManager;
 use Drupal\og\Og;
 use Drupal\og\OgRoleManagerInterface;
@@ -257,8 +258,8 @@ class OgPermissionsForm extends FormBase {
 
           // The roles property indicates which roles the permission applies to.
           $permission_applies = TRUE;
-          if (property_exists($permission, 'roles')) {
-            $target_roles = $permission->get('roles');
+          if ($permission instanceof GroupPermission) {
+            $target_roles = $permission->getApplicableRoles();
             $permission_applies = empty($target_roles) || in_array($rid_simple, $target_roles);
           }
 
