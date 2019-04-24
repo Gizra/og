@@ -15,7 +15,6 @@ use Drupal\Tests\migrate_drupal\Kernel\d7\MigrateDrupal7TestBase;
  */
 class OgFieldD7MigrateTest extends MigrateDrupal7TestBase {
 
-  use NodeCommentCombinationTrait;
   use FileMigrationSetupTrait;
 
   /**
@@ -53,21 +52,10 @@ class OgFieldD7MigrateTest extends MigrateDrupal7TestBase {
     $this->installEntitySchema('taxonomy_term');
     $this->installConfig(static::$modules);
 
-    $this->createNodeCommentCombination('page');
-    $this->createNodeCommentCombination('article');
-    $this->createNodeCommentCombination('blog');
-    $this->createNodeCommentCombination('book');
-    $this->createNodeCommentCombination('forum', 'comment_forum');
-    $this->createNodeCommentCombination('test_content_type');
-
-    Vocabulary::create(['vid' => 'test_vocabulary'])->save();
-
+    $this->migrateFields();
     $this->executeMigrations([
-      'd7_field',
-      'd7_field_instance',
       'd7_user_role',
       'd7_user',
-      'd7_node_type',
       'd7_node',
       'd7_og_group',
       'd7_og_field_instance',
