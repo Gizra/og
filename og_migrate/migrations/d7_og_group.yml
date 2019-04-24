@@ -11,4 +11,4 @@ destination:
   plugin: og_group
 migration_dependencies:
   required:
-    - d7_node
+    - d7_field_instance:group_group
