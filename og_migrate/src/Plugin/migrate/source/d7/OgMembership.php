@@ -2,7 +2,7 @@
 
 namespace Drupal\og_migrate\Plugin\migrate\source\d7;
 
-use Drupal\Component\Plugin\ConfigurablePluginInterface;
+use Drupal\Component\Plugin\ConfigurableInterface;
 use Drupal\Component\Utility\NestedArray;
 use Drupal\migrate\Plugin\Exception\BadPluginDefinitionException;
 use Drupal\migrate\Plugin\migrate\source\SqlBase;
@@ -15,10 +15,8 @@ use Drupal\migrate\Row;
  *   id = "d7_og_membership",
  *   source_module = "og_migrate"
  * )
- *
- * @todo Use ConfigurableInterface before Drupal 9.0.0.
  */
-class OgMembership extends SqlBase implements ConfigurablePluginInterface {
+class OgMembership extends SqlBase implements ConfigurableInterface {
 
   /**
    * Returns a select query.
