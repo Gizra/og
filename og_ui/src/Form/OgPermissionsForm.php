@@ -16,6 +16,8 @@ use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 /**
  * Provide the group permissions form.
+ *
+ * @see \Drupal\user\Form\UserPermissionsForm
  */
 class OgPermissionsForm extends FormBase {
 
