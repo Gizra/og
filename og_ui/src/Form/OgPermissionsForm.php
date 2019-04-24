@@ -314,7 +314,12 @@ class OgPermissionsForm extends FormBase {
    */
   public function submitForm(array &$form, FormStateInterface $form_state) {
 
-    /** @var \Drupal\og\Entity\OgRole $role */
+    /**
+     * The group roles.
+     *
+     * @var \Drupal\og\Entity\OgRole
+     */
+     protected $roles;
     foreach ($this->roles as $rid => $role) {
       if (!$form_state->hasValue($rid)) {
         continue;
