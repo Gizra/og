@@ -120,7 +120,7 @@ class OgPermissionsForm extends FormBase {
    * @return array
    *   The group roles.
    */
-  public function getGroupRoles($entity_type_id, $bundle_id) {
+  protected function getGroupRoles($entity_type_id, $bundle_id) {
     if (empty($this->roles)) {
       $this->roles = $this->roleManager->getRolesByBundle($entity_type_id, $bundle_id);
     }
