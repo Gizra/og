@@ -3,8 +3,6 @@
 namespace Drupal\Tests\og\Kernel\Migrate;
 
 use Drupal\field\Entity\FieldConfig;
-use Drupal\taxonomy\Entity\Vocabulary;
-use Drupal\Tests\migrate\Kernel\NodeCommentCombinationTrait;
 use Drupal\Tests\file\Kernel\Migrate\d7\FileMigrationSetupTrait;
 use Drupal\Tests\migrate_drupal\Kernel\d7\MigrateDrupal7TestBase;
 
