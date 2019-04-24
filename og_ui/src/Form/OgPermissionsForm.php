@@ -217,7 +217,6 @@ class OgPermissionsForm extends FormBase {
         continue;
       }
 
-      // Provider.
       $form['permissions'][$provider] = [
         [
           '#wrapper_attributes' => [
