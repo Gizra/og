@@ -253,7 +253,7 @@ class OgPermissionsForm extends FormBase {
         }
 
         foreach ($roles as $rid => $role) {
-          list(,, $rid_simple) = explode('-', $rid, 3);
+          $rid_simple = $role->getName();
 
           // The roles property indicates which roles the permission applies to.
           $permission_applies = TRUE;
