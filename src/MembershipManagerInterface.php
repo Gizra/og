@@ -56,6 +56,18 @@ interface MembershipManagerInterface {
   public function getUserGroups(AccountInterface $user, array $states = [OgMembershipInterface::STATE_ACTIVE]);
 
   /**
+   * Returns an array of groups filtered by the og roles of the user.
+   *
+   * @param \Drupal\Core\Session\AccountInterface $user
+   *   The user to get the groups for.
+   * @param array $roles
+   *   A list of og role objects to filter by.
+   * @param array $states
+   *   (optional) An array of states to filter the memberships by.
+   */
+  public function getUserGroupsByRoles(AccountInterface $user, array $roles, array $states = [OgMembershipInterface::STATE_ACTIVE]);
+
+  /**
    * Returns the group memberships a user is associated with.
    *
    * @param \Drupal\Core\Session\AccountInterface $user
