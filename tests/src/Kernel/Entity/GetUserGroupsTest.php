@@ -3,6 +3,8 @@
 namespace Drupal\Tests\og\Kernel\Entity;
 
 use Drupal\KernelTests\KernelTestBase;
+use Drupal\og\Entity\OgRole;
+use Drupal\og\OgRoleInterface;
 use Drupal\Tests\og\Traits\OgMembershipCreationTrait;
 use Drupal\entity_test\Entity\EntityTest;
 use Drupal\og\Og;
@@ -72,13 +74,6 @@ class GetUserGroupsTest extends KernelTestBase {
   protected $groupBundle;
 
   /**
-   * The machine name of the group content node type.
-   *
-   * @var string
-   */
-  protected $groupContentBundle;
-
-  /**
    * {@inheritdoc}
    */
   protected function setUp() {
@@ -91,7 +86,6 @@ class GetUserGroupsTest extends KernelTestBase {
     $this->installSchema('system', 'sequences');
 
     $this->groupBundle = mb_strtolower($this->randomMachineName());
-    $this->groupContentBundle = mb_strtolower($this->randomMachineName());
 
     // Create users.
     $this->user1 = User::create(['name' => $this->randomString()]);
@@ -232,6 +226,32 @@ class GetUserGroupsTest extends KernelTestBase {
     $this->assertFalse(Og::isMember($this->group1, $this->user3));
     $this->assertFalse(Og::isMember($this->group1, $this->user3, [OgMembershipInterface::STATE_PENDING]));
     $this->assertFalse(Og::isMemberPending($this->group1, $this->user3));
+  }
+
+  /**
+   * Tests retrieval of groups filtered by roles.
+   */
+  public function testGetGroupsByRoles() {
+    /** @var \Drupal\og\MembershipManagerInterface $membership_manager */
+    $membership_manager = \Drupal::service('og.membership_manager');
+
+    $og_role = OgRole::create();
+    $og_role
+      ->setName($this->randomMachineName())
+      ->setLabel(mb_strtolower($this->randomString()))
+      ->setGroupType('entity_test')
+      ->setGroupBundle($this->groupBundle)
+      ->save();
+
+    $member_role = OgRole::getRole('entity_test', $this->groupBundle, OgRoleInterface::AUTHENTICATED);
+
+    $this->createOgMembership($this->group2, $this->user1, [$og_role->getName()]);
+    $groups = $membership_manager->getUserGroupsByRoles($this->user1, [$member_role]);
+    $this->assertCount(2, $groups['entity_test']);
+    $groups = $membership_manager->getUserGroupsByRoles($this->user1, [$og_role]);
+    $this->assertCount(1, $groups['entity_test']);
+    $actual = reset($groups['entity_test']);
+    $this->assertEquals($this->group2->id(), $actual->id());
   }
 
   /**
