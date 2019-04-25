@@ -381,13 +381,6 @@ class MembershipManager implements MembershipManagerInterface {
   }
 
   /**
-   * {@inheritdoc}
-   */
-  public function reset() {
-    $this->staticCache->deleteAll();
-  }
-
-  /**
    * Prepares a conditional array for use in a cache identifier and query.
    *
    * This will filter out any duplicate values from the array and sort the
