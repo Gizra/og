@@ -244,6 +244,47 @@ class OgRoleTest extends KernelTestBase {
   }
 
   /**
+   * Tests searching roles by a given permission list.
+   */
+  public function testLoadRoleByPermissions() {
+    /** @var \Drupal\og\OgRoleManagerInterface $role_manager */
+    $role_manager = \Drupal::service('og.role_manager');
+    OgRole::create()
+      ->setName(mb_strtolower($this->randomMachineName()))
+      ->setLabel($this->randomString())
+      ->setGroupType('node')
+      ->setGroupBundle('group')
+      ->grantPermission('administer group')
+      ->grantPermission('access content')
+      ->save();
+
+    OgRole::create()
+      ->setName(mb_strtolower($this->randomMachineName()))
+      ->setLabel($this->randomString())
+      ->setGroupType('node')
+      ->setGroupBundle('group')
+      ->grantPermission('access content')
+      ->save();
+
+    $og_role3 = OgRole::create();
+    $og_role3->setName(mb_strtolower($this->randomMachineName()))
+      ->setLabel($this->randomString())
+      ->setGroupType('entity_test')
+      ->setGroupBundle('group')
+      ->grantPermission('administer group')
+      ->save();
+
+    $roles = $role_manager->getRolesByPermissions(['access content']);
+    $this->assertCount(2, $roles);
+
+    // Filter based on the entity type id and bundle.
+    $roles = $role_manager->getRolesByPermissions(['administer group'], 'entity_test', 'group');
+    $this->assertCount(1, $roles);
+    $actual_role = reset($roles);
+    $this->assertEquals($actual_role->id(), $og_role3->id());
+  }
+
+  /**
    * Tests the creation and deletion of required roles.
    */
   public function testRequiredRoles() {
