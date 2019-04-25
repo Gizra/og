@@ -135,6 +135,24 @@ class OgRoleManager implements OgRoleManagerInterface {
   /**
    * {@inheritdoc}
    */
+  public function getRolesByPermissions(array $permissions, $entity_type_id = NULL, $bundle = NULL) {
+    $role_storage = $this->ogRoleStorage();
+    $query = $role_storage->getQuery()->condition('permissions.*', $permissions, 'IN');
+
+    if (!empty($entity_type_id)) {
+      $query->condition('group_type', $entity_type_id);
+    }
+    if (!empty($bundle)) {
+      $query->condition('group_bundle', $bundle);
+    }
+
+    $role_ids = $query->execute();
+    return $role_storage->loadMultiple($role_ids);
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   public function removeRoles($entity_type_id, $bundle_id) {
     $properties = [
       'group_type' => $entity_type_id,
