@@ -142,6 +142,7 @@ class MembershipManager implements MembershipManagerInterface {
 
     $identifier = [
       __METHOD__,
+      $group->getEntityTypeId(),
       $group->id(),
       implode('|', $role_names),
       implode('|', $states),

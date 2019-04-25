@@ -526,6 +526,15 @@ class GroupMembershipManagerTest extends KernelTestBase {
             ],
             'expected_memberships' => [4, 7],
           ],
+          // There is one pending administrator, just as in the node group with
+          // the same entity ID. This ensures that the correct result will be
+          // returned for groups that have different entity types but the same
+          // entity ID.
+          [
+            'roles' => [OgRoleInterface::ADMINISTRATOR],
+            'states' => [OgMembershipInterface::STATE_PENDING],
+            'expected_memberships' => [8],
+          ],
           // There is one blocked moderator.
           [
             'roles' => [
@@ -673,6 +682,17 @@ class GroupMembershipManagerTest extends KernelTestBase {
           1 => [
             'state' => OgMembershipInterface::STATE_BLOCKED,
             'roles' => [OgRoleInterface::AUTHENTICATED],
+          ],
+        ],
+      ],
+
+      // A user which is a pending administrator of the second test entity
+      // group.
+      8 => [
+        'entity_test' => [
+          1 => [
+            'state' => OgMembershipInterface::STATE_PENDING,
+            'roles' => [OgRoleInterface::ADMINISTRATOR],
           ],
         ],
       ],
