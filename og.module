@@ -332,7 +332,6 @@ function og_invalidate_group_content_cache_tags(EntityInterface $entity) {
     if ($is_group_content && $original) {
       /** @var \Drupal\og\OgGroupAudienceHelperInterface $group_audience_helper */
       $group_audience_helper = \Drupal::service('og.group_audience_helper');
-      $audience_has_changed = FALSE;
       /** @var \Drupal\Core\Entity\FieldableEntityInterface $original */
       foreach ($group_audience_helper->getAllGroupAudienceFields($entity->getEntityTypeId(), $entity->bundle()) as $field) {
         $field_name = $field->getName();
@@ -342,14 +341,7 @@ function og_invalidate_group_content_cache_tags(EntityInterface $entity) {
           foreach ($original_field_item_list->referencedEntities() as $old_group) {
             $tags = Cache::mergeTags($tags, $old_group->getCacheTagsToInvalidate());
           }
-          $audience_has_changed = TRUE;
         }
-      }
-      if ($audience_has_changed) {
-        // If at least a group has changed, we clear the static cache of the
-        // membership manager which stores such relations. This is important
-        // when the membership manager was used previously in the same request.
-        $membership_manager->reset();
       }
     }
 

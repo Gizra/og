@@ -3,6 +3,9 @@
 namespace Drupal\og;
 
 use Drupal\Component\Utility\NestedArray;
+use Drupal\Core\Cache\Cache;
+use Drupal\Core\Cache\CacheBackendInterface;
+use Drupal\Core\Cache\CacheTagsInvalidatorInterface;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Session\AccountInterface;
@@ -11,16 +14,16 @@ use Drupal\field\FieldStorageConfigInterface;
 use Drupal\og\Entity\OgMembership;
 
 /**
- * Membership manager.
+ * Service for managing memberships and group content.
  */
 class MembershipManager implements MembershipManagerInterface {
 
   /**
-   * Static cache of the memberships and group association.
+   * The static cache backend.
    *
-   * @var array
+   * @var \Drupal\Core\Cache\CacheBackendInterface
    */
-  protected $cache;
+  protected $staticCache;
 
   /**
    * The entity type manager.
@@ -43,10 +46,14 @@ class MembershipManager implements MembershipManagerInterface {
    *   The entity type manager.
    * @param \Drupal\og\OgGroupAudienceHelperInterface $group_audience_helper
    *   The OG group audience helper.
+   * @param \Drupal\Core\Cache\CacheBackendInterface $cache
+   *   The static cache backend.
    */
-  public function __construct(EntityTypeManagerInterface $entity_type_manager, OgGroupAudienceHelperInterface $group_audience_helper) {
+  public function __construct(EntityTypeManagerInterface $entity_type_manager, OgGroupAudienceHelperInterface $group_audience_helper, CacheBackendInterface $cache) {
+    assert($cache instanceof CacheTagsInvalidatorInterface, 'The cache backend must support cache tag invalidation.');
     $this->entityTypeManager = $entity_type_manager;
     $this->groupAudienceHelper = $group_audience_helper;
+    $this->staticCache = $cache;
   }
 
   /**
@@ -85,26 +92,26 @@ class MembershipManager implements MembershipManagerInterface {
     // states.
     $states = $this->prepareConditionArray($states, OgMembership::ALL_STATES);
 
-    $identifier = [
+    $cid = [
       __METHOD__,
-      'user',
       $user->id(),
       implode('|', $states),
     ];
-    $identifier = implode(':', $identifier);
+    $cid = implode(':', $cid);
 
     // Use cached result if it exists.
-    if (!isset($this->cache[$identifier])) {
+    if (!$membership_ids = $this->staticCache->get($cid)->data ?? []) {
       $query = $this->entityTypeManager
         ->getStorage('og_membership')
         ->getQuery()
         ->condition('uid', $user->id())
         ->condition('state', $states, 'IN');
 
-      $this->cache[$identifier] = $query->execute();
+      $membership_ids = $query->execute();
+      $this->cacheMembershipIds($cid, $membership_ids);
     }
 
-    return $this->loadMemberships($this->cache[$identifier]);
+    return $this->loadMemberships($membership_ids);
   }
 
   /**
@@ -140,17 +147,17 @@ class MembershipManager implements MembershipManagerInterface {
     $role_names = $this->prepareConditionArray($role_names);
     $states = $this->prepareConditionArray($states, OgMembership::ALL_STATES);
 
-    $identifier = [
+    $cid = [
       __METHOD__,
       $group->getEntityTypeId(),
       $group->id(),
       implode('|', $role_names),
       implode('|', $states),
     ];
-    $identifier = implode(':', $identifier);
+    $cid = implode(':', $cid);
 
     // Only query the database if no cached result exists.
-    if (!isset($this->cache[$identifier])) {
+    if (!$membership_ids = $this->staticCache->get($cid)->data ?? []) {
       $entity_type_id = $group->getEntityTypeId();
 
       $query = $this->entityTypeManager
@@ -169,10 +176,11 @@ class MembershipManager implements MembershipManagerInterface {
         $query->condition('roles', $role_ids, 'IN');
       }
 
-      $this->cache[$identifier] = $query->execute();
+      $membership_ids = $query->execute();
+      $this->cacheMembershipIds($cid, $membership_ids);
     }
 
-    return $this->cache[$identifier];
+    return $membership_ids;
   }
 
   /**
@@ -206,7 +214,7 @@ class MembershipManager implements MembershipManagerInterface {
       throw new \InvalidArgumentException('\Drupal\og\MembershipManager::getGroupIds() cannot be used for user entities. Use \Drupal\og\MembershipManager::getUserGroups() instead.');
     }
 
-    $identifier = [
+    $cid = [
       __METHOD__,
       $entity->getEntityTypeId(),
       $entity->id(),
@@ -214,21 +222,23 @@ class MembershipManager implements MembershipManagerInterface {
       $group_bundle,
     ];
 
-    $identifier = implode(':', $identifier);
+    $cid = implode(':', $cid);
 
-    if (isset($this->cache[$identifier])) {
+    if ($group_ids = $this->staticCache->get($cid)->data ?? []) {
       // Return cached values.
-      return $this->cache[$identifier];
+      return $group_ids;
     }
 
     $group_ids = [];
+    $tags = $entity->getCacheTagsToInvalidate();
 
     $fields = $this->groupAudienceHelper->getAllGroupAudienceFields($entity->getEntityTypeId(), $entity->bundle(), $group_type_id, $group_bundle);
     foreach ($fields as $field) {
-      $target_type = $field->getFieldStorageDefinition()->getSetting('target_type');
+      $target_type_id = $field->getFieldStorageDefinition()->getSetting('target_type');
+      $target_type_definition = $this->entityTypeManager->getDefinition($target_type_id);
 
       // Optionally filter by group type.
-      if (!empty($group_type_id) && $group_type_id !== $target_type) {
+      if (!empty($group_type_id) && $group_type_id !== $target_type_id) {
         continue;
       }
 
@@ -250,9 +260,9 @@ class MembershipManager implements MembershipManagerInterface {
       // Query the database to get the actual list of groups. The target IDs may
       // contain groups that no longer exist. Entity reference doesn't clean up
       // orphaned target IDs.
-      $entity_type = $this->entityTypeManager->getDefinition($target_type);
+      $entity_type = $this->entityTypeManager->getDefinition($target_type_id);
       $query = $this->entityTypeManager
-        ->getStorage($target_type)
+        ->getStorage($target_type_id)
         ->getQuery()
         // Disable entity access check so fetching the groups related to group
         // content are not affected by the current user. Furthermore, when
@@ -267,10 +277,14 @@ class MembershipManager implements MembershipManagerInterface {
         $query->condition($entity_type->getKey('bundle'), $group_bundle);
       }
 
-      $group_ids = NestedArray::mergeDeep($group_ids, [$target_type => $query->execute()]);
+      // Add the list cache tags for the entity type, so that the cache gets
+      // invalidated if one of the group entities is deleted.
+      $tags = Cache::mergeTags($target_type_definition->getListCacheTags(), $tags);
+
+      $group_ids = NestedArray::mergeDeep($group_ids, [$target_type_id => $query->execute()]);
     }
 
-    $this->cache[$identifier] = $group_ids;
+    $this->staticCache->set($cid, $group_ids, Cache::PERMANENT, $tags);
 
     return $group_ids;
   }
@@ -368,13 +382,6 @@ class MembershipManager implements MembershipManagerInterface {
   }
 
   /**
-   * {@inheritdoc}
-   */
-  public function reset() {
-    $this->cache = [];
-  }
-
-  /**
    * Prepares a conditional array for use in a cache identifier and query.
    *
    * This will filter out any duplicate values from the array and sort the
@@ -398,6 +405,22 @@ class MembershipManager implements MembershipManagerInterface {
     }
     sort($value);
     return array_unique($value);
+  }
+
+  /**
+   * Stores the given list of membership IDs in the static cache backend.
+   *
+   * @param string $cid
+   *   The cache ID.
+   * @param array $membership_ids
+   *   The list of membership IDs to store in the static cache.
+   */
+  protected function cacheMembershipIds($cid, array $membership_ids) {
+    $tags = Cache::buildTags('og_membership', $membership_ids);
+    // Also invalidate the list cache tags so that if a new membership is
+    // created it will appear in this list.
+    $tags = Cache::mergeTags(['og_membership_list'], $tags);
+    $this->staticCache->set($cid, $membership_ids, Cache::PERMANENT, $tags);
   }
 
   /**
