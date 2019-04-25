@@ -88,6 +88,7 @@ class GroupMembershipManagerTest extends KernelTestBase {
     $this->installEntitySchema('og_membership');
     $this->installEntitySchema('user');
     $this->installSchema('system', 'sequences');
+    $this->installSchema('user', 'users_data');
 
     $this->entityTypeManager = $this->container->get('entity_type.manager');
     $this->membershipManager = $this->container->get('og.membership_manager');
@@ -566,6 +567,20 @@ class GroupMembershipManagerTest extends KernelTestBase {
         }
       }
     }
+
+    // Test that the correct memberships are returned when one of the users is
+    // deleted. We are using the second node group as a test case. This group
+    // has one pending administrator: the user with key '2'.
+    $group = $this->groups['node'][1];
+    $role_names = [OgRoleInterface::ADMINISTRATOR];
+    $states = [OgMembershipInterface::STATE_PENDING];
+    $memberships = $this->membershipManager->$method_name($group, $role_names, $states);
+    $this->assertCount(1, $memberships);
+
+    // Delete the user and check that it no longer appears in the result.
+    $this->users[2]->delete();
+    $memberships = $this->membershipManager->$method_name($group, $role_names, $states);
+    $this->assertCount(0, $memberships);
   }
 
   /**
