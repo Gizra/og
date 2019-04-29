@@ -304,6 +304,37 @@ function og_entity_type_alter(array &$entity_types) {
 }
 
 /**
+ * Implements hook_theme().
+ */
+function og_theme($existing, $type, $theme, $path) {
+  return [
+    'og_member_count' => [
+      'variables' => [
+        'count' => 0,
+        'group' => NULL,
+      ],
+    ],
+  ];
+}
+
+/**
+ * Prepares variables for member count templates.
+ *
+ * Default template: og-member-count.html.twig.
+ *
+ * @param array $variables
+ *   An associative array containing:
+ *   - count: An integer representing the number of members in the group.
+ *   - group: The group, which is a content entity.
+ */
+function template_preprocess_og_member_count(array &$variables) {
+  /** @var \Drupal\Core\Entity\ContentEntityInterface $group */
+  $group = $variables['group'];
+
+  $variables['group_label'] = $group->label();
+}
+
+/**
  * Invalidates group content cache tags for the groups this entity belongs to.
  *
  * @param \Drupal\Core\Entity\EntityInterface $entity

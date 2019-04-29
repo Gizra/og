@@ -2,6 +2,7 @@
 
 namespace Drupal\og\Entity;
 
+use Drupal\Core\Cache\Cache;
 use Drupal\Core\Entity\ContentEntityBase;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Entity\EntityStorageInterface;
@@ -480,6 +481,37 @@ class OgMembership extends ContentEntityBase implements OgMembershipInterface {
     \Drupal::service('og.access')->reset();
 
     return $result;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  protected function invalidateTagsOnSave($update) {
+    parent::invalidateTagsOnSave($update);
+
+    // A membership was created or updated: invalidate the membership list cache
+    // tags of its group. An updated membership may start to appear in a group's
+    // membership listings because it now meets those listings' filtering
+    // requirements. A newly created membership may start to appear in listings
+    // because it did not exist before.
+    $tags = Cache::buildTags('og-group-membership-list', $this->getGroup()->getCacheTagsToInvalidate());
+    Cache::invalidateTags($tags);
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  protected static function invalidateTagsOnDelete(EntityTypeInterface $entity_type, array $entities) {
+    parent::invalidateTagsOnDelete($entity_type, $entities);
+
+    // A membership was deleted: invalidate the membership list cache tags of
+    // its group membership lists, so that any lists that contain the membership
+    // will be recalculated.
+    $tags = [];
+    foreach ($entities as $entity) {
+      $tags = Cache::mergeTags(Cache::buildTags('og-group-membership-list', $entity->getGroup()->getCacheTagsToInvalidate()), $tags);
+    }
+    Cache::invalidateTags($tags);
   }
 
   /**
