@@ -494,8 +494,10 @@ class OgMembership extends ContentEntityBase implements OgMembershipInterface {
     // membership listings because it now meets those listings' filtering
     // requirements. A newly created membership may start to appear in listings
     // because it did not exist before.
-    $tags = Cache::buildTags('og-group-membership-list', $this->getGroup()->getCacheTagsToInvalidate());
-    Cache::invalidateTags($tags);
+    if ($group = $this->getGroup()) {
+      $tags = Cache::buildTags('og-group-membership-list', $group->getCacheTagsToInvalidate());
+      Cache::invalidateTags($tags);
+    }
   }
 
   /**
@@ -509,7 +511,9 @@ class OgMembership extends ContentEntityBase implements OgMembershipInterface {
     // will be recalculated.
     $tags = [];
     foreach ($entities as $entity) {
-      $tags = Cache::mergeTags(Cache::buildTags('og-group-membership-list', $entity->getGroup()->getCacheTagsToInvalidate()), $tags);
+      if ($group = $entity->getGroup()) {
+        $tags = Cache::mergeTags(Cache::buildTags('og-group-membership-list', $group->getCacheTagsToInvalidate()), $tags);
+      }
     }
     Cache::invalidateTags($tags);
   }
