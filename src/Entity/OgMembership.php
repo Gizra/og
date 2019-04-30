@@ -495,7 +495,7 @@ class OgMembership extends ContentEntityBase implements OgMembershipInterface {
     // requirements. A newly created membership may start to appear in listings
     // because it did not exist before.
     if ($group = $this->getGroup()) {
-      $tags = Cache::buildTags('og-group-membership-list', $group->getCacheTagsToInvalidate());
+      $tags = Cache::buildTags(OgMembershipInterface::GROUP_MEMBERSHIP_LIST_CACHE_TAG_PREFIX, $group->getCacheTagsToInvalidate());
       Cache::invalidateTags($tags);
     }
   }
@@ -506,13 +506,13 @@ class OgMembership extends ContentEntityBase implements OgMembershipInterface {
   protected static function invalidateTagsOnDelete(EntityTypeInterface $entity_type, array $entities) {
     parent::invalidateTagsOnDelete($entity_type, $entities);
 
-    // A membership was deleted: invalidate the membership list cache tags of
-    // its group membership lists, so that any lists that contain the membership
-    // will be recalculated.
+    // A membership was deleted: invalidate the list cache tags of its group
+    // membership lists, so that any lists that contain the membership will be
+    // recalculated.
     $tags = [];
     foreach ($entities as $entity) {
       if ($group = $entity->getGroup()) {
-        $tags = Cache::mergeTags(Cache::buildTags('og-group-membership-list', $group->getCacheTagsToInvalidate()), $tags);
+        $tags = Cache::mergeTags(Cache::buildTags(OgMembershipInterface::GROUP_MEMBERSHIP_LIST_CACHE_TAG_PREFIX, $group->getCacheTagsToInvalidate()), $tags);
       }
     }
     Cache::invalidateTags($tags);

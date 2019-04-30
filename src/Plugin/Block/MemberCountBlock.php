@@ -15,9 +15,9 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 /**
  * Provides a block that shows the number of members in the current group.
  *
- * This block is mainly intended to demonstrate the 'og-group-membership-list'
- * cache tag but can also be used to show the number of members on group pages.
- * The way the text is displayed can be changed by overriding the Twig template.
+ * This block is mainly intended to demonstrate the group membership list cache
+ * tag but can also be used to show the number of members on group pages. The
+ * way the text is displayed can be changed by overriding the Twig template.
  *
  * @Block(
  *   id = "og_member_count",
@@ -151,7 +151,7 @@ class MemberCountBlock extends BlockBase implements ContainerFactoryPluginInterf
     $tags = parent::getCacheTags();
 
     if ($group = $this->ogContext->getGroup()) {
-      $tags = Cache::mergeTags(Cache::buildTags('og-group-membership-list', $group->getCacheTagsToInvalidate()), $tags);
+      $tags = Cache::mergeTags(Cache::buildTags(OgMembershipInterface::GROUP_MEMBERSHIP_LIST_CACHE_TAG_PREFIX, $group->getCacheTagsToInvalidate()), $tags);
     }
 
     return $tags;
