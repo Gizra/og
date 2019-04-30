@@ -311,6 +311,7 @@ function og_theme($existing, $type, $theme, $path) {
     'og_member_count' => [
       'variables' => [
         'count' => 0,
+        'membership_states' => [],
         'group' => NULL,
       ],
     ],

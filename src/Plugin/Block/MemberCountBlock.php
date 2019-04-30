@@ -135,12 +135,10 @@ class MemberCountBlock extends BlockBase implements ContainerFactoryPluginInterf
     $membership_ids = $this->membershipManager->getGroupMembershipIdsByRoleNames($group, [OgRoleInterface::AUTHENTICATED], $states);
 
     return [
-      'list' => [
-        '#theme' => 'og_member_count',
-        '#count' => count($membership_ids),
-        '#group' => $group,
-        '#attributes' => ['class' => ['tralalala']],
-      ],
+      '#theme' => 'og_member_count',
+      '#count' => count($membership_ids),
+      '#group' => $group,
+      '#membership_states' => $states,
     ];
   }
 
