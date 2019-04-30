@@ -494,7 +494,8 @@ class OgMembership extends ContentEntityBase implements OgMembershipInterface {
     // membership listings because it now meets those listings' filtering
     // requirements. A newly created membership may start to appear in listings
     // because it did not exist before.
-    if ($group = $this->getGroup()) {
+    $group = $this->getGroup();
+    if (!empty($group)) {
       $tags = Cache::buildTags(OgMembershipInterface::GROUP_MEMBERSHIP_LIST_CACHE_TAG_PREFIX, $group->getCacheTagsToInvalidate());
       Cache::invalidateTags($tags);
     }

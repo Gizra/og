@@ -150,7 +150,8 @@ class MemberCountBlock extends BlockBase implements ContainerFactoryPluginInterf
   public function getCacheTags() {
     $tags = parent::getCacheTags();
 
-    if ($group = $this->ogContext->getGroup()) {
+    $group = $this->ogContext->getGroup();
+    if (!empty($group)) {
       $tags = Cache::mergeTags(Cache::buildTags(OgMembershipInterface::GROUP_MEMBERSHIP_LIST_CACHE_TAG_PREFIX, $group->getCacheTagsToInvalidate()), $tags);
     }
 
