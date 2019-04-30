@@ -304,6 +304,38 @@ function og_entity_type_alter(array &$entity_types) {
 }
 
 /**
+ * Implements hook_theme().
+ */
+function og_theme($existing, $type, $theme, $path) {
+  return [
+    'og_member_count' => [
+      'variables' => [
+        'count' => 0,
+        'membership_states' => [],
+        'group' => NULL,
+      ],
+    ],
+  ];
+}
+
+/**
+ * Prepares variables for member count templates.
+ *
+ * Default template: og-member-count.html.twig.
+ *
+ * @param array $variables
+ *   An associative array containing:
+ *   - count: An integer representing the number of members in the group.
+ *   - group: The group, which is a content entity.
+ */
+function template_preprocess_og_member_count(array &$variables) {
+  /** @var \Drupal\Core\Entity\ContentEntityInterface $group */
+  $group = $variables['group'];
+
+  $variables['group_label'] = $group->label();
+}
+
+/**
  * Invalidates group content cache tags for the groups this entity belongs to.
  *
  * @param \Drupal\Core\Entity\EntityInterface $entity
@@ -332,7 +364,6 @@ function og_invalidate_group_content_cache_tags(EntityInterface $entity) {
     if ($is_group_content && $original) {
       /** @var \Drupal\og\OgGroupAudienceHelperInterface $group_audience_helper */
       $group_audience_helper = \Drupal::service('og.group_audience_helper');
-      $audience_has_changed = FALSE;
       /** @var \Drupal\Core\Entity\FieldableEntityInterface $original */
       foreach ($group_audience_helper->getAllGroupAudienceFields($entity->getEntityTypeId(), $entity->bundle()) as $field) {
         $field_name = $field->getName();
@@ -342,14 +373,7 @@ function og_invalidate_group_content_cache_tags(EntityInterface $entity) {
           foreach ($original_field_item_list->referencedEntities() as $old_group) {
             $tags = Cache::mergeTags($tags, $old_group->getCacheTagsToInvalidate());
           }
-          $audience_has_changed = TRUE;
         }
-      }
-      if ($audience_has_changed) {
-        // If at least a group has changed, we clear the static cache of the
-        // membership manager which stores such relations. This is important
-        // when the membership manager was used previously in the same request.
-        $membership_manager->reset();
       }
     }
 

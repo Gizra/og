@@ -193,7 +193,7 @@ interface MembershipManagerInterface {
    * Returns the number of groups associated with a given group content entity.
    *
    * Do not use this to retrieve the group membership count for a user entity.
-   * Use count(Og::GetEntityGroups()) instead.
+   * Use count(\Drupal\og\MembershipManager::getUserGroupIds()) instead.
    *
    * @param \Drupal\Core\Entity\EntityInterface $entity
    *   The group content entity for which to count the associated groups.
@@ -272,10 +272,5 @@ interface MembershipManagerInterface {
    * @see \Drupal\og\Og::isMember
    */
   public function isMemberBlocked(EntityInterface $group, AccountInterface $user);
-
-  /**
-   * Reset the internal cache.
-   */
-  public function reset();
 
 }

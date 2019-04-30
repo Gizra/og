@@ -88,6 +88,7 @@ class GroupMembershipManagerTest extends KernelTestBase {
     $this->installEntitySchema('og_membership');
     $this->installEntitySchema('user');
     $this->installSchema('system', 'sequences');
+    $this->installSchema('user', 'users_data');
 
     $this->entityTypeManager = $this->container->get('entity_type.manager');
     $this->membershipManager = $this->container->get('og.membership_manager');
@@ -526,6 +527,15 @@ class GroupMembershipManagerTest extends KernelTestBase {
             ],
             'expected_memberships' => [4, 7],
           ],
+          // There is one pending administrator, just as in the node group with
+          // the same entity ID. This ensures that the correct result will be
+          // returned for groups that have different entity types but the same
+          // entity ID.
+          [
+            'roles' => [OgRoleInterface::ADMINISTRATOR],
+            'states' => [OgMembershipInterface::STATE_PENDING],
+            'expected_memberships' => [8],
+          ],
           // There is one blocked moderator.
           [
             'roles' => [
@@ -566,6 +576,20 @@ class GroupMembershipManagerTest extends KernelTestBase {
         }
       }
     }
+
+    // Test that the correct memberships are returned when one of the users is
+    // deleted. We are using the second node group as a test case. This group
+    // has one pending administrator: the user with key '2'.
+    $group = $this->groups['node'][1];
+    $role_names = [OgRoleInterface::ADMINISTRATOR];
+    $states = [OgMembershipInterface::STATE_PENDING];
+    $memberships = $this->membershipManager->$method_name($group, $role_names, $states);
+    $this->assertCount(1, $memberships);
+
+    // Delete the user and check that it no longer appears in the result.
+    $this->users[2]->delete();
+    $memberships = $this->membershipManager->$method_name($group, $role_names, $states);
+    $this->assertCount(0, $memberships);
   }
 
   /**
@@ -673,6 +697,17 @@ class GroupMembershipManagerTest extends KernelTestBase {
           1 => [
             'state' => OgMembershipInterface::STATE_BLOCKED,
             'roles' => [OgRoleInterface::AUTHENTICATED],
+          ],
+        ],
+      ],
+
+      // A user which is a pending administrator of the second test entity
+      // group.
+      8 => [
+        'entity_test' => [
+          1 => [
+            'state' => OgMembershipInterface::STATE_PENDING,
+            'roles' => [OgRoleInterface::ADMINISTRATOR],
           ],
         ],
       ],

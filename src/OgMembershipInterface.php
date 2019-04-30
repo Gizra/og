@@ -58,6 +58,11 @@ interface OgMembershipInterface extends ContentEntityInterface, EntityOwnerInter
   const REQUEST_FIELD = 'og_membership_request';
 
   /**
+   * The prefix that is used to identify group membership list cache tags.
+   */
+  const GROUP_MEMBERSHIP_LIST_CACHE_TAG_PREFIX = 'og-group-membership-list';
+
+  /**
    * Gets the membership creation timestamp.
    *
    * @return int

@@ -86,11 +86,6 @@ class CacheInvalidationOnGroupChangeTest extends KernelTestBase {
     $tags = Cache::buildTags('og-group-content', $group1->getCacheTagsToInvalidate());
     $bin->set($cid, $this->randomString(), Cache::PERMANENT, $tags);
 
-    // Change the group content entity group. We're clearing first the static
-    // cache of membership manager because in a real application, usually, the
-    // static cache is warmed in a previous request, so that in the request
-    // where the audience is changed, is already empty.
-    $this->container->get('og.membership_manager')->reset();
     $group_content
       ->set(OgGroupAudienceHelperInterface::DEFAULT_FIELD, $group2->id())
       ->save();
