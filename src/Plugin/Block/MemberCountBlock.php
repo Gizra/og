@@ -81,7 +81,7 @@ class MemberCountBlock extends BlockBase implements ContainerFactoryPluginInterf
     return [
       'count_blocked_users' => FALSE,
       'count_pending_users' => FALSE,
-    ];
+    ] + parent::defaultConfiguration();
   }
 
   /**
