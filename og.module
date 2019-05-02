@@ -313,6 +313,7 @@ function og_theme($existing, $type, $theme, $path) {
         'count' => 0,
         'membership_states' => [],
         'group' => NULL,
+        'group_label' => NULL,
       ],
     ],
   ];
