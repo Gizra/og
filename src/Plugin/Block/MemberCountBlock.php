@@ -138,6 +138,7 @@ class MemberCountBlock extends BlockBase implements ContainerFactoryPluginInterf
       '#theme' => 'og_member_count',
       '#count' => count($membership_ids),
       '#group' => $group,
+      '#group_label' => $group->label(),
       '#membership_states' => $states,
     ];
   }
