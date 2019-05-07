@@ -10,6 +10,7 @@
         "source": "https://cgit.drupalcode.org/og"
     },
     "require": {
+        "php": ">=7.1.0",
         "drupal/core": "~8.7"
     },
     "require-dev": {
