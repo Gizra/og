@@ -68,7 +68,7 @@ interface MembershipManagerInterface {
    * @param array $states
    *   (optional) An array of states to filter the memberships by.
    */
-  public function getUserGroupsByRoles(AccountInterface $user, array $roles, bool $require_all, array $states = [OgMembershipInterface::STATE_ACTIVE]);
+  public function getUserGroupsByRoles(AccountInterface $user, array $roles, bool $require_all = FALSE, array $states = [OgMembershipInterface::STATE_ACTIVE]);
 
   /**
    * Returns an array of groups ids filtered by the og roles of the user.
@@ -83,7 +83,7 @@ interface MembershipManagerInterface {
    * @param array $states
    *   (optional) An array of states to filter the memberships by.
    */
-  public function getUserGroupIdsByRoles(AccountInterface $user, array $roles, bool $require_all, array $states = [OgMembershipInterface::STATE_ACTIVE]);
+  public function getUserGroupsIdsByRoles(AccountInterface $user, array $roles, bool $require_all = FALSE, array $states = [OgMembershipInterface::STATE_ACTIVE]);
 
   /**
    * Returns the group memberships a user is associated with.

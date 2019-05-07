@@ -126,7 +126,7 @@ class MembershipManager implements MembershipManagerInterface {
   /**
    * {@inheritdoc}
    */
-  public function getUserGroupIdsByRoles(AccountInterface $user, array $roles, bool $require_all = FALSE, array $states = [OgMembershipInterface::STATE_ACTIVE]) {
+  public function getUserGroupsIdsByRoles(AccountInterface $user, array $roles, bool $require_all = FALSE, array $states = [OgMembershipInterface::STATE_ACTIVE]) {
     $role_ids = array_map(function (OgRoleInterface $role) {
       return $role->id();
     }, $roles);
@@ -148,7 +148,7 @@ class MembershipManager implements MembershipManagerInterface {
    * {@inheritdoc}
    */
   public function getUserGroupsByRoles(AccountInterface $user, array $roles, bool $require_all = FALSE, array $states = [OgMembershipInterface::STATE_ACTIVE]) {
-    $group_ids = $this->getUserGroupsByRoles($user, $roles, $require_all, $states);
+    $group_ids = $this->getUserGroupsIdsByRoles($user, $roles, $require_all, $states);
     return $this->loadGroups($group_ids);
   }
 
