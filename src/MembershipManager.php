@@ -132,12 +132,12 @@ class MembershipManager implements MembershipManagerInterface {
    * {@inheritdoc}
    */
   public function getUserGroupsByRoles(AccountInterface $user, array $roles, array $states = [OgMembershipInterface::STATE_ACTIVE]) {
-    $role_ids = array_map(function(OgRoleInterface $role) {
+    $role_ids = array_map(function (OgRoleInterface $role) {
       return $role->id();
     }, $roles);
 
     $memberships = $this->getMemberships($user, $states);
-    $memberships = array_filter($memberships, function(OgMembershipInterface $membership) use ($role_ids) {
+    $memberships = array_filter($memberships, function (OgMembershipInterface $membership) use ($role_ids) {
       $membership_roles_ids = $membership->getRolesIds();
       return array_intersect($membership_roles_ids, $role_ids);
     });
