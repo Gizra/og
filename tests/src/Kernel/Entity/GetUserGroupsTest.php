@@ -235,9 +235,9 @@ class GetUserGroupsTest extends KernelTestBase {
     /** @var \Drupal\og\MembershipManagerInterface $membership_manager */
     $membership_manager = \Drupal::service('og.membership_manager');
 
-    $og_role = OgRole::create();
-    $og_role
-      ->setName($this->randomMachineName())
+    $extra_role_1 = OgRole::create();
+    $extra_role_1
+      ->setName('extra_role_1')
       ->setLabel(mb_strtolower($this->randomString()))
       ->setGroupType('entity_test')
       ->setGroupBundle($this->groupBundle)
@@ -245,10 +245,29 @@ class GetUserGroupsTest extends KernelTestBase {
 
     $member_role = OgRole::getRole('entity_test', $this->groupBundle, OgRoleInterface::AUTHENTICATED);
 
-    $this->createOgMembership($this->group2, $this->user1, [$og_role->getName()]);
-    $groups = $membership_manager->getUserGroupsByRoles($this->user1, [$member_role]);
+    $this->createOgMembership($this->group1, $this->user3);
+    $this->createOgMembership($this->group2, $this->user3, [$extra_role_1->getName()], OgMembershipInterface::STATE_BLOCKED);
+
+    // By default only active memberships are retrieved.
+    $groups = $membership_manager->getUserGroupsIdsByRoles($this->user3, [$member_role]);
+    $this->assertCount(1, $groups['entity_test']);
+    $actual = reset($groups['entity_test']);
+    $this->assertEquals($this->group1->id(), $actual);
+
+    // Expected count does not include the blocked membership.
+    $groups = $membership_manager->getUserGroupsByRoles($this->user3, [$extra_role_1]);
+    $this->assertCount(0, $groups);
+
+    // Include all states.
+    $groups = $membership_manager->getUserGroupsIdsByRoles($this->user3, [$member_role], FALSE, OgMembershipInterface::ALL_STATES);
     $this->assertCount(2, $groups['entity_test']);
-    $groups = $membership_manager->getUserGroupsByRoles($this->user1, [$og_role]);
+
+    // Request any of multiple roles.
+    $groups = $membership_manager->getUserGroupsByRoles($this->user3, [$member_role, $extra_role_1], FALSE, OgMembershipInterface::ALL_STATES);
+    $this->assertCount(2, $groups['entity_test']);
+
+    // Request all of multiple roles.
+    $groups = $membership_manager->getUserGroupsByRoles($this->user3, [$member_role, $extra_role_1], TRUE, OgMembershipInterface::ALL_STATES);
     $this->assertCount(1, $groups['entity_test']);
     $actual = reset($groups['entity_test']);
     $this->assertEquals($this->group2->id(), $actual->id());
