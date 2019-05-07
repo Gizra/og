@@ -75,13 +75,8 @@ class MembershipManager implements MembershipManagerInterface {
    * {@inheritdoc}
    */
   public function getUserGroups(AccountInterface $user, array $states = [OgMembershipInterface::STATE_ACTIVE]) {
-    $groups = [];
-
-    foreach ($this->getUserGroupIds($user, $states) as $entity_type => $entity_ids) {
-      $groups[$entity_type] = $this->entityTypeManager->getStorage($entity_type)->loadMultiple($entity_ids);
-    }
-
-    return $groups;
+    $group_ids = $this->getUserGroupIds($user, $states);
+    return $this->loadGroups($group_ids);
   }
 
   /**
@@ -131,13 +126,21 @@ class MembershipManager implements MembershipManagerInterface {
   /**
    * {@inheritdoc}
    */
-  public function getUserGroupsByRoles(AccountInterface $user, array $roles, array $states = [OgMembershipInterface::STATE_ACTIVE]) {
+  public function getUserGroupsByRoles(AccountInterface $user, array $roles, bool $require_all = false, array $states = [OgMembershipInterface::STATE_ACTIVE]) {
+    $group_ids = $this->getUserGroupsByRoles($user, $roles, $require_all, $states);
+    return $this->loadGroups($group_ids);
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getUserGroupIdsByRoles(AccountInterface $user, array $roles, bool $require_all, array $states = [OgMembershipInterface::STATE_ACTIVE]) {
     $role_ids = array_map(function (OgRoleInterface $role) {
       return $role->id();
     }, $roles);
 
     $memberships = $this->getMemberships($user, $states);
-    $memberships = array_filter($memberships, function (OgMembershipInterface $membership) use ($role_ids) {
+    $memberships = array_filter($memberships, function (OgMembershipInterface $membership) use ($role_ids, $require_all) {
       $membership_roles_ids = $membership->getRolesIds();
       return array_intersect($membership_roles_ids, $role_ids);
     });
@@ -146,12 +149,7 @@ class MembershipManager implements MembershipManagerInterface {
     foreach ($memberships as $membership) {
       $group_ids[$membership->getGroupEntityType()][] = $membership->getGroupId();
     }
-
-    $groups = [];
-    foreach ($group_ids as $entity_type => $entity_ids) {
-      $groups[$entity_type] = $this->entityTypeManager->getStorage($entity_type)->loadMultiple($entity_ids);
-    }
-    return $groups;
+    return $group_ids;
   }
 
   /**
@@ -319,13 +317,8 @@ class MembershipManager implements MembershipManagerInterface {
    * {@inheritdoc}
    */
   public function getGroups(EntityInterface $entity, $group_type_id = NULL, $group_bundle = NULL) {
-    $groups = [];
-
-    foreach ($this->getGroupIds($entity, $group_type_id, $group_bundle) as $entity_type => $entity_ids) {
-      $groups[$entity_type] = $this->entityTypeManager->getStorage($entity_type)->loadMultiple($entity_ids);
-    }
-
-    return $groups;
+    $group_ids = $this->getGroupIds($entity, $group_type_id, $group_bundle);
+    return $this->loadGroups($group_ids);
   }
 
   /**
@@ -431,6 +424,24 @@ class MembershipManager implements MembershipManagerInterface {
     }
     sort($value);
     return array_unique($value);
+  }
+
+  /**
+   * Loads the entities of a structured array of entity ids.
+   *
+   * @param array $group_ids
+   *   A structured array of entity keys indexed by their entity type id.
+   *
+   * @return array
+   *   A structured array of entities indexed by their entity type id.
+   */
+  protected function loadGroups(array $group_ids) {
+    $groups = [];
+    foreach ($group_ids as $entity_type => $ids) {
+      $groups[$entity_type] = $this->entityTypeManager->getStorage($entity_type)->loadMultiple($ids);
+    }
+
+    return $groups;
   }
 
   /**
