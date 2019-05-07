@@ -342,9 +342,6 @@ class Og {
     \Drupal::entityTypeManager()->clearCachedDefinitions();
     \Drupal::service('entity_field.manager')->clearCachedFieldDefinitions();
 
-    // Invalidate the group membership manager.
-    \Drupal::service('og.membership_manager')->reset();
-
     // Let other OG modules know we invalidate cache.
     \Drupal::moduleHandler()->invokeAll('og_invalidate_cache');
   }

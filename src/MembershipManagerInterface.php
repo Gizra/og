@@ -285,9 +285,4 @@ interface MembershipManagerInterface {
    */
   public function isMemberBlocked(EntityInterface $group, AccountInterface $user);
 
-  /**
-   * Reset the internal cache.
-   */
-  public function reset();
-
 }

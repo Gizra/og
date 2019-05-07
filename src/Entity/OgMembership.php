@@ -479,9 +479,6 @@ class OgMembership extends ContentEntityBase implements OgMembershipInterface {
     Og::reset();
     \Drupal::service('og.access')->reset();
 
-    // Invalidate the group membership manager.
-    \Drupal::service('og.membership_manager')->reset();
-
     return $result;
   }
 
