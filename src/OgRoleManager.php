@@ -138,16 +138,16 @@ class OgRoleManager implements OgRoleManagerInterface {
   public function getRolesByPermissions(array $permissions, $entity_type_id = NULL, $bundle = NULL, $require_all = FALSE) {
     $role_storage = $this->ogRoleStorage();
     $query = $role_storage->getQuery();
-    if ($require_all === false) {
-      $query->condition('permissions.*', $permissions, 'IN');
-    }
-    else {
+    if ($require_all) {
       // If all permissions are requested, we need to add an AND condition for
       // each permission because there is not an easy way to explicitly request
       // a subset of an array.
       foreach ($permissions as $permission) {
         $query->condition('permissions.*', $permission);
       }
+    }
+    else {
+      $query->condition('permissions.*', $permissions, 'IN');
     }
 
     if (!empty($entity_type_id)) {
