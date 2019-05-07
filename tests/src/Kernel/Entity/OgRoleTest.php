@@ -254,8 +254,9 @@ class OgRoleTest extends KernelTestBase {
       ->setLabel($this->randomString())
       ->setGroupType('node')
       ->setGroupBundle('group')
-      ->grantPermission('administer group')
       ->grantPermission('access content')
+      ->grantPermission('administer group')
+      ->grantPermission('view own unpublished content')
       ->save();
 
     OgRole::create()
@@ -264,6 +265,7 @@ class OgRoleTest extends KernelTestBase {
       ->setGroupType('node')
       ->setGroupBundle('group')
       ->grantPermission('access content')
+      ->grantPermission('view own unpublished content')
       ->save();
 
     $og_role3 = OgRole::create();
@@ -271,11 +273,15 @@ class OgRoleTest extends KernelTestBase {
       ->setLabel($this->randomString())
       ->setGroupType('entity_test')
       ->setGroupBundle('group')
+      ->grantPermission('access content')
       ->grantPermission('administer group')
+      // Random permission to test that queries are working properly when
+      // requesting a subset of permissions.
+      ->grantPermission('edit any group entity_test')
       ->save();
 
     $roles = $role_manager->getRolesByPermissions(['access content']);
-    $this->assertCount(2, $roles);
+    $this->assertCount(3, $roles);
 
     // Filter based on the entity type id and bundle.
     $roles = $role_manager->getRolesByPermissions(['administer group'], 'entity_test', 'group');
@@ -296,6 +302,14 @@ class OgRoleTest extends KernelTestBase {
       'access content',
       'administer group',
     ], NULL, NULL, TRUE);
+    $this->assertCount(2, $roles);
+
+    // Require roles with all of the passed permissions and in certain entity
+    // type id and bundle.
+    $roles = $role_manager->getRolesByPermissions([
+      'access content',
+      'administer group',
+    ], 'entity_test', 'group', TRUE);
     $this->assertCount(1, $roles);
 
   }
