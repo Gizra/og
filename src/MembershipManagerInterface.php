@@ -62,13 +62,13 @@ interface MembershipManagerInterface {
    *   The user to get the groups for.
    * @param array $roles
    *   A list of og role objects to filter by.
-   * @param bool $require_all
+   * @param bool $require_all_roles
    *   (optional) If set to true, all requested roles must be present to return
    *   the group.
    * @param array $states
    *   (optional) An array of states to filter the memberships by.
    */
-  public function getUserGroupsByRoles(AccountInterface $user, array $roles, bool $require_all = FALSE, array $states = [OgMembershipInterface::STATE_ACTIVE]);
+  public function getUserGroupsByRoles(AccountInterface $user, array $roles, array $states = [OgMembershipInterface::STATE_ACTIVE], bool $require_all_roles = FALSE);
 
   /**
    * Returns an array of groups ids filtered by the og roles of the user.
@@ -77,13 +77,13 @@ interface MembershipManagerInterface {
    *   The user to get the groups for.
    * @param array $roles
    *   A list of og role objects to filter by.
-   * @param bool $require_all
+   * @param bool $require_all_roles
    *   (optional) If set to true, all requested roles must be present to return
    *   the group.
    * @param array $states
    *   (optional) An array of states to filter the memberships by.
    */
-  public function getUserGroupsIdsByRoles(AccountInterface $user, array $roles, bool $require_all = FALSE, array $states = [OgMembershipInterface::STATE_ACTIVE]);
+  public function getUserGroupsIdsByRoles(AccountInterface $user, array $roles, array $states = [OgMembershipInterface::STATE_ACTIVE], bool $require_all_roles = FALSE);
 
   /**
    * Returns the group memberships a user is associated with.
