@@ -311,7 +311,6 @@ class OgRoleTest extends KernelTestBase {
       'administer group',
     ], 'entity_test', 'group', TRUE);
     $this->assertCount(1, $roles);
-
   }
 
   /**

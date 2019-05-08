@@ -15,6 +15,7 @@ use Drupal\user\Entity\User;
  * Tests getting the memberships of an entity.
  *
  * @group og
+ * @coversDefaultClass \Drupal\og\MembershipManager
  */
 class GetUserGroupsTest extends KernelTestBase {
 
@@ -230,11 +231,14 @@ class GetUserGroupsTest extends KernelTestBase {
 
   /**
    * Tests retrieval of groups filtered by roles.
+   *
+   * @covers \Drupal\og\MembershipManager::getUserGroupsIdsByRoles
    */
   public function testGetGroupsByRoles() {
     /** @var \Drupal\og\MembershipManagerInterface $membership_manager */
     $membership_manager = \Drupal::service('og.membership_manager');
 
+    // Create a test role.
     $extra_role_1 = OgRole::create();
     $extra_role_1
       ->setName('extra_role_1')
@@ -243,18 +247,26 @@ class GetUserGroupsTest extends KernelTestBase {
       ->setGroupBundle($this->groupBundle)
       ->save();
 
+    // Retrieve the default role for a member.
     $member_role = OgRole::getRole('entity_test', $this->groupBundle, OgRoleInterface::AUTHENTICATED);
 
+    // Create memberships for the test user in the groups. The user will have
+    // the normal member role in group 1 and both the normal member role and the
+    // test role in group 2. In group 2 the user will have the blocked status so
+    // we can test filtering by status.
     $this->createOgMembership($this->group1, $this->user3);
     $this->createOgMembership($this->group2, $this->user3, [$extra_role_1->getName()], OgMembershipInterface::STATE_BLOCKED);
 
-    // By default only active memberships are retrieved.
+    // By default only active memberships are retrieved, so if we ask the
+    // groups where the user is a normal member of the result should not include
+    // group 2 where our test user is blocked.
     $groups = $membership_manager->getUserGroupsIdsByRoles($this->user3, [$member_role]);
     $this->assertCount(1, $groups['entity_test']);
     $actual = reset($groups['entity_test']);
     $this->assertEquals($this->group1->id(), $actual);
 
-    // Expected count does not include the blocked membership.
+    // When asking for the groups where our user has the test role, the result
+    // should not include the blocked membership, so it should be empty.
     $groups = $membership_manager->getUserGroupsByRoles($this->user3, [$extra_role_1]);
     $this->assertCount(0, $groups);
 
