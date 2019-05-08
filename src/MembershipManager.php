@@ -126,7 +126,7 @@ class MembershipManager implements MembershipManagerInterface {
   /**
    * {@inheritdoc}
    */
-  public function getUserGroupsIdsByRoles(AccountInterface $user, array $roles, array $states = [OgMembershipInterface::STATE_ACTIVE], bool $require_all_roles_roles = FALSE) {
+  public function getUserGroupIdsByRoles(AccountInterface $user, array $roles, array $states = [OgMembershipInterface::STATE_ACTIVE], bool $require_all_roles_roles = FALSE) {
     $role_ids = array_map(function (OgRoleInterface $role) {
       return $role->id();
     }, $roles);
@@ -148,7 +148,7 @@ class MembershipManager implements MembershipManagerInterface {
    * {@inheritdoc}
    */
   public function getUserGroupsByRoles(AccountInterface $user, array $roles, array $states = [OgMembershipInterface::STATE_ACTIVE], bool $require_all_roles_roles = FALSE) {
-    $group_ids = $this->getUserGroupsIdsByRoles($user, $roles, $require_all_roles_roles, $states);
+    $group_ids = $this->getUserGroupIdsByRoles($user, $roles, $require_all_roles_roles, $states);
     return $this->loadGroups($group_ids);
   }
 
@@ -427,7 +427,7 @@ class MembershipManager implements MembershipManagerInterface {
   }
 
   /**
-   * Loads the entities of a structured array of entity ids.
+   * Loads the entities of a associative array of entity ids.
    *
    * @param array $group_ids
    *   A structured array of entity keys indexed by their entity type id.

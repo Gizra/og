@@ -232,7 +232,7 @@ class GetUserGroupsTest extends KernelTestBase {
   /**
    * Tests retrieval of groups filtered by roles.
    *
-   * @covers \Drupal\og\MembershipManager::getUserGroupsIdsByRoles
+   * @covers \Drupal\og\MembershipManager::getUserGroupIdsByRoles
    */
   public function testGetGroupsByRoles() {
     /** @var \Drupal\og\MembershipManagerInterface $membership_manager */
@@ -260,7 +260,7 @@ class GetUserGroupsTest extends KernelTestBase {
     // By default only active memberships are retrieved, so if we ask the
     // groups where the user is a normal member of the result should not include
     // group 2 where our test user is blocked.
-    $groups = $membership_manager->getUserGroupsIdsByRoles($this->user3, [$member_role]);
+    $groups = $membership_manager->getUserGroupIdsByRoles($this->user3, [$member_role]);
     $this->assertCount(1, $groups['entity_test']);
     $actual = reset($groups['entity_test']);
     $this->assertEquals($this->group1->id(), $actual);
@@ -271,7 +271,7 @@ class GetUserGroupsTest extends KernelTestBase {
     $this->assertCount(0, $groups);
 
     // Include all states.
-    $groups = $membership_manager->getUserGroupsIdsByRoles($this->user3, [$member_role], FALSE, OgMembershipInterface::ALL_STATES);
+    $groups = $membership_manager->getUserGroupIdsByRoles($this->user3, [$member_role], FALSE, OgMembershipInterface::ALL_STATES);
     $this->assertCount(2, $groups['entity_test']);
 
     // Request any of multiple roles.
