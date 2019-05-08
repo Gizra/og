@@ -7,7 +7,7 @@
     "support": {
         "issues": "https://drupal.org/project/issues/og",
         "irc": "irc://irc.freenode.org/drupal-og",
-        "source": "https://cgit.drupalcode.org/og"
+        "source": "https://git.drupalcode.org/project/og"
     },
     "require": {
         "php": ">=7.1.0",
