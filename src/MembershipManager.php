@@ -126,15 +126,15 @@ class MembershipManager implements MembershipManagerInterface {
   /**
    * {@inheritdoc}
    */
-  public function getUserGroupIdsByRoles(AccountInterface $user, array $roles, array $states = [OgMembershipInterface::STATE_ACTIVE], bool $require_all_roles_roles = FALSE) {
+  public function getUserGroupIdsByRoles(AccountInterface $user, array $roles, array $states = [OgMembershipInterface::STATE_ACTIVE], bool $require_all_roles = FALSE) {
     $role_ids = array_map(function (OgRoleInterface $role) {
       return $role->id();
     }, $roles);
 
     $memberships = $this->getMemberships($user, $states);
-    $memberships = array_filter($memberships, function (OgMembershipInterface $membership) use ($role_ids, $require_all_roles_roles) {
+    $memberships = array_filter($memberships, function (OgMembershipInterface $membership) use ($role_ids, $require_all_roles) {
       $membership_roles_ids = $membership->getRolesIds();
-      return $require_all_roles_roles ? !array_diff($role_ids, $membership_roles_ids) : array_intersect($membership_roles_ids, $role_ids);
+      return $require_all_roles ? !array_diff($role_ids, $membership_roles_ids) : array_intersect($membership_roles_ids, $role_ids);
     });
 
     $group_ids = [];
@@ -147,8 +147,8 @@ class MembershipManager implements MembershipManagerInterface {
   /**
    * {@inheritdoc}
    */
-  public function getUserGroupsByRoles(AccountInterface $user, array $roles, array $states = [OgMembershipInterface::STATE_ACTIVE], bool $require_all_roles_roles = FALSE) {
-    $group_ids = $this->getUserGroupIdsByRoles($user, $roles, $require_all_roles_roles, $states);
+  public function getUserGroupsByRoles(AccountInterface $user, array $roles, array $states = [OgMembershipInterface::STATE_ACTIVE], bool $require_all_roles = FALSE) {
+    $group_ids = $this->getUserGroupIdsByRoles($user, $roles, $require_all_roles, $states);
     return $this->loadGroups($group_ids);
   }
 
