@@ -313,26 +313,10 @@ function og_theme($existing, $type, $theme, $path) {
         'count' => 0,
         'membership_states' => [],
         'group' => NULL,
+        'group_label' => NULL,
       ],
     ],
   ];
-}
-
-/**
- * Prepares variables for member count templates.
- *
- * Default template: og-member-count.html.twig.
- *
- * @param array $variables
- *   An associative array containing:
- *   - count: An integer representing the number of members in the group.
- *   - group: The group, which is a content entity.
- */
-function template_preprocess_og_member_count(array &$variables) {
-  /** @var \Drupal\Core\Entity\ContentEntityInterface $group */
-  $group = $variables['group'];
-
-  $variables['group_label'] = $group->label();
 }
 
 /**
