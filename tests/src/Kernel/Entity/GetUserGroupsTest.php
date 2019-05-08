@@ -271,15 +271,15 @@ class GetUserGroupsTest extends KernelTestBase {
     $this->assertCount(0, $groups);
 
     // Include all states.
-    $groups = $membership_manager->getUserGroupIdsByRoles($this->user3, [$member_role], FALSE, OgMembershipInterface::ALL_STATES);
+    $groups = $membership_manager->getUserGroupIdsByRoles($this->user3, [$member_role], OgMembershipInterface::ALL_STATES, FALSE);
     $this->assertCount(2, $groups['entity_test']);
 
     // Request any of multiple roles.
-    $groups = $membership_manager->getUserGroupsByRoles($this->user3, [$member_role, $extra_role_1], FALSE, OgMembershipInterface::ALL_STATES);
+    $groups = $membership_manager->getUserGroupsByRoles($this->user3, [$member_role, $extra_role_1], OgMembershipInterface::ALL_STATES, FALSE);
     $this->assertCount(2, $groups['entity_test']);
 
     // Request all of multiple roles.
-    $groups = $membership_manager->getUserGroupsByRoles($this->user3, [$member_role, $extra_role_1], TRUE, OgMembershipInterface::ALL_STATES);
+    $groups = $membership_manager->getUserGroupsByRoles($this->user3, [$member_role, $extra_role_1], OgMembershipInterface::ALL_STATES, TRUE);
     $this->assertCount(1, $groups['entity_test']);
     $actual = reset($groups['entity_test']);
     $this->assertEquals($this->group2->id(), $actual->id());
