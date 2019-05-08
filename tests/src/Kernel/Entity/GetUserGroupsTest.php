@@ -236,7 +236,7 @@ class GetUserGroupsTest extends KernelTestBase {
    */
   public function testGetGroupsByRoles() {
     /** @var \Drupal\og\MembershipManagerInterface $membership_manager */
-    $membership_manager = \Drupal::service('og.membership_manager');
+    $membership_manager = $this->container->get('og.membership_manager');
 
     // Create a test role.
     $extra_role_1 = OgRole::create();
