@@ -2494,15 +2494,17 @@ function og_is_group_content_type($entity_type, $bundle_name) {
 function og_get_all_group_entity() {
   $return = array();
 
-  foreach (entity_get_info() as $entity_type => $entity_value) {
-    foreach ($entity_value['bundles'] as $bundle => $bundle_value) {
-      if (og_is_group_type($entity_type, $bundle)) {
-        $return[$entity_type] = check_plain($entity_value['label']);
-        // At least one bundle of the entity can be a group, so break.
-        break;
-      }
-    }
+  $field = field_info_field(OG_GROUP_FIELD);
+  if (empty($field['bundles'])) {
+    return $return;
   }
+
+  $entity_types = array_keys($field['bundles']);
+  foreach ($entity_types as $entity_type) {
+    $entity_info = entity_get_info($entity_type);
+    $return[$entity_type] = check_plain($entity_info['label']);
+  }
+
   return $return;
 }
 
