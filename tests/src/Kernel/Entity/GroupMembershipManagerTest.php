@@ -88,6 +88,7 @@ class GroupMembershipManagerTest extends KernelTestBase {
     $this->installEntitySchema('og_membership');
     $this->installEntitySchema('user');
     $this->installSchema('system', 'sequences');
+    $this->installSchema('user', 'users_data');
 
     $this->entityTypeManager = $this->container->get('entity_type.manager');
     $this->membershipManager = $this->container->get('og.membership_manager');
@@ -364,11 +365,47 @@ class GroupMembershipManagerTest extends KernelTestBase {
    * @covers ::getGroupMembershipsByRoleNames
    */
   public function testGetGroupMembershipsByRoleNames() {
+    $retrieve_membership_owner_id = function (OgMembershipInterface $membership) {
+      return $membership->getOwnerId();
+    };
+    $this->doTestGetGroupMembershipsByRoleNames('getGroupMembershipsByRoleNames', $retrieve_membership_owner_id);
+  }
+
+  /**
+   * Tests retrieval of group membership IDs filtered by role names.
+   *
+   * @covers ::getGroupMembershipIdsByRoleNames
+   */
+  public function testGetGroupMembershipIdsByRoleNames() {
+    $membership_storage = $this->container->get('entity_type.manager')->getStorage('og_membership');
+    $retrieve_membership_owner_id = function ($membership_id) use ($membership_storage) {
+      /** @var \Drupal\og\OgMembershipInterface $membership */
+      $membership = $membership_storage->load($membership_id);
+      return $membership->getOwnerId();
+    };
+    $this->doTestGetGroupMembershipsByRoleNames('getGroupMembershipIdsByRoleNames', $retrieve_membership_owner_id);
+  }
+
+  /**
+   * Tests retrieval of group memberships or their IDs filtered by role names.
+   *
+   * Contains the actual test logic of ::testGetGroupMembershipsByRoleNames()
+   * and ::testGetGroupMembershipIdsByRoleNames().
+   *
+   * @param string $method_name
+   *   The name of the method under test. Can be one of the following:
+   *   - 'getGroupMembershipIdsByRoleNames'
+   *   - 'getGroupMembershipsByRoleNames'.
+   * @param callable $retrieve_membership_owner_id
+   *   A callable that will retrieve the ID of the owner of the membership or
+   *   membership ID.
+   */
+  protected function doTestGetGroupMembershipsByRoleNames($method_name, callable $retrieve_membership_owner_id) {
     $this->createTestMemberships();
 
     // Check that an exception is thrown if no role names are passed.
     try {
-      $this->membershipManager->getGroupMembershipsByRoleNames($this->groups['node'][0], []);
+      $this->membershipManager->$method_name($this->groups['node'][0], []);
       $this->fail('MembershipManager::getGroupsMembershipsByRoleNames() throws an exception when called without passing any role names.');
     }
     catch (\InvalidArgumentException $e) {
@@ -377,6 +414,23 @@ class GroupMembershipManagerTest extends KernelTestBase {
 
     // Define a test matrix to iterate over. We're not using a data provider
     // because the large number of test cases would slow down the test too much.
+    // The test matrix has the following structure:
+    // @code
+    // [
+    //   // The machine name of the group entity type being tested.
+    //   {entity_type_id} => [
+    //     // The key of the test group as created in ::setUp().
+    //     {group_key} => [ //
+    //       // The roles being passed to the method.
+    //       'roles' => [{role_id}],
+    //       // The membership states being passed to the method.
+    //       'states' => [{state_id}],
+    //       // The memberships that should be returned by the method.
+    //       'expected_memberships' => [{expected_membership_id}],
+    //     ],
+    //   ],
+    // ];
+    // @endcode
     $matrix = [
       'node' => [
         0 => [
@@ -502,6 +556,15 @@ class GroupMembershipManagerTest extends KernelTestBase {
             ],
             'expected_memberships' => [4, 7],
           ],
+          // There is one pending administrator, just as in the node group with
+          // the same entity ID. This ensures that the correct result will be
+          // returned for groups that have different entity types but the same
+          // entity ID.
+          [
+            'roles' => [OgRoleInterface::ADMINISTRATOR],
+            'states' => [OgMembershipInterface::STATE_PENDING],
+            'expected_memberships' => [8],
+          ],
           // There is one blocked moderator.
           [
             'roles' => [
@@ -525,15 +588,13 @@ class GroupMembershipManagerTest extends KernelTestBase {
           $states = $test_case['states'];
           $expected_memberships = $test_case['expected_memberships'];
 
-          /** @var \Drupal\og\OgMembershipInterface[] $actual_memberships */
-          $actual_memberships = $this->membershipManager->getGroupMembershipsByRoleNames($group, $role_names, $states);
-
+          $actual_memberships = $this->membershipManager->$method_name($group, $role_names, $states);
           $this->assertSameSize($expected_memberships, $actual_memberships);
 
           foreach ($expected_memberships as $expected_membership_key) {
             $expected_user_id = $this->users[$expected_membership_key]->id();
             foreach ($actual_memberships as $actual_membership) {
-              if ($actual_membership->getOwnerId() == $expected_user_id) {
+              if ($retrieve_membership_owner_id($actual_membership) == $expected_user_id) {
                 // Match found.
                 continue 2;
               }
@@ -544,6 +605,20 @@ class GroupMembershipManagerTest extends KernelTestBase {
         }
       }
     }
+
+    // Test that the correct memberships are returned when one of the users is
+    // deleted. We are using the second node group as a test case. This group
+    // has one pending administrator: the user with key '2'.
+    $group = $this->groups['node'][1];
+    $role_names = [OgRoleInterface::ADMINISTRATOR];
+    $states = [OgMembershipInterface::STATE_PENDING];
+    $memberships = $this->membershipManager->$method_name($group, $role_names, $states);
+    $this->assertCount(1, $memberships);
+
+    // Delete the user and check that it no longer appears in the result.
+    $this->users[2]->delete();
+    $memberships = $this->membershipManager->$method_name($group, $role_names, $states);
+    $this->assertCount(0, $memberships);
   }
 
   /**
@@ -651,6 +726,17 @@ class GroupMembershipManagerTest extends KernelTestBase {
           1 => [
             'state' => OgMembershipInterface::STATE_BLOCKED,
             'roles' => [OgRoleInterface::AUTHENTICATED],
+          ],
+        ],
+      ],
+
+      // A user which is a pending administrator of the second test entity
+      // group.
+      8 => [
+        'entity_test' => [
+          1 => [
+            'state' => OgMembershipInterface::STATE_PENDING,
+            'roles' => [OgRoleInterface::ADMINISTRATOR],
           ],
         ],
       ],
