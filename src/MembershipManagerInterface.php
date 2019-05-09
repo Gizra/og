@@ -62,11 +62,11 @@ interface MembershipManagerInterface {
    *   The user to get the groups for.
    * @param \Drupal\og\OgRoleInterface[] $roles
    *   A list of og role objects to filter by.
+   * @param array $states
+   *   (optional) An array of states to filter the memberships by.
    * @param bool $require_all_roles
    *   (optional) If set to true, all requested roles must be present to return
    *   the group.
-   * @param array $states
-   *   (optional) An array of states to filter the memberships by.
    */
   public function getUserGroupsByRoles(AccountInterface $user, array $roles, array $states = [OgMembershipInterface::STATE_ACTIVE], bool $require_all_roles = FALSE);
 
@@ -77,11 +77,11 @@ interface MembershipManagerInterface {
    *   The user to get the groups for.
    * @param \Drupal\og\OgRoleInterface[] $roles
    *   A list of og role objects to filter by.
+   * @param array $states
+   *   (optional) An array of states to filter the memberships by.
    * @param bool $require_all_roles
    *   (optional) If set to true, all requested roles must be present to return
    *   the group.
-   * @param array $states
-   *   (optional) An array of states to filter the memberships by.
    */
   public function getUserGroupIdsByRoles(AccountInterface $user, array $roles, array $states = [OgMembershipInterface::STATE_ACTIVE], bool $require_all_roles = FALSE);
 

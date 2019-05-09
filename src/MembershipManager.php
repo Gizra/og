@@ -148,7 +148,7 @@ class MembershipManager implements MembershipManagerInterface {
    * {@inheritdoc}
    */
   public function getUserGroupsByRoles(AccountInterface $user, array $roles, array $states = [OgMembershipInterface::STATE_ACTIVE], bool $require_all_roles = FALSE) {
-    $group_ids = $this->getUserGroupIdsByRoles($user, $roles, $require_all_roles, $states);
+    $group_ids = $this->getUserGroupIdsByRoles($user, $roles, $states, $require_all_roles);
     return $this->loadGroups($group_ids);
   }
 
