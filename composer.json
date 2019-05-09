@@ -7,6 +7,7 @@
     "support": {
         "issues": "https://drupal.org/project/issues/og",
         "irc": "irc://irc.freenode.org/drupal-og",
+        "slack": "https://drupal.slack.com/messages/CELR48EA0",
         "source": "https://git.drupalcode.org/project/og"
     },
     "require": {
