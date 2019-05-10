@@ -97,8 +97,8 @@ interface OgMembershipInterface extends ContentEntityInterface, EntityOwnerInter
    * Gets the group associated with the membership.
    *
    * @return \Drupal\Core\Entity\ContentEntityInterface|null
-   *   The group object which is referenced by the membership, or NULL if no
-   *   group has been set yet.
+   *   The group object which is referenced by the membership, or NULL if the
+   *   group no longer exists in the entity storage.
    */
   public function getGroup(): ?ContentEntityInterface;
 

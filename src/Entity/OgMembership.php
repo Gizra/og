@@ -184,14 +184,10 @@ class OgMembership extends ContentEntityBase implements OgMembershipInterface {
   /**
    * {@inheritdoc}
    */
-  public function getGroup(): ContentEntityInterface {
+  public function getGroup(): ?ContentEntityInterface {
     assert(!empty($this->get('entity_type')->value) || !empty($this->get('entity_id')->value), new \LogicException(__METHOD__ . '() should only be called on loaded memberships, or on newly created memberships that already have the group set.'));
     $entity_type = $this->get('entity_type')->value;
     $entity_id = $this->get('entity_id')->value;
-
-    if (empty($entity_type) || empty($entity_id)) {
-      return NULL;
-    }
 
     return \Drupal::entityTypeManager()->getStorage($entity_type)->load($entity_id);
   }
