@@ -214,6 +214,11 @@ class MembershipManager implements MembershipManagerInterface {
       throw new \InvalidArgumentException('\Drupal\og\MembershipManager::getGroupIds() cannot be used for user entities. Use \Drupal\og\MembershipManager::getUserGroups() instead.');
     }
 
+    // This should only be called on group content types.
+    if (!$this->groupAudienceHelper->hasGroupAudienceField($entity->getEntityTypeId(), $entity->bundle())) {
+      throw new \InvalidArgumentException('Can only retrieve group IDs for group content entities.');
+    }
+
     $cid = [
       __METHOD__,
       $entity->getEntityTypeId(),
