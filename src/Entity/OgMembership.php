@@ -98,6 +98,7 @@ class OgMembership extends ContentEntityBase implements OgMembershipInterface {
    * {@inheritdoc}
    */
   public function getOwner() {
+    assert(!empty($this->get('uid')->entity), new \LogicException(__METHOD__ . '() should only be called on loaded memberships, or on newly created memberships that already have the owner set.'));
     return $this->get('uid')->entity;
   }
 
@@ -105,6 +106,7 @@ class OgMembership extends ContentEntityBase implements OgMembershipInterface {
    * {@inheritdoc}
    */
   public function getOwnerId() {
+    assert(!empty($this->get('uid')->entity), new \LogicException(__METHOD__ . '() should only be called on loaded memberships, or on newly created memberships that already have the owner set.'));
     return $this->get('uid')->target_id;
   }
 
@@ -138,6 +140,7 @@ class OgMembership extends ContentEntityBase implements OgMembershipInterface {
    * {@inheritdoc}
    */
   public function getGroupEntityType(): string {
+    assert(!empty($this->get('entity_type')->value), new \LogicException(__METHOD__ . '() should only be called on loaded memberships, or on newly created memberships that already have the group type set.'));
     return $this->get('entity_type')->value;
   }
 
@@ -145,6 +148,7 @@ class OgMembership extends ContentEntityBase implements OgMembershipInterface {
    * {@inheritdoc}
    */
   public function getGroupBundle(): string {
+    assert(!empty($this->get('entity_bundle')->value), new \LogicException(__METHOD__ . '() should only be called on loaded memberships, or on newly created memberships that already have the group bundle set.'));
     return $this->get('entity_bundle')->value;
   }
 
@@ -152,6 +156,7 @@ class OgMembership extends ContentEntityBase implements OgMembershipInterface {
    * {@inheritdoc}
    */
   public function getGroupId(): string {
+    assert(!empty($this->get('entity_id')->value), new \LogicException(__METHOD__ . '() should only be called on loaded memberships, or on newly created memberships that already have the group ID set.'));
     return $this->get('entity_id')->value;
   }
 
@@ -180,6 +185,7 @@ class OgMembership extends ContentEntityBase implements OgMembershipInterface {
    * {@inheritdoc}
    */
   public function getGroup(): ContentEntityInterface {
+    assert(!empty($this->get('entity_type')->value) || !empty($this->get('entity_id')->value), new \LogicException(__METHOD__ . '() should only be called on loaded memberships, or on newly created memberships that already have the group set.'));
     $entity_type = $this->get('entity_type')->value;
     $entity_id = $this->get('entity_id')->value;
 
