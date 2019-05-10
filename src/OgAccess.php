@@ -12,6 +12,7 @@ use Drupal\Core\Session\AccountInterface;
 use Drupal\Core\Session\AccountProxyInterface;
 use Drupal\og\Entity\OgRole;
 use Drupal\user\EntityOwnerInterface;
+use Drupal\user\UserInterface;
 
 /**
  * The service that determines if users have access to groups and group content.
@@ -266,7 +267,7 @@ class OgAccess implements OgAccessInterface {
       $cache_tags = $entity_type->getListCacheTags();
 
       // The entity might be a user or a non-user entity.
-      $groups = $entity->getEntityTypeId() == 'user' ? $this->membershipManager->getUserGroups($entity) : $this->membershipManager->getGroups($entity);
+      $groups = $entity instanceof UserInterface ? $this->membershipManager->getUserGroups($entity) : $this->membershipManager->getGroups($entity);
 
       if ($groups) {
         $forbidden = AccessResult::forbidden()->addCacheTags($cache_tags);
