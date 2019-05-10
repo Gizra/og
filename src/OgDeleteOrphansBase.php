@@ -149,6 +149,7 @@ abstract class OgDeleteOrphansBase extends PluginBase implements OgDeleteOrphans
     // Only delete group content that is fully orphaned, i.e. it is no longer
     // associated with any groups.
     if ($this->groupAudienceHelper->hasGroupAudienceField($entity->getEntityTypeId(), $entity->bundle())) {
+      // Only do a group count if the entity is actually group content.
       $group_count = $this->membershipManager->getGroupCount($entity);
       if ($group_count == 0) {
         $entity->delete();
