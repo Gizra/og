@@ -98,7 +98,9 @@ interface OgMembershipInterface extends ContentEntityInterface, EntityOwnerInter
    *
    * @return \Drupal\Core\Entity\ContentEntityInterface|null
    *   The group object which is referenced by the membership, or NULL if the
-   *   group no longer exists in the entity storage.
+   *   group no longer exists in the entity storage. This can happen when the
+   *   cleanup of orphaned memberships is configured to be handled in a cron job
+   *   or batch process.
    */
   public function getGroup(): ?ContentEntityInterface;
 
