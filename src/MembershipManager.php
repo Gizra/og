@@ -12,6 +12,7 @@ use Drupal\Core\Session\AccountInterface;
 use Drupal\field\Entity\FieldStorageConfig;
 use Drupal\field\FieldStorageConfigInterface;
 use Drupal\og\Entity\OgMembership;
+use Drupal\user\UserInterface;
 
 /**
  * Service for managing memberships and group content.
@@ -210,8 +211,13 @@ class MembershipManager implements MembershipManagerInterface {
    */
   public function getGroupIds(EntityInterface $entity, $group_type_id = NULL, $group_bundle = NULL) {
     // This does not work for user entities.
-    if ($entity->getEntityTypeId() === 'user') {
+    if ($entity instanceof UserInterface) {
       throw new \InvalidArgumentException('\Drupal\og\MembershipManager::getGroupIds() cannot be used for user entities. Use \Drupal\og\MembershipManager::getUserGroups() instead.');
+    }
+
+    // This should only be called on group content types.
+    if (!$this->groupAudienceHelper->hasGroupAudienceField($entity->getEntityTypeId(), $entity->bundle())) {
+      throw new \InvalidArgumentException('Can only retrieve group IDs for group content entities.');
     }
 
     $cid = [

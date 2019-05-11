@@ -4,4 +4,4 @@ description: 'Provides default views for views OG standard reference tests.'
 package: Testing
 core: 8.x
 dependencies:
- - views
+ - drupal:views
