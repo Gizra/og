@@ -7,7 +7,7 @@ type: module
 php: 7.1
 
 dependencies:
-  - options
-  - text
-  - field
-  - user
+  - drupal:options
+  - drupal:text
+  - drupal:field
+  - drupal:user
