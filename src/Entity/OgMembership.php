@@ -2,6 +2,7 @@
 
 namespace Drupal\og\Entity;
 
+use Drupal\Core\Cache\Cache;
 use Drupal\Core\Entity\ContentEntityBase;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Entity\EntityStorageInterface;
@@ -126,6 +127,7 @@ class OgMembership extends ContentEntityBase implements OgMembershipInterface {
    */
   public function setGroup(EntityInterface $group) {
     $this->set('entity_type', $group->getEntityTypeId());
+    $this->set('entity_bundle', $group->bundle());
     $this->set('entity_id', $group->id());
     return $this;
   }
@@ -140,8 +142,36 @@ class OgMembership extends ContentEntityBase implements OgMembershipInterface {
   /**
    * {@inheritdoc}
    */
+  public function getGroupBundle() {
+    return $this->get('entity_bundle')->value;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   public function getGroupId() {
     return $this->get('entity_id')->value;
+  }
+
+  /**
+   * Checks if a group has already been populated on the membership.
+   *
+   * The group is required for a membership, so it is always present if a
+   * membership has been saved. This is intended for internal use to verify if
+   * a group is present when methods are called on a membership that is possibly
+   * still under construction.
+   *
+   * For performance reasons this avoids loading the full group entity just for
+   * this purpose, and relies only on the fact that the data for the entity is
+   * populated in the relevant fields. This should give us the same indication,
+   * but with a lower performance cost, especially for users that are a member
+   * of a large number of groups.
+   *
+   * @return bool
+   *   Whether or not the group is already present.
+   */
+  protected function hasGroup() {
+    return !empty($this->get('entity_type')->value) && !empty($this->get('entity_bundle')->value) && !empty($this->get('entity_id')->value);
   }
 
   /**
@@ -219,10 +249,15 @@ class OgMembership extends ContentEntityBase implements OgMembershipInterface {
    * {@inheritdoc}
    */
   public function getRoles() {
-    // Add the member role.
-    $roles = [
-      OgRole::getRole($this->getGroupEntityType(), $this->getGroup()->bundle(), OgRoleInterface::AUTHENTICATED),
-    ];
+    $roles = [];
+
+    // Add the member role. This is only possible if a group has been set on the
+    // membership.
+    if ($this->hasGroup()) {
+      $roles = [
+        OgRole::getRole($this->getGroupEntityType(), $this->getGroupBundle(), OgRoleInterface::AUTHENTICATED),
+      ];
+    }
     $roles = array_merge($roles, $this->get('roles')->referencedEntities());
     return $roles;
   }
@@ -330,9 +365,13 @@ class OgMembership extends ContentEntityBase implements OgMembershipInterface {
       ->setLabel(t('Group entity type'))
       ->setDescription(t('The entity type of the group.'));
 
+    $fields['entity_bundle'] = BaseFieldDefinition::create('string')
+      ->setLabel(t('Group bundle ID'))
+      ->setDescription(t('The bundle ID of the group.'));
+
     $fields['entity_id'] = BaseFieldDefinition::create('string')
-      ->setLabel(t('Group entity id'))
-      ->setDescription(t("The entity ID of the group."));
+      ->setLabel(t('Group entity ID'))
+      ->setDescription(t('The entity ID of the group.'));
 
     $fields['state'] = BaseFieldDefinition::create('string')
       ->setLabel(t('State'))
@@ -425,7 +464,7 @@ class OgMembership extends ContentEntityBase implements OgMembershipInterface {
       ->execute();
 
     if ($count) {
-      throw new \LogicException(sprintf('An OG membership already exists for group of entity-type %s and ID: %s', $entity_type_id, $this->getGroup()->id()));
+      throw new \LogicException(sprintf('An OG membership already exists for uid %s in group of entity-type %s and ID: %s', $this->get('uid')->target_id, $entity_type_id, $this->getGroup()->id()));
     }
 
     parent::preSave($storage);
@@ -441,10 +480,43 @@ class OgMembership extends ContentEntityBase implements OgMembershipInterface {
     Og::reset();
     \Drupal::service('og.access')->reset();
 
-    // Invalidate the group membership manager.
-    \Drupal::service('og.membership_manager')->reset();
-
     return $result;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  protected function invalidateTagsOnSave($update) {
+    parent::invalidateTagsOnSave($update);
+
+    // A membership was created or updated: invalidate the membership list cache
+    // tags of its group. An updated membership may start to appear in a group's
+    // membership listings because it now meets those listings' filtering
+    // requirements. A newly created membership may start to appear in listings
+    // because it did not exist before.
+    $group = $this->getGroup();
+    if (!empty($group)) {
+      $tags = Cache::buildTags(OgMembershipInterface::GROUP_MEMBERSHIP_LIST_CACHE_TAG_PREFIX, $group->getCacheTagsToInvalidate());
+      Cache::invalidateTags($tags);
+    }
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  protected static function invalidateTagsOnDelete(EntityTypeInterface $entity_type, array $entities) {
+    parent::invalidateTagsOnDelete($entity_type, $entities);
+
+    // A membership was deleted: invalidate the list cache tags of its group
+    // membership lists, so that any lists that contain the membership will be
+    // recalculated.
+    $tags = [];
+    foreach ($entities as $entity) {
+      if ($group = $entity->getGroup()) {
+        $tags = Cache::mergeTags(Cache::buildTags(OgMembershipInterface::GROUP_MEMBERSHIP_LIST_CACHE_TAG_PREFIX, $group->getCacheTagsToInvalidate()), $tags);
+      }
+    }
+    Cache::invalidateTags($tags);
   }
 
   /**

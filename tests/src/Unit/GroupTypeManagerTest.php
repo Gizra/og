@@ -2,16 +2,17 @@
 
 namespace Drupal\Tests\og\Unit;
 
+use Drupal\Core\Cache\CacheBackendInterface;
 use Drupal\Core\Config\Config;
 use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Entity\EntityStorageInterface;
 use Drupal\Core\Entity\EntityTypeBundleInfoInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Routing\RouteBuilderInterface;
-use Drupal\Core\State\StateInterface;
 use Drupal\og\Event\GroupCreationEvent;
 use Drupal\og\Event\GroupCreationEventInterface;
 use Drupal\og\GroupTypeManager;
+use Drupal\og\GroupTypeManagerInterface;
 use Drupal\og\OgGroupAudienceHelperInterface;
 use Drupal\og\PermissionManagerInterface;
 use Drupal\og\OgRoleManagerInterface;
@@ -86,11 +87,11 @@ class GroupTypeManagerTest extends UnitTestCase {
   protected $permissionEvent;
 
   /**
-   * The state prophecy used in the test.
+   * The cache prophecy used in the test.
    *
-   * @var \Drupal\Core\State\StateInterface|\Prophecy\Prophecy\ObjectProphecy
+   * @var \Drupal\Core\Cache\CacheBackendInterface|\Prophecy\Prophecy\ObjectProphecy
    */
-  protected $state;
+  protected $cache;
 
   /**
    * The OG permission manager prophecy used in the test.
@@ -134,7 +135,7 @@ class GroupTypeManagerTest extends UnitTestCase {
     $this->ogRoleManager = $this->prophesize(OgRoleManagerInterface::class);
     $this->permissionEvent = $this->prophesize(PermissionEventInterface::class);
     $this->permissionManager = $this->prophesize(PermissionManagerInterface::class);
-    $this->state = $this->prophesize(StateInterface::class);
+    $this->cache = $this->prophesize(CacheBackendInterface::class);
     $this->routeBuilder = $this->prophesize(RouteBuilderInterface::class);
     $this->groupAudienceHelper = $this->prophesize(OgGroupAudienceHelperInterface::class);
   }
@@ -148,7 +149,7 @@ class GroupTypeManagerTest extends UnitTestCase {
     // Just creating an instance should be lightweight, no methods should be
     // called.
     $group_manager = $this->createGroupManager();
-    $this->assertInstanceOf(GroupTypeManager::class, $group_manager);
+    $this->assertInstanceOf(GroupTypeManagerInterface::class, $group_manager);
   }
 
   /**
@@ -201,19 +202,19 @@ class GroupTypeManagerTest extends UnitTestCase {
   }
 
   /**
-   * Tests getting all the groups of an entity type.
+   * Tests getting all the groups IDs of an entity type.
    *
-   * @covers ::getGroupsForEntityType
+   * @covers ::getGroupBundleIdsByEntityType
    */
-  public function testGetGroupsForEntityType() {
+  public function testGetGroupBundleIdsByEntityType() {
     // It is expected that the group map will be retrieved from config.
     $groups = ['test_entity' => ['a', 'b']];
     $this->expectGroupMapRetrieval($groups);
 
     $manager = $this->createGroupManager();
 
-    $this->assertSame($groups['test_entity'], $manager->getGroupsForEntityType('test_entity'));
-    $this->assertSame([], $manager->getGroupsForEntityType('test_entity_non_existent'));
+    $this->assertSame($groups['test_entity'], $manager->getGroupBundleIdsByEntityType('test_entity'));
+    $this->assertSame([], $manager->getGroupBundleIdsByEntityType('test_entity_non_existent'));
   }
 
   /**
@@ -238,7 +239,7 @@ class GroupTypeManagerTest extends UnitTestCase {
     // Add to existing.
     $manager->addGroup('test_entity', 'c');
 
-    $this->assertSame(['a', 'b', 'c'], $manager->getGroupsForEntityType('test_entity'));
+    $this->assertSame(['a', 'b', 'c'], $manager->getGroupBundleIdsByEntityType('test_entity'));
     $this->assertTrue($manager->isGroup('test_entity', 'c'));
   }
 
@@ -279,7 +280,7 @@ class GroupTypeManagerTest extends UnitTestCase {
 
     // Add a new entity type.
     $manager->addGroup('test_entity_new', 'a');
-    $this->assertSame(['a'], $manager->getGroupsForEntityType('test_entity_new'));
+    $this->assertSame(['a'], $manager->getGroupBundleIdsByEntityType('test_entity_new'));
     $this->assertTrue($manager->isGroup('test_entity_new', 'a'));
   }
 
@@ -313,7 +314,7 @@ class GroupTypeManagerTest extends UnitTestCase {
 
     // Add to existing.
     $manager->removeGroup('test_entity', 'b');
-    $this->assertSame(['a'], $manager->getGroupsForEntityType('test_entity'));
+    $this->assertSame(['a'], $manager->getGroupBundleIdsByEntityType('test_entity'));
     $this->assertFalse($manager->isGroup('test_entity', 'b'));
     $this->assertTrue($manager->isGroup('test_entity', 'a'));
   }
@@ -321,21 +322,16 @@ class GroupTypeManagerTest extends UnitTestCase {
   /**
    * Creates a group manager instance with a mock config factory.
    *
-   * @return \Drupal\og\GroupTypeManager
+   * @return \Drupal\og\GroupTypeManagerInterface
    *   Returns the group manager.
    */
   protected function createGroupManager() {
-    // It is expected that the role storage will be initialized.
-    $this->entityTypeManager->getStorage('og_role')
-      ->willReturn($this->entityStorage->reveal())
-      ->shouldBeCalled();
-
     return new GroupTypeManager(
       $this->configFactory->reveal(),
       $this->entityTypeManager->reveal(),
       $this->entityTypeBundleInfo->reveal(),
       $this->eventDispatcher->reveal(),
-      $this->state->reveal(),
+      $this->cache->reveal(),
       $this->permissionManager->reveal(),
       $this->ogRoleManager->reveal(),
       $this->routeBuilder->reveal(),

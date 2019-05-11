@@ -4,7 +4,7 @@ namespace Drupal\Tests\og\Unit\Plugin\OgGroupResolver;
 
 use Drupal\Core\Entity\ContentEntityInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
-use Drupal\og\GroupTypeManager;
+use Drupal\og\GroupTypeManagerInterface;
 use Drupal\og\MembershipManagerInterface;
 use Drupal\og\OgGroupAudienceHelperInterface;
 use Drupal\Tests\UnitTestCase;
@@ -54,7 +54,7 @@ abstract class OgGroupResolverTestBase extends UnitTestCase {
   /**
    * The mocked OG group type manager.
    *
-   * @var \Drupal\og\GroupTypeManager|\Prophecy\Prophecy\ObjectProphecy
+   * @var \Drupal\og\GroupTypeManagerInterface|\Prophecy\Prophecy\ObjectProphecy
    */
   protected $groupTypeManager;
 
@@ -74,7 +74,7 @@ abstract class OgGroupResolverTestBase extends UnitTestCase {
     // Instantiate mocks of the classes that the plugins rely on.
     $this->entityTypeManager = $this->prophesize(EntityTypeManagerInterface::class);
     $this->groupAudienceHelper = $this->prophesize(OgGroupAudienceHelperInterface::class);
-    $this->groupTypeManager = $this->prophesize(GroupTypeManager::class);
+    $this->groupTypeManager = $this->prophesize(GroupTypeManagerInterface::class);
     $this->membershipManager = $this->prophesize(MembershipManagerInterface::class);
 
     // Create mocked test entities.

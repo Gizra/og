@@ -2,7 +2,6 @@
 
 namespace Drupal\Tests\og\Kernel\Entity;
 
-use Drupal\Component\Utility\Unicode;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\node\Entity\Node;
 use Drupal\node\Entity\NodeType;
@@ -86,8 +85,8 @@ class SelectionHandlerTest extends KernelTestBase {
     $this->installSchema('system', 'sequences');
 
     // Setting up variables.
-    $this->groupBundle = Unicode::strtolower($this->randomMachineName());
-    $this->groupContentBundle = Unicode::strtolower($this->randomMachineName());
+    $this->groupBundle = mb_strtolower($this->randomMachineName());
+    $this->groupContentBundle = mb_strtolower($this->randomMachineName());
 
     // Create a group.
     NodeType::create([
@@ -134,14 +133,15 @@ class SelectionHandlerTest extends KernelTestBase {
   /**
    * Testing OG selection handler results.
    *
-   * We need to verify that each user get the groups he own in the normal widget
-   * and the other users group's in the other groups widget and vice versa.
+   * We need to verify that each user gets the groups they own in the normal
+   * widget and the other users' groups in the other groups widget and vice
+   * versa.
    */
   public function testSelectionHandlerResults() {
     $user1_groups = $this->createGroups(2, $this->user1);
     $user2_groups = $this->createGroups(2, $this->user2);
 
-    // Checking that the user get the groups he mange.
+    // Check that users get the groups they manage.
     $this->setCurrentAccount($this->user1);
     $groups = $this->selectionHandler->getReferenceableEntities();
     $this->assertEquals($user1_groups, array_keys($groups[$this->groupBundle]));

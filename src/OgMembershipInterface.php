@@ -39,6 +39,15 @@ interface OgMembershipInterface extends ContentEntityInterface, EntityOwnerInter
   const STATE_BLOCKED = 'blocked';
 
   /**
+   * An array containing all possible group membership states.
+   */
+  const ALL_STATES = [
+    self::STATE_ACTIVE,
+    self::STATE_PENDING,
+    self::STATE_BLOCKED,
+  ];
+
+  /**
    * The default group membership type that is the bundle of group membership.
    */
   const TYPE_DEFAULT = 'default';
@@ -47,6 +56,11 @@ interface OgMembershipInterface extends ContentEntityInterface, EntityOwnerInter
    * The name of the user's request field in the default group membership type.
    */
   const REQUEST_FIELD = 'og_membership_request';
+
+  /**
+   * The prefix that is used to identify group membership list cache tags.
+   */
+  const GROUP_MEMBERSHIP_LIST_CACHE_TAG_PREFIX = 'og-group-membership-list';
 
   /**
    * Gets the membership creation timestamp.
@@ -94,6 +108,14 @@ interface OgMembershipInterface extends ContentEntityInterface, EntityOwnerInter
    *   The entity type.
    */
   public function getGroupEntityType();
+
+  /**
+   * Gets the group entity bundle.
+   *
+   * @return string
+   *   The bundle.
+   */
+  public function getGroupBundle();
 
   /**
    * Gets the group entity ID.

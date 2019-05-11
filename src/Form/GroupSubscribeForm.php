@@ -2,10 +2,13 @@
 
 namespace Drupal\og\Form;
 
+use Drupal\Component\Datetime\TimeInterface;
 use Drupal\Core\Entity\ContentEntityForm;
+use Drupal\Core\Entity\EntityRepositoryInterface;
+use Drupal\Core\Entity\EntityTypeBundleInfoInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Url;
-use Drupal\og\OgAccess;
+use Drupal\og\OgAccessInterface;
 use Drupal\og\OgMembershipInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
@@ -23,23 +26,53 @@ class GroupSubscribeForm extends ContentEntityForm {
   /**
    * OG access service.
    *
-   * @var \Drupal\og\OgAccess
+   * @var \Drupal\og\OgAccessInterface
    */
   protected $ogAccess;
 
   /**
-   * Constructs a SubscriptionController object.
+   * Constructs a GroupSubscribeForm.
+   *
+   * @param \Drupal\og\OgAccessInterface $og_access
+   *   The OG access service.
+   * @param \Drupal\Core\Entity\EntityRepositoryInterface|\Drupal\Core\Entity\EntityManagerInterface $entity_repository
+   *   The entity repository service.
+   * @param \Drupal\Core\Entity\EntityTypeBundleInfoInterface $entity_type_bundle_info
+   *   The entity type bundle service.
+   * @param \Drupal\Component\Datetime\TimeInterface $time
+   *   The time service.
+   *
+   * @todo Set the `EntityRepositoryInterface` type hint on the second argument
+   *   once Drupal 8.6.0 is released. It is currently omitted to preserve
+   *   backwards compatibility with Drupal 8.5.x and earlier.
+   *
+   * @see https://github.com/Gizra/og/issues/397
    */
-  public function __construct(OgAccess $og_access) {
+  public function __construct(OgAccessInterface $og_access, $entity_repository, EntityTypeBundleInfoInterface $entity_type_bundle_info = NULL, TimeInterface $time = NULL) {
+    parent::__construct($entity_repository, $entity_type_bundle_info, $time);
     $this->ogAccess = $og_access;
   }
 
   /**
    * {@inheritdoc}
+   *
+   * @todo Remove the workaround for 8.5.x backwards compatibility when 8.6.0 is
+   *   released.
    */
   public static function create(ContainerInterface $container) {
+    // Starting with Drupal 8.6.0 the parent class is expecting that the
+    // entity repository service is passed in as the first argument. In older
+    // versions this was the entity manager. Detect the type hint of the first
+    // argument of the parent constructor and pass the right service.
+    $parent_constructor_parameters = (new \ReflectionClass(parent::class))->getMethod('__construct')->getParameters();
+    $entity_repository_class_name = $parent_constructor_parameters[0]->getClass()->getName();
+    $entity_repository_service = $entity_repository_class_name === EntityRepositoryInterface::class ? 'entity.repository' : 'entity.manager';
+
     return new static(
-      $container->get('og.access')
+      $container->get('og.access'),
+      $container->get($entity_repository_service),
+      $container->get('entity_type.bundle.info'),
+      $container->get('datetime.time')
     );
   }
 
@@ -201,8 +234,8 @@ class GroupSubscribeForm extends ContentEntityForm {
     /** @var EntityInterface $group */
     $group = $membership->getGroup();
 
-    $message = $membership->isActive() ? $this->t('Your are now subscribed to the group.') : $this->t('Your subscription request was sent.');
-    drupal_set_message($message);
+    $message = $membership->isActive() ? $this->t('You are now subscribed to the group.') : $this->t('Your subscription request has been sent.');
+    $this->messenger()->addMessage($message);
 
     // User doesn't have access to the group entity, so redirect to front page,
     // otherwise back to the group entity.

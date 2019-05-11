@@ -2,7 +2,6 @@
 
 namespace Drupal\Tests\og\Kernel\Entity;
 
-use Drupal\Component\Utility\Unicode;
 use Drupal\entity_test\Entity\EntityTest;
 use Drupal\KernelTests\KernelTestBase;
 use Drupal\node\Entity\Node;
@@ -89,7 +88,7 @@ class OgMembershipTest extends KernelTestBase {
 
     // Create a bundle and add as a group.
     $group = EntityTest::create([
-      'type' => Unicode::strtolower($this->randomMachineName()),
+      'type' => mb_strtolower($this->randomMachineName()),
       'name' => $this->randomString(),
       'user_id' => $owner->id(),
     ]);
@@ -166,7 +165,7 @@ class OgMembershipTest extends KernelTestBase {
   public function testMembershipStaticCache() {
     // Create a second bundle and add as a group.
     $another_group = EntityTest::create([
-      'type' => Unicode::strtolower($this->randomMachineName()),
+      'type' => mb_strtolower($this->randomMachineName()),
       'name' => $this->randomString(),
     ]);
     $another_group->save();
@@ -218,7 +217,7 @@ class OgMembershipTest extends KernelTestBase {
    */
   public function testNoOwnerException() {
     // Create a bundle and add as a group.
-    $bundle = Unicode::strtolower($this->randomMachineName());
+    $bundle = mb_strtolower($this->randomMachineName());
     $group = NodeType::create([
       'type' => $bundle,
       'label' => $this->randomString(),
@@ -242,7 +241,7 @@ class OgMembershipTest extends KernelTestBase {
    */
   public function testSetNonValidGroupException() {
     $non_group = EntityTest::create([
-      'type' => Unicode::strtolower($this->randomMachineName()),
+      'type' => mb_strtolower($this->randomMachineName()),
       'name' => $this->randomString(),
     ]);
 
@@ -260,7 +259,7 @@ class OgMembershipTest extends KernelTestBase {
    */
   public function testSaveExistingMembership() {
     $group = EntityTest::create([
-      'type' => Unicode::strtolower($this->randomMachineName()),
+      'type' => mb_strtolower($this->randomMachineName()),
       'name' => $this->randomString(),
     ]);
 
@@ -296,7 +295,7 @@ class OgMembershipTest extends KernelTestBase {
     $wrong_role = OgRole::create()
       ->setGroupType($group_entity_type_id)
       ->setGroupBundle($group_bundle_id)
-      ->setName(Unicode::strtolower($this->randomMachineName()));
+      ->setName(mb_strtolower($this->randomMachineName()));
     $wrong_role->save();
 
     Og::createMembership($group, $this->user)->addRole($wrong_role)->save();
@@ -417,7 +416,7 @@ class OgMembershipTest extends KernelTestBase {
    */
   public function testSaveSameMembershipTwice() {
     $group = EntityTest::create([
-      'type' => Unicode::strtolower($this->randomMachineName()),
+      'type' => mb_strtolower($this->randomMachineName()),
       'name' => $this->randomString(),
     ]);
 
@@ -472,6 +471,24 @@ class OgMembershipTest extends KernelTestBase {
   }
 
   /**
+   * Tests getting the bundle of the group that is associated with a membership.
+   *
+   * @covers ::getGroupBundle
+   */
+  public function testGetGroupBundle() {
+    $membership = OgMembership::create();
+
+    // When no group has been set yet, the method should return NULL.
+    $this->assertNull($membership->getGroupBundle());
+
+    // Set a group.
+    $membership->setGroup($this->group);
+
+    // Now the group bundle should be returned.
+    $this->assertEquals($this->group->bundle(), $membership->getGroupBundle());
+  }
+
+  /**
    * Tests that membership has "member" role when roles are retrieved.
    *
    * @covers ::getRoles
@@ -487,6 +504,21 @@ class OgMembershipTest extends KernelTestBase {
 
     $this->assertEquals(1, count($roles));
     $this->assertEquals(OgRoleInterface::AUTHENTICATED, $role->getName());
+  }
+
+  /**
+   * Tests that we can retrieve the (empty) roles list from a new membership.
+   *
+   * If a membership is newly created and doesn't have a group associated with
+   * it yet, it should still be possible to get the (empty) list of roles
+   * without getting any errors.
+   *
+   * @covers ::getRoles
+   */
+  public function testGetRolesFromMembershipWithoutGroup() {
+    $membership = OgMembership::create();
+    $roles = $membership->getRoles();
+    $this->assertEquals([], $roles);
   }
 
   /**

@@ -195,7 +195,7 @@ class OgComplex extends EntityReferenceAutocompleteWidget {
    *   A renderable element with the "other groups".
    */
   protected function otherGroupsWidget(FieldItemListInterface $items, FormStateInterface $form_state) {
-    if ($this->fieldDefinition->getTargetEntityTypeId() == 'user') {
+    if ($this->fieldDefinition->getTargetEntityTypeId() === 'user') {
       $description = $this->t('As groups administrator, associate this user with groups you do <em>not</em> belong to.');
     }
     else {

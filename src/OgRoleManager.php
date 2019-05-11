@@ -13,6 +13,13 @@ use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 class OgRoleManager implements OgRoleManagerInterface {
 
   /**
+   * The entity type manager.
+   *
+   * @var \Drupal\Core\Entity\EntityTypeManagerInterface
+   */
+  protected $entityTypeManager;
+
+  /**
    * The entity storage for OgRole entities.
    *
    * @var \Drupal\Core\Entity\EntityStorageInterface
@@ -44,7 +51,7 @@ class OgRoleManager implements OgRoleManagerInterface {
    *   The OG permission manager.
    */
   public function __construct(EntityTypeManagerInterface $entity_type_manager, EventDispatcherInterface $event_dispatcher, PermissionManagerInterface $permission_manager) {
-    $this->ogRoleStorage = $entity_type_manager->getStorage('og_role');
+    $this->entityTypeManager = $entity_type_manager;
     $this->eventDispatcher = $event_dispatcher;
     $this->permissionManager = $permission_manager;
   }
@@ -108,7 +115,7 @@ class OgRoleManager implements OgRoleManagerInterface {
     ];
 
     foreach ($role_properties as $properties) {
-      $roles[$properties['name']] = $this->ogRoleStorage->create($properties);
+      $roles[$properties['name']] = $this->ogRoleStorage()->create($properties);
     }
 
     return $roles;
@@ -122,7 +129,7 @@ class OgRoleManager implements OgRoleManagerInterface {
       'group_type' => $entity_type_id,
       'group_bundle' => $bundle,
     ];
-    return $this->ogRoleStorage->loadByProperties($properties);
+    return $this->ogRoleStorage()->loadByProperties($properties);
   }
 
   /**
@@ -133,9 +140,23 @@ class OgRoleManager implements OgRoleManagerInterface {
       'group_type' => $entity_type_id,
       'group_bundle' => $bundle_id,
     ];
-    foreach ($this->ogRoleStorage->loadByProperties($properties) as $role) {
+    foreach ($this->ogRoleStorage()->loadByProperties($properties) as $role) {
       $role->delete();
     }
+  }
+
+  /**
+   * Retrieves the OG Role storage.
+   *
+   * @return \Drupal\Core\Entity\EntityStorageInterface
+   *   The OG Role storage
+   */
+  protected function ogRoleStorage() {
+    if (!$this->ogRoleStorage) {
+      $this->ogRoleStorage = $this->entityTypeManager->getStorage('og_role');
+    }
+
+    return $this->ogRoleStorage;
   }
 
 }
