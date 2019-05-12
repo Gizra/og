@@ -37,14 +37,14 @@ class OgSelection extends DefaultSelection {
    *
    * @var \Drupal\og\OgAccessInterface
    */
-  protected $OgAccess;
+  protected $ogAccess;
 
   /**
    * The OG membership manager.
    *
    * @var \Drupal\og\MembershipManagerInterface
    */
-  protected $OgMembershipManager;
+  protected $ogMembershipManager;
 
   /**
    * Constructs a new SelectionBase object.
@@ -68,8 +68,8 @@ class OgSelection extends DefaultSelection {
    */
   public function __construct(array $configuration, $plugin_id, $plugin_definition, EntityManagerInterface $entity_manager, ModuleHandlerInterface $module_handler, AccountInterface $current_user, OgAccessInterface $og_access, MembershipManagerInterface $og_membership_manager) {
     parent::__construct($configuration, $plugin_id, $plugin_definition, $entity_manager, $module_handler, $current_user);
-    $this->OgAccess = $og_access;
-    $this->OgMembershipManager = $og_membership_manager;
+    $this->ogAccess = $og_access;
+    $this->ogMembershipManager = $og_membership_manager;
   }
 
   /**
@@ -191,7 +191,7 @@ class OgSelection extends DefaultSelection {
    */
   protected function getUserGroups() {
     $user = User::load($this->currentUser->id());
-    $other_groups = $this->OgMembershipManager->getUserGroups($user);
+    $other_groups = $this->ogMembershipManager->getUserGroups($user);
     return isset($other_groups[$this->configuration['target_type']]) ? $other_groups[$this->configuration['target_type']] : [];
   }
 
