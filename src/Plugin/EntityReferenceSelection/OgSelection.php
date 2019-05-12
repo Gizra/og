@@ -203,8 +203,8 @@ class OgSelection extends DefaultSelection {
 
     // Filter out the bundles that are not groups.
     $entity_type_id = $this->configuration['target_type'];
-    $entity_type = $this->entityManager->getDefinition($entity_type_id);
-    $bundles_info = $this->entityManager->getBundleInfo($entity_type_id);
+    $entity_type = $this->entityTypeManager->getDefinition($entity_type_id);
+    $bundles_info = $this->entityTypeManager->getBundleInfo($entity_type_id);
 
     if ($entity_type->hasKey('bundle')) {
 
