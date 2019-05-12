@@ -2,6 +2,7 @@
 
 namespace Drupal\og\Plugin\Validation\Constraint;
 
+use Drupal\Core\DependencyInjection\ContainerInjectionInterface;
 use Drupal\og\Og;
 use Symfony\Component\Validator\Constraint;
 use Symfony\Component\Validator\ConstraintValidator;
@@ -9,7 +10,44 @@ use Symfony\Component\Validator\ConstraintValidator;
 /**
  * Make sure that at least one audience field is populated.
  */
-class ValidOgMembershipMultipleReferenceConstraintValidator extends ConstraintValidator {
+class ValidOgMembershipMultipleReferenceConstraintValidator extends ConstraintValidator implements ContainerInjectionInterface {
+
+  /**
+   * The current user.
+   *
+   * @var \Drupal\Core\Session\AccountInterface
+   */
+  protected $currentUser;
+
+  /**
+   * The OG group audience helper.
+   *
+   * @var \Drupal\og\OgGroupAudienceHelperInterface
+   */
+  protected $groupAudienceHelper;
+
+  /**
+   * Constructs a ValidOgMembershipMultipleReferenceConstraintValidator object.
+   *
+   * @param \Drupal\Core\Session\AccountInterface $current_user
+   *   The current user.
+   * @param \Drupal\og\OgGroupAudienceHelperInterface $group_audience_helper
+   *   The OG group audience helper.
+   */
+  public function __construct(SelectionPluginManagerInterface $current_user, EntityTypeManagerInterface $group_audience_helper) {
+    $this->currentUser = $current_user;
+    $this->groupAudienceHelper = $group_audience_helper;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public static function create(ContainerInterface $container) {
+    return new static(
+      $container->get('current_user'),
+      $container->get('og.group_audience_helper')
+    );
+  }
 
   /**
    * {@inheritdoc}
@@ -21,8 +59,7 @@ class ValidOgMembershipMultipleReferenceConstraintValidator extends ConstraintVa
     }
 
     /** @var \Drupal\Core\Session\AccountProxy $current_user */
-    $current_user = \Drupal::service('current_user');
-    $account = $current_user->getAccount();
+    $account = $this->currentUser->getAccount();
     $bundle = $entity->bundle();
 
     // Check if the user has site wide permission. If the user has global access
@@ -38,7 +75,7 @@ class ValidOgMembershipMultipleReferenceConstraintValidator extends ConstraintVa
       return;
     }
 
-    $audience_fields = \Drupal::service('og.group_audience_helper')->getAllGroupAudienceFields($entity->getEntityTypeId(), $entity->bundle());
+    $audience_fields = $this->groupAudienceHelper->getAllGroupAudienceFields($entity->getEntityTypeId(), $entity->bundle());
 
     if (count($audience_fields) === 1) {
       // There is only one group audience field. Setting the field as required
