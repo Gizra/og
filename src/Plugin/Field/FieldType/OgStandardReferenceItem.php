@@ -10,7 +10,7 @@ use Drupal\Core\Field\Plugin\Field\FieldType\EntityReferenceItem;
  * @FieldType(
  *   id = "og_standard_reference",
  *   label = @Translation("OG reference"),
- *   description = @Translation("An entity field containing an OG reference for a non-user entity."),
+ *   description = @Translation("An entity reference field containing an OG reference for a non-user entity."),
  *   category = @Translation("Reference"),
  *   no_ui = TRUE,
  *   default_widget = "options_select",
