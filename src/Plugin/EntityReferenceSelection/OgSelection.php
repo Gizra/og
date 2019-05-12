@@ -80,7 +80,7 @@ class OgSelection extends DefaultSelection {
       $configuration,
       $plugin_id,
       $plugin_definition,
-      $container->get('entity.manager'),
+      $container->get('entity_type.manager'),
       $container->get('module_handler'),
       $container->get('current_user'),
       $container->get('og.access'),
