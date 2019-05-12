@@ -78,7 +78,7 @@ class OgSelectionConfigurationFormTest extends KernelTestBase {
    * @covers ::buildConfigurationForm
    */
   public function testConfigurationForm() {
-    $form_object = \Drupal::entityManager()->getFormObject('field_config', 'edit');
+    $form_object = \Drupal::entityTypeManager()->getFormObject('field_config', 'edit');
 
     $entity = FieldConfig::loadByName('entity_test_with_bundle', 'group_content', OgGroupAudienceHelper::DEFAULT_FIELD);
     $form_object->setEntity($entity);
