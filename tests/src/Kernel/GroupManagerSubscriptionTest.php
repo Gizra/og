@@ -63,7 +63,7 @@ class GroupManagerSubscriptionTest extends KernelTestBase {
     $this->installEntitySchema('node');
     $this->installEntitySchema('og_membership');
     $this->installEntitySchema('user');
-    $this->installSchema('system', ['queue', 'sequences']);
+    $this->installSchema('system', ['sequences']);
 
     // Create a group type.
     NodeType::create([

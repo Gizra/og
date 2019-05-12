@@ -61,7 +61,9 @@ interface MembershipManagerInterface {
    * @param \Drupal\Core\Session\AccountInterface $user
    *   The user to get groups for.
    * @param array $states
-   *   (optional) Array with the state to return. Defaults to active.
+   *   (optional) Array with the states to return. Defaults to only returning
+   *   active memberships. In order to retrieve all memberships regardless of
+   *   state, pass `OgMembershipInterface::ALL_STATES`.
    *
    * @return \Drupal\og\OgMembershipInterface[]
    *   An array of OgMembership entities, keyed by ID.
@@ -76,13 +78,51 @@ interface MembershipManagerInterface {
    * @param \Drupal\Core\Session\AccountInterface $user
    *   The user to get the membership for.
    * @param array $states
-   *   (optional) Array with the state to return. Defaults to active.
+   *   (optional) Array with the states to return. Defaults to only returning
+   *   active memberships. In order to retrieve all memberships regardless of
+   *   state, pass `OgMembershipInterface::ALL_STATES`.
    *
    * @return \Drupal\og\OgMembershipInterface|null
    *   The OgMembership entity. NULL will be returned if no membership is
    *   available that matches the passed in $states.
    */
   public function getMembership(EntityInterface $group, AccountInterface $user, array $states = [OgMembershipInterface::STATE_ACTIVE]);
+
+  /**
+   * Returns the membership IDs of the given group filtered by role names.
+   *
+   * @param \Drupal\Core\Entity\EntityInterface $group
+   *   The group entity for which to return the memberships.
+   * @param array $role_names
+   *   An array of role names to filter by. In order to retrieve a list of all
+   *   membership IDs, pass `[OgRoleInterface::AUTHENTICATED]`.
+   * @param array $states
+   *   (optional) Array with the states to return. Defaults to only returning
+   *   active membership IDs. In order to retrieve all membership IDs regardless
+   *   of state, pass `OgMembershipInterface::ALL_STATES`.
+   *
+   * @return \Drupal\Core\Entity\EntityInterface[]
+   *   The membership entities.
+   */
+  public function getGroupMembershipIdsByRoleNames(EntityInterface $group, array $role_names, array $states = [OgMembershipInterface::STATE_ACTIVE]);
+
+  /**
+   * Returns the memberships of the given group filtered by role name.
+   *
+   * @param \Drupal\Core\Entity\EntityInterface $group
+   *   The group entity for which to return the memberships.
+   * @param array $role_names
+   *   An array of role names to filter by. In order to retrieve a list of all
+   *   memberships, pass `[OgRoleInterface::AUTHENTICATED]`.
+   * @param array $states
+   *   (optional) Array with the states to return. Defaults to only returning
+   *   active memberships. In order to retrieve all memberships regardless of
+   *   state, pass `OgMembershipInterface::ALL_STATES`.
+   *
+   * @return \Drupal\Core\Entity\EntityInterface[]
+   *   The membership entities.
+   */
+  public function getGroupMembershipsByRoleNames(EntityInterface $group, array $role_names, array $states = [OgMembershipInterface::STATE_ACTIVE]);
 
   /**
    * Creates an OG membership.
@@ -153,7 +193,7 @@ interface MembershipManagerInterface {
    * Returns the number of groups associated with a given group content entity.
    *
    * Do not use this to retrieve the group membership count for a user entity.
-   * Use count(Og::GetEntityGroups()) instead.
+   * Use count(\Drupal\og\MembershipManager::getUserGroupIds()) instead.
    *
    * @param \Drupal\Core\Entity\EntityInterface $entity
    *   The group content entity for which to count the associated groups.
@@ -232,10 +272,5 @@ interface MembershipManagerInterface {
    * @see \Drupal\og\Og::isMember
    */
   public function isMemberBlocked(EntityInterface $group, AccountInterface $user);
-
-  /**
-   * Reset the internal cache.
-   */
-  public function reset();
 
 }

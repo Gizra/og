@@ -124,6 +124,32 @@ class OgMembershipTest extends KernelTestBase {
   }
 
   /**
+   * Tests getting the owner of a newly created membership.
+   *
+   * @covers ::getOwner
+   * @expectedException \LogicException
+   */
+  public function testGetOwnerOnNewMembership() {
+    // A brand new entity does not have an owner set yet. It should throw a
+    // logic exception.
+    $membership = OgMembership::create();
+    $membership->getOwner();
+  }
+
+  /**
+   * Tests getting the owner ID of a newly created membership.
+   *
+   * @covers ::getOwnerId
+   * @expectedException \LogicException
+   */
+  public function testGetOwnerIdOnNewMembership() {
+    // A brand new entity does not have an owner set yet. It should throw a
+    // logic exception.
+    $membership = OgMembership::create();
+    $membership->getOwnerId();
+  }
+
+  /**
    * Tests getting and setting owners by ID on OgMemberships.
    *
    * @covers ::getOwner
@@ -459,15 +485,116 @@ class OgMembershipTest extends KernelTestBase {
   public function testGetGroup() {
     $membership = OgMembership::create();
 
-    // When no group has been set yet, the method should return NULL.
-    $this->assertNull($membership->getGroup());
-
     // Set a group.
     $membership->setGroup($this->group);
 
     // Now the group should be returned. Check both the entity type and ID.
     $this->assertEquals($this->group->getEntityTypeId(), $membership->getGroup()->getEntityTypeId());
     $this->assertEquals($this->group->id(), $membership->getGroup()->id());
+  }
+
+  /**
+   * Tests getting the group from a new membership.
+   *
+   * @covers ::getGroup
+   * @expectedException \LogicException
+   */
+  public function testGetGroupOnNewMembership() {
+    $membership = OgMembership::create();
+
+    // When no group has been set yet, the method should throw an assertion.
+    $membership->getGroup();
+  }
+
+  /**
+   * Tests getting the bundle of the group that is associated with a membership.
+   *
+   * @covers ::getGroupBundle
+   */
+  public function testGetGroupBundle() {
+    $membership = OgMembership::create();
+
+    // Set a group.
+    $membership->setGroup($this->group);
+
+    // Now the group bundle should be returned.
+    $this->assertEquals($this->group->bundle(), $membership->getGroupBundle());
+  }
+
+  /**
+   * Tests getting the group bundle of a newly created membership.
+   *
+   * @covers ::getGroupBundle
+   * @expectedException \LogicException
+   */
+  public function testGetGroupBundleOnNewMembership() {
+    $membership = OgMembership::create();
+    $membership->getGroupBundle();
+  }
+
+  /**
+   * Tests getting the entity type ID of the group associated with a membership.
+   *
+   * @covers ::getGroupEntityType
+   */
+  public function testGetGroupEntityType() {
+    $membership = OgMembership::create();
+    $membership->setGroup($this->group);
+    $this->assertEquals($this->group->getEntityTypeId(), $membership->getGroupEntityType());
+  }
+
+  /**
+   * Tests getting the group entity type ID of a newly created membership.
+   *
+   * @covers ::getGroupEntityType
+   * @expectedException \LogicException
+   */
+  public function testGetGroupEntityTypeOnNewMembership() {
+    $membership = OgMembership::create();
+    $membership->getGroupEntityType();
+  }
+
+  /**
+   * Tests getting the ID of the group associated with a membership.
+   *
+   * @covers ::getGroupId
+   */
+  public function testGetGroupId() {
+    $membership = OgMembership::create();
+    $membership->setGroup($this->group);
+    $this->assertEquals($this->group->id(), $membership->getGroupId());
+  }
+
+  /**
+   * Tests getting the group ID of a newly created membership.
+   *
+   * @covers ::getGroupId
+   * @expectedException \LogicException
+   */
+  public function testGetGroupIdOnNewMembership() {
+    $membership = OgMembership::create();
+    $membership->getGroupId();
+  }
+
+  /**
+   * Tests getting and setting the creation time.
+   *
+   * @covers ::getCreatedTime
+   * @covers ::setCreatedTime
+   */
+  public function testGetSetCreatedTime() {
+    // When creating a brand new membership the request time should be set as
+    // the creation time.
+    $expected_time = $this->container->get('datetime.time')->getRequestTime();
+    $membership = OgMembership::create();
+    $this->assertEquals($expected_time, $membership->getCreatedTime());
+
+    // Try setting a custom creation time and retrieving it.
+    $custom_time = strtotime('January 1, 2019');
+    $created_time = $membership
+      ->setCreatedTime($custom_time)
+      ->getCreatedTime();
+    $this->assertEquals($custom_time, $created_time);
   }
 
   /**

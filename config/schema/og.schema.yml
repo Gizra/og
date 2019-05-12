@@ -154,3 +154,14 @@ condition.plugin.og_group_type:
       type: sequence
       sequence:
         type: string
+
+block.settings.og_member_count:
+  type: block_settings
+  label: 'Group member count block'
+  mapping:
+    count_blocked_users:
+      type: boolean
+      label: 'Count blocked users'
+    count_pending_users:
+      type: boolean
+      label: 'Count pending users'
