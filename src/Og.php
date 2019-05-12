@@ -382,7 +382,7 @@ class Og {
   public static function getSelectionHandler(FieldDefinitionInterface $field_definition) {
     if (!\Drupal::service('og.group_audience_helper')->isGroupAudienceField($field_definition)) {
       $field_name = $field_definition->getName();
-      throw new \Exception("The field $field_name is not a group audience field.");
+      throw new \Exception('The field $field_name is not a group audience field.');
     }
 
     $entity_type_id = $field_definition->getTargetEntityTypeId();
