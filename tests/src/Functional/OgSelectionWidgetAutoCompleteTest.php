@@ -124,7 +124,7 @@ class OgSelectionWidgetAutoCompleteTest extends BrowserTestBase {
   public function testAutoCompleteForNonGroupMember() {
     $this->drupalLogin($this->user1);
 
-    // Verify the user can reference group content to a groups which he owns.
+    // Verify that users can reference group content to groups they own.
     $edit = [
       'title[0][value]' => $this->randomMachineName(),
       'og_audience[0][target_id]' => $this->group1->label() . ' (' . $this->group2->id() . ')',
