@@ -9,7 +9,7 @@ use Drupal\og\Og;
 use Drupal\og\OgGroupAudienceHelperInterface;
 use Drupal\Tests\BrowserTestBase;
 use Drupal\Tests\node\Traits\ContentTypeCreationTrait;
-use Drupal\simpletest\NodeCreationTrait;
+use Drupal\Tests\node\Traits\NodeCreationTrait;
 
 /**
  * Tests the widget for the OG selection handler.
