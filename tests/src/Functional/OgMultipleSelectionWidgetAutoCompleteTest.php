@@ -141,7 +141,7 @@ class OgMultipleSelectionWidgetAutoCompleteTest extends BrowserTestBase {
     // Make sure the node has created.
     $this->assertSession()->pageTextContains('First group name has been created.');
 
-    $query = $this->container->get('entity.query')->get('node');
+    $query = $this->container->get('entity_type.manager')->getStorage('node');
     $result = $query
       ->condition('type', 'group_content')
       ->range(0, 1)

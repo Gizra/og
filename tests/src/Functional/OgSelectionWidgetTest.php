@@ -83,7 +83,7 @@ class OgSelectionWidgetTest extends BrowserTestBase {
 
     // Retrieve the post that was created from the database.
     /** @var \Drupal\Core\Entity\Query\QueryInterface $query */
-    $query = $this->container->get('entity.query')->get('node');
+    $query = $this->container->get('entity_type.manager')->getStorage('node');
     $result = $query
       ->condition('type', 'post')
       ->range(0, 1)
