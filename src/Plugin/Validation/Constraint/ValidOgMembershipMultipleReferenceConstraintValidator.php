@@ -98,7 +98,7 @@ class ValidOgMembershipMultipleReferenceConstraintValidator extends ConstraintVa
     }
 
     if ($fields_are_empty) {
-      $this->context->addViolation($constraint->invalidMessage, [
+      $this->context->addViolation('One of the fields @fields is required.', [
         '@fields' => implode(', ', $fields),
       ]);
     }
