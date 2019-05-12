@@ -133,7 +133,7 @@ interface MembershipManagerInterface {
    *   The user object.
    * @param string $membership_type
    *   (optional) The membership type. Defaults to
-       \Drupal\og\OgMembershipInterface::TYPE_DEFAULT.
+   *   \Drupal\og\OgMembershipInterface::TYPE_DEFAULT.
    *
    * @return \Drupal\og\OgMembershipInterface
    *   The unsaved membership object.
