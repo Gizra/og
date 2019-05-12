@@ -415,7 +415,6 @@ class Og {
     static::$cache = [];
 
     \Drupal::service('og.access')->reset();
-    \Drupal::service('og.membership_manager')->reset();
   }
 
 }
