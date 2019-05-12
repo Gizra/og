@@ -415,9 +415,6 @@ class Og {
     static::$cache = [];
 
      \Drupal::service('og.access')->reset();
-     // @todo: Remove this or fix cache deletion in MembershipManager.
-     // See https://github.com/Gizra/og/pull/480#discussion_r283138725.
-     \Drupal::service('cache.static')->deleteAll();
   }
 
 }
