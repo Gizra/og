@@ -34,7 +34,7 @@ class ValidOgMembershipMultipleReferenceConstraintValidator extends ConstraintVa
    * @param \Drupal\og\OgGroupAudienceHelperInterface $group_audience_helper
    *   The OG group audience helper.
    */
-  public function __construct(SelectionPluginManagerInterface $current_user, EntityTypeManagerInterface $group_audience_helper) {
+  public function __construct(AccountInterface $current_user, OgGroupAudienceHelperInterface $group_audience_helper) {
     $this->currentUser = $current_user;
     $this->groupAudienceHelper = $group_audience_helper;
   }
