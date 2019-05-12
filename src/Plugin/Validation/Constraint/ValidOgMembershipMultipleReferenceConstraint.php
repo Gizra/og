@@ -23,6 +23,6 @@ class ValidOgMembershipMultipleReferenceConstraint extends Constraint {
    *
    * @var string
    */
-  public $invalidMessage = 'One of the fields @fields is required.';
+  public $AudienceFieldsAreNotPopulated = 'One of the fields @fields is required.';
 
 }
