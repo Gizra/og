@@ -8,7 +8,7 @@ prepare:
     path: ".csslintrc"
   - url: "https://git.drupalcode.org/project/drupal/raw/8.7.x/core/.eslintrc.json"
     path: ".eslintrc.json"
-  - url: "https://raw.githubusercontent.com/digipolisgent/ci_config-files-and-scripts/master/php/drupal8/.eslintignore"
+  - url: "https://git.drupalcode.org/project/drupal/raw/8.7.x/core/.eslintignore"
     path: ".eslintignore"
 
 checks:
