@@ -16,25 +16,25 @@ checks:
     enabled: false
   complex-logic:
     config:
-      threshold: 4
+      threshold: 16
   file-lines:
     config:
-      threshold: 250
+      threshold: 1000
   method-complexity:
     config:
-      threshold: 5
+      threshold: 20
   method-count:
     config:
-      threshold: 20
+      threshold: 80
   method-lines:
     config:
-      threshold: 50
+      threshold: 200
   nested-control-flow:
     config:
-      threshold: 4
+      threshold: 16
   return-statements:
     config:
-      threshold: 4
+      threshold: 16
   similar-code:
     config:
       threshold: # language-specific defaults. an override will affect all languages.
