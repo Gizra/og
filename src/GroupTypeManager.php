@@ -10,7 +10,6 @@ use Drupal\Core\Cache\CacheBackendInterface;
 use Drupal\og\Event\GroupCreationEvent;
 use Drupal\og\Event\GroupCreationEventInterface;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
-use Drupal\node\Entity\Node;
 
 /**
  * A manager to keep track of which entity type/bundles are OG group enabled.
