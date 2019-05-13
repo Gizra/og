@@ -77,7 +77,7 @@ interface OgRoleManagerInterface {
    * @return \Drupal\og\OgRoleInterface[]
    *   An array of roles indexed by their ids.
    */
-  public function getRolesByPermissions(array $permissions, $entity_type_id = NULL, $bundle = NULL, $require_all = TRUE);
+  public function getRolesByPermissions(array $permissions, $entity_type_id = NULL, $bundle = NULL, $require_all = TRUE): array;
 
   /**
    * Deletes the roles associated with a group type.

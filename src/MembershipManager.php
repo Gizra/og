@@ -127,15 +127,15 @@ class MembershipManager implements MembershipManagerInterface {
   /**
    * {@inheritdoc}
    */
-  public function getUserGroupIdsByRoles(AccountInterface $user, array $roles, array $states = [OgMembershipInterface::STATE_ACTIVE], bool $require_all_roles = TRUE) {
-    $role_ids = array_map(function (OgRoleInterface $role) {
+  public function getUserGroupIdsByRoles(AccountInterface $user, array $roles, array $states = [OgMembershipInterface::STATE_ACTIVE], bool $require_all_roles = TRUE): array {
+    $role_ids = array_map(function (OgRoleInterface $role): string {
       return $role->id();
     }, $roles);
 
     $memberships = $this->getMemberships($user, $states);
-    $memberships = array_filter($memberships, function (OgMembershipInterface $membership) use ($role_ids, $require_all_roles) {
+    $memberships = array_filter($memberships, function (OgMembershipInterface $membership) use ($role_ids, $require_all_roles): bool {
       $membership_roles_ids = $membership->getRolesIds();
-      return $require_all_roles ? !array_diff($role_ids, $membership_roles_ids) : array_intersect($membership_roles_ids, $role_ids);
+      return $require_all_roles ? empty(array_diff($role_ids, $membership_roles_ids)) : !empty(array_intersect($membership_roles_ids, $role_ids));
     });
 
     $group_ids = [];
@@ -148,7 +148,7 @@ class MembershipManager implements MembershipManagerInterface {
   /**
    * {@inheritdoc}
    */
-  public function getUserGroupsByRoles(AccountInterface $user, array $roles, array $states = [OgMembershipInterface::STATE_ACTIVE], bool $require_all_roles = TRUE) {
+  public function getUserGroupsByRoles(AccountInterface $user, array $roles, array $states = [OgMembershipInterface::STATE_ACTIVE], bool $require_all_roles = TRUE): array {
     $group_ids = $this->getUserGroupIdsByRoles($user, $roles, $states, $require_all_roles);
     return $this->loadGroups($group_ids);
   }
@@ -441,7 +441,7 @@ class MembershipManager implements MembershipManagerInterface {
    * @return array
    *   A structured array of entities indexed by their entity type id.
    */
-  protected function loadGroups(array $group_ids) {
+  protected function loadGroups(array $group_ids): array {
     $groups = [];
     foreach ($group_ids as $entity_type => $ids) {
       $groups[$entity_type] = $this->entityTypeManager->getStorage($entity_type)->loadMultiple($ids);
