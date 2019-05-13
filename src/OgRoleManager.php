@@ -135,7 +135,7 @@ class OgRoleManager implements OgRoleManagerInterface {
   /**
    * {@inheritdoc}
    */
-  public function getRolesByPermissions(array $permissions, $entity_type_id = NULL, $bundle = NULL, $require_all = FALSE) {
+  public function getRolesByPermissions(array $permissions, $entity_type_id = NULL, $bundle = NULL, $require_all = TRUE) {
     $role_storage = $this->ogRoleStorage();
     $query = $role_storage->getQuery();
     if ($require_all) {

@@ -289,20 +289,19 @@ class OgRoleTest extends KernelTestBase {
     $actual_role = reset($roles);
     $this->assertEquals($actual_role->id(), $og_role3->id());
 
-    // By default, roles are requested to have at least one of the given
-    // permissions.
+    // By default, roles are that match all of the passed permissions.
     $roles = $role_manager->getRolesByPermissions([
       'access content',
       'administer group',
     ]);
-    $this->assertCount(3, $roles);
+    $this->assertCount(2, $roles);
 
-    // Require roles with all of the passed permissions.
+    // Request roles that match one or more of the passed permissions.
     $roles = $role_manager->getRolesByPermissions([
       'access content',
       'administer group',
-    ], NULL, NULL, TRUE);
-    $this->assertCount(2, $roles);
+    ], NULL, NULL, FALSE);
+    $this->assertCount(3, $roles);
 
     // Require roles with all of the passed permissions and in certain entity
     // type id and bundle.

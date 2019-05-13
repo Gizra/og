@@ -64,19 +64,20 @@ interface OgRoleManagerInterface {
    * Optionally filter the roles by entity type id and bundle.
    *
    * @param array $permissions
-   *   An array of permissions that the roles must have. Any permission included
-   *   will return the role.
+   *   An array of permissions that the roles must have.
    * @param string $entity_type_id
    *   (optional) The entity type id of the group.
    * @param string $bundle
    *   (optional) The bundle of the group.
    * @param bool $require_all
-   *   (optional) Whether all given permissions are required. Defaults to FALSE.
+   *   (optional) Whether all given permissions are required. When set to FALSE
+   *   all roles that include one or more of the given permissions will be
+   *   returned. Defaults to TRUE.
    *
    * @return \Drupal\og\OgRoleInterface[]
    *   An array of roles indexed by their ids.
    */
-  public function getRolesByPermissions(array $permissions, $entity_type_id = NULL, $bundle = NULL, $require_all = FALSE);
+  public function getRolesByPermissions(array $permissions, $entity_type_id = NULL, $bundle = NULL, $require_all = TRUE);
 
   /**
    * Deletes the roles associated with a group type.
