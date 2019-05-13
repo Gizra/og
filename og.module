@@ -72,8 +72,8 @@ function og_entity_update(EntityInterface $entity) {
  */
 function og_entity_predelete(EntityInterface $entity) {
   if (Og::isGroup($entity->getEntityTypeId(), $entity->bundle())) {
-    // Register orphaned group content for deletion, if this option has been
-    // enabled.
+    // Register orphaned group content and user memberships for deletion, if
+    // this option has been enabled.
     $config = \Drupal::config('og.settings');
     if ($config->get('delete_orphans')) {
       $plugin_id = $config->get('delete_orphans_plugin_id');
@@ -313,26 +313,10 @@ function og_theme($existing, $type, $theme, $path) {
         'count' => 0,
         'membership_states' => [],
         'group' => NULL,
+        'group_label' => NULL,
       ],
     ],
   ];
-}
-
-/**
- * Prepares variables for member count templates.
- *
- * Default template: og-member-count.html.twig.
- *
- * @param array $variables
- *   An associative array containing:
- *   - count: An integer representing the number of members in the group.
- *   - group: The group, which is a content entity.
- */
-function template_preprocess_og_member_count(array &$variables) {
-  /** @var \Drupal\Core\Entity\ContentEntityInterface $group */
-  $group = $variables['group'];
-
-  $variables['group_label'] = $group->label();
 }
 
 /**

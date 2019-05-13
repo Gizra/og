@@ -40,6 +40,13 @@ abstract class OgDeleteOrphansBase extends PluginBase implements OgDeleteOrphans
   protected $membershipManager;
 
   /**
+   * The OG group audience helper.
+   *
+   * @var \Drupal\og\OgGroupAudienceHelperInterface
+   */
+  protected $groupAudienceHelper;
+
+  /**
    * Constructs an OgDeleteOrphansBase object.
    *
    * @param array $configuration
@@ -54,12 +61,15 @@ abstract class OgDeleteOrphansBase extends PluginBase implements OgDeleteOrphans
    *   The queue factory.
    * @param \Drupal\og\MembershipManagerInterface $membership_manager
    *   The OG membership manager service.
+   * @param \Drupal\og\OgGroupAudienceHelperInterface $group_audience_helper
+   *   The OG group audience helper.
    */
-  public function __construct(array $configuration, $plugin_id, $plugin_definition, EntityTypeManagerInterface $entity_type_manager, QueueFactory $queue_factory, MembershipManagerInterface $membership_manager) {
+  public function __construct(array $configuration, $plugin_id, $plugin_definition, EntityTypeManagerInterface $entity_type_manager, QueueFactory $queue_factory, MembershipManagerInterface $membership_manager, OgGroupAudienceHelperInterface $group_audience_helper) {
     parent::__construct($configuration, $plugin_id, $plugin_definition);
     $this->entityTypeManager = $entity_type_manager;
     $this->queueFactory = $queue_factory;
     $this->membershipManager = $membership_manager;
+    $this->groupAudienceHelper = $group_audience_helper;
   }
 
   /**
@@ -72,7 +82,8 @@ abstract class OgDeleteOrphansBase extends PluginBase implements OgDeleteOrphans
       $plugin_definition,
       $container->get('entity_type.manager'),
       $container->get('queue'),
-      $container->get('og.membership_manager')
+      $container->get('og.membership_manager'),
+      $container->get('og.group_audience_helper')
     );
   }
 
@@ -135,10 +146,18 @@ abstract class OgDeleteOrphansBase extends PluginBase implements OgDeleteOrphans
       return;
     }
 
-    // Only delete content that is fully orphaned, i.e. it is no longer
+    // Only delete group content that is fully orphaned, i.e. it is no longer
     // associated with any groups.
-    $group_count = $this->membershipManager->getGroupCount($entity);
-    if ($group_count == 0) {
+    if ($this->groupAudienceHelper->hasGroupAudienceField($entity->getEntityTypeId(), $entity->bundle())) {
+      // Only do a group count if the entity is actually group content.
+      $group_count = $this->membershipManager->getGroupCount($entity);
+      if ($group_count == 0) {
+        $entity->delete();
+      }
+    }
+    // If the entity is not group content (e.g. an OgMembership entity), just go
+    // ahead and delete it.
+    else {
       $entity->delete();
     }
   }

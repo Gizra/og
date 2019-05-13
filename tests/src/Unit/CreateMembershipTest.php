@@ -4,7 +4,7 @@ namespace Drupal\Tests\og\Unit;
 
 use Drupal\Core\Cache\MemoryCache\MemoryCacheInterface;
 use Drupal\Core\DependencyInjection\ContainerBuilder;
-use Drupal\Core\Entity\EntityInterface;
+use Drupal\Core\Entity\ContentEntityInterface;
 use Drupal\Core\Entity\EntityStorageInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Entity\EntityTypeRepositoryInterface;
@@ -123,7 +123,7 @@ class CreateMembershipTest extends UnitTestCase {
       ->willReturn($membership_entity->reveal());
 
     // Create a mocked test group.
-    $this->group = $this->prophesize(EntityInterface::class);
+    $this->group = $this->prophesize(ContentEntityInterface::class);
 
     // Create a mocked test user.
     $this->user = $this->prophesize(UserInterface::class);

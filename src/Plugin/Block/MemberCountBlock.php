@@ -81,7 +81,7 @@ class MemberCountBlock extends BlockBase implements ContainerFactoryPluginInterf
     return [
       'count_blocked_users' => FALSE,
       'count_pending_users' => FALSE,
-    ];
+    ] + parent::defaultConfiguration();
   }
 
   /**
@@ -138,6 +138,7 @@ class MemberCountBlock extends BlockBase implements ContainerFactoryPluginInterf
       '#theme' => 'og_member_count',
       '#count' => count($membership_ids),
       '#group' => $group,
+      '#group_label' => $group->label(),
       '#membership_states' => $states,
     ];
   }
