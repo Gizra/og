@@ -371,7 +371,7 @@ class GroupTypeManager implements GroupTypeManagerInterface {
   protected function refreshGroupRelationMap() {
     // Retrieve a cached version of the map if it exists.
     if ($group_relation_map = $this->cache->get(self::GROUP_RELATION_MAP_CACHE_KEY)) {
-      $this->groupRelationMap = $group_relation_map;
+      $this->groupRelationMap = $group_relation_map->data;
       return;
     }
 
