@@ -41,7 +41,7 @@ plugins:
   phpcodesniffer:
     enabled: true
     config:
-      standard: "Drupal"
+      standard: "Drupal,DrupalPractice"
       file_extensions: "php,inc,module,install"
   phpmd:
     enabled: true
