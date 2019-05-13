@@ -132,6 +132,7 @@ class MembershipManager implements MembershipManagerInterface {
       return $role->id();
     }, $roles);
 
+    /** @var \Drupal\og\OgMembershipInterface[] $memberships */
     $memberships = $this->getMemberships($user, $states);
     $memberships = array_filter($memberships, function (OgMembershipInterface $membership) use ($role_ids, $require_all_roles): bool {
       $membership_roles_ids = $membership->getRolesIds();
@@ -433,13 +434,19 @@ class MembershipManager implements MembershipManagerInterface {
   }
 
   /**
-   * Loads the entities of a associative array of entity ids.
+   * Loads the entities of an associative array of entity IDs.
    *
-   * @param array $group_ids
-   *   A structured array of entity keys indexed by their entity type id.
+   * @param array[] $group_ids
+   *   An associative array of entity IDs indexed by their entity type ID.
    *
-   * @return array
-   *   A structured array of entities indexed by their entity type id.
+   * @return \Drupal\Core\Entity\ContentEntityInterface[][]
+   *   An associative array of entities indexed by their entity type ID.
+   *
+   * @throws \Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException
+   *   Thrown when the entity type definition of one or more of the passed in
+   *   entity types is invalid.
+   * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundException
+   *   Thrown when one or more of the passed in entity types is not defined.
    */
   protected function loadGroups(array $group_ids): array {
     $groups = [];
@@ -472,8 +479,14 @@ class MembershipManager implements MembershipManagerInterface {
    * @param array $ids
    *   The IDs of the memberships to load.
    *
-   * @return \Drupal\Core\Entity\EntityInterface[]
+   * @return \Drupal\og\OgMembershipInterface[]
    *   The membership entities.
+   *
+   * @throws \Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException
+   *   Thrown when the entity type definition of one or more of the passed in
+   *   entity types is invalid.
+   * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundException
+   *   Thrown when one or more of the passed in entity types is not defined.
    */
   protected function loadMemberships(array $ids) {
     if (empty($ids)) {

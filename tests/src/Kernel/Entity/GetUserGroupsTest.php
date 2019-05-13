@@ -129,6 +129,8 @@ class GetUserGroupsTest extends KernelTestBase {
 
   /**
    * Tests group owners have the correct groups.
+   *
+   * @todo Convert Og::isMember() calls to $this->membershipManager->isMember().
    */
   public function testOwnerGroupsOnly() {
     $actual = $this->membershipManager->getUserGroups($this->user1);
@@ -152,6 +154,8 @@ class GetUserGroupsTest extends KernelTestBase {
 
   /**
    * Tests other groups users are added to.
+   *
+   * @todo Convert Og::isMember() calls to $this->membershipManager->isMember().
    */
   public function testOtherGroups() {
     // Should not be a part of any groups.
@@ -191,6 +195,8 @@ class GetUserGroupsTest extends KernelTestBase {
 
   /**
    * Tests member methods for states that other groups users are added to.
+   *
+   * @todo Convert Og::isMember() calls to $this->membershipManager->isMember().
    */
   public function testIsMemberStates() {
     // Add user to group 1 should now return that group only.
@@ -235,7 +241,7 @@ class GetUserGroupsTest extends KernelTestBase {
   /**
    * Tests retrieval of groups filtered by roles.
    *
-   * @covers \Drupal\og\MembershipManager::getUserGroupIdsByRoles
+   * @covers ::getUserGroupIdsByRoles
    */
   public function testGetGroupsByRoles() {
     // Create a test role.
