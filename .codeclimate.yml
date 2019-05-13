@@ -4,7 +4,7 @@ prepare:
   fetch:
   - url: "https://raw.githubusercontent.com/digipolisgent/ci_config-files-and-scripts/master/php/drupal8/.phpmd.xml"
     path: ".phpmd.xml"
-  - url: "https://raw.githubusercontent.com/digipolisgent/ci_config-files-and-scripts/master/php/drupal8/.csslintrc"
+  - url: "https://git.drupalcode.org/project/drupal/raw/8.7.x/.csslintrc"
     path: ".csslintrc"
   - url: "https://raw.githubusercontent.com/digipolisgent/ci_config-files-and-scripts/master/php/drupal8/.eslintrc.json"
     path: ".eslintrc.json"
