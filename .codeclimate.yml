@@ -15,20 +15,15 @@ checks:
   argument-count:
     enabled: false
   complex-logic:
-    config:
-      threshold: 16
+    enabled: false
   file-lines:
-    config:
-      threshold: 1000
+    enabled: false
   method-complexity:
-    config:
-      threshold: 20
+    enabled: false
   method-count:
-    config:
-      threshold: 80
+    enabled: false
   method-lines:
-    config:
-      threshold: 200
+    enabled: false
   nested-control-flow:
     config:
       threshold: 16
@@ -81,4 +76,3 @@ exclude_patterns:
 - "**/.idea/**/*"
 - "**/tests/**/*"
 - "**/*.settings.php"
-- "RoboFile.php"
