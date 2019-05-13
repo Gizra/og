@@ -8,6 +8,8 @@ use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Routing\RouteBuilderInterface;
 use Drupal\Core\Cache\CacheBackendInterface;
 use Drupal\og\Event\GroupCreationEvent;
+use Drupal\og\Event\GroupCreationEventInterface;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Drupal\node\Entity\Node;
 
 /**
