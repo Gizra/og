@@ -30,11 +30,9 @@ mysql:
   encoding: utf8
 
 before_script:
-  # Remove Xdebug as we don't need it and it causes "PHP Fatal error: Maximum
-  # function nesting level of '256' reached."
-  # We also don't care if that file exists or not on PHP 7.
+  # Disable Xdebug to speed up Travis.
   - cp $HOME/.phpenv/versions/$(phpenv global)/etc/conf.d/xdebug.ini /tmp
-  - phpenv config-rm xdebug.ini || true
+  - phpenv config-rm xdebug.ini
 
   # Make sure Composer is up to date.
   - composer self-update
