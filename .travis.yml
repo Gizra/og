@@ -82,9 +82,10 @@ before_script:
   - chmod +x ./cc-test-reporter
   - ./cc-test-reporter before-build
 
-script:
-  // Re-enable xdebug to support PHPUnit code coverage.
+  # Re-enable xdebug to support PHPUnit code coverage.
   - if [ "$TRAVIS_PULL_REQUEST" == "false" ] && [ "${TEST_SUITE}" != "PHP_CodeSniffer" ]; then phpenv config-add /tmp/xdebug.ini; fi
+
+script:
   - DRUPAL_DIR=$DRUPAL_DIR MODULE_DIR=$MODULE_DIR $MODULE_DIR/scripts/travis-ci/run-test.sh $TEST_SUITE
 
 after_script:
