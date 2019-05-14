@@ -1,0 +1,39 @@
+<?xml version="1.0"?>
+<ruleset xmlns="http://pmd.sourceforge.net/ruleset/2.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" name="PMD Ruleset for Drupal" xsi:schemaLocation="http://pmd.sourceforge.net/ruleset/2.0.0 http://pmd.sourceforge.net/ruleset_2_0_0.xsd">
+  <description>
+    A PMD Ruleset for Drupal coding standards.
+  </description>
+  <!-- The clean code rules don't match Drupal standards.
+  <rule ref="rulesets/cleancode.xml"/>
+  -->
+  <!-- Code size rules are not Drupal standard, but are good rules. -->
+  <rule ref="rulesets/codesize.xml"/>
+  <!-- Bump method length to a more reasonable number. -->
+  <rule ref="rulesets/codesize.xml/ExcessiveMethodLength">
+    <properties>
+      <property name="minimum" value="50" />
+    </properties>
+  </rule>
+  <!-- Exclude style related checks that will be included in PHPCS. -->
+  <rule ref="rulesets/controversial.xml">
+    <exclude name="CamelCaseClassName"/>
+    <exclude name="CamelCasePropertyName"/>
+    <exclude name="CamelCaseMethodName"/>
+    <exclude name="CamelCaseParameterName"/>
+    <exclude name="CamelCaseVariableName"/>
+  </rule>
+  <!-- Design rules are not Drupal standard, but are good rules. The thresholds can be tweaked. -->
+  <rule ref="rulesets/design.xml"/>
+  <!-- Naming rules are not Drupal standard, but are good rules. The thresholds can be tweaked. -->
+  <!--<rule ref="rulesets/naming.xml"/>-->
+  <!-- Allow $id as a variable name. -->
+  <rule ref="rulesets/naming.xml/ShortVariable">
+    <properties>
+      <property name="exceptions" value="id" />
+    </properties>
+  </rule>
+  <!-- Unused code rules are not Drupal standard, but are good rules. The thresholds can be tweaked. -->
+  <rule ref="rulesets/unusedcode.xml">
+    <exclude name="UnusedFormalParameter"/>
+  </rule>
+</ruleset>
