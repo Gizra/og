@@ -27,7 +27,7 @@ case "$1" in
         EXIT=0
         for i in ${TEST_DIRS[@]}; do
           echo " > Executing tests from $i"
-          ./vendor/bin/phpunit -c ./core/phpunit.xml.dist $i || EXIT=1
+          ./vendor/bin/phpunit -c ./core/phpunit.xml.dist $i --coverage-clover "$TRAVIS_BUILD_DIR/build/logs/clover.xml" || EXIT=1
         done
         exit $EXIT
 esac
