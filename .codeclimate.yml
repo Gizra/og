@@ -42,14 +42,7 @@ plugins:
       standard: "Drupal,DrupalPractice"
       file_extensions: "php,inc,module,install"
   phpmd:
-    enabled: true
-    config:
-      file_extensions:
-        - php
-        - inc
-        - module
-        - install
-      rulesets: ".phpmd.xml"
+    enabled: false
   csslint:
     enabled: true
   eslint:
