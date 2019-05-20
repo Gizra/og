@@ -97,7 +97,7 @@ class OgMultipleSelectionWidgetAutoCompleteTest extends BrowserTestBase {
       ->setLabel('Content group editor')
       ->setGroupType('node')
       ->setGroupBundle('group_type')
-      ->grantPermission('create node group_content')
+      ->grantPermission('create group_content content')
       ->save();
 
     // Create a role.

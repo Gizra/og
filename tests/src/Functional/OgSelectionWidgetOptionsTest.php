@@ -151,7 +151,7 @@ class OgSelectionWidgetOptionsTest extends BrowserTestBase {
     // Grant create permission for the first group.
     $role = OgRole::getRole($this->group1->getEntityTypeId(), $this->group1->bundle(), OgRoleInterface::AUTHENTICATED);
     $role
-      ->grantPermission('create node group_content')
+      ->grantPermission('create group_content content')
       ->save();
 
     $this->drupalGet('node/add/group_content');
