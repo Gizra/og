@@ -178,7 +178,8 @@ class OgSelection extends DefaultSelection {
     $ids = [];
     foreach ($this->getUserGroups() as $group) {
       // Check user has "create" permission on this entity.
-      if ($this->ogAccess->userAccess($group, "create $entity_type_id $bundle", $this->currentUser)->isAllowed()) {
+      $permission = "create $bundle content";
+      if ($this->ogAccess->userAccess($group, $permission, $this->currentUser)->isAllowed()) {
         $ids[] = $group->id();
       }
     }
