@@ -234,8 +234,8 @@ class GroupSubscribeForm extends ContentEntityForm {
     /** @var EntityInterface $group */
     $group = $membership->getGroup();
 
-    $message = $membership->isActive() ? $this->t('Your are now subscribed to the group.') : $this->t('Your subscription request was sent.');
-    drupal_set_message($message);
+    $message = $membership->isActive() ? $this->t('You are now subscribed to the group.') : $this->t('Your subscription request has been sent.');
+    $this->messenger()->addMessage($message);
 
     // User doesn't have access to the group entity, so redirect to front page,
     // otherwise back to the group entity.
