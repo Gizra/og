@@ -338,6 +338,58 @@ class OgNodeAccess extends DrupalWebTestCase {
     $this->assertFalse(in_array($this->group2->nid, $entity_groups['node']), 'Content retains original groups after saving node form.');
   }
 
+  /**
+   * Test user access to unpublished group node.
+   */
+  function testUnpublishedGroupAccess() {
+    $user1 = $this->group_manager;
+    $user2 = $this->editor_user;
+    $this->drupalLogin($user1);
+
+    // Create a group node and set as private.
+    $settings = array();
+    $settings['type'] = 'page';
+    $settings[OG_GROUP_FIELD][LANGUAGE_NONE][0]['value'] = 1;
+    $settings[OG_ACCESS_FIELD][LANGUAGE_NONE][0]['value'] = 1;
+    $group_node = $this->drupalCreateNode($settings);
+
+    // Add another user to group.
+    og_group('node', $group_node->nid, array('entity' => $user2));
+    drupal_static_reset('node_access');
+
+    $this->assertTrue(entity_access('view', 'node', $group_node, $user2), 'Group member can view published group.');
+
+    // Get user's groups they have access to using og_get_entity_groups().
+    $groups1 = og_get_entity_groups('user', $user2, array(OG_STATE_ACTIVE), NULL, TRUE);
+    // Get user's groups they have access to using og_get_groups_by_user().
+    $groups2 = og_get_groups_by_user($user2, 'node', TRUE);
+
+    $group1 = !empty($groups1['node']) ? in_array($group_node->nid, $groups1['node']) : FALSE;
+    $group2 = !empty($groups2) ? in_array($group_node->nid, $groups2) : FALSE;
+
+    $this->assertTrue($group1, 'Group member is getting published group from og_get_entity_groups().');
+    $this->assertTrue($group2, 'Group member is getting published group from og_get_groups_by_user().');
+
+    $group_node->status = NODE_NOT_PUBLISHED;
+    node_save($group_node);
+    drupal_static_reset('node_access');
+
+    $this->assertFalse(entity_access('view', 'node', $group_node, $user2), "Group member can't view unpublished group.");
+
+    // Clear the cache because permissions were changed.
+    drupal_static_reset('og_get_entity_groups');
+
+    // Get user's groups they have access to using og_get_entity_groups().
+    $groups1 = og_get_entity_groups('user', $user2, array(OG_STATE_ACTIVE), NULL, TRUE);
+    // Get user's groups they have access to using og_get_groups_by_user().
+    $groups2 = og_get_groups_by_user($user2, 'node', TRUE);
+
+    $group1 = !empty($groups1['node']) ? in_array($group_node->nid, $groups1['node']) : FALSE;
+    $group2 = !empty($groups2) ? in_array($group_node->nid, $groups2) : FALSE;
+
+    $this->assertFalse($group1, 'Group member is not getting unpublished group from og_get_entity_groups().');
+    $this->assertFalse($group2, 'Group member is not getting unpublished group from og_get_groups_by_user().');
+  }
 }
 
 /**
@@ -2014,7 +2066,7 @@ class OgDeleteOrphansTestCase extends DrupalWebTestCase {
     // Add OG audience field to the audience content type.
     $og_field = og_fields_info(OG_AUDIENCE_FIELD);
     $og_field['field']['settings']['target_type'] = 'node';
-    og_create_field(OG_AUDIENCE_FIELD, 'node', $type->type, $og_field);
+    og_create_field(OG_AUDIENCE_FIELD, 'node', $this->node_type, $og_field);
 
     // Set the setting for delete a group content when deleting group.
     variable_set('og_orphans_delete', TRUE);
@@ -2052,7 +2104,7 @@ class OgDeleteOrphansTestCase extends DrupalWebTestCase {
     $second_node = node_load($second_node->nid);
 
     // Verify the none orphan node wasn't deleted.
-    $this->assertTrue($first_node, "The second node is realted to another group and deleted.");
+    $this->assertTrue($first_node, "The second node is related to another group and deleted.");
     // Verify the orphan node deleted.
     $this->assertFalse($second_node, "The orphan node deleted.");
   }
