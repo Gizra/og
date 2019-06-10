@@ -585,7 +585,8 @@ class OgMembershipTest extends KernelTestBase {
   public function testGetSetCreatedTime() {
     // When creating a brand new membership the request time should be set as
     // the creation time.
-    $expected_time = $this->container->get('datetime.time')->getRequestTime();
+    // @todo Replace this with \Drupal::time()->getRequestTime() in Drupal 9.
+    $expected_time = (int) $_SERVER['REQUEST_TIME'];
     $membership = OgMembership::create();
     $this->assertEquals($expected_time, $membership->getCreatedTime());
 

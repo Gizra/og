@@ -43,10 +43,10 @@ interface MembershipManagerInterface {
    *
    * @param \Drupal\Core\Session\AccountInterface $user
    *   The user to get groups for.
-   * @param array $states
+   * @param string[] $states
    *   (optional) Array with the states to return. Defaults to active.
    *
-   * @return \Drupal\Core\Entity\EntityInterface[][]
+   * @return \Drupal\Core\Entity\ContentEntityInterface[][]
    *   An associative array, keyed by group entity type, each item an array of
    *   group entities.
    *
@@ -54,6 +54,46 @@ interface MembershipManagerInterface {
    * @see \Drupal\og\MembershipManager::getMemberships()
    */
   public function getUserGroups(AccountInterface $user, array $states = [OgMembershipInterface::STATE_ACTIVE]);
+
+  /**
+   * Returns an array of groups filtered by the OG roles of the user.
+   *
+   * @param \Drupal\Core\Session\AccountInterface $user
+   *   The user to get the groups for.
+   * @param string[] $role_ids
+   *   A list of OG role IDs to filter by.
+   * @param string[] $states
+   *   (optional) An array of states to filter the memberships by.
+   * @param bool $require_all_roles
+   *   (optional) If set to TRUE, all requested roles must be present to return
+   *   the group. Set to FALSE to return the groups that match one or more of
+   *   the requested roles. Defaults to TRUE.
+   *
+   * @return \Drupal\Core\Entity\ContentEntityInterface[][]
+   *   An associative array, keyed by group entity type, each item an array of
+   *   group entities.
+   */
+  public function getUserGroupsByRoleIds(AccountInterface $user, array $role_ids, array $states = [OgMembershipInterface::STATE_ACTIVE], bool $require_all_roles = TRUE): array;
+
+  /**
+   * Returns an array of groups ids filtered by the og roles of the user.
+   *
+   * @param \Drupal\Core\Session\AccountInterface $user
+   *   The user to get the groups for.
+   * @param string[] $role_ids
+   *   A list of OG role IDs to filter by.
+   * @param string[] $states
+   *   (optional) An array of states to filter the memberships by.
+   * @param bool $require_all_roles
+   *   (optional) If set to TRUE, all requested roles must be present to return
+   *   the group. Set to FALSE to return the groups that match one or more of
+   *   the requested roles. Defaults to TRUE.
+   *
+   * @return array[]
+   *   An associative array, keyed by group entity type, each item an array of
+   *   group IDs.
+   */
+  public function getUserGroupIdsByRoleIds(AccountInterface $user, array $role_ids, array $states = [OgMembershipInterface::STATE_ACTIVE], bool $require_all_roles = TRUE): array;
 
   /**
    * Returns the group memberships a user is associated with.
@@ -132,7 +172,8 @@ interface MembershipManagerInterface {
    * @param \Drupal\Core\Session\AccountInterface $user
    *   The user object.
    * @param string $membership_type
-   *   (optional) The membership type. Defaults to OG_MEMBERSHIP_TYPE_DEFAULT.
+   *   (optional) The membership type. Defaults to
+   *   \Drupal\og\OgMembershipInterface::TYPE_DEFAULT.
    *
    * @return \Drupal\og\OgMembershipInterface
    *   The unsaved membership object.

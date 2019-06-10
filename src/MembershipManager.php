@@ -76,13 +76,8 @@ class MembershipManager implements MembershipManagerInterface {
    * {@inheritdoc}
    */
   public function getUserGroups(AccountInterface $user, array $states = [OgMembershipInterface::STATE_ACTIVE]) {
-    $groups = [];
-
-    foreach ($this->getUserGroupIds($user, $states) as $entity_type => $entity_ids) {
-      $groups[$entity_type] = $this->entityTypeManager->getStorage($entity_type)->loadMultiple($entity_ids);
-    }
-
-    return $groups;
+    $group_ids = $this->getUserGroupIds($user, $states);
+    return $this->loadGroups($group_ids);
   }
 
   /**
@@ -127,6 +122,32 @@ class MembershipManager implements MembershipManagerInterface {
 
     // No membership matches the request.
     return NULL;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getUserGroupIdsByRoleIds(AccountInterface $user, array $role_ids, array $states = [OgMembershipInterface::STATE_ACTIVE], bool $require_all_roles = TRUE): array {
+    /** @var \Drupal\og\OgMembershipInterface[] $memberships */
+    $memberships = $this->getMemberships($user, $states);
+    $memberships = array_filter($memberships, function (OgMembershipInterface $membership) use ($role_ids, $require_all_roles): bool {
+      $membership_roles_ids = $membership->getRolesIds();
+      return $require_all_roles ? empty(array_diff($role_ids, $membership_roles_ids)) : !empty(array_intersect($membership_roles_ids, $role_ids));
+    });
+
+    $group_ids = [];
+    foreach ($memberships as $membership) {
+      $group_ids[$membership->getGroupEntityType()][] = $membership->getGroupId();
+    }
+    return $group_ids;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getUserGroupsByRoleIds(AccountInterface $user, array $role_ids, array $states = [OgMembershipInterface::STATE_ACTIVE], bool $require_all_roles = TRUE): array {
+    $group_ids = $this->getUserGroupIdsByRoleIds($user, $role_ids, $states, $require_all_roles);
+    return $this->loadGroups($group_ids);
   }
 
   /**
@@ -299,13 +320,8 @@ class MembershipManager implements MembershipManagerInterface {
    * {@inheritdoc}
    */
   public function getGroups(EntityInterface $entity, $group_type_id = NULL, $group_bundle = NULL) {
-    $groups = [];
-
-    foreach ($this->getGroupIds($entity, $group_type_id, $group_bundle) as $entity_type => $entity_ids) {
-      $groups[$entity_type] = $this->entityTypeManager->getStorage($entity_type)->loadMultiple($entity_ids);
-    }
-
-    return $groups;
+    $group_ids = $this->getGroupIds($entity, $group_type_id, $group_bundle);
+    return $this->loadGroups($group_ids);
   }
 
   /**
@@ -414,6 +430,30 @@ class MembershipManager implements MembershipManagerInterface {
   }
 
   /**
+   * Loads the entities of an associative array of entity IDs.
+   *
+   * @param array[] $group_ids
+   *   An associative array of entity IDs indexed by their entity type ID.
+   *
+   * @return \Drupal\Core\Entity\ContentEntityInterface[][]
+   *   An associative array of entities indexed by their entity type ID.
+   *
+   * @throws \Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException
+   *   Thrown when the entity type definition of one or more of the passed in
+   *   entity types is invalid.
+   * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundException
+   *   Thrown when one or more of the passed in entity types is not defined.
+   */
+  protected function loadGroups(array $group_ids): array {
+    $groups = [];
+    foreach ($group_ids as $entity_type => $ids) {
+      $groups[$entity_type] = $this->entityTypeManager->getStorage($entity_type)->loadMultiple($ids);
+    }
+
+    return $groups;
+  }
+
+  /**
    * Stores the given list of membership IDs in the static cache backend.
    *
    * @param string $cid
@@ -435,8 +475,14 @@ class MembershipManager implements MembershipManagerInterface {
    * @param array $ids
    *   The IDs of the memberships to load.
    *
-   * @return \Drupal\Core\Entity\EntityInterface[]
+   * @return \Drupal\og\OgMembershipInterface[]
    *   The membership entities.
+   *
+   * @throws \Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException
+   *   Thrown when the entity type definition of one or more of the passed in
+   *   entity types is invalid.
+   * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundException
+   *   Thrown when one or more of the passed in entity types is not defined.
    */
   protected function loadMemberships(array $ids) {
     if (empty($ids)) {
