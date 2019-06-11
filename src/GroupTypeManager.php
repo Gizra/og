@@ -352,7 +352,7 @@ class GroupTypeManager implements GroupTypeManagerInterface {
    */
   protected function getGroupRelationMap() {
     if (empty($this->groupRelationMap)) {
-      $this->refreshGroupRelationMap();
+      $this->populateGroupRelationMap();
     }
     return $this->groupRelationMap;
   }
@@ -368,7 +368,7 @@ class GroupTypeManager implements GroupTypeManagerInterface {
   /**
    * Populates the map of relations between group types and group content types.
    */
-  protected function refreshGroupRelationMap() {
+  protected function populateGroupRelationMap(): void {
     // Retrieve a cached version of the map if it exists.
     if ($cached_map = $this->getCachedGroupRelationMap()) {
       $this->groupRelationMap = $cached_map;
