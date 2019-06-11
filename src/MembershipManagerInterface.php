@@ -60,8 +60,8 @@ interface MembershipManagerInterface {
    *
    * @param \Drupal\Core\Session\AccountInterface $user
    *   The user to get the groups for.
-   * @param \Drupal\og\OgRoleInterface[] $roles
-   *   A list of og role objects to filter by.
+   * @param string[] $role_ids
+   *   A list of OG role IDs to filter by.
    * @param string[] $states
    *   (optional) An array of states to filter the memberships by.
    * @param bool $require_all_roles
@@ -73,15 +73,15 @@ interface MembershipManagerInterface {
    *   An associative array, keyed by group entity type, each item an array of
    *   group entities.
    */
-  public function getUserGroupsByRoles(AccountInterface $user, array $roles, array $states = [OgMembershipInterface::STATE_ACTIVE], bool $require_all_roles = TRUE): array;
+  public function getUserGroupsByRoleIds(AccountInterface $user, array $role_ids, array $states = [OgMembershipInterface::STATE_ACTIVE], bool $require_all_roles = TRUE): array;
 
   /**
    * Returns an array of groups ids filtered by the og roles of the user.
    *
    * @param \Drupal\Core\Session\AccountInterface $user
    *   The user to get the groups for.
-   * @param \Drupal\og\OgRoleInterface[] $roles
-   *   A list of og role objects to filter by.
+   * @param string[] $role_ids
+   *   A list of OG role IDs to filter by.
    * @param string[] $states
    *   (optional) An array of states to filter the memberships by.
    * @param bool $require_all_roles
@@ -93,7 +93,7 @@ interface MembershipManagerInterface {
    *   An associative array, keyed by group entity type, each item an array of
    *   group IDs.
    */
-  public function getUserGroupIdsByRoles(AccountInterface $user, array $roles, array $states = [OgMembershipInterface::STATE_ACTIVE], bool $require_all_roles = TRUE): array;
+  public function getUserGroupIdsByRoleIds(AccountInterface $user, array $role_ids, array $states = [OgMembershipInterface::STATE_ACTIVE], bool $require_all_roles = TRUE): array;
 
   /**
    * Returns the group memberships a user is associated with.
