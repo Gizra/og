@@ -352,7 +352,7 @@ class GroupTypeManager implements GroupTypeManagerInterface {
    */
   protected function getGroupRelationMap() {
     if (empty($this->groupRelationMap)) {
-      $this->refreshGroupRelationMap();
+      $this->populateGroupRelationMap();
     }
     return $this->groupRelationMap;
   }
@@ -368,10 +368,10 @@ class GroupTypeManager implements GroupTypeManagerInterface {
   /**
    * Populates the map of relations between group types and group content types.
    */
-  protected function refreshGroupRelationMap() {
+  protected function populateGroupRelationMap(): void {
     // Retrieve a cached version of the map if it exists.
-    if ($group_relation_map = $this->cache->get(self::GROUP_RELATION_MAP_CACHE_KEY)) {
-      $this->groupRelationMap = $group_relation_map;
+    if ($cached_map = $this->getCachedGroupRelationMap()) {
+      $this->groupRelationMap = $cached_map;
       return;
     }
 
@@ -396,6 +396,17 @@ class GroupTypeManager implements GroupTypeManagerInterface {
     }
     // Cache the map.
     $this->cache->set(self::GROUP_RELATION_MAP_CACHE_KEY, $this->groupRelationMap);
+  }
+
+  /**
+   * Returns the group relation map from the cache.
+   *
+   * @return array|null
+   *   An associative array representing group and group content relations, or
+   *   NULL if the group relation map was not found in the cache.
+   */
+  protected function getCachedGroupRelationMap(): ?array {
+    return $this->cache->get(self::GROUP_RELATION_MAP_CACHE_KEY)->data ?? NULL;
   }
 
 }

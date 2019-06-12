@@ -5,6 +5,7 @@ namespace Drupal\Tests\og\Kernel\Entity;
 use Drupal\KernelTests\KernelTestBase;
 use Drupal\block_content\Entity\BlockContentType;
 use Drupal\node\Entity\NodeType;
+use Drupal\og\GroupTypeManager;
 use Drupal\og\Og;
 use Drupal\og\OgGroupAudienceHelperInterface;
 
@@ -50,6 +51,13 @@ class GetBundleByBundleTest extends KernelTestBase {
   protected $groupTypeManager;
 
   /**
+   * The cache backend.
+   *
+   * @var \Drupal\Core\Cache\CacheBackendInterface
+   */
+  protected $cache;
+
+  /**
    * {@inheritdoc}
    */
   protected function setUp() {
@@ -63,6 +71,7 @@ class GetBundleByBundleTest extends KernelTestBase {
     $this->installSchema('system', 'sequences');
 
     $this->groupTypeManager = $this->container->get('og.group_type_manager');
+    $this->cache = $this->container->get('cache.data');
 
     // Create four groups of two different entity types.
     for ($i = 0; $i < 2; $i++) {
@@ -555,6 +564,67 @@ class GetBundleByBundleTest extends KernelTestBase {
         ],
       ],
     ];
+  }
+
+  /**
+   * Tests that retrieval of group content bundle IDs uses cached data.
+   *
+   * @covers ::getGroupContentBundleIdsByGroupBundle
+   */
+  public function testGetGroupContentBundleIdsByGroupBundleUsesCachedData() {
+    // Initially no cached group relation data should exist.
+    $this->assertNull($this->getCachedGroupRelationMap());
+
+    // We do not yet have any group content types, so when we retrieve the group
+    // content bundle IDs we should get no result back, and the cache should
+    // remain empty.
+    $bundle_ids = $this->groupTypeManager->getGroupContentBundleIdsByGroupBundle('node', 'group_0');
+    $this->assertEquals([], $bundle_ids);
+
+    // The cached group relation data should now no longer be NULL but an empty
+    // array. NULL indicates the absence of cached data.
+    $this->assertEquals([], $this->getCachedGroupRelationMap());
+
+    // Reset the data, this should clear the cached data again.
+    $this->groupTypeManager->reset();
+    $this->assertNull($this->getCachedGroupRelationMap());
+
+    // Inject some data in the cache, and check that the group type manager uses
+    // this cached data.
+    $relation_data = [
+      'node' => [
+        'group_0' => [
+          'group_content_entity_type_id' => [
+            'group_content_bundle_id',
+          ],
+        ],
+      ],
+    ];
+    $this->cacheGroupRelationMap($relation_data);
+
+    $bundle_ids = $this->groupTypeManager->getGroupContentBundleIdsByGroupBundle('node', 'group_0');
+    $this->assertEquals($relation_data['node']['group_0'], $bundle_ids);
+  }
+
+  /**
+   * Returns the group relation map from the cache.
+   *
+   * @return array|null
+   *   An associative array representing group and group content relations, or
+   *   NULL if the group relation map was not found in the cache.
+   */
+  protected function getCachedGroupRelationMap(): ?array {
+    return $this->cache->get(GroupTypeManager::GROUP_RELATION_MAP_CACHE_KEY)->data ?? NULL;
+  }
+
+  /**
+   * Stores the group relation map in the cache.
+   *
+   * @param array $relation_data
+   *   An associative array representing group and group content relations.
+   */
+  protected function cacheGroupRelationMap(array $relation_data): void {
+    $this->cache->set(GroupTypeManager::GROUP_RELATION_MAP_CACHE_KEY, $relation_data);
   }
 
 }
