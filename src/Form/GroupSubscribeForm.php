@@ -35,7 +35,7 @@ class GroupSubscribeForm extends ContentEntityForm {
    *
    * @param \Drupal\og\OgAccessInterface $og_access
    *   The OG access service.
-   * @param \Drupal\Core\Entity\EntityRepositoryInterface|\Drupal\Core\Entity\EntityManagerInterface $entity_repository
+   * @param \Drupal\Core\Entity\EntityRepositoryInterface $entity_repository
    *   The entity repository service.
    * @param \Drupal\Core\Entity\EntityTypeBundleInfoInterface $entity_type_bundle_info
    *   The entity type bundle service.
@@ -48,29 +48,18 @@ class GroupSubscribeForm extends ContentEntityForm {
    *
    * @see https://github.com/Gizra/og/issues/397
    */
-  public function __construct(OgAccessInterface $og_access, $entity_repository, EntityTypeBundleInfoInterface $entity_type_bundle_info = NULL, TimeInterface $time = NULL) {
+  public function __construct(OgAccessInterface $og_access, EntityRepositoryInterface $entity_repository, EntityTypeBundleInfoInterface $entity_type_bundle_info = NULL, TimeInterface $time = NULL) {
     parent::__construct($entity_repository, $entity_type_bundle_info, $time);
     $this->ogAccess = $og_access;
   }
 
   /**
    * {@inheritdoc}
-   *
-   * @todo Remove the workaround for 8.5.x backwards compatibility when 8.6.0 is
-   *   released.
    */
   public static function create(ContainerInterface $container) {
-    // Starting with Drupal 8.6.0 the parent class is expecting that the
-    // entity repository service is passed in as the first argument. In older
-    // versions this was the entity manager. Detect the type hint of the first
-    // argument of the parent constructor and pass the right service.
-    $parent_constructor_parameters = (new \ReflectionClass(parent::class))->getMethod('__construct')->getParameters();
-    $entity_repository_class_name = $parent_constructor_parameters[0]->getClass()->getName();
-    $entity_repository_service = $entity_repository_class_name === EntityRepositoryInterface::class ? 'entity.repository' : 'entity.manager';
-
     return new static(
       $container->get('og.access'),
-      $container->get($entity_repository_service),
+      $container->get('entity.repository'),
       $container->get('entity_type.bundle.info'),
       $container->get('datetime.time')
     );

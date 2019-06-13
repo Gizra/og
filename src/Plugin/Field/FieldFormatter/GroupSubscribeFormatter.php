@@ -2,7 +2,6 @@
 
 namespace Drupal\og\Plugin\Field\FieldFormatter;
 
-use Drupal\Core\Entity\EntityManagerInterface;
 use Drupal\Core\Field\FieldDefinitionInterface;
 use Drupal\Core\Field\FieldItemListInterface;
 use Drupal\Core\Field\FormatterBase;
@@ -64,15 +63,13 @@ class GroupSubscribeFormatter extends FormatterBase implements ContainerFactoryP
    *   The view mode.
    * @param array $third_party_settings
    *   Any third party settings settings.
-   * @param \Drupal\Core\Entity\EntityManagerInterface $entity_manager
-   *   The entity manager.
    * @param \Drupal\Core\Session\AccountInterface $current_user
    *   The current user.
    * @param \Drupal\og\OgAccessInterface $og_access
    *   The OG access service.
    */
-  public function __construct($plugin_id, $plugin_definition, FieldDefinitionInterface $field_definition, array $settings, $label, $view_mode, array $third_party_settings, EntityManagerInterface $entity_manager, AccountInterface $current_user, OgAccessInterface $og_access) {
-    parent::__construct($plugin_id, $plugin_definition, $field_definition, $settings, $label, $view_mode, $third_party_settings, $entity_manager);
+  public function __construct($plugin_id, $plugin_definition, FieldDefinitionInterface $field_definition, array $settings, $label, $view_mode, array $third_party_settings, AccountInterface $current_user, OgAccessInterface $og_access) {
+    parent::__construct($plugin_id, $plugin_definition, $field_definition, $settings, $label, $view_mode, $third_party_settings);
 
     $this->currentUser = $current_user;
     $this->ogAccess = $og_access;
@@ -90,7 +87,6 @@ class GroupSubscribeFormatter extends FormatterBase implements ContainerFactoryP
       $configuration['label'],
       $configuration['view_mode'],
       $configuration['third_party_settings'],
-      $container->get('entity.manager'),
       $container->get('current_user'),
       $container->get('og.access')
     );
