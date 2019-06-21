@@ -7,9 +7,9 @@ use Drupal\block_content\Entity\BlockContentType;
 use Drupal\node\Entity\Node;
 use Drupal\og\Og;
 use Drupal\og\OgGroupAudienceHelperInterface;
-use Drupal\simpletest\BrowserTestBase;
-use Drupal\simpletest\ContentTypeCreationTrait;
-use Drupal\simpletest\NodeCreationTrait;
+use Drupal\Tests\BrowserTestBase;
+use Drupal\Tests\node\Traits\ContentTypeCreationTrait;
+use Drupal\Tests\node\Traits\NodeCreationTrait;
 
 /**
  * Tests the complex widget.
@@ -88,7 +88,6 @@ class OgComplexWidgetTest extends BrowserTestBase {
     $this->assertSession()->statusCodeEquals(200);
 
     // Retrieve the post that was created from the database.
-    /** @var QueryInterface $query */
     $query = $this->container->get('entity_type.manager')->getStorage('node')->getQuery();
     $result = $query
       ->condition('type', 'post')
@@ -97,7 +96,7 @@ class OgComplexWidgetTest extends BrowserTestBase {
       ->execute();
     $post_nid = reset($result);
 
-    /** @var \Drupal\node\Entity\NodeInterface $post */
+    /** @var \Drupal\node\NodeInterface $post */
     $post = Node::load($post_nid);
 
     // Check that the post references the group correctly.

@@ -84,7 +84,7 @@ abstract class ActionTestBase extends KernelTestBase {
     $this->installEntitySchema('og_membership');
     $this->installEntitySchema('user');
     $this->installEntitySchema('node');
-    $this->installSchema('system', ['queue', 'sequences']);
+    $this->installSchema('system', ['sequences']);
 
     $this->membershipManager = $this->container->get('og.membership_manager');
     $this->groupTypeManager = $this->container->get('og.group_type_manager');

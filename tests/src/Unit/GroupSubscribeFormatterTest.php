@@ -5,7 +5,6 @@ namespace Drupal\Tests\og\Unit;
 use Drupal\Core\Access\AccessResultInterface;
 use Drupal\Core\DependencyInjection\ContainerBuilder;
 use Drupal\Core\Entity\EntityInterface;
-use Drupal\Core\Entity\EntityManagerInterface;
 use Drupal\Core\Entity\EntityStorageInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Entity\EntityTypeRepositoryInterface;
@@ -28,13 +27,6 @@ use Drupal\user\EntityOwnerInterface;
  * @coversDefaultClass \Drupal\og\Plugin\Field\FieldFormatter\GroupSubscribeFormatter
  */
 class GroupSubscribeFormatterTest extends UnitTestCase {
-
-  /**
-   * The entity manager used for testing.
-   *
-   * @var \Drupal\Core\Entity\EntityManagerInterface|\Prophecy\Prophecy\ObjectProphecy
-   */
-  protected $entityManager;
 
   /**
    * The entity storage prophecy used in the test.
@@ -165,7 +157,6 @@ class GroupSubscribeFormatterTest extends UnitTestCase {
     $this->accountProxy = $this->prophesize(AccountProxyInterface::class);
     $this->bundle = $this->randomMachineName();
     $this->entityId = rand(10, 50);
-    $this->entityManager = $this->prophesize(EntityManagerInterface::class);
     $this->entityStorage = $this->prophesize(EntityStorageInterface::class);
     $this->entityTypeId = $this->randomMachineName();
     $this->entityTypeManager = $this->prophesize(EntityTypeManagerInterface::class);
@@ -370,7 +361,6 @@ class GroupSubscribeFormatterTest extends UnitTestCase {
       '',
       '',
       [],
-      $this->entityManager->reveal(),
       $this->accountProxy->reveal(),
       $this->ogAccess->reveal()
     );

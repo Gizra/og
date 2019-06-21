@@ -176,7 +176,8 @@ class Og {
    * @param \Drupal\Core\Session\AccountInterface $user
    *   The user object.
    * @param string $membership_type
-   *   (optional) The membership type. Defaults to OG_MEMBERSHIP_TYPE_DEFAULT.
+   *   (optional) The membership type. Defaults to
+   *   \Drupal\og\OgMembershipInterface::TYPE_DEFAULT.
    *
    * @return \Drupal\og\Entity\OgMembership
    *   The unsaved membership object.
@@ -337,11 +338,10 @@ class Og {
     static::$cache = [];
 
     // Invalidate the entity property cache.
+    // @todo We should not clear the entity type and field definition caches.
+    // @see https://github.com/Gizra/og/issues/219
     \Drupal::entityTypeManager()->clearCachedDefinitions();
     \Drupal::service('entity_field.manager')->clearCachedFieldDefinitions();
-
-    // Invalidate the group membership manager.
-    \Drupal::service('og.membership_manager')->reset();
 
     // Let other OG modules know we invalidate cache.
     \Drupal::moduleHandler()->invokeAll('og_invalidate_cache');

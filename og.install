@@ -28,9 +28,14 @@ function og_update_8001(&$sandbox) {
     \Drupal::entityDefinitionUpdateManager()->installFieldStorageDefinition('entity_bundle', 'og_membership', 'og', $storage_definition);
 
     $sandbox['#finished'] = 0;
+    $sandbox['batch_size'] = 500;
     $sandbox['current'] = 0;
     $sandbox['total'] = $storage->getQuery()->count()->execute();
-    $sandbox['batch_size'] = 500;
+
+    if (!$sandbox['total']) {
+      $sandbox['#finished'] = 1;
+      return t('No OG memberships found.');
+    }
   }
 
   // Update the existing memberships to include the group bundle ID.

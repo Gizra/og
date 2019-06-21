@@ -3,6 +3,7 @@
 namespace Drupal\Tests\og\Kernel\Entity;
 
 use Drupal\entity_test\Entity\EntityTest;
+use Drupal\entity_test\Entity\EntityTestMul;
 use Drupal\KernelTests\KernelTestBase;
 use Drupal\node\Entity\Node;
 use Drupal\node\Entity\NodeType;
@@ -37,7 +38,7 @@ class OgMembershipTest extends KernelTestBase {
   /**
    * Test group.
    *
-   * @var \Drupal\Core\Entity\EntityInterface
+   * @var \Drupal\Core\Entity\ContentEntityInterface
    */
   protected $group;
 
@@ -63,6 +64,13 @@ class OgMembershipTest extends KernelTestBase {
   protected $entityTypeManager;
 
   /**
+   * The group type manager.
+   *
+   * @var \Drupal\og\GroupTypeManagerInterface
+   */
+  protected $groupTypeManager;
+
+  /**
    * {@inheritdoc}
    */
   protected function setUp() {
@@ -71,11 +79,14 @@ class OgMembershipTest extends KernelTestBase {
     $this->installConfig(['og']);
     $this->installEntitySchema('og_membership');
     $this->installEntitySchema('entity_test');
+    $this->installEntitySchema('entity_test_mul');
     $this->installEntitySchema('node');
     $this->installEntitySchema('user');
     $this->installSchema('system', 'sequences');
 
     $this->entityTypeManager = $this->container->get('entity_type.manager');
+    $this->groupTypeManager = $this->container->get('og.group_type_manager');
+
     $storage = $this->entityTypeManager->getStorage('user');
     // Insert a row for the anonymous user.
     // @see user_install().
@@ -88,7 +99,7 @@ class OgMembershipTest extends KernelTestBase {
 
     // Create a bundle and add as a group.
     $group = EntityTest::create([
-      'type' => mb_strtolower($this->randomMachineName()),
+      'type' => 'test_bundle',
       'name' => $this->randomString(),
       'user_id' => $owner->id(),
     ]);
@@ -97,7 +108,7 @@ class OgMembershipTest extends KernelTestBase {
     $this->group = $group;
 
     // Add that as a group.
-    Og::groupTypeManager()->addGroup('entity_test', $group->bundle());
+    $this->groupTypeManager->addGroup('entity_test', $group->bundle());
 
     // Create test user.
     $user = User::create(['name' => $this->randomString()]);
@@ -121,6 +132,32 @@ class OgMembershipTest extends KernelTestBase {
       ->save();
 
     $this->assertOwner($membership);
+  }
+
+  /**
+   * Tests getting the owner of a newly created membership.
+   *
+   * @covers ::getOwner
+   * @expectedException \LogicException
+   */
+  public function testGetOwnerOnNewMembership() {
+    // A brand new entity does not have an owner set yet. It should throw a
+    // logic exception.
+    $membership = OgMembership::create();
+    $membership->getOwner();
+  }
+
+  /**
+   * Tests getting the owner ID of a newly created membership.
+   *
+   * @covers ::getOwnerId
+   * @expectedException \LogicException
+   */
+  public function testGetOwnerIdOnNewMembership() {
+    // A brand new entity does not have an owner set yet. It should throw a
+    // logic exception.
+    $membership = OgMembership::create();
+    $membership->getOwnerId();
   }
 
   /**
@@ -169,7 +206,7 @@ class OgMembershipTest extends KernelTestBase {
       'name' => $this->randomString(),
     ]);
     $another_group->save();
-    Og::groupTypeManager()->addGroup('entity_test', $another_group->bundle());
+    $this->groupTypeManager->addGroup('entity_test', $another_group->bundle());
 
     $membership = Og::createMembership($this->group, $this->user);
     $membership->save();
@@ -214,6 +251,9 @@ class OgMembershipTest extends KernelTestBase {
 
   /**
    * Test that it is possible to create groups without an owner.
+   *
+   * @todo This test is not related to the OgMembership entity. It should be
+   *   moved to a more appropriate test class.
    */
   public function testNoOwnerException() {
     // Create a bundle and add as a group.
@@ -225,7 +265,7 @@ class OgMembershipTest extends KernelTestBase {
     $group->save();
 
     // Add that as a group.
-    Og::groupTypeManager()->addGroup('node', $bundle);
+    $this->groupTypeManager->addGroup('node', $bundle);
     $entity = Node::create([
       'title' => $this->randomString(),
       'type' => $bundle,
@@ -265,7 +305,7 @@ class OgMembershipTest extends KernelTestBase {
 
     $group->save();
 
-    Og::groupTypeManager()->addGroup('entity_test', $group->bundle());
+    $this->groupTypeManager->addGroup('entity_test', $group->bundle());
 
     /** @var \Drupal\og\OgMembershipInterface $membership */
     $membership1 = Og::createMembership($group, $this->user);
@@ -290,7 +330,7 @@ class OgMembershipTest extends KernelTestBase {
 
     $group->save();
 
-    Og::groupTypeManager()->addGroup('entity_test', $group->bundle());
+    $this->groupTypeManager->addGroup('entity_test', $group->bundle());
 
     $wrong_role = OgRole::create()
       ->setGroupType($group_entity_type_id)
@@ -392,6 +432,138 @@ class OgMembershipTest extends KernelTestBase {
   }
 
   /**
+   * Tests an exception is thrown when saving a membership with invalid roles.
+   *
+   * @param array $roles_metadata
+   *   An array of test role metadata.
+   *
+   * @covers ::save
+   * @expectedException \Drupal\Core\Entity\EntityStorageException
+   * @dataProvider saveMembershipWithInvalidRolesProvider
+   */
+  public function testSaveMembershipWithInvalidRoles(array $roles_metadata): void {
+    $test_groups = ['test_group' => $this->group];
+
+    // Create a second test group that has the same entity type but a different
+    // bundle so we can test that roles created for this group will throw an
+    // exception.
+    $group = EntityTest::create([
+      'type' => 'a_different_group_bundle',
+      'name' => $this->randomString(),
+    ]);
+    $group->save();
+    $this->groupTypeManager->addGroup($group->getEntityTypeId(), $group->bundle());
+    $test_groups['different_bundle'] = $group;
+
+    // Create a third test group that has a different entity type but the same
+    // bundle so we can test that roles created for this group will throw an
+    // exception.
+    $group = EntityTestMul::create([
+      'type' => 'test_bundle',
+      'name' => $this->randomString(),
+    ]);
+    $group->save();
+    $this->groupTypeManager->addGroup($group->getEntityTypeId(), $group->bundle());
+    $test_groups['different_entity_type'] = $group;
+
+    // Create the roles as defined in the test case.
+    $roles = [];
+    foreach ($roles_metadata as $role_metadata) {
+      $group = $test_groups[$role_metadata['group']];
+      $role = OgRole::loadByGroupAndName($group, $role_metadata['role_name']);
+
+      // Create the role if it was not created automatically.
+      if (empty($role)) {
+        $role = OgRole::create([
+          'group_type' => $group->getEntityTypeId(),
+          'group_bundle' => $group->bundle(),
+          'name' => $role_metadata['role_name'],
+        ]);
+        $role->save();
+      }
+      $roles[] = $role;
+    }
+
+    // Create a membership with the test group and roles. This should throw an
+    // exception since the roles are invalid.
+    OgMembership::create()
+      ->setOwner($this->user)
+      ->setGroup($this->group)
+      ->setRoles($roles)
+      ->save();
+  }
+
+  /**
+   * Provides test data for saving a membership with invalid roles.
+   *
+   * @return array
+   *   An array of test data, each item is an associative array of role metadata
+   *   with the following keys:
+   *   - group: the group to associate with the role. Can be 'test_group',
+   *     'different_bundle', or 'different_entity_type'.
+   *   - role_name: the role name.
+   */
+  public function saveMembershipWithInvalidRolesProvider(): array {
+    return [
+      // A membership can not be saved for an anonymous user.
+      [
+        [
+          [
+            'group' => 'test_group',
+            'role_name' => OgRoleInterface::ANONYMOUS,
+          ],
+        ],
+      ],
+      // A membership with multiple roles can not be saved if any of the roles
+      // is for an anonymous user.
+      [
+        [
+          [
+            'group' => 'test_group',
+            'role_name' => OgRoleInterface::ADMINISTRATOR,
+          ],
+          [
+            'group' => 'test_group',
+            'role_name' => 'custom_role',
+          ],
+          [
+            'group' => 'test_group',
+            'role_name' => OgRoleInterface::ANONYMOUS,
+          ],
+        ],
+      ],
+      // A membership can not be saved when one of the roles references a
+      // different bundle.
+      [
+        [
+          [
+            'group' => 'test_group',
+            'role_name' => OgRoleInterface::ADMINISTRATOR,
+          ],
+          [
+            'group' => 'different_bundle',
+            'role_name' => OgRoleInterface::ADMINISTRATOR,
+          ],
+        ],
+      ],
+      // A membership can not be saved when one of the roles references a
+      // different entity type.
+      [
+        [
+          [
+            'group' => 'test_group',
+            'role_name' => OgRoleInterface::ADMINISTRATOR,
+          ],
+          [
+            'group' => 'different_entity_type',
+            'role_name' => OgRoleInterface::ADMINISTRATOR,
+          ],
+        ],
+      ],
+    ];
+  }
+
+  /**
    * Tests the exception thrown if the validity of a role cannot be established.
    *
    * @covers ::isRoleValid
@@ -422,7 +594,7 @@ class OgMembershipTest extends KernelTestBase {
 
     $group->save();
 
-    Og::groupTypeManager()->addGroup('entity_test', $group->bundle());
+    $this->groupTypeManager->addGroup('entity_test', $group->bundle());
 
     /** @var \Drupal\og\OgMembershipInterface $membership */
     $membership = Og::createMembership($group, $this->user);
@@ -459,15 +631,25 @@ class OgMembershipTest extends KernelTestBase {
   public function testGetGroup() {
     $membership = OgMembership::create();
 
-    // When no group has been set yet, the method should return NULL.
-    $this->assertNull($membership->getGroup());
-
     // Set a group.
     $membership->setGroup($this->group);
 
     // Now the group should be returned. Check both the entity type and ID.
     $this->assertEquals($this->group->getEntityTypeId(), $membership->getGroup()->getEntityTypeId());
     $this->assertEquals($this->group->id(), $membership->getGroup()->id());
+  }
+
+  /**
+   * Tests getting the group from a new membership.
+   *
+   * @covers ::getGroup
+   * @expectedException \LogicException
+   */
+  public function testGetGroupOnNewMembership() {
+    $membership = OgMembership::create();
+
+    // When no group has been set yet, the method should throw an assertion.
+    $membership->getGroup();
   }
 
   /**
@@ -478,14 +660,88 @@ class OgMembershipTest extends KernelTestBase {
   public function testGetGroupBundle() {
     $membership = OgMembership::create();
 
-    // When no group has been set yet, the method should return NULL.
-    $this->assertNull($membership->getGroupBundle());
-
     // Set a group.
     $membership->setGroup($this->group);
 
     // Now the group bundle should be returned.
     $this->assertEquals($this->group->bundle(), $membership->getGroupBundle());
+  }
+
+  /**
+   * Tests getting the group bundle of a newly created membership.
+   *
+   * @covers ::getGroupBundle
+   * @expectedException \LogicException
+   */
+  public function testGetGroupBundleOnNewMembership() {
+    $membership = OgMembership::create();
+    $membership->getGroupBundle();
+  }
+
+  /**
+   * Tests getting the entity type ID of the group associated with a membership.
+   *
+   * @covers ::getGroupEntityType
+   */
+  public function testGetGroupEntityType() {
+    $membership = OgMembership::create();
+    $membership->setGroup($this->group);
+    $this->assertEquals($this->group->getEntityTypeId(), $membership->getGroupEntityType());
+  }
+
+  /**
+   * Tests getting the group entity type ID of a newly created membership.
+   *
+   * @covers ::getGroupEntityType
+   * @expectedException \LogicException
+   */
+  public function testGetGroupEntityTypeOnNewMembership() {
+    $membership = OgMembership::create();
+    $membership->getGroupEntityType();
+  }
+
+  /**
+   * Tests getting the ID of the group associated with a membership.
+   *
+   * @covers ::getGroupId
+   */
+  public function testGetGroupId() {
+    $membership = OgMembership::create();
+    $membership->setGroup($this->group);
+    $this->assertEquals($this->group->id(), $membership->getGroupId());
+  }
+
+  /**
+   * Tests getting the group ID of a newly created membership.
+   *
+   * @covers ::getGroupId
+   * @expectedException \LogicException
+   */
+  public function testGetGroupIdOnNewMembership() {
+    $membership = OgMembership::create();
+    $membership->getGroupId();
+  }
+
+  /**
+   * Tests getting and setting the creation time.
+   *
+   * @covers ::getCreatedTime
+   * @covers ::setCreatedTime
+   */
+  public function testGetSetCreatedTime() {
+    // When creating a brand new membership the request time should be set as
+    // the creation time.
+    // @todo Replace this with \Drupal::time()->getRequestTime() in Drupal 9.
+    $expected_time = (int) $_SERVER['REQUEST_TIME'];
+    $membership = OgMembership::create();
+    $this->assertEquals($expected_time, $membership->getCreatedTime());
+
+    // Try setting a custom creation time and retrieving it.
+    $custom_time = strtotime('January 1, 2019');
+    $created_time = $membership
+      ->setCreatedTime($custom_time)
+      ->getCreatedTime();
+    $this->assertEquals($custom_time, $created_time);
   }
 
   /**
