@@ -20,8 +20,25 @@ class OgStandardReferenceItemTest extends KernelTestBase {
    */
   public static $modules = ['user', 'entity_test', 'field', 'og', 'system'];
 
+  /**
+   * A list of bundles.
+   *
+   * @var string[]
+   */
   protected $bundles;
+
+  /**
+   * The machine name for a field.
+   *
+   * @var array
+   */
   protected $fieldName;
+
+  /**
+   * A list of groups.
+   *
+   * @var EntityTest[]
+   */
   protected $groups;
 
   /**
