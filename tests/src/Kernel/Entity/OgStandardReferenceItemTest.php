@@ -37,7 +37,7 @@ class OgStandardReferenceItemTest extends KernelTestBase {
   /**
    * A list of groups.
    *
-   * @var EntityTest[]
+   * @var \Drupal\entity_test\Entity\EntityTest[]
    */
   protected $groups;
 
