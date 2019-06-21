@@ -30,14 +30,14 @@ class OgStandardReferenceItemTest extends KernelTestBase {
   /**
    * The machine name for a field.
    *
-   * @var array
+   * @var string[]
    */
   protected $fieldName;
 
   /**
    * A list of groups.
    *
-   * @var EntityTest[]
+   * @var \Drupal\entity_test\Entity\EntityTest[]
    */
   protected $groups;
 
