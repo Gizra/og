@@ -79,7 +79,7 @@ class OgMembershipListBuilder extends EntityListBuilder {
     $row['label'] = Link::fromTextAndUrl($entity->getGroup()->label(), $entity->getGroup()->toUrl());
     $callback = function(OgRoleInterface $role) {
       return $role->getLabel();
-    }
+    };
     $row['roles'] = implode(', ', array_map($callback, $entity->getRoles()));
     $row['state'] = $entity->getState();
 
