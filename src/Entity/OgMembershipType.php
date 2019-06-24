@@ -35,6 +35,11 @@ use Drupal\og\OgMembershipTypeInterface;
  */
 class OgMembershipType extends ConfigEntityBase implements OgMembershipTypeInterface {
 
+  /**
+   * The membership type.
+   *
+   * @var string
+   */
   protected $type;
 
   /**
