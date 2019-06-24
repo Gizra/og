@@ -89,7 +89,5 @@ function og_update_8002() {
   $entity_type->set('entity_keys', $entity_keys);
   $manager->updateEntityType($entity_type);
 
-  foreach (['uuid'] as $field_name) {
-    $manager->updateFieldStorageDefinition($manager->getFieldStorageDefinition($field_name, 'og_membership'));
-  }
+  $manager->updateFieldStorageDefinition($manager->getFieldStorageDefinition('uuid', 'og_membership'));
 }
