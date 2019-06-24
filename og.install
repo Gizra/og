@@ -77,3 +77,19 @@ function og_update_8001(&$sandbox) {
 
   return $message;
 }
+
+/**
+ * Add uuid field to OgMembership.
+ */
+function og_update_8002() {
+  $manager = \Drupal::entityDefinitionUpdateManager();
+  $entity_type = $manager->getEntityType('og_membership');
+  $entity_keys = $entity_type->getKeys();
+  $entity_keys['uuid'] = 'uuid';
+  $entity_type->set('entity_keys', $entity_keys);
+  $manager->updateEntityType($entity_type);
+
+  foreach (['uuid'] as $field_name) {
+    $manager->updateFieldStorageDefinition($manager->getFieldStorageDefinition($field_name, 'og_membership'));
+  }
+}
