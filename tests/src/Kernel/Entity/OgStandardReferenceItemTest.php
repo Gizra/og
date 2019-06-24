@@ -30,7 +30,7 @@ class OgStandardReferenceItemTest extends KernelTestBase {
   /**
    * The machine name for a field.
    *
-   * @var string[]
+   * @var string
    */
   protected $fieldName;
 
