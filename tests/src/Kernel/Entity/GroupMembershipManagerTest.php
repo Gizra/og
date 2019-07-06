@@ -193,6 +193,35 @@ class GroupMembershipManagerTest extends KernelTestBase {
   }
 
   /**
+   * Tests that exceptions are thrown when invalid arguments are passed.
+   *
+   * @covers ::getGroupIds
+   * @dataProvider groupContentProvider
+   */
+  public function testGetGroupIdsInvalidArguments() {
+    /** @var \Drupal\og\MembershipManagerInterface $membership_manager */
+    $membership_manager = \Drupal::service('og.membership_manager');
+
+    $test_cases = [
+      // Test that an exception is thrown when passing a User entity.
+      User::create(),
+      // Test that an exception is thrown when passing an entity which is not
+      // group content. We are using one of the test groups for this.
+      $this->groups['node'][0],
+    ];
+
+    foreach ($test_cases as $test_case) {
+      try {
+        $membership_manager->getGroupIds($test_case);
+        $this->fail();
+      }
+      catch (\InvalidArgumentException $e) {
+        // Expected result.
+      }
+    }
+  }
+
+  /**
    * Tests that the static cache loads the appropriate group.
    *
    * Verify that entities from different entity types with colliding Ids that

@@ -7,8 +7,8 @@ use Drupal\Core\Config\Config;
 use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\DependencyInjection\ContainerBuilder;
 use Drupal\Core\Entity\EntityInterface;
-use Drupal\Core\Entity\EntityManagerInterface;
 use Drupal\Core\Entity\EntityTypeInterface;
+use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Extension\ModuleHandlerInterface;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\Core\Session\AccountProxyInterface;
@@ -106,11 +106,11 @@ class OgAccessTestBase extends UnitTestCase {
   protected $groupAudienceHelper;
 
   /**
-   * The entity manager service.
+   * The entity type manager service.
    *
-   * @var \Drupal\Core\Entity\EntityManagerInterface|\Prophecy\Prophecy\ObjectProphecy
+   * @var \Drupal\Core\Entity\EntityTypeManagerInterface|\Prophecy\Prophecy\ObjectProphecy
    */
-  protected $entityManager;
+  protected $entityTypeManager;
 
   /**
    * The membership entity.
@@ -134,7 +134,7 @@ class OgAccessTestBase extends UnitTestCase {
     $this->entityTypeId = $this->randomMachineName();
     $this->bundle = $this->randomMachineName();
 
-    $this->entityManager = $this->prophesize(EntityManagerInterface::class);
+    $this->entityTypeManager = $this->prophesize(EntityTypeManagerInterface::class);
     $this->membership = $this->prophesize(OgMembershipInterface::class);
     $this->ogRole = $this->prophesize(RoleInterface::class);
 
@@ -202,7 +202,7 @@ class OgAccessTestBase extends UnitTestCase {
     $container = new ContainerBuilder();
     $container->set('cache_contexts_manager', $cache_contexts_manager->reveal());
     $container->set('config.factory', $config_factory->reveal());
-    $container->set('entity.manager', $this->entityManager->reveal());
+    $container->set('entity_type.manager', $this->entityTypeManager->reveal());
     $container->set('module_handler', $this->prophesize(ModuleHandlerInterface::class)->reveal());
     $container->set('og.group_type_manager', $this->groupTypeManager->reveal());
     $container->set('og.membership_manager', $this->membershipManager->reveal());

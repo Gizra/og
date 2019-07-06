@@ -72,8 +72,8 @@ function og_entity_update(EntityInterface $entity) {
  */
 function og_entity_predelete(EntityInterface $entity) {
   if (Og::isGroup($entity->getEntityTypeId(), $entity->bundle())) {
-    // Register orphaned group content for deletion, if this option has been
-    // enabled.
+    // Register orphaned group content and user memberships for deletion, if
+    // this option has been enabled.
     $config = \Drupal::config('og.settings');
     if ($config->get('delete_orphans')) {
       $plugin_id = $config->get('delete_orphans_plugin_id');
@@ -313,26 +313,10 @@ function og_theme($existing, $type, $theme, $path) {
         'count' => 0,
         'membership_states' => [],
         'group' => NULL,
+        'group_label' => NULL,
       ],
     ],
   ];
-}
-
-/**
- * Prepares variables for member count templates.
- *
- * Default template: og-member-count.html.twig.
- *
- * @param array $variables
- *   An associative array containing:
- *   - count: An integer representing the number of members in the group.
- *   - group: The group, which is a content entity.
- */
-function template_preprocess_og_member_count(array &$variables) {
-  /** @var \Drupal\Core\Entity\ContentEntityInterface $group */
-  $group = $variables['group'];
-
-  $variables['group_label'] = $group->label();
 }
 
 /**
@@ -345,12 +329,10 @@ function template_preprocess_og_member_count(array &$variables) {
 function og_invalidate_group_content_cache_tags(EntityInterface $entity) {
   // If group content is created or updated, invalidate the group content cache
   // tags for each of the groups this group content belongs to. This allows
-  // group listings to be cached effectively. Also invalidate the tags if the
-  // group itself changes. The cache tag format is
+  // group listings to be cached effectively. The cache tag format is
   // 'og-group-content:{group entity type}:{group entity id}'.
   $is_group_content = Og::isGroupContent($entity->getEntityTypeId(), $entity->bundle());
-  $group_is_updated = Og::isGroup($entity->getEntityTypeId(), $entity->bundle()) && !empty($entity->original);
-  if ($group_is_updated || $is_group_content) {
+  if ($is_group_content) {
     /** @var \Drupal\og\MembershipManagerInterface $membership_manager */
     $membership_manager = \Drupal::service('og.membership_manager');
     $tags = [];
@@ -361,7 +343,7 @@ function og_invalidate_group_content_cache_tags(EntityInterface $entity) {
     // the tags of the old group(s).
     /** @var \Drupal\Core\Entity\FieldableEntityInterface $entity */
     $original = !empty($entity->original) ? $entity->original : NULL;
-    if ($is_group_content && $original) {
+    if ($original) {
       /** @var \Drupal\og\OgGroupAudienceHelperInterface $group_audience_helper */
       $group_audience_helper = \Drupal::service('og.group_audience_helper');
       /** @var \Drupal\Core\Entity\FieldableEntityInterface $original */

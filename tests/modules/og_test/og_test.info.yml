@@ -4,4 +4,4 @@ description: 'Support module for Organic Groups testing.'
 package: Testing
 core: 8.x
 dependencies:
-  - options
+  - drupal:options

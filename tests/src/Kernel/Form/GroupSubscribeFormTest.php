@@ -138,7 +138,7 @@ class GroupSubscribeFormTest extends KernelTestBase {
     $user = $this->createUser(['access content']);
 
     /** @var \Drupal\og\Form\GroupSubscribeForm $form */
-    $form = \Drupal::entityManager()->getFormObject('og_membership', 'subscribe');
+    $form = \Drupal::entityTypeManager()->getFormObject('og_membership', 'subscribe');
 
     // Pending membership.
     $membership_pending = OgMembership::create();
