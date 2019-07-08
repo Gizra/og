@@ -33,7 +33,7 @@ function og_features_permission_features_export($data, &$export, $module_name = 
       if (isset($permissions[$group_type][$bundle][$perm]['module'])) {
         // Add the module which defines the permission as a dependency.
         $module = $permissions[$group_type][$bundle][$perm]['module'];
-        if ($module != $module_name) {
+        if ($module !== $module_name) {
           $export['dependencies'][$module] = $module;
         }
 
