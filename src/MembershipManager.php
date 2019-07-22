@@ -63,8 +63,8 @@ class MembershipManager implements MembershipManagerInterface {
    * {@inheritdoc}
    */
   public function getUserGroupIds($user_id, array $states = [OgMembershipInterface::STATE_ACTIVE]) {
-    if ($user_id instanceof AccountInterface) {
-      trigger_error('Passing an account object is deprecated in og:8.1.0-alpha4 and is removed from og:8.1.0-beta1. Pass the user ID instead.', E_USER_DEPRECATED);
+    if (!is_int($user_id)) {
+      trigger_error('Passing an account object is deprecated in og:8.1.0-alpha4 and is removed from og:8.1.0-beta1. Instead pass the user ID as an integer value. See https://github.com/Gizra/og/issues/542', E_USER_DEPRECATED);
       $user_id = $user_id->id();
     }
     $group_ids = [];
@@ -82,8 +82,8 @@ class MembershipManager implements MembershipManagerInterface {
    * {@inheritdoc}
    */
   public function getUserGroups($user_id, array $states = [OgMembershipInterface::STATE_ACTIVE]) {
-    if ($user_id instanceof AccountInterface) {
-      trigger_error('Passing an account object is deprecated in og:8.1.0-alpha4 and is removed from og:8.1.0-beta1. Pass the user ID instead.', E_USER_DEPRECATED);
+    if (!is_int($user_id)) {
+      trigger_error('Passing an account object is deprecated in og:8.1.0-alpha4 and is removed from og:8.1.0-beta1. Instead pass the user ID as an integer value. See https://github.com/Gizra/og/issues/542', E_USER_DEPRECATED);
       $user_id = $user_id->id();
     }
 
@@ -95,8 +95,8 @@ class MembershipManager implements MembershipManagerInterface {
    * {@inheritdoc}
    */
   public function getMemberships($user_id, array $states = [OgMembershipInterface::STATE_ACTIVE]) {
-    if ($user_id instanceof AccountInterface) {
-      trigger_error('Passing an account object is deprecated in og:8.1.0-alpha4 and is removed from og:8.1.0-beta1. Pass the user ID instead.', E_USER_DEPRECATED);
+    if (!is_int($user_id)) {
+      trigger_error('Passing an account object is deprecated in og:8.1.0-alpha4 and is removed from og:8.1.0-beta1. Instead pass the user ID as an integer value. See https://github.com/Gizra/og/issues/542', E_USER_DEPRECATED);
       $user_id = $user_id->id();
     }
 
@@ -130,8 +130,8 @@ class MembershipManager implements MembershipManagerInterface {
    * {@inheritdoc}
    */
   public function getMembership(EntityInterface $group, $user_id, array $states = [OgMembershipInterface::STATE_ACTIVE]) {
-    if ($user_id instanceof AccountInterface) {
-      trigger_error('Passing an account object is deprecated in og:8.1.0-alpha4 and is removed from og:8.1.0-beta1. Pass the user ID instead.', E_USER_DEPRECATED);
+    if (!is_int($user_id)) {
+      trigger_error('Passing an account object is deprecated in og:8.1.0-alpha4 and is removed from og:8.1.0-beta1. Instead pass the user ID as an integer value. See https://github.com/Gizra/og/issues/542', E_USER_DEPRECATED);
       $user_id = $user_id->id();
     }
 
@@ -149,8 +149,8 @@ class MembershipManager implements MembershipManagerInterface {
    * {@inheritdoc}
    */
   public function getUserGroupIdsByRoleIds($user_id, array $role_ids, array $states = [OgMembershipInterface::STATE_ACTIVE], bool $require_all_roles = TRUE): array {
-    if ($user_id instanceof AccountInterface) {
-      trigger_error('Passing an account object is deprecated in og:8.1.0-alpha4 and is removed from og:8.1.0-beta1. Pass the user ID instead.', E_USER_DEPRECATED);
+    if (!is_int($user_id)) {
+      trigger_error('Passing an account object is deprecated in og:8.1.0-alpha4 and is removed from og:8.1.0-beta1. Instead pass the user ID as an integer value. See https://github.com/Gizra/og/issues/542', E_USER_DEPRECATED);
       $user_id = $user_id->id();
     }
 
@@ -172,8 +172,8 @@ class MembershipManager implements MembershipManagerInterface {
    * {@inheritdoc}
    */
   public function getUserGroupsByRoleIds($user_id, array $role_ids, array $states = [OgMembershipInterface::STATE_ACTIVE], bool $require_all_roles = TRUE): array {
-    if ($user_id instanceof AccountInterface) {
-      trigger_error('Passing an account object is deprecated in og:8.1.0-alpha4 and is removed from og:8.1.0-beta1. Pass the user ID instead.', E_USER_DEPRECATED);
+    if (!is_int($user_id)) {
+      trigger_error('Passing an account object is deprecated in og:8.1.0-alpha4 and is removed from og:8.1.0-beta1. Instead pass the user ID as an integer value. See https://github.com/Gizra/og/issues/542', E_USER_DEPRECATED);
       $user_id = $user_id->id();
     }
 
@@ -415,8 +415,8 @@ class MembershipManager implements MembershipManagerInterface {
    * {@inheritdoc}
    */
   public function isMember(EntityInterface $group, $user_id, array $states = [OgMembershipInterface::STATE_ACTIVE]) {
-    if ($user_id instanceof AccountInterface) {
-      trigger_error('Passing an account object is deprecated in og:8.1.0-alpha4 and is removed from og:8.1.0-beta1. Pass the user ID instead.', E_USER_DEPRECATED);
+    if (!is_int($user_id)) {
+      trigger_error('Passing an account object is deprecated in og:8.1.0-alpha4 and is removed from og:8.1.0-beta1. Instead pass the user ID as an integer value. See https://github.com/Gizra/og/issues/542', E_USER_DEPRECATED);
       $user_id = $user_id->id();
     }
 
@@ -429,8 +429,8 @@ class MembershipManager implements MembershipManagerInterface {
    * {@inheritdoc}
    */
   public function isMemberPending(EntityInterface $group, $user_id) {
-    if ($user_id instanceof AccountInterface) {
-      trigger_error('Passing an account object is deprecated in og:8.1.0-alpha4 and is removed from og:8.1.0-beta1. Pass the user ID instead.', E_USER_DEPRECATED);
+    if (!is_int($user_id)) {
+      trigger_error('Passing an account object is deprecated in og:8.1.0-alpha4 and is removed from og:8.1.0-beta1. Instead pass the user ID as an integer value. See https://github.com/Gizra/og/issues/542', E_USER_DEPRECATED);
       $user_id = $user_id->id();
     }
 
@@ -441,8 +441,8 @@ class MembershipManager implements MembershipManagerInterface {
    * {@inheritdoc}
    */
   public function isMemberBlocked(EntityInterface $group, $user_id) {
-    if ($user_id instanceof AccountInterface) {
-      trigger_error('Passing an account object is deprecated in og:8.1.0-alpha4 and is removed from og:8.1.0-beta1. Pass the user ID instead.', E_USER_DEPRECATED);
+    if (!is_int($user_id)) {
+      trigger_error('Passing an account object is deprecated in og:8.1.0-alpha4 and is removed from og:8.1.0-beta1. Instead pass the user ID as an integer value. See https://github.com/Gizra/og/issues/542', E_USER_DEPRECATED);
       $user_id = $user_id->id();
     }
 

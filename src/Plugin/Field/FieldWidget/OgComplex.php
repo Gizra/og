@@ -10,7 +10,6 @@ use Drupal\Core\Field\FieldStorageDefinitionInterface;
 use Drupal\Core\Field\Plugin\Field\FieldWidget\EntityReferenceAutocompleteWidget;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\og\OgAccess;
-use Drupal\user\Entity\User;
 
 /**
  * Plugin implementation of the 'entity_reference autocomplete' widget.
