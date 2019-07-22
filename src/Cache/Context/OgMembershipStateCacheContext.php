@@ -77,7 +77,7 @@ class OgMembershipStateCacheContext implements CacheContextInterface {
     }
 
     /** @var \Drupal\og\OgMembershipInterface $membership */
-    $membership = $this->membershipManager->getMembership($group, $this->user, OgMembershipInterface::ALL_STATES);
+    $membership = $this->membershipManager->getMembership($group, $this->user->id(), OgMembershipInterface::ALL_STATES);
     return $membership ? $membership->getState() : self::NO_CONTEXT;
   }
 

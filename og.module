@@ -90,7 +90,7 @@ function og_entity_predelete(EntityInterface $entity) {
   if ($entity instanceof UserInterface) {
     /** @var \Drupal\og\MembershipManagerInterface $membership_manager */
     $membership_manager = \Drupal::service('og.membership_manager');
-    foreach ($membership_manager->getMemberships($entity, []) as $membership) {
+    foreach ($membership_manager->getMemberships($entity->id(), []) as $membership) {
       $membership->delete();
     }
   }

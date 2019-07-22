@@ -185,7 +185,7 @@ class OgAccess implements OgAccessInterface {
     if (!$pre_alter_cache) {
       $permissions = [];
       $user_is_group_admin = FALSE;
-      if ($membership = $this->membershipManager->getMembership($group, $user)) {
+      if ($membership = $this->membershipManager->getMembership($group, $user->id())) {
         foreach ($membership->getRoles() as $role) {
           // Check for the is_admin flag.
           /** @var \Drupal\og\Entity\OgRole $role */
@@ -197,7 +197,7 @@ class OgAccess implements OgAccessInterface {
           $permissions = array_merge($permissions, $role->getPermissions());
         }
       }
-      elseif (!$this->membershipManager->isMember($group, $user, [OgMembershipInterface::STATE_BLOCKED])) {
+      elseif (!$this->membershipManager->isMember($group, $user->id(), [OgMembershipInterface::STATE_BLOCKED])) {
         // User is a non-member or has a pending membership.
         /** @var \Drupal\og\Entity\OgRole $role */
         $role = OgRole::loadByGroupAndName($group, OgRoleInterface::ANONYMOUS);
@@ -267,7 +267,7 @@ class OgAccess implements OgAccessInterface {
       $cache_tags = $entity_type->getListCacheTags();
 
       // The entity might be a user or a non-user entity.
-      $groups = $entity instanceof UserInterface ? $this->membershipManager->getUserGroups($entity) : $this->membershipManager->getGroups($entity);
+      $groups = $entity instanceof UserInterface ? $this->membershipManager->getUserGroups($entity->id()) : $this->membershipManager->getGroups($entity);
 
       if ($groups) {
         $forbidden = AccessResult::forbidden()->addCacheTags($cache_tags);

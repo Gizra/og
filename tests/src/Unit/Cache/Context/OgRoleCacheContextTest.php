@@ -54,7 +54,7 @@ class OgRoleCacheContextTest extends OgCacheContextTestBase {
     // manager.
     /** @var \Drupal\Core\Session\AccountInterface|\Prophecy\Prophecy\ObjectProphecy $user */
     $user = $this->prophesize(AccountInterface::class)->reveal();
-    $this->membershipManager->getMemberships($user)->willReturn([]);
+    $this->membershipManager->getMemberships($user->id())->willReturn([]);
 
     // The result should be the predefined 'NO_CONTEXT' value.
     $result = $this->getContextResult($user);
@@ -84,7 +84,7 @@ class OgRoleCacheContextTest extends OgCacheContextTestBase {
     // manager.
     /** @var \Drupal\Core\Session\AccountInterface|\Prophecy\Prophecy\ObjectProphecy $user */
     $user = $this->prophesize(AccountInterface::class)->reveal();
-    $this->membershipManager->getMemberships($user)->willReturn([$membership]);
+    $this->membershipManager->getMemberships($user->id())->willReturn([$membership]);
 
     // The result should be the predefined 'NO_CONTEXT' value.
     $result = $this->getContextResult($user);
@@ -161,7 +161,7 @@ class OgRoleCacheContextTest extends OgCacheContextTestBase {
       // When the memberships for every user in the test case are requested from
       // the membership manager, the respective array of memberships will be
       // returned.
-      $this->membershipManager->getMemberships($user)->willReturn($memberships[$user_id]);
+      $this->membershipManager->getMemberships($user_id)->willReturn($memberships[$user_id]);
       $cache_context_ids[$user_id] = $this->getContextResult($user);
     }
 

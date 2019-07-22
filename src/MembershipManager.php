@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types = 1);
+
 namespace Drupal\og;
 
 use Drupal\Component\Utility\NestedArray;
@@ -60,11 +62,15 @@ class MembershipManager implements MembershipManagerInterface {
   /**
    * {@inheritdoc}
    */
-  public function getUserGroupIds(AccountInterface $user, array $states = [OgMembershipInterface::STATE_ACTIVE]) {
+  public function getUserGroupIds($user_id, array $states = [OgMembershipInterface::STATE_ACTIVE]) {
+    if ($user_id instanceof AccountInterface) {
+      trigger_error('Passing an account object is deprecated in og:8.1.0-alpha4 and is removed from og:8.1.0-beta1. Pass the user ID instead.', E_USER_DEPRECATED);
+      $user_id = $user_id->id();
+    }
     $group_ids = [];
 
     /** @var \Drupal\og\Entity\OgMembership[] $memberships */
-    $memberships = $this->getMemberships($user, $states);
+    $memberships = $this->getMemberships($user_id, $states);
     foreach ($memberships as $membership) {
       $group_ids[$membership->getGroupEntityType()][] = $membership->getGroupId();
     }
@@ -75,22 +81,32 @@ class MembershipManager implements MembershipManagerInterface {
   /**
    * {@inheritdoc}
    */
-  public function getUserGroups(AccountInterface $user, array $states = [OgMembershipInterface::STATE_ACTIVE]) {
-    $group_ids = $this->getUserGroupIds($user, $states);
+  public function getUserGroups($user_id, array $states = [OgMembershipInterface::STATE_ACTIVE]) {
+    if ($user_id instanceof AccountInterface) {
+      trigger_error('Passing an account object is deprecated in og:8.1.0-alpha4 and is removed from og:8.1.0-beta1. Pass the user ID instead.', E_USER_DEPRECATED);
+      $user_id = $user_id->id();
+    }
+
+    $group_ids = $this->getUserGroupIds($user_id, $states);
     return $this->loadGroups($group_ids);
   }
 
   /**
    * {@inheritdoc}
    */
-  public function getMemberships(AccountInterface $user, array $states = [OgMembershipInterface::STATE_ACTIVE]) {
+  public function getMemberships($user_id, array $states = [OgMembershipInterface::STATE_ACTIVE]) {
+    if ($user_id instanceof AccountInterface) {
+      trigger_error('Passing an account object is deprecated in og:8.1.0-alpha4 and is removed from og:8.1.0-beta1. Pass the user ID instead.', E_USER_DEPRECATED);
+      $user_id = $user_id->id();
+    }
+
     // When an empty array is passed, retrieve memberships with all possible
     // states.
     $states = $this->prepareConditionArray($states, OgMembership::ALL_STATES);
 
     $cid = [
       __METHOD__,
-      $user->id(),
+      $user_id,
       implode('|', $states),
     ];
     $cid = implode(':', $cid);
@@ -100,7 +116,7 @@ class MembershipManager implements MembershipManagerInterface {
       $query = $this->entityTypeManager
         ->getStorage('og_membership')
         ->getQuery()
-        ->condition('uid', $user->id())
+        ->condition('uid', $user_id)
         ->condition('state', $states, 'IN');
 
       $membership_ids = $query->execute();
@@ -113,8 +129,13 @@ class MembershipManager implements MembershipManagerInterface {
   /**
    * {@inheritdoc}
    */
-  public function getMembership(EntityInterface $group, AccountInterface $user, array $states = [OgMembershipInterface::STATE_ACTIVE]) {
-    foreach ($this->getMemberships($user, $states) as $membership) {
+  public function getMembership(EntityInterface $group, $user_id, array $states = [OgMembershipInterface::STATE_ACTIVE]) {
+    if ($user_id instanceof AccountInterface) {
+      trigger_error('Passing an account object is deprecated in og:8.1.0-alpha4 and is removed from og:8.1.0-beta1. Pass the user ID instead.', E_USER_DEPRECATED);
+      $user_id = $user_id->id();
+    }
+
+    foreach ($this->getMemberships($user_id, $states) as $membership) {
       if ($membership->getGroupEntityType() === $group->getEntityTypeId() && $membership->getGroupId() === $group->id()) {
         return $membership;
       }
@@ -127,9 +148,14 @@ class MembershipManager implements MembershipManagerInterface {
   /**
    * {@inheritdoc}
    */
-  public function getUserGroupIdsByRoleIds(AccountInterface $user, array $role_ids, array $states = [OgMembershipInterface::STATE_ACTIVE], bool $require_all_roles = TRUE): array {
+  public function getUserGroupIdsByRoleIds($user_id, array $role_ids, array $states = [OgMembershipInterface::STATE_ACTIVE], bool $require_all_roles = TRUE): array {
+    if ($user_id instanceof AccountInterface) {
+      trigger_error('Passing an account object is deprecated in og:8.1.0-alpha4 and is removed from og:8.1.0-beta1. Pass the user ID instead.', E_USER_DEPRECATED);
+      $user_id = $user_id->id();
+    }
+
     /** @var \Drupal\og\OgMembershipInterface[] $memberships */
-    $memberships = $this->getMemberships($user, $states);
+    $memberships = $this->getMemberships($user_id, $states);
     $memberships = array_filter($memberships, function (OgMembershipInterface $membership) use ($role_ids, $require_all_roles): bool {
       $membership_roles_ids = $membership->getRolesIds();
       return $require_all_roles ? empty(array_diff($role_ids, $membership_roles_ids)) : !empty(array_intersect($membership_roles_ids, $role_ids));
@@ -145,8 +171,13 @@ class MembershipManager implements MembershipManagerInterface {
   /**
    * {@inheritdoc}
    */
-  public function getUserGroupsByRoleIds(AccountInterface $user, array $role_ids, array $states = [OgMembershipInterface::STATE_ACTIVE], bool $require_all_roles = TRUE): array {
-    $group_ids = $this->getUserGroupIdsByRoleIds($user, $role_ids, $states, $require_all_roles);
+  public function getUserGroupsByRoleIds($user_id, array $role_ids, array $states = [OgMembershipInterface::STATE_ACTIVE], bool $require_all_roles = TRUE): array {
+    if ($user_id instanceof AccountInterface) {
+      trigger_error('Passing an account object is deprecated in og:8.1.0-alpha4 and is removed from og:8.1.0-beta1. Pass the user ID instead.', E_USER_DEPRECATED);
+      $user_id = $user_id->id();
+    }
+
+    $group_ids = $this->getUserGroupIdsByRoleIds($user_id, $role_ids, $states, $require_all_roles);
     return $this->loadGroups($group_ids);
   }
 
@@ -383,8 +414,13 @@ class MembershipManager implements MembershipManagerInterface {
   /**
    * {@inheritdoc}
    */
-  public function isMember(EntityInterface $group, AccountInterface $user, array $states = [OgMembershipInterface::STATE_ACTIVE]) {
-    $group_ids = $this->getUserGroupIds($user, $states);
+  public function isMember(EntityInterface $group, $user_id, array $states = [OgMembershipInterface::STATE_ACTIVE]) {
+    if ($user_id instanceof AccountInterface) {
+      trigger_error('Passing an account object is deprecated in og:8.1.0-alpha4 and is removed from og:8.1.0-beta1. Pass the user ID instead.', E_USER_DEPRECATED);
+      $user_id = $user_id->id();
+    }
+
+    $group_ids = $this->getUserGroupIds($user_id, $states);
     $entity_type_id = $group->getEntityTypeId();
     return !empty($group_ids[$entity_type_id]) && in_array($group->id(), $group_ids[$entity_type_id]);
   }
@@ -392,15 +428,25 @@ class MembershipManager implements MembershipManagerInterface {
   /**
    * {@inheritdoc}
    */
-  public function isMemberPending(EntityInterface $group, AccountInterface $user) {
-    return $this->isMember($group, $user, [OgMembershipInterface::STATE_PENDING]);
+  public function isMemberPending(EntityInterface $group, $user_id) {
+    if ($user_id instanceof AccountInterface) {
+      trigger_error('Passing an account object is deprecated in og:8.1.0-alpha4 and is removed from og:8.1.0-beta1. Pass the user ID instead.', E_USER_DEPRECATED);
+      $user_id = $user_id->id();
+    }
+
+    return $this->isMember($group, $user_id, [OgMembershipInterface::STATE_PENDING]);
   }
 
   /**
    * {@inheritdoc}
    */
-  public function isMemberBlocked(EntityInterface $group, AccountInterface $user) {
-    return $this->isMember($group, $user, [OgMembershipInterface::STATE_BLOCKED]);
+  public function isMemberBlocked(EntityInterface $group, $user_id) {
+    if ($user_id instanceof AccountInterface) {
+      trigger_error('Passing an account object is deprecated in og:8.1.0-alpha4 and is removed from og:8.1.0-beta1. Pass the user ID instead.', E_USER_DEPRECATED);
+      $user_id = $user_id->id();
+    }
+
+    return $this->isMember($group, $user_id, [OgMembershipInterface::STATE_BLOCKED]);
   }
 
   /**
