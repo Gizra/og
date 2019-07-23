@@ -34,7 +34,7 @@ class DeleteOgMembershipActionTest extends ChangeOgMembershipActionTestBase {
     $plugin = $this->getPlugin($configuration);
     $plugin->execute($membership);
 
-    $this->assertFalse($this->membershipManager->isMember($this->group, $member, [
+    $this->assertFalse($this->membershipManager->isMember($this->group, $member->id(), [
       OgMembershipInterface::STATE_ACTIVE,
       OgMembershipInterface::STATE_BLOCKED,
       OgMembershipInterface::STATE_PENDING,

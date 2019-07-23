@@ -164,16 +164,17 @@ class OgAccessTestBase extends UnitTestCase {
     $this->config->getCacheMaxAge()->willReturn(0);
 
     // Create a mocked test user.
+    $user_id = 2;
     $this->user = $this->prophesize(AccountInterface::class);
     $this->user->isAuthenticated()->willReturn(TRUE);
-    $this->user->id()->willReturn(2);
+    $this->user->id()->willReturn($user_id);
     $this->user->hasPermission(OgAccess::ADMINISTER_GROUP_PERMISSION)->willReturn(FALSE);
 
     $this->group = $this->groupEntity()->reveal();
 
     $this->membershipManager = $this->prophesize(MembershipManagerInterface::class);
-    $this->membershipManager->getMembership($this->group, $this->user->reveal())->willReturn($this->membership->reveal());
-    $this->membershipManager->getMembership($this->group, $this->user->reveal(), [OgMembershipInterface::STATE_ACTIVE])->willReturn($this->membership->reveal());
+    $this->membershipManager->getMembership($this->group, $user_id)->willReturn($this->membership->reveal());
+    $this->membershipManager->getMembership($this->group, $user_id, [OgMembershipInterface::STATE_ACTIVE])->willReturn($this->membership->reveal());
     $this->membershipManager->getGroupCount(Argument::any())->willReturn(1);
     $this->membership->getRoles()->willReturn([$this->ogRole->reveal()]);
 
