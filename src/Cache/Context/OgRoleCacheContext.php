@@ -9,7 +9,6 @@ use Drupal\Core\PrivateKey;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\Core\Site\Settings;
 use Drupal\og\MembershipManagerInterface;
-use Drupal\og\OgRoleInterface;
 
 /**
  * Defines a cache context service for the OG roles of the current user.
@@ -88,9 +87,13 @@ class OgRoleCacheContext extends UserCacheContextBase implements CacheContextInt
     if (empty($this->hashes[$this->user->id()])) {
       $memberships = [];
       foreach ($this->membershipManager->getMemberships($this->user->id()) as $membership) {
-        $role_names = array_map(function (OgRoleInterface $role) {
-          return $role->getName();
-        }, $membership->getRoles());
+        // Derive the role names from the role IDs. This is faster than loading
+        // the OgRole object from the membership.
+        $role_names = array_map(function (string $role_id) use ($membership): string {
+          $pattern = preg_quote("{$membership->getGroupEntityType()}-{$membership->getGroupBundle()}-");
+          preg_match("/$pattern(.+)/", $role_id, $matches);
+          return $matches[1];
+        }, $membership->getRolesIds());
         if ($role_names) {
           $memberships[$membership->getGroupEntityType()][$membership->getGroupId()] = $role_names;
         }

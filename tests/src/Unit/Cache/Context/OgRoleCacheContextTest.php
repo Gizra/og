@@ -76,9 +76,7 @@ class OgRoleCacheContextTest extends OgCacheContextTestBase {
     // group entity type, but no roles.
     /** @var \Drupal\og\OgMembershipInterface|\Prophecy\Prophecy\ObjectProphecy $membership */
     $membership = $this->prophesize(OgMembershipInterface::class);
-    $membership->getGroupEntityType()->willReturn('test_entity');
-    $membership->getGroupId()->willReturn('test_id');
-    $membership->getRoles()->willReturn([]);
+    $membership->getRolesIds()->willReturn([]);
 
     // The membership with the orphaned role will be returned by the membership
     // manager.
@@ -137,19 +135,17 @@ class OgRoleCacheContextTest extends OgCacheContextTestBase {
       $memberships[$user_id] = [];
       foreach ($group_entity_type_ids as $group_entity_type_id => $group_ids) {
         foreach ($group_ids as $group_id => $roles) {
-          // Mock the role objects that will be contained in the memberships.
-          $roles = array_map(function ($role_name) {
-            /** @var \Drupal\og\OgRoleInterface|\Prophecy\Prophecy\ObjectProphecy $role */
-            $role = $this->prophesize(OgRoleInterface::class);
-            $role->getName()->willReturn($role_name);
-            return $role->reveal();
+          // Construct the role IDs that will be returned by the membership.
+          $roles_ids = array_map(function (string $role_name) use ($group_entity_type_id) {
+            return "{$group_entity_type_id}-bundle-{$role_name}";
           }, $roles);
           // Mock the expected returns of method calls on the membership.
           /** @var \Drupal\og\OgMembershipInterface|\Prophecy\Prophecy\ObjectProphecy $membership */
           $membership = $this->prophesize(OgMembershipInterface::class);
           $membership->getGroupEntityType()->willReturn($group_entity_type_id);
+          $membership->getGroupBundle()->willReturn('bundle');
           $membership->getGroupId()->willReturn($group_id);
-          $membership->getRoles()->willReturn($roles);
+          $membership->getRolesIds()->willReturn($roles_ids);
           $memberships[$user_id][++$membership_id] = $membership->reveal();
         }
       }
