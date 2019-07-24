@@ -87,7 +87,11 @@ class OgMembership extends ContentEntityBase implements OgMembershipInterface {
     // Access the value directly instead of calling $this->get(). Membership
     // entities are not translatable so we can avoid the expensive calls to
     // $this->getTranslatedField().
-    return $this->values['created'][LanguageInterface::LANGCODE_DEFAULT];
+    $created_time = $this->values['created'][LanguageInterface::LANGCODE_DEFAULT];
+    if (is_array($created_time)) {
+      return reset($created_time)['value'];
+    }
+    return $created_time;
   }
 
   /**
@@ -111,7 +115,11 @@ class OgMembership extends ContentEntityBase implements OgMembershipInterface {
    */
   public function getOwnerId() {
     assert(!empty($this->values['uid'][LanguageInterface::LANGCODE_DEFAULT]), new \LogicException(__METHOD__ . '() should only be called on loaded memberships, or on newly created memberships that already have the owner set.'));
-    return $this->values['uid'][LanguageInterface::LANGCODE_DEFAULT];
+    $owner_id = $this->values['uid'][LanguageInterface::LANGCODE_DEFAULT];
+    if (is_array($owner_id)) {
+      return reset($owner_id)['target_id'];
+    }
+    return $owner_id;
   }
 
   /**
@@ -145,7 +153,11 @@ class OgMembership extends ContentEntityBase implements OgMembershipInterface {
    */
   public function getGroupEntityType(): string {
     assert(!empty($this->values['entity_type'][LanguageInterface::LANGCODE_DEFAULT]), new \LogicException(__METHOD__ . '() should only be called on loaded memberships, or on newly created memberships that already have the group type set.'));
-    return $this->values['entity_type'][LanguageInterface::LANGCODE_DEFAULT];
+    $entity_type = $this->values['entity_type'][LanguageInterface::LANGCODE_DEFAULT];
+    if (is_array($entity_type)) {
+      return reset($entity_type)['value'];
+    }
+    return $entity_type;
   }
 
   /**
@@ -153,7 +165,11 @@ class OgMembership extends ContentEntityBase implements OgMembershipInterface {
    */
   public function getGroupBundle(): string {
     assert(!empty($this->values['entity_bundle'][LanguageInterface::LANGCODE_DEFAULT]), new \LogicException(__METHOD__ . '() should only be called on loaded memberships, or on newly created memberships that already have the group bundle set.'));
-    return $this->values['entity_bundle'][LanguageInterface::LANGCODE_DEFAULT];
+    $bundle = $this->values['entity_bundle'][LanguageInterface::LANGCODE_DEFAULT];
+    if (is_array($bundle)) {
+      return reset($bundle)['value'];
+    }
+    return $bundle;
   }
 
   /**
@@ -161,7 +177,11 @@ class OgMembership extends ContentEntityBase implements OgMembershipInterface {
    */
   public function getGroupId(): string {
     assert(!empty($this->values['entity_id'][LanguageInterface::LANGCODE_DEFAULT]), new \LogicException(__METHOD__ . '() should only be called on loaded memberships, or on newly created memberships that already have the group ID set.'));
-    return $this->values['entity_id'][LanguageInterface::LANGCODE_DEFAULT];
+    $entity_id = $this->values['entity_id'][LanguageInterface::LANGCODE_DEFAULT];
+    if (is_array($entity_id)) {
+      return reset($entity_id)['value'];
+    }
+    return $entity_id;
   }
 
   /**
@@ -208,7 +228,11 @@ class OgMembership extends ContentEntityBase implements OgMembershipInterface {
    * {@inheritdoc}
    */
   public function getState(): string {
-    return $this->values['state'][LanguageInterface::LANGCODE_DEFAULT];
+    $state = $this->values['state'][LanguageInterface::LANGCODE_DEFAULT];
+    if (is_array($state)) {
+      return reset($state)['value'];
+    }
+    return $state;
   }
 
   /**
