@@ -11,6 +11,7 @@ use Drupal\Core\Entity\EntityStorageInterface;
 use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Field\BaseFieldDefinition;
 use Drupal\Core\Field\FieldStorageDefinitionInterface;
+use Drupal\Core\Language\LanguageInterface;
 use Drupal\user\UserInterface;
 use Drupal\og\Og;
 use Drupal\og\OgMembershipInterface;
@@ -83,7 +84,10 @@ class OgMembership extends ContentEntityBase implements OgMembershipInterface {
    * {@inheritdoc}
    */
   public function getCreatedTime(): int {
-    return $this->get('created')->value;
+    // Access the value directly instead of calling $this->get(). Membership
+    // entities are not translatable so we can avoid the expensive calls to
+    // $this->getTranslatedField().
+    return $this->values['created'][LanguageInterface::LANGCODE_DEFAULT];
   }
 
   /**
@@ -106,8 +110,8 @@ class OgMembership extends ContentEntityBase implements OgMembershipInterface {
    * {@inheritdoc}
    */
   public function getOwnerId() {
-    assert(!empty($this->get('uid')->entity), new \LogicException(__METHOD__ . '() should only be called on loaded memberships, or on newly created memberships that already have the owner set.'));
-    return $this->get('uid')->target_id;
+    assert(!empty($this->values['uid'][LanguageInterface::LANGCODE_DEFAULT]), new \LogicException(__METHOD__ . '() should only be called on loaded memberships, or on newly created memberships that already have the owner set.'));
+    return $this->values['uid'][LanguageInterface::LANGCODE_DEFAULT];
   }
 
   /**
@@ -140,24 +144,24 @@ class OgMembership extends ContentEntityBase implements OgMembershipInterface {
    * {@inheritdoc}
    */
   public function getGroupEntityType(): string {
-    assert(!empty($this->get('entity_type')->value), new \LogicException(__METHOD__ . '() should only be called on loaded memberships, or on newly created memberships that already have the group type set.'));
-    return $this->get('entity_type')->value;
+    assert(!empty($this->values['entity_type'][LanguageInterface::LANGCODE_DEFAULT]), new \LogicException(__METHOD__ . '() should only be called on loaded memberships, or on newly created memberships that already have the group type set.'));
+    return $this->values['entity_type'][LanguageInterface::LANGCODE_DEFAULT];
   }
 
   /**
    * {@inheritdoc}
    */
   public function getGroupBundle(): string {
-    assert(!empty($this->get('entity_bundle')->value), new \LogicException(__METHOD__ . '() should only be called on loaded memberships, or on newly created memberships that already have the group bundle set.'));
-    return $this->get('entity_bundle')->value;
+    assert(!empty($this->values['entity_bundle'][LanguageInterface::LANGCODE_DEFAULT]), new \LogicException(__METHOD__ . '() should only be called on loaded memberships, or on newly created memberships that already have the group bundle set.'));
+    return $this->values['entity_bundle'][LanguageInterface::LANGCODE_DEFAULT];
   }
 
   /**
    * {@inheritdoc}
    */
   public function getGroupId(): string {
-    assert(!empty($this->get('entity_id')->value), new \LogicException(__METHOD__ . '() should only be called on loaded memberships, or on newly created memberships that already have the group ID set.'));
-    return $this->get('entity_id')->value;
+    assert(!empty($this->values['entity_id'][LanguageInterface::LANGCODE_DEFAULT]), new \LogicException(__METHOD__ . '() should only be called on loaded memberships, or on newly created memberships that already have the group ID set.'));
+    return $this->values['entity_id'][LanguageInterface::LANGCODE_DEFAULT];
   }
 
   /**
@@ -178,16 +182,16 @@ class OgMembership extends ContentEntityBase implements OgMembershipInterface {
    *   Whether or not the group is already present.
    */
   protected function hasGroup(): bool {
-    return !empty($this->get('entity_type')->value) && !empty($this->get('entity_bundle')->value) && !empty($this->get('entity_id')->value);
+    return !empty($this->values['entity_type'][LanguageInterface::LANGCODE_DEFAULT]) && !empty($this->values['entity_bundle'][LanguageInterface::LANGCODE_DEFAULT]) && !empty($this->values['entity_id'][LanguageInterface::LANGCODE_DEFAULT]);
   }
 
   /**
    * {@inheritdoc}
    */
   public function getGroup(): ?ContentEntityInterface {
-    assert(!empty($this->get('entity_type')->value) || !empty($this->get('entity_id')->value), new \LogicException(__METHOD__ . '() should only be called on loaded memberships, or on newly created memberships that already have the group set.'));
-    $entity_type = $this->get('entity_type')->value;
-    $entity_id = $this->get('entity_id')->value;
+    assert(!empty($this->values['entity_type'][LanguageInterface::LANGCODE_DEFAULT]) || !empty($this->values['entity_id'][LanguageInterface::LANGCODE_DEFAULT]), new \LogicException(__METHOD__ . '() should only be called on loaded memberships, or on newly created memberships that already have the group set.'));
+    $entity_type = $this->getGroupEntityType();
+    $entity_id = $this->getGroupId();
 
     return \Drupal::entityTypeManager()->getStorage($entity_type)->load($entity_id);
   }
@@ -204,7 +208,7 @@ class OgMembership extends ContentEntityBase implements OgMembershipInterface {
    * {@inheritdoc}
    */
   public function getState(): string {
-    return $this->get('state')->value;
+    return $this->values['state'][LanguageInterface::LANGCODE_DEFAULT];
   }
 
   /**
@@ -286,9 +290,13 @@ class OgMembership extends ContentEntityBase implements OgMembershipInterface {
    * {@inheritdoc}
    */
   public function getRolesIds(): array {
+    // Access the values directly instead of calling $this->get(). The roles
+    // field is not translatable so we can avoid the expensive call to
+    // $this->getTranslatedField().
+    $values = $this->values['roles'][LanguageInterface::LANGCODE_DEFAULT] ?? [];
     $roles_ids = array_map(function (array $role_data): string {
       return $role_data['target_id'];
-    }, $this->get('roles')->getValue());
+    }, $values);
 
     // Add the member role. This is only possible if a group has been set on the
     // membership.
