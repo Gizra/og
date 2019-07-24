@@ -87,7 +87,7 @@ class OgMembership extends ContentEntityBase implements OgMembershipInterface {
     // Only use $this->get() if it is already populated. If it is not available
     // then use the raw value. This field is not translatable so we do not need
     // the slow field definition lookup from $this->getTranslatedField().
-    $created_time = empty($this->fields['created'][LanguageInterface::LANGCODE_DEFAULT]) ? $this->values['created'][LanguageInterface::LANGCODE_DEFAULT] : $this->get('created')->value;
+    $created_time = isset($this->fields['created'][LanguageInterface::LANGCODE_DEFAULT]) ? $this->get('created')->value : $this->values['created'][LanguageInterface::LANGCODE_DEFAULT];
     if (is_array($created_time)) {
       return reset($created_time)['value'];
     }
@@ -117,7 +117,7 @@ class OgMembership extends ContentEntityBase implements OgMembershipInterface {
     // Only use $this->get() if it is already populated. If it is not available
     // then use the raw value. This field is not translatable so we do not need
     // the slow field definition lookup from $this->getTranslatedField().
-    $owner_id = empty($this->fields['uid'][LanguageInterface::LANGCODE_DEFAULT]) ? $this->values['uid'][LanguageInterface::LANGCODE_DEFAULT] : $this->get('uid')->target_id;
+    $owner_id = isset($this->fields['uid'][LanguageInterface::LANGCODE_DEFAULT]) ? $this->get('uid')->target_id : $this->values['uid'][LanguageInterface::LANGCODE_DEFAULT];
     assert(!empty($owner_id), new \LogicException(__METHOD__ . '() should only be called on loaded memberships, or on newly created memberships that already have the owner set.'));
     if (is_array($owner_id)) {
       return reset($owner_id)['target_id'];
@@ -158,7 +158,7 @@ class OgMembership extends ContentEntityBase implements OgMembershipInterface {
     // Only use $this->get() if it is already populated. If it is not available
     // then use the raw value. This field is not translatable so we do not need
     // the slow field definition lookup from $this->getTranslatedField().
-    $entity_type = empty($this->fields['entity_type'][LanguageInterface::LANGCODE_DEFAULT]) ? $this->values['entity_type'][LanguageInterface::LANGCODE_DEFAULT] : $this->get('entity_type')->value;
+    $entity_type = isset($this->fields['entity_type'][LanguageInterface::LANGCODE_DEFAULT]) ? $this->get('entity_type')->value : $this->values['entity_type'][LanguageInterface::LANGCODE_DEFAULT];
     assert(!empty($entity_type), new \LogicException(__METHOD__ . '() should only be called on loaded memberships, or on newly created memberships that already have the group type set.'));
     if (is_array($entity_type)) {
       return reset($entity_type)['value'];
@@ -173,7 +173,7 @@ class OgMembership extends ContentEntityBase implements OgMembershipInterface {
     // Only use $this->get() if it is already populated. If it is not available
     // then use the raw value. This field is not translatable so we do not need
     // the slow field definition lookup from $this->getTranslatedField().
-    $bundle = empty($this->fields['entity_bundle'][LanguageInterface::LANGCODE_DEFAULT]) ? $this->values['entity_bundle'][LanguageInterface::LANGCODE_DEFAULT] : $this->get('entity_bundle')->value;
+    $bundle = isset($this->fields['entity_bundle'][LanguageInterface::LANGCODE_DEFAULT]) ? $this->get('entity_bundle')->value : $this->values['entity_bundle'][LanguageInterface::LANGCODE_DEFAULT];
     assert(!empty($bundle), new \LogicException(__METHOD__ . '() should only be called on loaded memberships, or on newly created memberships that already have the group bundle set.'));
     if (is_array($bundle)) {
       return reset($bundle)['value'];
@@ -188,7 +188,7 @@ class OgMembership extends ContentEntityBase implements OgMembershipInterface {
     // Only use $this->get() if it is already populated. If it is not available
     // then use the raw value. This field is not translatable so we do not need
     // the slow field definition lookup from $this->getTranslatedField().
-    $entity_id = empty($this->fields['entity_id'][LanguageInterface::LANGCODE_DEFAULT]) ? $this->values['entity_id'][LanguageInterface::LANGCODE_DEFAULT] : $this->get('entity_id')->value;
+    $entity_id = isset($this->fields['entity_id'][LanguageInterface::LANGCODE_DEFAULT]) ? $this->get('entity_id')->value : $this->values['entity_id'][LanguageInterface::LANGCODE_DEFAULT];
     assert(!empty($entity_id), new \LogicException(__METHOD__ . '() should only be called on loaded memberships, or on newly created memberships that already have the group ID set.'));
     if (is_array($entity_id)) {
       return reset($entity_id)['value'];
@@ -215,9 +215,9 @@ class OgMembership extends ContentEntityBase implements OgMembershipInterface {
    */
   protected function hasGroup(): bool {
     return
-      !empty(empty($this->fields['entity_type'][LanguageInterface::LANGCODE_DEFAULT]) ? $this->values['entity_type'][LanguageInterface::LANGCODE_DEFAULT] : $this->get('entity_type')->value) &&
-      !empty(empty($this->fields['entity_bundle'][LanguageInterface::LANGCODE_DEFAULT]) ? $this->values['entity_bundle'][LanguageInterface::LANGCODE_DEFAULT] : $this->get('entity_bundle')->value) &&
-      !empty(empty($this->fields['entity_id'][LanguageInterface::LANGCODE_DEFAULT]) ? $this->values['entity_id'][LanguageInterface::LANGCODE_DEFAULT] : $this->get('entity_id')->value);
+      !empty(isset($this->fields['entity_type'][LanguageInterface::LANGCODE_DEFAULT]) ? $this->get('entity_type')->value : $this->values['entity_type'][LanguageInterface::LANGCODE_DEFAULT]) &&
+      !empty(isset($this->fields['entity_bundle'][LanguageInterface::LANGCODE_DEFAULT]) ? $this->get('entity_bundle')->value : $this->values['entity_bundle'][LanguageInterface::LANGCODE_DEFAULT]) &&
+      !empty(isset($this->fields['entity_id'][LanguageInterface::LANGCODE_DEFAULT]) ? $this->get('entity_id')->value : $this->values['entity_id'][LanguageInterface::LANGCODE_DEFAULT]);
   }
 
   /**
@@ -331,7 +331,7 @@ class OgMembership extends ContentEntityBase implements OgMembershipInterface {
     // Only use $this->get() if it is already populated. If it is not available
     // then use the raw value. This field is not translatable so we do not need
     // the slow field definition lookup from $this->getTranslatedField().
-    $values = empty($this->fields['roles'][LanguageInterface::LANGCODE_DEFAULT]) ? $this->values['roles'][LanguageInterface::LANGCODE_DEFAULT] : $this->get('roles')->getValue();
+    $values = isset($this->fields['roles'][LanguageInterface::LANGCODE_DEFAULT]) ? $this->get('roles')->getValue() : $this->values['roles'][LanguageInterface::LANGCODE_DEFAULT];
     $roles_ids = array_map(function (array $role_data): string {
       return $role_data['target_id'];
     }, $values);
