@@ -143,7 +143,7 @@ class Og {
   public static function getMemberships(AccountInterface $user, array $states = [OgMembershipInterface::STATE_ACTIVE]) {
     /** @var \Drupal\og\MembershipManagerInterface $membership_manager */
     $membership_manager = \Drupal::service('og.membership_manager');
-    return $membership_manager->getMemberships($user, $states);
+    return $membership_manager->getMemberships($user->id(), $states);
   }
 
   /**
@@ -165,7 +165,7 @@ class Og {
   public static function getMembership(EntityInterface $group, AccountInterface $user, array $states = [OgMembershipInterface::STATE_ACTIVE]) {
     /** @var \Drupal\og\MembershipManagerInterface $membership_manager */
     $membership_manager = \Drupal::service('og.membership_manager');
-    return $membership_manager->getMembership($group, $user, $states);
+    return $membership_manager->getMembership($group, $user->id(), $states);
   }
 
   /**
@@ -176,7 +176,8 @@ class Og {
    * @param \Drupal\Core\Session\AccountInterface $user
    *   The user object.
    * @param string $membership_type
-   *   (optional) The membership type. Defaults to OG_MEMBERSHIP_TYPE_DEFAULT.
+   *   (optional) The membership type. Defaults to
+   *   \Drupal\og\OgMembershipInterface::TYPE_DEFAULT.
    *
    * @return \Drupal\og\Entity\OgMembership
    *   The unsaved membership object.
@@ -204,7 +205,7 @@ class Og {
   public static function isMember(EntityInterface $group, AccountInterface $user, array $states = [OgMembershipInterface::STATE_ACTIVE]) {
     /** @var \Drupal\og\MembershipManagerInterface $membership_manager */
     $membership_manager = \Drupal::service('og.membership_manager');
-    return $membership_manager->isMember($group, $user, $states);
+    return $membership_manager->isMember($group, $user->id(), $states);
   }
 
   /**

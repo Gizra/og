@@ -90,7 +90,7 @@ function og_entity_predelete(EntityInterface $entity) {
   if ($entity instanceof UserInterface) {
     /** @var \Drupal\og\MembershipManagerInterface $membership_manager */
     $membership_manager = \Drupal::service('og.membership_manager');
-    foreach ($membership_manager->getMemberships($entity, []) as $membership) {
+    foreach ($membership_manager->getMemberships($entity->id(), []) as $membership) {
       $membership->delete();
     }
   }
@@ -389,12 +389,10 @@ function og_theme($existing, $type, $theme, $path) {
 function og_invalidate_group_content_cache_tags(EntityInterface $entity) {
   // If group content is created or updated, invalidate the group content cache
   // tags for each of the groups this group content belongs to. This allows
-  // group listings to be cached effectively. Also invalidate the tags if the
-  // group itself changes. The cache tag format is
+  // group listings to be cached effectively. The cache tag format is
   // 'og-group-content:{group entity type}:{group entity id}'.
   $is_group_content = Og::isGroupContent($entity->getEntityTypeId(), $entity->bundle());
-  $group_is_updated = Og::isGroup($entity->getEntityTypeId(), $entity->bundle()) && !empty($entity->original);
-  if ($group_is_updated || $is_group_content) {
+  if ($is_group_content) {
     /** @var \Drupal\og\MembershipManagerInterface $membership_manager */
     $membership_manager = \Drupal::service('og.membership_manager');
     $tags = [];
@@ -405,7 +403,7 @@ function og_invalidate_group_content_cache_tags(EntityInterface $entity) {
     // the tags of the old group(s).
     /** @var \Drupal\Core\Entity\FieldableEntityInterface $entity */
     $original = !empty($entity->original) ? $entity->original : NULL;
-    if ($is_group_content && $original) {
+    if ($original) {
       /** @var \Drupal\og\OgGroupAudienceHelperInterface $group_audience_helper */
       $group_audience_helper = \Drupal::service('og.group_audience_helper');
       /** @var \Drupal\Core\Entity\FieldableEntityInterface $original */

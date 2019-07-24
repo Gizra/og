@@ -5,14 +5,17 @@ namespace Drupal\Tests\og\Kernel\Entity;
 use Drupal\KernelTests\KernelTestBase;
 use Drupal\Tests\og\Traits\OgMembershipCreationTrait;
 use Drupal\entity_test\Entity\EntityTest;
+use Drupal\og\Entity\OgRole;
 use Drupal\og\Og;
 use Drupal\og\OgMembershipInterface;
+use Drupal\og\OgRoleInterface;
 use Drupal\user\Entity\User;
 
 /**
  * Tests getting the memberships of an entity.
  *
  * @group og
+ * @coversDefaultClass \Drupal\og\MembershipManager
  */
 class GetUserGroupsTest extends KernelTestBase {
 
@@ -28,6 +31,13 @@ class GetUserGroupsTest extends KernelTestBase {
     'og',
     'entity_test',
   ];
+
+  /**
+   * The OG membership manager.
+   *
+   * @var \Drupal\og\MembershipManagerInterface
+   */
+  protected $membershipManager;
 
   /**
    * A user object.
@@ -72,13 +82,6 @@ class GetUserGroupsTest extends KernelTestBase {
   protected $groupBundle;
 
   /**
-   * The machine name of the group content node type.
-   *
-   * @var string
-   */
-  protected $groupContentBundle;
-
-  /**
    * {@inheritdoc}
    */
   protected function setUp() {
@@ -90,8 +93,9 @@ class GetUserGroupsTest extends KernelTestBase {
     $this->installEntitySchema('entity_test');
     $this->installSchema('system', 'sequences');
 
+    $this->membershipManager = $this->container->get('og.membership_manager');
+
     $this->groupBundle = mb_strtolower($this->randomMachineName());
-    $this->groupContentBundle = mb_strtolower($this->randomMachineName());
 
     // Create users.
     $this->user1 = User::create(['name' => $this->randomString()]);
@@ -125,12 +129,11 @@ class GetUserGroupsTest extends KernelTestBase {
 
   /**
    * Tests group owners have the correct groups.
+   *
+   * @todo Convert Og::isMember() calls to $this->membershipManager->isMember().
    */
   public function testOwnerGroupsOnly() {
-    /** @var \Drupal\og\MembershipManagerInterface $membership_manager */
-    $membership_manager = \Drupal::service('og.membership_manager');
-
-    $actual = $membership_manager->getUserGroups($this->user1);
+    $actual = $this->membershipManager->getUserGroups($this->user1->id());
 
     $this->assertCount(1, $actual['entity_test']);
     $this->assertGroupExistsInResults($this->group1, $actual);
@@ -139,7 +142,7 @@ class GetUserGroupsTest extends KernelTestBase {
     $this->assertTrue(Og::isMember($this->group1, $this->user1));
     $this->assertFalse(Og::isMember($this->group1, $this->user2));
 
-    $actual = $membership_manager->getUserGroups($this->user2);
+    $actual = $this->membershipManager->getUserGroups($this->user2->id());
 
     $this->assertCount(1, $actual['entity_test']);
     $this->assertGroupExistsInResults($this->group2, $actual);
@@ -151,13 +154,12 @@ class GetUserGroupsTest extends KernelTestBase {
 
   /**
    * Tests other groups users are added to.
+   *
+   * @todo Convert Og::isMember() calls to $this->membershipManager->isMember().
    */
   public function testOtherGroups() {
-    /** @var \Drupal\og\MembershipManagerInterface $membership_manager */
-    $membership_manager = \Drupal::service('og.membership_manager');
-
     // Should not be a part of any groups.
-    $this->assertEquals([], $membership_manager->getUserGroups($this->user3));
+    $this->assertEquals([], $this->membershipManager->getUserGroups($this->user3->id()));
     $this->assertFalse(Og::isMember($this->group1, $this->user3));
     $this->assertFalse(Og::isMember($this->group2, $this->user3));
 
@@ -168,7 +170,7 @@ class GetUserGroupsTest extends KernelTestBase {
     // Add user to group 1 should now return that group only.
     $this->createOgMembership($this->group1, $this->user3);
 
-    $actual = $membership_manager->getUserGroups($this->user3);
+    $actual = $this->membershipManager->getUserGroups($this->user3->id());
 
     $this->assertCount(1, $actual['entity_test']);
     $this->assertGroupExistsInResults($this->group1, $actual);
@@ -181,7 +183,7 @@ class GetUserGroupsTest extends KernelTestBase {
     // Add to group 2 should also return that.
     $this->createOgMembership($this->group2, $this->user3);
 
-    $actual = $membership_manager->getUserGroups($this->user3);
+    $actual = $this->membershipManager->getUserGroups($this->user3->id());
 
     $this->assertCount(2, $actual['entity_test']);
     $this->assertGroupExistsInResults($this->group1, $actual);
@@ -193,6 +195,8 @@ class GetUserGroupsTest extends KernelTestBase {
 
   /**
    * Tests member methods for states that other groups users are added to.
+   *
+   * @todo Convert Og::isMember() calls to $this->membershipManager->isMember().
    */
   public function testIsMemberStates() {
     // Add user to group 1 should now return that group only.
@@ -232,6 +236,59 @@ class GetUserGroupsTest extends KernelTestBase {
     $this->assertFalse(Og::isMember($this->group1, $this->user3));
     $this->assertFalse(Og::isMember($this->group1, $this->user3, [OgMembershipInterface::STATE_PENDING]));
     $this->assertFalse(Og::isMemberPending($this->group1, $this->user3));
+  }
+
+  /**
+   * Tests retrieval of groups filtered by roles.
+   *
+   * @covers ::getUserGroupIdsByRoleIds
+   */
+  public function testGetGroupsByRoles() {
+    // Create a test role.
+    $extra_role_1 = OgRole::create();
+    $extra_role_1
+      ->setName('extra_role_1')
+      ->setLabel(mb_strtolower($this->randomString()))
+      ->setGroupType('entity_test')
+      ->setGroupBundle($this->groupBundle)
+      ->save();
+
+    // Retrieve the default role for a member.
+    $member_role = OgRole::getRole('entity_test', $this->groupBundle, OgRoleInterface::AUTHENTICATED);
+
+    // Create memberships for the test user in the groups. The user will have
+    // the normal member role in group 1 and both the normal member role and the
+    // test role in group 2. In group 2 the user will have the blocked status so
+    // we can test filtering by status.
+    $this->createOgMembership($this->group1, $this->user3);
+    $this->createOgMembership($this->group2, $this->user3, [$extra_role_1->getName()], OgMembershipInterface::STATE_BLOCKED);
+
+    // By default only active memberships are retrieved, so if we ask the
+    // groups where the user is a normal member of the result should not include
+    // group 2 where our test user is blocked.
+    $groups = $this->membershipManager->getUserGroupIdsByRoleIds($this->user3->id(), [$member_role->id()]);
+    $this->assertCount(1, $groups['entity_test']);
+    $actual = reset($groups['entity_test']);
+    $this->assertEquals($this->group1->id(), $actual);
+
+    // When asking for the groups where our user has the test role, the result
+    // should not include the blocked membership, so it should be empty.
+    $groups = $this->membershipManager->getUserGroupsByRoleIds($this->user3->id(), [$extra_role_1->id()]);
+    $this->assertCount(0, $groups);
+
+    // Include all states.
+    $groups = $this->membershipManager->getUserGroupIdsByRoleIds($this->user3->id(), [$member_role->id()], OgMembershipInterface::ALL_STATES, FALSE);
+    $this->assertCount(2, $groups['entity_test']);
+
+    // Request any of multiple roles.
+    $groups = $this->membershipManager->getUserGroupsByRoleIds($this->user3->id(), [$member_role->id(), $extra_role_1->id()], OgMembershipInterface::ALL_STATES, FALSE);
+    $this->assertCount(2, $groups['entity_test']);
+
+    // Request all of multiple roles.
+    $groups = $this->membershipManager->getUserGroupsByRoleIds($this->user3->id(), [$member_role->id(), $extra_role_1->id()], OgMembershipInterface::ALL_STATES, TRUE);
+    $this->assertCount(1, $groups['entity_test']);
+    $actual = reset($groups['entity_test']);
+    $this->assertEquals($this->group2->id(), $actual->id());
   }
 
   /**

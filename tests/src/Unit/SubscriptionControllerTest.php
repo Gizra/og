@@ -80,6 +80,13 @@ class SubscriptionControllerTest extends UnitTestCase {
   protected $user;
 
   /**
+   * A user ID to use in the test.
+   *
+   * @var int
+   */
+  protected $userId;
+
+  /**
    * {@inheritdoc}
    */
   public function setUp() {
@@ -91,6 +98,9 @@ class SubscriptionControllerTest extends UnitTestCase {
     $this->ogMembership = $this->prophesize(OgMembershipInterface::class);
     $this->url = $this->prophesize(Url::class);
     $this->user = $this->prophesize(AccountInterface::class);
+
+    $this->userId = rand(20, 50);
+    $this->user->id()->willReturn($this->userId);
 
     // Set the container for the string translation service.
     $container = new ContainerBuilder();
@@ -117,7 +127,7 @@ class SubscriptionControllerTest extends UnitTestCase {
 
     $this
       ->membershipManager
-      ->getMembership($this->group->reveal(), $this->user->reveal(), $states)
+      ->getMembership($this->group->reveal(), $this->userId, $states)
       ->willReturn(NULL);
 
     $this->unsubscribe();
@@ -138,7 +148,7 @@ class SubscriptionControllerTest extends UnitTestCase {
 
     $this
       ->membershipManager
-      ->getMembership($this->group->reveal(), $this->user->reveal(), $states)
+      ->getMembership($this->group->reveal(), $this->userId, $states)
       ->willReturn($this->ogMembership->reveal());
 
     $this
@@ -164,7 +174,7 @@ class SubscriptionControllerTest extends UnitTestCase {
 
     $this
       ->membershipManager
-      ->getMembership($this->group->reveal(), $this->user->reveal(), $states)
+      ->getMembership($this->group->reveal(), $this->userId, $states)
       ->willReturn($this->ogMembership->reveal());
 
     $this
@@ -212,7 +222,7 @@ class SubscriptionControllerTest extends UnitTestCase {
 
     $this
       ->membershipManager
-      ->getMembership($this->group->reveal(), $this->user->reveal(), $states)
+      ->getMembership($this->group->reveal(), $this->userId, $states)
       ->willReturn($this->ogMembership->reveal());
 
     $this
@@ -220,17 +230,10 @@ class SubscriptionControllerTest extends UnitTestCase {
       ->getState()
       ->willReturn($state);
 
-    $entity_id = rand(20, 50);
-
-    $this
-      ->user
-      ->id()
-      ->willReturn($entity_id);
-
     $this
       ->group
       ->getOwnerId()
-      ->willReturn($entity_id);
+      ->willReturn($this->userId);
 
     $this
       ->group

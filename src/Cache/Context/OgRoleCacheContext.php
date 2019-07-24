@@ -87,7 +87,7 @@ class OgRoleCacheContext extends UserCacheContextBase implements CacheContextInt
     // compute the hash once.
     if (empty($this->hashes[$this->user->id()])) {
       $memberships = [];
-      foreach ($this->membershipManager->getMemberships($this->user) as $membership) {
+      foreach ($this->membershipManager->getMemberships($this->user->id()) as $membership) {
         $role_names = array_map(function (OgRoleInterface $role) {
           return $role->getName();
         }, $membership->getRoles());
