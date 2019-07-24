@@ -84,10 +84,10 @@ class OgMembership extends ContentEntityBase implements OgMembershipInterface {
    * {@inheritdoc}
    */
   public function getCreatedTime(): int {
-    // Access the value directly instead of calling $this->get(). Membership
-    // entities are not translatable so we can avoid the expensive calls to
-    // $this->getTranslatedField().
-    $created_time = $this->values['created'][LanguageInterface::LANGCODE_DEFAULT];
+    // Try to access the field value directly and only fall back to $this->get()
+    // if it is not available. This field is not translatable so we don't need
+    // the slow field definition lookup from $this->getTranslatedField().
+    $created_time = $this->values['created'][LanguageInterface::LANGCODE_DEFAULT] ?? $this->get('created')->value;
     if (is_array($created_time)) {
       return reset($created_time)['value'];
     }
@@ -114,8 +114,11 @@ class OgMembership extends ContentEntityBase implements OgMembershipInterface {
    * {@inheritdoc}
    */
   public function getOwnerId() {
-    assert(!empty($this->values['uid'][LanguageInterface::LANGCODE_DEFAULT]), new \LogicException(__METHOD__ . '() should only be called on loaded memberships, or on newly created memberships that already have the owner set.'));
-    $owner_id = $this->values['uid'][LanguageInterface::LANGCODE_DEFAULT];
+    // Try to access the field value directly and only fall back to $this->get()
+    // if it is not available. This field is not translatable so we don't need
+    // the slow field definition lookup from $this->getTranslatedField().
+    $owner_id = $this->values['uid'][LanguageInterface::LANGCODE_DEFAULT] ?? $this->get('uid')->target_id;
+    assert(!empty($owner_id), new \LogicException(__METHOD__ . '() should only be called on loaded memberships, or on newly created memberships that already have the owner set.'));
     if (is_array($owner_id)) {
       return reset($owner_id)['target_id'];
     }
@@ -152,8 +155,11 @@ class OgMembership extends ContentEntityBase implements OgMembershipInterface {
    * {@inheritdoc}
    */
   public function getGroupEntityType(): string {
-    assert(!empty($this->values['entity_type'][LanguageInterface::LANGCODE_DEFAULT]), new \LogicException(__METHOD__ . '() should only be called on loaded memberships, or on newly created memberships that already have the group type set.'));
-    $entity_type = $this->values['entity_type'][LanguageInterface::LANGCODE_DEFAULT];
+    // Try to access the field value directly and only fall back to $this->get()
+    // if it is not available. This field is not translatable so we don't need
+    // the slow field definition lookup from $this->getTranslatedField().
+    $entity_type = $this->values['entity_type'][LanguageInterface::LANGCODE_DEFAULT] ?? $this->get('entity_type')->value;
+    assert(!empty($entity_type), new \LogicException(__METHOD__ . '() should only be called on loaded memberships, or on newly created memberships that already have the group type set.'));
     if (is_array($entity_type)) {
       return reset($entity_type)['value'];
     }
@@ -164,8 +170,11 @@ class OgMembership extends ContentEntityBase implements OgMembershipInterface {
    * {@inheritdoc}
    */
   public function getGroupBundle(): string {
-    assert(!empty($this->values['entity_bundle'][LanguageInterface::LANGCODE_DEFAULT]), new \LogicException(__METHOD__ . '() should only be called on loaded memberships, or on newly created memberships that already have the group bundle set.'));
-    $bundle = $this->values['entity_bundle'][LanguageInterface::LANGCODE_DEFAULT];
+    // Try to access the field value directly and only fall back to $this->get()
+    // if it is not available. This field is not translatable so we don't need
+    // the slow field definition lookup from $this->getTranslatedField().
+    $bundle = $this->values['entity_bundle'][LanguageInterface::LANGCODE_DEFAULT] ?? $this->get('entity_bundle')->value;
+    assert(!empty($bundle), new \LogicException(__METHOD__ . '() should only be called on loaded memberships, or on newly created memberships that already have the group bundle set.'));
     if (is_array($bundle)) {
       return reset($bundle)['value'];
     }
@@ -176,8 +185,11 @@ class OgMembership extends ContentEntityBase implements OgMembershipInterface {
    * {@inheritdoc}
    */
   public function getGroupId(): string {
-    assert(!empty($this->values['entity_id'][LanguageInterface::LANGCODE_DEFAULT]), new \LogicException(__METHOD__ . '() should only be called on loaded memberships, or on newly created memberships that already have the group ID set.'));
-    $entity_id = $this->values['entity_id'][LanguageInterface::LANGCODE_DEFAULT];
+    // Try to access the field value directly and only fall back to $this->get()
+    // if it is not available. This field is not translatable so we don't need
+    // the slow field definition lookup from $this->getTranslatedField().
+    $entity_id = $this->values['entity_id'][LanguageInterface::LANGCODE_DEFAULT] ?? $this->get('entity_id')->value;
+    assert(!empty($entity_id), new \LogicException(__METHOD__ . '() should only be called on loaded memberships, or on newly created memberships that already have the group ID set.'));
     if (is_array($entity_id)) {
       return reset($entity_id)['value'];
     }
@@ -202,14 +214,16 @@ class OgMembership extends ContentEntityBase implements OgMembershipInterface {
    *   Whether or not the group is already present.
    */
   protected function hasGroup(): bool {
-    return !empty($this->values['entity_type'][LanguageInterface::LANGCODE_DEFAULT]) && !empty($this->values['entity_bundle'][LanguageInterface::LANGCODE_DEFAULT]) && !empty($this->values['entity_id'][LanguageInterface::LANGCODE_DEFAULT]);
+    return
+      !empty($this->values['entity_type'][LanguageInterface::LANGCODE_DEFAULT] ?? $this->get('entity_type')->value) &&
+      !empty($this->values['entity_bundle'][LanguageInterface::LANGCODE_DEFAULT] ?? $this->get('entity_bundle')->value) &&
+      !empty($this->values['entity_id'][LanguageInterface::LANGCODE_DEFAULT] ?? $this->get('entity_id')->value);
   }
 
   /**
    * {@inheritdoc}
    */
   public function getGroup(): ?ContentEntityInterface {
-    assert(!empty($this->values['entity_type'][LanguageInterface::LANGCODE_DEFAULT]) || !empty($this->values['entity_id'][LanguageInterface::LANGCODE_DEFAULT]), new \LogicException(__METHOD__ . '() should only be called on loaded memberships, or on newly created memberships that already have the group set.'));
     $entity_type = $this->getGroupEntityType();
     $entity_id = $this->getGroupId();
 
@@ -228,7 +242,7 @@ class OgMembership extends ContentEntityBase implements OgMembershipInterface {
    * {@inheritdoc}
    */
   public function getState(): string {
-    $state = $this->values['state'][LanguageInterface::LANGCODE_DEFAULT];
+    $state = $this->values['state'][LanguageInterface::LANGCODE_DEFAULT] ?? $this->get('state')->value;
     if (is_array($state)) {
       return reset($state)['value'];
     }
@@ -314,10 +328,10 @@ class OgMembership extends ContentEntityBase implements OgMembershipInterface {
    * {@inheritdoc}
    */
   public function getRolesIds(): array {
-    // Access the values directly instead of calling $this->get(). The roles
-    // field is not translatable so we can avoid the expensive call to
-    // $this->getTranslatedField().
-    $values = $this->values['roles'][LanguageInterface::LANGCODE_DEFAULT] ?? [];
+    // Try to access the field value directly and only fall back to $this->get()
+    // if it is not available. This field is not translatable so we don't need
+    // the slow field definition lookup from $this->getTranslatedField().
+    $values = $this->values['roles'][LanguageInterface::LANGCODE_DEFAULT] ?? $this->get('roles')->getValue();
     $roles_ids = array_map(function (array $role_data): string {
       return $role_data['target_id'];
     }, $values);
