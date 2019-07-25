@@ -247,10 +247,11 @@ class OgMembership extends ContentEntityBase implements OgMembershipInterface {
    *   Whether or not the group is already present.
    */
   protected function hasGroup(): bool {
-    return
+    $has_group =
       !empty(isset($this->fields['entity_type'][LanguageInterface::LANGCODE_DEFAULT]) ? $this->get('entity_type')->value : ($this->values['entity_type'][LanguageInterface::LANGCODE_DEFAULT] ?? NULL)) &&
       !empty(isset($this->fields['entity_bundle'][LanguageInterface::LANGCODE_DEFAULT]) ? $this->get('entity_bundle')->value : ($this->values['entity_bundle'][LanguageInterface::LANGCODE_DEFAULT] ?? NULL)) &&
       !empty(isset($this->fields['entity_id'][LanguageInterface::LANGCODE_DEFAULT]) ? $this->get('entity_id')->value : ($this->values['entity_id'][LanguageInterface::LANGCODE_DEFAULT] ?? NULL));
+    return $has_group;
   }
 
   /**
