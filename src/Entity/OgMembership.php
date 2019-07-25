@@ -84,19 +84,7 @@ class OgMembership extends ContentEntityBase implements OgMembershipInterface {
    * {@inheritdoc}
    */
   public function getCreatedTime(): int {
-    // Only use $this->get() if it is already populated. If it is not available
-    // then use the raw value. This field is not translatable so we do not need
-    // the slow field definition lookup from $this->getTranslatedField().
-    if (isset($this->fields['created'][LanguageInterface::LANGCODE_DEFAULT])) {
-      $created_time = $this->get('created')->value;
-    }
-    else {
-      $created_time = $this->values['created'][LanguageInterface::LANGCODE_DEFAULT] ?? 0;
-    }
-    if (is_array($created_time)) {
-      return reset($created_time)['value'];
-    }
-    return $created_time;
+    return $this->getUntranslatedSinglePropertyFieldValue('created') ?: 0;
   }
 
   /**
@@ -119,21 +107,8 @@ class OgMembership extends ContentEntityBase implements OgMembershipInterface {
    * {@inheritdoc}
    */
   public function getOwnerId() {
-    // Only use $this->get() if it is already populated. If it is not available
-    // then use the raw value. This field is not translatable so we do not need
-    // the slow field definition lookup from $this->getTranslatedField().
-    if (isset($this->fields['uid'][LanguageInterface::LANGCODE_DEFAULT])) {
-      $owner_id = $this->get('uid')->target_id;
-    }
-    else {
-      $owner_id = $this->values['uid'][LanguageInterface::LANGCODE_DEFAULT] ?? NULL;
-    }
-
+    $owner_id = $this->getUntranslatedSinglePropertyFieldValue('uid', 'target_id');
     assert(!empty($owner_id), new \LogicException(__METHOD__ . '() should only be called on loaded memberships, or on newly created memberships that already have the owner set.'));
-
-    if (is_array($owner_id)) {
-      return reset($owner_id)['target_id'];
-    }
     return $owner_id;
   }
 
@@ -167,21 +142,8 @@ class OgMembership extends ContentEntityBase implements OgMembershipInterface {
    * {@inheritdoc}
    */
   public function getGroupEntityType(): string {
-    // Only use $this->get() if it is already populated. If it is not available
-    // then use the raw value. This field is not translatable so we do not need
-    // the slow field definition lookup from $this->getTranslatedField().
-    if (isset($this->fields['entity_type'][LanguageInterface::LANGCODE_DEFAULT])) {
-      $entity_type = $this->get('entity_type')->value;
-    }
-    else {
-      $entity_type = $this->values['entity_type'][LanguageInterface::LANGCODE_DEFAULT] ?? '';
-    }
-
+    $entity_type = $this->getUntranslatedSinglePropertyFieldValue('entity_type') ?: '';
     assert(!empty($entity_type), new \LogicException(__METHOD__ . '() should only be called on loaded memberships, or on newly created memberships that already have the group type set.'));
-
-    if (is_array($entity_type)) {
-      return reset($entity_type)['value'];
-    }
     return $entity_type;
   }
 
@@ -189,21 +151,8 @@ class OgMembership extends ContentEntityBase implements OgMembershipInterface {
    * {@inheritdoc}
    */
   public function getGroupBundle(): string {
-    // Only use $this->get() if it is already populated. If it is not available
-    // then use the raw value. This field is not translatable so we do not need
-    // the slow field definition lookup from $this->getTranslatedField().
-    if (isset($this->fields['entity_bundle'][LanguageInterface::LANGCODE_DEFAULT])) {
-      $bundle = $this->get('entity_bundle')->value;
-    }
-    else {
-      $bundle = $this->values['entity_bundle'][LanguageInterface::LANGCODE_DEFAULT] ?? '';
-    }
-
+    $bundle = $this->getUntranslatedSinglePropertyFieldValue('entity_bundle') ?: '';
     assert(!empty($bundle), new \LogicException(__METHOD__ . '() should only be called on loaded memberships, or on newly created memberships that already have the group bundle set.'));
-
-    if (is_array($bundle)) {
-      return reset($bundle)['value'];
-    }
     return $bundle;
   }
 
@@ -211,21 +160,8 @@ class OgMembership extends ContentEntityBase implements OgMembershipInterface {
    * {@inheritdoc}
    */
   public function getGroupId(): string {
-    // Only use $this->get() if it is already populated. If it is not available
-    // then use the raw value. This field is not translatable so we do not need
-    // the slow field definition lookup from $this->getTranslatedField().
-    if (isset($this->fields['entity_id'][LanguageInterface::LANGCODE_DEFAULT])) {
-      $entity_id = $this->get('entity_id')->value;
-    }
-    else {
-      $entity_id = $this->values['entity_id'][LanguageInterface::LANGCODE_DEFAULT] ?? '';
-    }
-
+    $entity_id = $this->getUntranslatedSinglePropertyFieldValue('entity_id') ?: '';
     assert(!empty($entity_id), new \LogicException(__METHOD__ . '() should only be called on loaded memberships, or on newly created memberships that already have the group ID set.'));
-
-    if (is_array($entity_id)) {
-      return reset($entity_id)['value'];
-    }
     return $entity_id;
   }
 
@@ -248,9 +184,9 @@ class OgMembership extends ContentEntityBase implements OgMembershipInterface {
    */
   protected function hasGroup(): bool {
     $has_group =
-      !empty(isset($this->fields['entity_type'][LanguageInterface::LANGCODE_DEFAULT]) ? $this->get('entity_type')->value : ($this->values['entity_type'][LanguageInterface::LANGCODE_DEFAULT] ?? NULL)) &&
-      !empty(isset($this->fields['entity_bundle'][LanguageInterface::LANGCODE_DEFAULT]) ? $this->get('entity_bundle')->value : ($this->values['entity_bundle'][LanguageInterface::LANGCODE_DEFAULT] ?? NULL)) &&
-      !empty(isset($this->fields['entity_id'][LanguageInterface::LANGCODE_DEFAULT]) ? $this->get('entity_id')->value : ($this->values['entity_id'][LanguageInterface::LANGCODE_DEFAULT] ?? NULL));
+      !empty($this->getUntranslatedSinglePropertyFieldValue('entity_type')) &&
+      !empty($this->getUntranslatedSinglePropertyFieldValue('entity_bundle')) &&
+      !empty($this->getUntranslatedSinglePropertyFieldValue('entity_id'));
     return $has_group;
   }
 
@@ -653,6 +589,41 @@ class OgMembership extends ContentEntityBase implements OgMembershipInterface {
   public function isOwner(): bool {
     $group = $this->getGroup();
     return $group instanceof EntityOwnerInterface && $group->getOwnerId() == $this->getOwnerId();
+  }
+
+  /**
+   * Returns the value of a given untranslatable single property field.
+   *
+   * This method is optimized for dealing with untranslatable fields with a
+   * single value stored in a single property. For performance reasons this
+   * avoids calling ::get() so we can skip the expensive construction of the
+   * FieldItemList and the slow operations that are done to determine
+   * translatability and cardinality of the field, such as loading and
+   * inspecting the field and field storage definitions.
+   *
+   * @param string $field
+   *   The name of the field for which to return the value.
+   * @param string $property
+   *   The name of the field property that holds the value. Defaults to 'value'.
+   *
+   * @return mixed|null
+   *   The value, or NULL if no value has been set.
+   */
+  protected function getUntranslatedSinglePropertyFieldValue(string $field, string $property = 'value') {
+    // Only use $this->get() if it is already populated. If it is not available
+    // then use the raw value.
+    if (isset($this->fields[$field][LanguageInterface::LANGCODE_DEFAULT])) {
+      $value = $this->get($field)->$property;
+    }
+    else {
+      $value = $this->values[$field][LanguageInterface::LANGCODE_DEFAULT] ?? NULL;
+    }
+
+    if (is_array($value)) {
+      return reset($value)[$property];
+    }
+
+    return $value;
   }
 
 }
