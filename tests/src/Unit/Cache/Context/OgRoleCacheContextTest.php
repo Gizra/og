@@ -227,7 +227,7 @@ class OgRoleCacheContextTest extends OgCacheContextTestBase {
    * @covers ::getContext
    * @dataProvider membershipsProvider
    */
-  public function testMembershipsNoSQL(array $group_memberships, array $expected_identical_role_groups) {
+  public function testMembershipsNoSql(array $group_memberships, array $expected_identical_role_groups) {
     // 'Mock' the unmockable singleton that holds the Drupal settings array by
     // instantiating it and populating it with a random salt.
     new Settings(['hash_salt' => $this->randomMachineName()]);
