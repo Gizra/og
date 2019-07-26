@@ -84,7 +84,7 @@ class OgMembership extends ContentEntityBase implements OgMembershipInterface {
    * {@inheritdoc}
    */
   public function getCreatedTime(): int {
-    return $this->getUntranslatedSinglePropertyFieldValue('created') ?: 0;
+    return $this->getFieldValue('created', 'value') ?: 0;
   }
 
   /**
@@ -107,7 +107,7 @@ class OgMembership extends ContentEntityBase implements OgMembershipInterface {
    * {@inheritdoc}
    */
   public function getOwnerId() {
-    $owner_id = $this->getUntranslatedSinglePropertyFieldValue('uid', 'target_id');
+    $owner_id = $this->getFieldValue('uid', 'target_id');
     assert(!empty($owner_id), new \LogicException(__METHOD__ . '() should only be called on loaded memberships, or on newly created memberships that already have the owner set.'));
     return $owner_id;
   }
@@ -142,7 +142,7 @@ class OgMembership extends ContentEntityBase implements OgMembershipInterface {
    * {@inheritdoc}
    */
   public function getGroupEntityType(): string {
-    $entity_type = $this->getUntranslatedSinglePropertyFieldValue('entity_type') ?: '';
+    $entity_type = $this->getFieldValue('entity_type', 'value') ?: '';
     assert(!empty($entity_type), new \LogicException(__METHOD__ . '() should only be called on loaded memberships, or on newly created memberships that already have the group type set.'));
     return $entity_type;
   }
@@ -151,7 +151,7 @@ class OgMembership extends ContentEntityBase implements OgMembershipInterface {
    * {@inheritdoc}
    */
   public function getGroupBundle(): string {
-    $bundle = $this->getUntranslatedSinglePropertyFieldValue('entity_bundle') ?: '';
+    $bundle = $this->getFieldValue('entity_bundle', 'value') ?: '';
     assert(!empty($bundle), new \LogicException(__METHOD__ . '() should only be called on loaded memberships, or on newly created memberships that already have the group bundle set.'));
     return $bundle;
   }
@@ -160,7 +160,7 @@ class OgMembership extends ContentEntityBase implements OgMembershipInterface {
    * {@inheritdoc}
    */
   public function getGroupId(): string {
-    $entity_id = $this->getUntranslatedSinglePropertyFieldValue('entity_id') ?: '';
+    $entity_id = $this->getFieldValue('entity_id', 'value') ?: '';
     assert(!empty($entity_id), new \LogicException(__METHOD__ . '() should only be called on loaded memberships, or on newly created memberships that already have the group ID set.'));
     return $entity_id;
   }
@@ -184,9 +184,9 @@ class OgMembership extends ContentEntityBase implements OgMembershipInterface {
    */
   protected function hasGroup(): bool {
     $has_group =
-      !empty($this->getUntranslatedSinglePropertyFieldValue('entity_type')) &&
-      !empty($this->getUntranslatedSinglePropertyFieldValue('entity_bundle')) &&
-      !empty($this->getUntranslatedSinglePropertyFieldValue('entity_id'));
+      !empty($this->getFieldValue('entity_type', 'value')) &&
+      !empty($this->getFieldValue('entity_bundle', 'value')) &&
+      !empty($this->getFieldValue('entity_id', 'value'));
     return $has_group;
   }
 
@@ -212,11 +212,7 @@ class OgMembership extends ContentEntityBase implements OgMembershipInterface {
    * {@inheritdoc}
    */
   public function getState(): string {
-    $state = $this->values['state'][LanguageInterface::LANGCODE_DEFAULT] ?? $this->get('state')->value;
-    if (is_array($state)) {
-      return reset($state)['value'];
-    }
-    return $state;
+    return $this->getFieldValue('state', 'value') ?: '';
   }
 
   /**
@@ -592,38 +588,52 @@ class OgMembership extends ContentEntityBase implements OgMembershipInterface {
   }
 
   /**
-   * Returns the value of a given untranslatable single property field.
+   * Gets the value of a specific property of a field.
    *
-   * This method is optimized for dealing with untranslatable fields with a
-   * single value stored in a single property. For performance reasons this
-   * avoids calling ::get() so we can skip the expensive construction of the
-   * FieldItemList and the slow operations that are done to determine
-   * translatability and cardinality of the field, such as loading and
-   * inspecting the field and field storage definitions.
+   * Only the first delta can be accessed with this method.
    *
-   * @param string $field
-   *   The name of the field for which to return the value.
+   * @todo Remove this once issue #2580551 is fixed.
+   *
+   * @see https://www.drupal.org/project/drupal/issues/2580551
+   *
+   * @param string $field_name
+   *   The name of the field.
    * @param string $property
-   *   The name of the field property that holds the value. Defaults to 'value'.
+   *   The field property, "value" for many field types.
    *
-   * @return mixed|null
-   *   The value, or NULL if no value has been set.
+   * @return mixed
    */
-  protected function getUntranslatedSinglePropertyFieldValue(string $field, string $property = 'value') {
-    // Only use $this->get() if it is already populated. If it is not available
-    // then use the raw value.
-    if (isset($this->fields[$field][LanguageInterface::LANGCODE_DEFAULT])) {
-      $value = $this->get($field)->$property;
-    }
-    else {
-      $value = $this->values[$field][LanguageInterface::LANGCODE_DEFAULT] ?? NULL;
+  public function getFieldValue($field_name, $property) {
+    // Attempt to get the value from the values directly if the field is not
+    // initialized yet.
+    if (!isset($this->fields[$field_name])) {
+      $field_values = NULL;
+      if (isset($this->values[$field_name][$this->activeLangcode])) {
+        $field_values = $this->values[$field_name][$this->activeLangcode];
+      }
+      elseif (isset($this->values[$field_name][LanguageInterface::LANGCODE_DEFAULT])) {
+        $field_values = $this->values[$field_name][LanguageInterface::LANGCODE_DEFAULT];
+      }
+
+      if ($field_values !== NULL) {
+        // If there are field values, try to get the property value.
+        // Configurable/Multi-value fields are stored differently, try accessing
+        // with delta and property first, then without delta and last, if the
+        // value is a scalar, just return that.
+        if (isset($field_values[0][$property]) && is_array($field_values[0])) {
+          return $field_values[0][$property];
+        }
+        elseif (isset($field_values[$property]) && is_array($field_values)) {
+          return $field_values[$property];
+        }
+        elseif (!is_array($field_values)) {
+          return $field_values;
+        }
+      }
     }
 
-    if (is_array($value)) {
-      return reset($value)[$property];
-    }
-
-    return $value;
+    // Fall back to access the property through the field object.
+    return $this->get($field_name)->$property;
   }
 
 }
