@@ -304,9 +304,7 @@ class OgMembership extends ContentEntityBase implements OgMembershipInterface {
       $values = $this->values['roles'][LanguageInterface::LANGCODE_DEFAULT] ?? [];
     }
 
-    $roles_ids = array_map(function (array $role_data): string {
-      return $role_data['target_id'];
-    }, $values);
+    $roles_ids = array_column($values, 'target_id');
 
     // Add the member role. This is only possible if a group has been set on the
     // membership.
