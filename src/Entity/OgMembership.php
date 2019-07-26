@@ -600,6 +600,7 @@ class OgMembership extends ContentEntityBase implements OgMembershipInterface {
    *   The field property, "value" for many field types.
    *
    * @return mixed
+   *   The value.
    */
   public function getFieldValue($field_name, $property) {
     // Attempt to get the value from the values directly if the field is not
