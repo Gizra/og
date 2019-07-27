@@ -170,7 +170,7 @@ class OgRoleCacheContextTest extends OgCacheContextTestBase {
 
     // Mock the query.
     $query = $this->prophesize(Select::class);
-    $query->join(Argument::cetera())->willReturn();
+    $query->leftJoin(Argument::cetera())->willReturn();
     $query->fields(Argument::cetera())->willReturn();
     $query->condition(Argument::cetera())->willReturn();
     $this->database->select($base_table, 'm')->willReturn($query->reveal());
