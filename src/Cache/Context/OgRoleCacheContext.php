@@ -14,6 +14,7 @@ use Drupal\Core\PrivateKey;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\Core\Site\Settings;
 use Drupal\og\MembershipManagerInterface;
+use Drupal\og\OgRoleInterface;
 
 /**
  * Defines a cache context service for the OG roles of the current user.
@@ -175,7 +176,7 @@ class OgRoleCacheContext extends UserCacheContextBase implements CacheContextInt
     $base_table = $table_mapping->getBaseTable();
     $role_table = $table_mapping->getFieldTableName('roles');
     $query = $this->database->select($base_table, 'm');
-    $query->join($role_table, 'r', 'm.id = r.entity_id');
+    $query->leftJoin($role_table, 'r', 'm.id = r.entity_id');
     $query->fields('m', ['entity_type', 'entity_bundle', 'entity_id']);
     $query->fields('r', ['roles_target_id']);
     $query->condition('m.uid', $this->user->id());
@@ -185,11 +186,18 @@ class OgRoleCacheContext extends UserCacheContextBase implements CacheContextInt
       $entity_type_id = $row->entity_type;
       $entity_bundle_id = $row->entity_bundle;
       $entity_id = $row->entity_id;
+      $role_name = $row->roles_target_id;
 
-      // Derive the role name from the role ID.
-      $pattern = preg_quote("$entity_type_id-$entity_bundle_id-");
-      preg_match("/$pattern(.+)/", $row->roles_target_id, $matches);
-      $role_name = $matches[1];
+      // If the role name is empty this is a regular authenticated user. If it
+      // is set we can derive the role name from the role ID.
+      if (empty($role_name)) {
+        $role_name = OgRoleInterface::AUTHENTICATED;
+      }
+      else {
+        $pattern = preg_quote("$entity_type_id-$entity_bundle_id-");
+        preg_match("/$pattern(.+)/", $row->roles_target_id, $matches);
+        $role_name = $matches[1];
+      }
 
       $memberships[$entity_type_id][$entity_id][] = $role_name;
     }
