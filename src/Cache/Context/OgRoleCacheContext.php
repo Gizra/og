@@ -14,6 +14,7 @@ use Drupal\Core\PrivateKey;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\Core\Site\Settings;
 use Drupal\og\MembershipManagerInterface;
+use Drupal\og\OgMembershipInterface;
 use Drupal\og\OgRoleInterface;
 
 /**
@@ -180,6 +181,7 @@ class OgRoleCacheContext extends UserCacheContextBase implements CacheContextInt
     $query->fields('m', ['entity_type', 'entity_bundle', 'entity_id']);
     $query->fields('r', ['roles_target_id']);
     $query->condition('m.uid', $this->user->id());
+    $query->condition('m.state', OgMembershipInterface::STATE_ACTIVE);
 
     $memberships = [];
     foreach ($query->execute() as $row) {
