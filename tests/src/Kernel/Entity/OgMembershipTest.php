@@ -800,7 +800,7 @@ class OgMembershipTest extends KernelTestBase {
 
     $role_names = ['member', $og_extra_role->getName()];
     $expected_ids = array_map(function ($role_name) use ($entity_type_id, $bundle) {
-      return "{$entity_type_id}-{$bundle}-" . $role_name;
+      return "{$entity_type_id}-{$bundle}-{$role_name}";
     }, $role_names);
     $this->assertEquals($expected_ids, $membership->getRolesIds(), 'Role ids are built properly.');
   }
