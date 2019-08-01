@@ -778,6 +778,34 @@ class OgMembershipTest extends KernelTestBase {
   }
 
   /**
+   * Tests that the role ids are being built properly by the membership.
+   *
+   * @covers ::getRolesIds
+   */
+  public function testGetRolesIdsFromMembership() {
+    $entity_type_id = $this->group->getEntityTypeId();
+    $bundle = $this->group->bundle();
+
+    $og_extra_role = OgRole::create()
+      ->setGroupType($entity_type_id)
+      ->setGroupBundle($bundle)
+      ->setName(mb_strtolower($this->randomMachineName()));
+    $og_extra_role->save();
+
+    $membership = OgMembership::create()
+      ->setGroup($this->group)
+      ->setOwner($this->user)
+      ->addRole($og_extra_role);
+    $membership->save();
+
+    $role_names = ['member', $og_extra_role->getName()];
+    $expected_ids = array_map(function ($role_name) use ($entity_type_id, $bundle) {
+      return "{$entity_type_id}-{$bundle}-" . $role_name;
+    }, $role_names);
+    $this->assertEquals($expected_ids, $membership->getRolesIds(), 'Role ids are built properly.');
+  }
+
+  /**
    * Tests that the membership can return if it belongs to the group owner.
    *
    * @covers ::isOwner
