@@ -802,7 +802,14 @@ class OgMembershipTest extends KernelTestBase {
     $expected_ids = array_map(function ($role_name) use ($entity_type_id, $bundle) {
       return "{$entity_type_id}-{$bundle}-{$role_name}";
     }, $role_names);
-    $this->assertEquals($expected_ids, $membership->getRolesIds(), 'Role ids are built properly.');
+    $actual_ids = $membership->getRolesIds();
+
+    // Sort the two arrays before comparing so we can check the contents
+    // regardless of their order.
+    sort($expected_ids);
+    sort($actual_ids);
+
+    $this->assertEquals($expected_ids, $actual_ids, 'Role ids are built properly.');
   }
 
   /**
