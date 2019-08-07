@@ -371,6 +371,7 @@ function og_og_role_insert(OgRoleInterface $role) {
     return;
   }
 
+  // Skip creation of action plugins while importing configuration.
   if ($role instanceof ConfigEntityInterface) {
     if ($role->isSyncing()) {
       return;
