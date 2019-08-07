@@ -8,6 +8,7 @@
 use Drupal\Core\Access\AccessResult;
 use Drupal\Core\Cache\Cache;
 use Drupal\Core\Config\Entity\ConfigEntityBundleBase;
+use Drupal\Core\Config\Entity\ConfigEntityInterface;
 use Drupal\Core\Entity\ContentEntityInterface;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Entity\EntityTypeInterface;
@@ -370,7 +371,7 @@ function og_og_role_insert(OgRoleInterface $role) {
     return;
   }
 
-  if ($role instanceof \Drupal\Core\Config\Entity\ConfigEntityInterface) {
+  if ($role instanceof ConfigEntityInterface) {
     if ($role->isSyncing()) {
       return;
     }
