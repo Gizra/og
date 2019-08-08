@@ -13,9 +13,9 @@ field.field_settings.og_membership_reference:
     handler:
       type: string
       label: 'Reference method'
-    handler_settings:
-      type: entity_reference_selection.[%parent.handler]
-      label: 'Organic Groups reference selection plugin settings'
+    field_mode:
+      type: string
+      label: 'The field mode'
     access_override:
       type: boolean
       label: 'Access Override'
@@ -35,9 +35,9 @@ field.field_settings.og_standard_reference:
     handler:
       type: string
       label: 'Reference method'
-    handler_settings:
-      type: entity_reference_selection.[%parent.handler]
-      label: 'Organic Groups reference selection plugin settings'
+    field_mode:
+      type: string
+      label: 'The field mode'
     access_override:
       type: boolean
       label: 'Access Override'
