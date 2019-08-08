@@ -122,8 +122,6 @@ class OgRoleCacheContextTest extends OgCacheContextTestBase {
    * This tests the fallback implementation for NoSQL databases. The main
    * implementation is tested in a kernel test.
    *
-   * @see \Drupal\Tests\og\Kernel\Cache\Context\OgRoleCacheContextTest::testMemberships()
-   *
    * @param array $group_memberships
    *   An array that defines the roles test users have in test groups. See the
    *   data provider for a description of the format of the array.
@@ -131,6 +129,8 @@ class OgRoleCacheContextTest extends OgCacheContextTestBase {
    *   An array containing arrays of user IDs that are expected to have
    *   identical cache context keys, since they have identical memberships in
    *   the defined test groups.
+   *
+   * @see \Drupal\Tests\og\Kernel\Cache\Context\OgRoleCacheContextTest::testMemberships()
    *
    * @covers ::getContext
    * @dataProvider membershipsProvider

@@ -16,7 +16,6 @@ use Drupal\node\Entity\NodeType;
 use Drupal\og\Cache\Context\OgRoleCacheContext;
 use Drupal\og\Entity\OgMembership;
 use Drupal\og\Entity\OgRole;
-use Drupal\og\OgRoleInterface;
 use Drupal\user\Entity\User;
 
 /**
@@ -123,8 +122,6 @@ class OgRoleCacheContextTest extends KernelTestBase {
    * This tests the main implementation for SQL databases. The fallback
    * implementation for NoSQL databases is tested in a unit test.
    *
-   * @see \Drupal\Tests\og\Unit\Cache\Context\OgRoleCacheContextTest::testMembershipsNoSql()
-   *
    * @param array $group_memberships
    *   An array that defines the roles test users have in test groups. See the
    *   data provider for a description of the format of the array.
@@ -132,6 +129,8 @@ class OgRoleCacheContextTest extends KernelTestBase {
    *   An array containing arrays of user IDs that are expected to have
    *   identical cache context keys, since they have identical memberships in
    *   the defined test groups.
+   *
+   * @see \Drupal\Tests\og\Unit\Cache\Context\OgRoleCacheContextTest::testMembershipsNoSql()
    *
    * @covers ::getContext
    * @dataProvider membershipsProvider
@@ -152,7 +151,7 @@ class OgRoleCacheContextTest extends KernelTestBase {
     // test as a custom role in addition to the default roles 'member',
     // 'administrator', etc.
     foreach (['entity_test', 'node'] as $entity_type_id) {
-      /** @var OgRoleInterface $role */
+      /** @var \Drupal\og\OgRoleInterface $role */
       $role = OgRole::create();
       $role
         ->setGroupType($entity_type_id)
