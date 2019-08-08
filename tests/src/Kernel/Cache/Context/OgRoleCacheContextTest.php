@@ -56,7 +56,7 @@ class OgRoleCacheContextTest extends KernelTestBase {
   protected $entityTypeManager;
 
   /**
-   * The group type manager.
+   * The OG group type manager service.
    *
    * @var \Drupal\og\GroupTypeManagerInterface
    */
@@ -156,8 +156,8 @@ class OgRoleCacheContextTest extends KernelTestBase {
       $role
         ->setGroupType($entity_type_id)
         ->setGroupBundle('group')
-        ->setName('moderator');
-      $role->save();
+        ->setName('moderator')
+        ->save();
     }
 
     // Create the users and memberships as required by the test.
