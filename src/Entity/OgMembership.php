@@ -63,6 +63,7 @@ use Drupal\user\EntityOwnerInterface;
  *   fieldable = TRUE,
  *   bundle_entity_type = "og_membership_type",
  *   entity_keys = {
+ *     "uuid" = "uuid",
  *     "id" = "id",
  *     "bundle" = "type",
  *   },
