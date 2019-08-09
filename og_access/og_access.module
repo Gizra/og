@@ -205,7 +205,7 @@ function og_access_entity_type_save(EntityInterface $entity) {
  * Implements hook_module_implements_alter().
  */
 function og_access_module_implements_alter(&$implementations, $hook) {
-  if ($hook == 'form_alter') {
+  if ($hook === 'form_alter') {
     // Move our form alter after the og_ui one.
     // @TODO remove once og_ui and og are merged.
     $group = $implementations['og_access'];
