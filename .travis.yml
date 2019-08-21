@@ -30,6 +30,9 @@ mysql:
   username: root
   encoding: utf8
 
+services:
+  - mysql
+
 before_script:
   # Remove Xdebug as we don't need it and it causes "PHP Fatal error: Maximum
   # function nesting level of '256' reached."
