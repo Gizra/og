@@ -118,9 +118,9 @@ class Membership extends ArgumentDefaultPluginBase implements CacheableDependenc
    */
   public function getCacheContexts() {
     // This cache context is the best thing we have right now.
-    // og_role takes in consideration the user memberships and 
-    // the roles held in the corresponding groups, and while it 
-    // is one level too granular, i.e. the context will be more 
+    // og_role takes in consideration the user memberships and
+    // the roles held in the corresponding groups, and while it
+    // is one level too granular, i.e. the context will be more
     // fragmented than strictly needed, it works.
     return ['og_role'];
   }
