@@ -24,7 +24,7 @@ use Drupal\og_access\OgAccess;
  * Implements hook_node_grants().
  */
 function og_access_node_grants(AccountInterface $account, $op) {
-  if ($op != 'view') {
+  if ($op !== 'view') {
     return [];
   }
 
