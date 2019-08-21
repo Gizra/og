@@ -56,15 +56,15 @@ class Membership extends ArgumentDefaultPluginBase implements CacheableDependenc
    *   The OG context provider.
    * @param \Drupal\og\MembershipManagerInterface $og_membership
    *   The OG membership manager.
-   * @param \Drupal\Core\Session\AccountInterface $og_user
+   * @param \Drupal\Core\Session\AccountInterface $user
    *   The user to be evaluated.
    */
-  public function __construct(array $configuration, $plugin_id, $plugin_definition, ContextProviderInterface $og_context, MembershipManagerInterface $og_membership, AccountInterface $og_user) {
+  public function __construct(array $configuration, $plugin_id, $plugin_definition, ContextProviderInterface $og_context, MembershipManagerInterface $og_membership, AccountInterface $user) {
     parent::__construct($configuration, $plugin_id, $plugin_definition);
 
     $this->ogContext = $og_context;
     $this->ogMembership = $og_membership;
-    $this->ogUser = $og_user;
+    $this->ogUser = $user;
   }
 
   /**
