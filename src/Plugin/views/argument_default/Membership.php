@@ -147,7 +147,7 @@ class Membership extends ArgumentDefaultPluginBase implements CacheableDependenc
    *   An array of groups, or an empty array if no group is found.
    */
   protected function getCurrentUserGroupIds($entity_type = 'node') {
-    $groups = $this->ogMembership->getUserGroupIds($this->ogUser);
+    $groups = $this->ogMembership->getUserGroupIds($this->ogUser->id());
     if (!empty($groups) && isset($groups[$entity_type])) {
       return $groups[$entity_type];
     }
