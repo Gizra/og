@@ -135,6 +135,7 @@ class Membership extends ArgumentDefaultPluginBase implements CacheableDependenc
       $tag = $group->getEntityTypeId() . ':' . $group->id();
       return Cache::buildTags('og-group-content', [$tag]);
     }
+
     return [];
   }
 
@@ -152,6 +153,7 @@ class Membership extends ArgumentDefaultPluginBase implements CacheableDependenc
     if (!empty($groups) && isset($groups[$entity_type])) {
       return $groups[$entity_type];
     }
+
     return [];
   }
 
