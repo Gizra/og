@@ -13,8 +13,7 @@ use Drupal\Core\Session\AccountInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
- * Default argument plugin to provide the group memberships from the current
- * context.
+ * Provides the group memberships from the current context.
  *
  * @ViewsArgumentDefault(
  *   id = "og_group_membership",
