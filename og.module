@@ -75,7 +75,8 @@ function og_entity_predelete(EntityInterface $entity) {
   $membership_manager = \Drupal::service('og.membership_manager');
 
   if (Og::isGroup($entity->getEntityTypeId(), $entity->bundle())) {
-    // Register orphaned group content for deletion, if this option has been enabled.
+    // Register orphaned group content for deletion, if this option has been
+    // enabled.
     $config = \Drupal::config('og.settings');
     if ($config->get('delete_orphans')) {
       $plugin_id = $config->get('delete_orphans_plugin_id');
