@@ -129,6 +129,38 @@ class MembershipManager implements MembershipManagerInterface {
   /**
    * {@inheritdoc}
    */
+  public function getMembershipsByGroup(EntityInterface $group, array $states = [OgMembershipInterface::STATE_ACTIVE]) {
+    // When an empty array is passed, retrieve memberships with all possible
+    // states.
+    $states = $this->prepareConditionArray($states, OgMembership::ALL_STATES);
+
+    $cid = [
+      __METHOD__,
+      $group->id(),
+      implode('|', $states),
+    ];
+    $cid = implode(':', $cid);
+
+    // Use cached result if it exists.
+    if (!$membership_ids = $this->staticCache->get($cid)->data ?? []) {
+      $query = $this->entityTypeManager
+        ->getStorage('og_membership')
+        ->getQuery()
+        ->condition('entity_type', $group->getEntityTypeId())
+        ->condition('entity_bundle', $group->bundle())
+        ->condition('entity_id', $group->id())
+        ->condition('state', $states, 'IN');
+
+      $membership_ids = $query->execute();
+      $this->cacheMembershipIds($cid, $membership_ids);
+    }
+
+    return $this->loadMemberships($membership_ids);
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   public function getMembership(EntityInterface $group, $user_id, array $states = [OgMembershipInterface::STATE_ACTIVE]) {
     if ($user_id instanceof AccountInterface) {
       trigger_error('Passing an account object is deprecated in og:8.1.0-alpha4 and is removed from og:8.1.0-beta1. Instead pass the user ID as an integer value. See https://github.com/Gizra/og/issues/542', E_USER_DEPRECATED);

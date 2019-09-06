@@ -111,6 +111,21 @@ interface MembershipManagerInterface {
   public function getMemberships($user_id, array $states = [OgMembershipInterface::STATE_ACTIVE]);
 
   /**
+   * Returns the group memberships for a group.
+   *
+   * @param \Drupal\Core\Entity\EntityInterface $group
+   *   The group to get the memberships for.
+   * @param array $states
+   *   (optional) Array with the states to return. Defaults to only returning
+   *   active memberships. In order to retrieve all memberships regardless of
+   *   state, pass `OgMembershipInterface::ALL_STATES`.
+   *
+   * @return \Drupal\og\OgMembershipInterface[]
+   *   An array of OgMembership entities, keyed by ID.
+   */
+  public function getMembershipsByGroup(EntityInterface $group, array $states = [OgMembershipInterface::STATE_ACTIVE]);
+
+  /**
    * Returns the group membership for a given user and group.
    *
    * @param \Drupal\Core\Entity\EntityInterface $group

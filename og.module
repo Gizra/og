@@ -71,9 +71,11 @@ function og_entity_update(EntityInterface $entity) {
  * Implements hook_entity_predelete().
  */
 function og_entity_predelete(EntityInterface $entity) {
+  /** @var \Drupal\og\MembershipManagerInterface $membership_manager */
+  $membership_manager = \Drupal::service('og.membership_manager');
+
   if (Og::isGroup($entity->getEntityTypeId(), $entity->bundle())) {
-    // Register orphaned group content and user memberships for deletion, if
-    // this option has been enabled.
+    // Register orphaned group content for deletion, if this option has been enabled.
     $config = \Drupal::config('og.settings');
     if ($config->get('delete_orphans')) {
       $plugin_id = $config->get('delete_orphans_plugin_id');
@@ -85,11 +87,15 @@ function og_entity_predelete(EntityInterface $entity) {
     // @todo Delete user roles.
     // @see https://github.com/amitaibu/og/issues/175
     // og_delete_user_roles_by_group($entity_type, $entity);
+
+    // Delete the group memberships.
+    foreach ($membership_manager->getMembershipsByGroup($entity, []) as $membership) {
+      $membership->delete();
+    }
   }
+
   // If a user is being deleted, also delete its memberships.
   if ($entity instanceof UserInterface) {
-    /** @var \Drupal\og\MembershipManagerInterface $membership_manager */
-    $membership_manager = \Drupal::service('og.membership_manager');
     foreach ($membership_manager->getMemberships($entity->id(), []) as $membership) {
       $membership->delete();
     }
