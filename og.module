@@ -88,7 +88,6 @@ function og_entity_predelete(EntityInterface $entity) {
     // @todo Delete user roles.
     // @see https://github.com/amitaibu/og/issues/175
     // og_delete_user_roles_by_group($entity_type, $entity);
-
     // Delete the group memberships.
     foreach ($membership_manager->getMembershipsByGroup($entity, []) as $membership) {
       $membership->delete();
