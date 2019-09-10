@@ -1,14 +1,20 @@
 <?php
 
+declare(strict_types = 1);
+
 namespace Drupal\og\Cache\Context;
 
 use Drupal\Core\Cache\CacheableMetadata;
 use Drupal\Core\Cache\Context\CacheContextInterface;
 use Drupal\Core\Cache\Context\UserCacheContextBase;
+use Drupal\Core\Database\Connection;
+use Drupal\Core\Entity\EntityTypeManagerInterface;
+use Drupal\Core\Entity\Sql\SqlContentEntityStorage;
 use Drupal\Core\PrivateKey;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\Core\Site\Settings;
 use Drupal\og\MembershipManagerInterface;
+use Drupal\og\OgMembershipInterface;
 use Drupal\og\OgRoleInterface;
 
 /**
@@ -35,11 +41,25 @@ class OgRoleCacheContext extends UserCacheContextBase implements CacheContextInt
   const NO_CONTEXT = 'none';
 
   /**
+   * The entity type manager.
+   *
+   * @var \Drupal\Core\Entity\EntityTypeManagerInterface
+   */
+  protected $entityTypeManager;
+
+  /**
    * The membership manager service.
    *
    * @var \Drupal\og\MembershipManagerInterface
    */
   protected $membershipManager;
+
+  /**
+   * The active database connection.
+   *
+   * @var \Drupal\Core\Database\Connection
+   */
+  protected $database;
 
   /**
    * The private key service.
@@ -67,16 +87,22 @@ class OgRoleCacheContext extends UserCacheContextBase implements CacheContextInt
    *
    * @param \Drupal\Core\Session\AccountInterface $user
    *   The current user.
-   * @param \Drupal\og\MembershipManagerInterface $membership_manager
+   * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entityTypeManager
+   *   The entity type manager.
+   * @param \Drupal\og\MembershipManagerInterface $membershipManager
    *   The membership manager service.
-   * @param \Drupal\Core\PrivateKey $private_key
+   * @param \Drupal\Core\Database\Connection $database
+   *   The active database connection.
+   * @param \Drupal\Core\PrivateKey $privateKey
    *   The private key service.
    */
-  public function __construct(AccountInterface $user, MembershipManagerInterface $membership_manager, PrivateKey $private_key) {
+  public function __construct(AccountInterface $user, EntityTypeManagerInterface $entityTypeManager, MembershipManagerInterface $membershipManager, Connection $database, PrivateKey $privateKey) {
     parent::__construct($user);
 
-    $this->membershipManager = $membership_manager;
-    $this->privateKey = $private_key;
+    $this->entityTypeManager = $entityTypeManager;
+    $this->membershipManager = $membershipManager;
+    $this->database = $database;
+    $this->privateKey = $privateKey;
   }
 
   /**
@@ -86,15 +112,11 @@ class OgRoleCacheContext extends UserCacheContextBase implements CacheContextInt
     // Due to cacheability metadata bubbling this can be called often. Only
     // compute the hash once.
     if (empty($this->hashes[$this->user->id()])) {
-      $memberships = [];
-      foreach ($this->membershipManager->getMemberships($this->user) as $membership) {
-        $role_names = array_map(function (OgRoleInterface $role) {
-          return $role->getName();
-        }, $membership->getRoles());
-        if ($role_names) {
-          $memberships[$membership->getGroupEntityType()][$membership->getGroupId()] = $role_names;
-        }
-      }
+      // If the memberships are stored in a SQL database, use a fast SELECT
+      // query to retrieve the membership data. If not, fall back to loading
+      // the full membership entities.
+      $storage = $this->entityTypeManager->getStorage('og_membership');
+      $memberships = $storage instanceof SqlContentEntityStorage ? $this->getMembershipsFromDatabase() : $this->getMembershipsFromEntities();
 
       // Sort the memberships, so that the same key can be generated, even if
       // the memberships were defined in a different order.
@@ -131,6 +153,85 @@ class OgRoleCacheContext extends UserCacheContextBase implements CacheContextInt
    */
   protected function hash($identifier) {
     return hash('sha256', $this->privateKey->get() . Settings::getHashSalt() . $identifier);
+  }
+
+  /**
+   * Returns membership information by performing a database query.
+   *
+   * This method retrieves the membership data by doing a direct SELECT query on
+   * the membership database. This is very fast but can only be done on SQL
+   * databases since the query requires a JOIN between two tables.
+   *
+   * @return array[][]
+   *   An array containing membership information for the current user. The data
+   *   is in the format [$entity_type_id][$entity_id][$role_name].
+   */
+  protected function getMembershipsFromDatabase(): array {
+    $storage = $this->entityTypeManager->getStorage('og_membership');
+    if (!$storage instanceof SqlContentEntityStorage) {
+      throw new \LogicException('Can only retrieve memberships directly from SQL databases.');
+    }
+
+    /** @var \Drupal\Core\Entity\Sql\DefaultTableMapping $table_mapping */
+    $table_mapping = $storage->getTableMapping();
+    $base_table = $table_mapping->getBaseTable();
+    $role_table = $table_mapping->getFieldTableName('roles');
+    $query = $this->database->select($base_table, 'm');
+    $query->leftJoin($role_table, 'r', 'm.id = r.entity_id');
+    $query->fields('m', ['entity_type', 'entity_bundle', 'entity_id']);
+    $query->fields('r', ['roles_target_id']);
+    $query->condition('m.uid', $this->user->id());
+    $query->condition('m.state', OgMembershipInterface::STATE_ACTIVE);
+
+    $memberships = [];
+    foreach ($query->execute() as $row) {
+      $entity_type_id = $row->entity_type;
+      $entity_bundle_id = $row->entity_bundle;
+      $entity_id = $row->entity_id;
+      $role_name = $row->roles_target_id;
+
+      // If the role name is empty this is a regular authenticated user. If it
+      // is set we can derive the role name from the role ID.
+      if (empty($role_name)) {
+        $role_name = OgRoleInterface::AUTHENTICATED;
+      }
+      else {
+        $pattern = preg_quote("$entity_type_id-$entity_bundle_id-");
+        preg_match("/$pattern(.+)/", $row->roles_target_id, $matches);
+        $role_name = $matches[1];
+      }
+
+      $memberships[$entity_type_id][$entity_id][] = $role_name;
+    }
+
+    return $memberships;
+  }
+
+  /**
+   * Returns membership information by iterating over membership entities.
+   *
+   * This method uses pure Entity API methods to retrieve the data. This is slow
+   * but also works with NoSQL databases.
+   *
+   * @return array[][]
+   *   An array containing membership information for the current user. The data
+   *   is in the format [$entity_type_id][$entity_id][$role_name].
+   */
+  protected function getMembershipsFromEntities(): array {
+    $memberships = [];
+    foreach ($this->membershipManager->getMemberships($this->user->id()) as $membership) {
+      // Derive the role names from the role IDs. This is faster than loading
+      // the OgRole object from the membership.
+      $role_names = array_map(function (string $role_id) use ($membership): string {
+        $pattern = preg_quote("{$membership->getGroupEntityType()}-{$membership->getGroupBundle()}-");
+        preg_match("/$pattern(.+)/", $role_id, $matches);
+        return $matches[1];
+      }, $membership->getRolesIds());
+      if ($role_names) {
+        $memberships[$membership->getGroupEntityType()][$membership->getGroupId()] = $role_names;
+      }
+    }
+    return $memberships;
   }
 
 }

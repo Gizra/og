@@ -8,7 +8,6 @@ use Drupal\Core\Routing\Access\AccessInterface;
 use Drupal\Core\Routing\RouteMatchInterface;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\og\Og;
-use Drupal\og\OgAccess;
 use Drupal\og\OgAccessInterface;
 use Symfony\Component\Routing\Route;
 

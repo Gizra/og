@@ -13,5 +13,28 @@
     <exclude-pattern>*.min.css</exclude-pattern>
     <exclude-pattern>*.min.js</exclude-pattern>
 
-    <rule ref="./vendor/drupal/coder/coder_sniffer/Drupal" />
+    <rule ref="./vendor/drupal/coder/coder_sniffer/Drupal">
+        <!-- URLs in deprecation messages point to Github rather than drupal.org. -->
+        <exclude name="Drupal.Semantics.FunctionTriggerError.TriggerErrorSeeUrlFormat" />
+        <!-- Deprecation versions are allowed to include beta versions. -->
+        <exclude name="Drupal.Semantics.FunctionTriggerError.TriggerErrorVersion" />
+    </rule>
+    <rule ref="./vendor/drupal/coder/coder_sniffer/DrupalPractice">
+        <!-- https://github.com/Gizra/og/issues/549 -->
+        <exclude name="DrupalPractice.CodeAnalysis.VariableAnalysis.UndefinedVariable" />
+        <!-- https://github.com/Gizra/og/issues/545 -->
+        <exclude name="DrupalPractice.CodeAnalysis.VariableAnalysis.UnusedVariable" />
+        <!-- https://github.com/Gizra/og/issues/548 -->
+        <exclude name="DrupalPractice.Commenting.ExpectedException.TagFound" />
+        <!-- https://github.com/Gizra/og/issues/550 -->
+        <exclude name="DrupalPractice.Constants.GlobalDefine.GlobalConstant" />
+        <!-- https://github.com/Gizra/og/issues/544 -->
+        <exclude name="DrupalPractice.InfoFiles.NamespacedDependency.NonNamespaced" />
+        <!-- https://github.com/Gizra/og/issues/546 -->
+        <exclude name="DrupalPractice.Objects.GlobalClass.GlobalClass" />
+        <!-- https://github.com/Gizra/og/issues/547 -->
+        <exclude name="DrupalPractice.Objects.GlobalDrupal.GlobalDrupal" />
+        <!-- https://github.com/Gizra/og/issues/543 -->
+        <exclude name="DrupalPractice.Objects.GlobalFunction.GlobalFunction" />
+    </rule>
 </ruleset>

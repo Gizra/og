@@ -2,7 +2,6 @@
 
 namespace Drupal\Tests\og\Kernel\Form;
 
-use Drupal\Component\Utility\Unicode;
 use Drupal\KernelTests\KernelTestBase;
 use Drupal\node\Entity\Node;
 use Drupal\node\Entity\NodeType;
@@ -75,7 +74,7 @@ class GroupSubscribeFormTest extends KernelTestBase {
     // Create 3 test bundles and declare them as groups.
     $bundle_names = [];
     for ($i = 0; $i < 3; $i++) {
-      $bundle_name = Unicode::strtolower($this->randomMachineName());
+      $bundle_name = mb_strtolower($this->randomMachineName());
       NodeType::create(['type' => $bundle_name])->save();
       Og::groupTypeManager()->addGroup('node', $bundle_name);
       $bundle_names[] = $bundle_name;
@@ -139,7 +138,7 @@ class GroupSubscribeFormTest extends KernelTestBase {
     $user = $this->createUser(['access content']);
 
     /** @var \Drupal\og\Form\GroupSubscribeForm $form */
-    $form = \Drupal::entityManager()->getFormObject('og_membership', 'subscribe');
+    $form = \Drupal::entityTypeManager()->getFormObject('og_membership', 'subscribe');
 
     // Pending membership.
     $membership_pending = OgMembership::create();

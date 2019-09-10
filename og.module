@@ -53,11 +53,7 @@ function og_entity_insert(EntityInterface $entity) {
 
   // Other modules that implement hook_entity_insert() might already have
   // created a membership ahead of us.
-  if (!Og::getMembership($entity, $entity->getOwner(), [
-    OgMembershipInterface::STATE_ACTIVE,
-    OgMembershipInterface::STATE_PENDING,
-    OgMembershipInterface::STATE_BLOCKED,
-  ])) {
+  if (!Og::getMembership($entity, $entity->getOwner(), OgMembershipInterface::ALL_STATES)) {
     $membership = Og::createMembership($entity, $entity->getOwner());
     $membership->save();
   }
@@ -76,8 +72,8 @@ function og_entity_update(EntityInterface $entity) {
  */
 function og_entity_predelete(EntityInterface $entity) {
   if (Og::isGroup($entity->getEntityTypeId(), $entity->bundle())) {
-    // Register orphaned group content for deletion, if this option has been
-    // enabled.
+    // Register orphaned group content and user memberships for deletion, if
+    // this option has been enabled.
     $config = \Drupal::config('og.settings');
     if ($config->get('delete_orphans')) {
       $plugin_id = $config->get('delete_orphans_plugin_id');
@@ -94,7 +90,7 @@ function og_entity_predelete(EntityInterface $entity) {
   if ($entity instanceof UserInterface) {
     /** @var \Drupal\og\MembershipManagerInterface $membership_manager */
     $membership_manager = \Drupal::service('og.membership_manager');
-    foreach ($membership_manager->getMemberships($entity, []) as $membership) {
+    foreach ($membership_manager->getMemberships($entity->id(), []) as $membership) {
       $membership->delete();
     }
   }
@@ -142,8 +138,16 @@ function og_entity_access(EntityInterface $entity, $operation, AccountInterface 
 
   $entity_type_id = $entity->getEntityTypeId();
   $bundle_id = $entity->bundle();
+  $is_group_content = Og::isGroupContent($entity_type_id, $bundle_id);
 
-  if (!Og::isGroup($entity_type_id, $bundle_id) && !Og::isGroupContent($entity_type_id, $bundle_id)) {
+  // If the entity is neither a group or group content, then we have no opinion.
+  if (!Og::isGroup($entity_type_id, $bundle_id) && !$is_group_content) {
+    return AccessResult::neutral();
+  }
+
+  // If the entity type is a group content type, but the entity is not
+  // associated with any groups, we have no opinion.
+  if ($is_group_content && \Drupal::service('og.membership_manager')->getGroupCount($entity) === 0) {
     return AccessResult::neutral();
   }
 
@@ -289,14 +293,30 @@ function og_field_widget_info_alter(array &$info) {
  * Add link template to groups. We add it to all the entity types, and later on
  * return the correct access, depending if the bundle is indeed a group and
  * accessible. We do not filter here the entity type by groups, so whenever
- * GroupTypeManager::addGroup is called, it's enough to mark route to be rebuilt
- * via RouteBuilder::setRebuildNeeded.
+ * GroupTypeManagerInterface::addGroup is called, it's enough to mark route to
+ * be rebuilt via RouteBuilder::setRebuildNeeded.
  */
 function og_entity_type_alter(array &$entity_types) {
   /** @var \Drupal\Core\Entity\EntityTypeInterface $entity_type */
   foreach ($entity_types as $entity_type_id => $entity_type) {
     $entity_type->setLinkTemplate('og-admin-routes', "/group/$entity_type_id/{{$entity_type_id}}/admin");
   }
+}
+
+/**
+ * Implements hook_theme().
+ */
+function og_theme($existing, $type, $theme, $path) {
+  return [
+    'og_member_count' => [
+      'variables' => [
+        'count' => 0,
+        'membership_states' => [],
+        'group' => NULL,
+        'group_label' => NULL,
+      ],
+    ],
+  ];
 }
 
 /**
@@ -309,12 +329,10 @@ function og_entity_type_alter(array &$entity_types) {
 function og_invalidate_group_content_cache_tags(EntityInterface $entity) {
   // If group content is created or updated, invalidate the group content cache
   // tags for each of the groups this group content belongs to. This allows
-  // group listings to be cached effectively. Also invalidate the tags if the
-  // group itself changes. The cache tag format is
+  // group listings to be cached effectively. The cache tag format is
   // 'og-group-content:{group entity type}:{group entity id}'.
   $is_group_content = Og::isGroupContent($entity->getEntityTypeId(), $entity->bundle());
-  $group_is_updated = Og::isGroup($entity->getEntityTypeId(), $entity->bundle()) && !empty($entity->original);
-  if ($group_is_updated || $is_group_content) {
+  if ($is_group_content) {
     /** @var \Drupal\og\MembershipManagerInterface $membership_manager */
     $membership_manager = \Drupal::service('og.membership_manager');
     $tags = [];
@@ -325,10 +343,9 @@ function og_invalidate_group_content_cache_tags(EntityInterface $entity) {
     // the tags of the old group(s).
     /** @var \Drupal\Core\Entity\FieldableEntityInterface $entity */
     $original = !empty($entity->original) ? $entity->original : NULL;
-    if ($is_group_content && $original) {
+    if ($original) {
       /** @var \Drupal\og\OgGroupAudienceHelperInterface $group_audience_helper */
       $group_audience_helper = \Drupal::service('og.group_audience_helper');
-      $audience_has_changed = FALSE;
       /** @var \Drupal\Core\Entity\FieldableEntityInterface $original */
       foreach ($group_audience_helper->getAllGroupAudienceFields($entity->getEntityTypeId(), $entity->bundle()) as $field) {
         $field_name = $field->getName();
@@ -338,14 +355,7 @@ function og_invalidate_group_content_cache_tags(EntityInterface $entity) {
           foreach ($original_field_item_list->referencedEntities() as $old_group) {
             $tags = Cache::mergeTags($tags, $old_group->getCacheTagsToInvalidate());
           }
-          $audience_has_changed = TRUE;
         }
-      }
-      if ($audience_has_changed) {
-        // If at least a group has changed, we clear the static cache of the
-        // membership manager which stores such relations. This is important
-        // when the membership manager was used previously in the same request.
-        $membership_manager->reset();
       }
     }
 
@@ -367,6 +377,11 @@ function og_og_role_insert(OgRoleInterface $role) {
   // Create actions to add or remove the role, except for the required default
   // roles 'member' and 'non-member'. These cannot be added or removed.
   if ($role->getRoleType() === OgRoleInterface::ROLE_TYPE_REQUIRED) {
+    return;
+  }
+
+  // Do not create config while config import is in progress.
+  if (\Drupal::isConfigSyncing()) {
     return;
   }
 

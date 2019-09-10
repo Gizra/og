@@ -5,7 +5,7 @@ namespace Drupal\og\Plugin\OgGroupResolver;
 use Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
-use Drupal\og\GroupTypeManager;
+use Drupal\og\GroupTypeManagerInterface;
 use Drupal\og\OgGroupResolverBase;
 use Drupal\og\OgResolvedGroupCollectionInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
@@ -45,7 +45,7 @@ class RequestQueryArgumentResolver extends OgGroupResolverBase implements Contai
   /**
    * The group type manager.
    *
-   * @var \Drupal\og\GroupTypeManager
+   * @var \Drupal\og\GroupTypeManagerInterface
    */
   protected $groupTypeManager;
 
@@ -67,12 +67,12 @@ class RequestQueryArgumentResolver extends OgGroupResolverBase implements Contai
    *   The plugin implementation definition.
    * @param \Symfony\Component\HttpFoundation\RequestStack $request_stack
    *   The request stack.
-   * @param \Drupal\og\GroupTypeManager $group_type_manager
+   * @param \Drupal\og\GroupTypeManagerInterface $group_type_manager
    *   The group type manager.
    * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entity_type_manager
    *   The entity type manager.
    */
-  public function __construct(array $configuration, $plugin_id, $plugin_definition, RequestStack $request_stack, GroupTypeManager $group_type_manager, EntityTypeManagerInterface $entity_type_manager) {
+  public function __construct(array $configuration, $plugin_id, $plugin_definition, RequestStack $request_stack, GroupTypeManagerInterface $group_type_manager, EntityTypeManagerInterface $entity_type_manager) {
     parent::__construct($configuration, $plugin_id, $plugin_definition);
     $this->requestStack = $request_stack;
     $this->groupTypeManager = $group_type_manager;

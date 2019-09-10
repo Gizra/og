@@ -38,7 +38,7 @@ class OgRoleTest extends KernelTestBase {
   /**
    * The group type manager.
    *
-   * @var \Drupal\og\GroupTypeManager
+   * @var \Drupal\og\GroupTypeManagerInterface
    */
   protected $groupTypeManager;
 

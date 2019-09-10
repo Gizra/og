@@ -2,7 +2,7 @@
 
 namespace Drupal\Tests\og\Kernel;
 
-use Drupal\Component\Utility\SafeMarkup;
+use Drupal\Component\Render\FormattableMarkup;
 use Drupal\KernelTests\KernelTestBase;
 use Drupal\node\Entity\NodeType;
 use Drupal\og\Event\PermissionEvent;
@@ -131,8 +131,7 @@ class PermissionEventTest extends KernelTestBase {
       'administer group',
       'approve and deny subscription',
       'manage members',
-      'manage permissions',
-      'manage roles',
+      'administer permissions',
       'subscribe without approval',
       'subscribe',
       'update group',
@@ -170,7 +169,7 @@ class PermissionEventTest extends KernelTestBase {
       // Test retrieving permissions for a group that has no group content types
       // associated with it.
       [
-    [],
+        [],
         // It should only return the default permissions.
         $default_permissions,
         // The list of permissions should only contain the group level
@@ -183,9 +182,9 @@ class PermissionEventTest extends KernelTestBase {
       // Test retrieving permissions for a group that has a group content type
       // associated with it.
       [
-    [
-      'node' => ['test_group_content'],
-    ],
+        [
+          'node' => ['test_group_content'],
+        ],
         // It should return the default permissions as well as the permissions
         // to create, delete and update group content.
         array_merge($default_permissions, $group_content_permissions),
@@ -209,7 +208,7 @@ class PermissionEventTest extends KernelTestBase {
    * @see t()
    */
   public function t($string, array $args = [], array $options = []) {
-    return SafeMarkup::format($string, $args);
+    return new FormattableMarkup($string, $args);
   }
 
   /**

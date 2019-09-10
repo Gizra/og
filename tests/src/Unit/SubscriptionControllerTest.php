@@ -5,6 +5,7 @@ namespace Drupal\Tests\og\Unit;
 use Drupal\Core\DependencyInjection\ContainerBuilder;
 use Drupal\Core\Entity\ContentEntityInterface;
 use Drupal\Core\Entity\EntityFormBuilderInterface;
+use Drupal\Core\Messenger\MessengerInterface;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\Core\Url;
 use Drupal\og\Controller\SubscriptionController;
@@ -51,6 +52,13 @@ class SubscriptionControllerTest extends UnitTestCase {
   protected $ogAccess;
 
   /**
+   * The mocked messenger service.
+   *
+   * @var \Drupal\Core\Messenger\MessengerInterface|\Prophecy\Prophecy\ObjectProphecy
+   */
+  protected $messenger;
+
+  /**
    * The OG membership entity.
    *
    * @var \Drupal\og\OgMembershipInterface|\Prophecy\Prophecy\ObjectProphecy
@@ -72,6 +80,13 @@ class SubscriptionControllerTest extends UnitTestCase {
   protected $user;
 
   /**
+   * A user ID to use in the test.
+   *
+   * @var int
+   */
+  protected $userId;
+
+  /**
    * {@inheritdoc}
    */
   public function setUp() {
@@ -79,9 +94,13 @@ class SubscriptionControllerTest extends UnitTestCase {
     $this->group = $this->prophesize(ContentEntityInterface::class);
     $this->membershipManager = $this->prophesize(MembershipManagerInterface::class);
     $this->ogAccess = $this->prophesize(OgAccessInterface::class);
+    $this->messenger = $this->prophesize(MessengerInterface::class);
     $this->ogMembership = $this->prophesize(OgMembershipInterface::class);
     $this->url = $this->prophesize(Url::class);
     $this->user = $this->prophesize(AccountInterface::class);
+
+    $this->userId = rand(20, 50);
+    $this->user->id()->willReturn($this->userId);
 
     // Set the container for the string translation service.
     $container = new ContainerBuilder();
@@ -108,7 +127,7 @@ class SubscriptionControllerTest extends UnitTestCase {
 
     $this
       ->membershipManager
-      ->getMembership($this->group->reveal(), $this->user->reveal(), $states)
+      ->getMembership($this->group->reveal(), $this->userId, $states)
       ->willReturn(NULL);
 
     $this->unsubscribe();
@@ -129,7 +148,7 @@ class SubscriptionControllerTest extends UnitTestCase {
 
     $this
       ->membershipManager
-      ->getMembership($this->group->reveal(), $this->user->reveal(), $states)
+      ->getMembership($this->group->reveal(), $this->userId, $states)
       ->willReturn($this->ogMembership->reveal());
 
     $this
@@ -155,7 +174,7 @@ class SubscriptionControllerTest extends UnitTestCase {
 
     $this
       ->membershipManager
-      ->getMembership($this->group->reveal(), $this->user->reveal(), $states)
+      ->getMembership($this->group->reveal(), $this->userId, $states)
       ->willReturn($this->ogMembership->reveal());
 
     $this
@@ -203,7 +222,7 @@ class SubscriptionControllerTest extends UnitTestCase {
 
     $this
       ->membershipManager
-      ->getMembership($this->group->reveal(), $this->user->reveal(), $states)
+      ->getMembership($this->group->reveal(), $this->userId, $states)
       ->willReturn($this->ogMembership->reveal());
 
     $this
@@ -211,17 +230,10 @@ class SubscriptionControllerTest extends UnitTestCase {
       ->getState()
       ->willReturn($state);
 
-    $entity_id = rand(20, 50);
-
-    $this
-      ->user
-      ->id()
-      ->willReturn($entity_id);
-
     $this
       ->group
       ->getOwnerId()
-      ->willReturn($entity_id);
+      ->willReturn($this->userId);
 
     $this
       ->group
@@ -255,21 +267,8 @@ class SubscriptionControllerTest extends UnitTestCase {
    * Invoke the unsubscribe method.
    */
   protected function unsubscribe() {
-    $controller = new SubscriptionController($this->ogAccess->reveal());
+    $controller = new SubscriptionController($this->ogAccess->reveal(), $this->messenger->reveal());
     $controller->unsubscribe($this->group->reveal());
-  }
-
-}
-
-// @todo Delete after https://www.drupal.org/node/1858196 is in.
-namespace Drupal\og\Controller;
-
-if (!function_exists('drupal_set_message')) {
-
-  /**
-   * Mocking for drupal_set_message().
-   */
-  function drupal_set_message() {
   }
 
 }

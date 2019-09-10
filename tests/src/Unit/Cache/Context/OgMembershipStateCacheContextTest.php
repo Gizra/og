@@ -96,7 +96,7 @@ class OgMembershipStateCacheContextTest extends OgContextCacheContextTestBase {
     ];
 
     $this->membershipManager
-      ->getMembership($this->group->reveal(), $this->user->reveal(), $states)
+      ->getMembership($this->group->reveal(), $this->user->reveal()->id(), $states)
       ->willReturn($state);
   }
 

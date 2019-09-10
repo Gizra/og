@@ -10,7 +10,6 @@ use Drupal\Core\Field\FieldStorageDefinitionInterface;
 use Drupal\Core\Field\Plugin\Field\FieldWidget\EntityReferenceAutocompleteWidget;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\og\OgAccess;
-use Drupal\user\Entity\User;
 
 /**
  * Plugin implementation of the 'entity_reference autocomplete' widget.
@@ -72,7 +71,7 @@ class OgComplex extends EntityReferenceAutocompleteWidget {
 
     /** @var \Drupal\og\MembershipManagerInterface $membership_manager */
     $membership_manager = \Drupal::service('og.membership_manager');
-    $user_groups = $membership_manager->getUserGroups(User::load(\Drupal::currentUser()->id()));
+    $user_groups = $membership_manager->getUserGroups(\Drupal::currentUser()->id());
     $user_groups_target_type = isset($user_groups[$target_type]) ? $user_groups[$target_type] : [];
     $user_group_ids = array_map(function ($group) {
       return $group->id();
@@ -195,7 +194,7 @@ class OgComplex extends EntityReferenceAutocompleteWidget {
    *   A renderable element with the "other groups".
    */
   protected function otherGroupsWidget(FieldItemListInterface $items, FormStateInterface $form_state) {
-    if ($this->fieldDefinition->getTargetEntityTypeId() == 'user') {
+    if ($this->fieldDefinition->getTargetEntityTypeId() === 'user') {
       $description = $this->t('As groups administrator, associate this user with groups you do <em>not</em> belong to.');
     }
     else {
@@ -235,7 +234,7 @@ class OgComplex extends EntityReferenceAutocompleteWidget {
 
     /** @var \Drupal\og\MembershipManagerInterface $membership_manager */
     $membership_manager = \Drupal::service('og.membership_manager');
-    $user_groups = $membership_manager->getUserGroups(User::load(\Drupal::currentUser()->id()));
+    $user_groups = $membership_manager->getUserGroups(\Drupal::currentUser()->id());
     $user_groups_target_type = isset($user_groups[$target_type]) ? $user_groups[$target_type] : [];
     $user_group_ids = array_map(function ($group) {
       return $group->id();

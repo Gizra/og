@@ -299,7 +299,7 @@ class OgRole extends Role implements OgRoleInterface {
   /**
    * Gets the group manager.
    *
-   * @return \Drupal\og\GroupTypeManager
+   * @return \Drupal\og\GroupTypeManagerInterface
    *   The group manager.
    */
   protected function groupTypeManager() {
