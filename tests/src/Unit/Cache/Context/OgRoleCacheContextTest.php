@@ -1,14 +1,19 @@
 <?php
 
+declare(strict_types = 1);
+
 namespace Drupal\Tests\og\Unit\Cache\Context;
 
+use Drupal\Core\Cache\Context\CacheContextInterface;
+use Drupal\Core\Database\Connection;
+use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\PrivateKey;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\Core\Site\Settings;
 use Drupal\og\Cache\Context\OgRoleCacheContext;
 use Drupal\og\MembershipManagerInterface;
 use Drupal\og\OgMembershipInterface;
-use Drupal\og\OgRoleInterface;
+use Drupal\Tests\og\Traits\OgRoleCacheContextTestTrait;
 
 /**
  * Tests the OG role cache context.
@@ -18,12 +23,28 @@ use Drupal\og\OgRoleInterface;
  */
 class OgRoleCacheContextTest extends OgCacheContextTestBase {
 
+  use OgRoleCacheContextTestTrait;
+
+  /**
+   * The mocked entity type manager.
+   *
+   * @var \Drupal\Core\Entity\EntityTypeManagerInterface|\Prophecy\Prophecy\ObjectProphecy
+   */
+  protected $entityTypeManager;
+
   /**
    * The mocked OG membership manager service.
    *
    * @var \Drupal\og\MembershipManagerInterface|\Prophecy\Prophecy\ObjectProphecy
    */
   protected $membershipManager;
+
+  /**
+   * The mocked database connection.
+   *
+   * @var \Drupal\Core\Database\Connection|\Prophecy\Prophecy\ObjectProphecy
+   */
+  protected $database;
 
   /**
    * The mocked private key handler.
@@ -35,10 +56,12 @@ class OgRoleCacheContextTest extends OgCacheContextTestBase {
   /**
    * {@inheritdoc}
    */
-  public function setUp() {
+  public function setUp(): void {
     parent::setUp();
 
+    $this->entityTypeManager = $this->prophesize(EntityTypeManagerInterface::class);
     $this->membershipManager = $this->prophesize(MembershipManagerInterface::class);
+    $this->database = $this->prophesize(Connection::class);
     $this->privateKey = $this->prophesize(PrivateKey::class);
   }
 
@@ -49,12 +72,12 @@ class OgRoleCacheContextTest extends OgCacheContextTestBase {
    *
    * @covers ::getContext
    */
-  public function testNoMemberships() {
+  public function testNoMemberships(): void {
     // No memberships (an empty array) will be returned by the membership
     // manager.
     /** @var \Drupal\Core\Session\AccountInterface|\Prophecy\Prophecy\ObjectProphecy $user */
     $user = $this->prophesize(AccountInterface::class)->reveal();
-    $this->membershipManager->getMemberships($user)->willReturn([]);
+    $this->membershipManager->getMemberships($user->id())->willReturn([]);
 
     // The result should be the predefined 'NO_CONTEXT' value.
     $result = $this->getContextResult($user);
@@ -71,20 +94,18 @@ class OgRoleCacheContextTest extends OgCacheContextTestBase {
    *
    * @covers ::getContext
    */
-  public function testMembershipsWithOrphanedRole() {
+  public function testMembershipsWithOrphanedRole(): void {
     // Mock the membership with the orphaned role. It will return a group and
     // group entity type, but no roles.
     /** @var \Drupal\og\OgMembershipInterface|\Prophecy\Prophecy\ObjectProphecy $membership */
     $membership = $this->prophesize(OgMembershipInterface::class);
-    $membership->getGroupEntityType()->willReturn('test_entity');
-    $membership->getGroupId()->willReturn('test_id');
-    $membership->getRoles()->willReturn([]);
+    $membership->getRolesIds()->willReturn([]);
 
     // The membership with the orphaned role will be returned by the membership
     // manager.
     /** @var \Drupal\Core\Session\AccountInterface|\Prophecy\Prophecy\ObjectProphecy $user */
     $user = $this->prophesize(AccountInterface::class)->reveal();
-    $this->membershipManager->getMemberships($user)->willReturn([$membership]);
+    $this->membershipManager->getMemberships($user->id())->willReturn([$membership]);
 
     // The result should be the predefined 'NO_CONTEXT' value.
     $result = $this->getContextResult($user);
@@ -98,6 +119,9 @@ class OgRoleCacheContextTest extends OgCacheContextTestBase {
    * groups. Verify that a unique hash is returned for each combination of
    * roles.
    *
+   * This tests the fallback implementation for NoSQL databases. The main
+   * implementation is tested in a kernel test.
+   *
    * @param array $group_memberships
    *   An array that defines the roles test users have in test groups. See the
    *   data provider for a description of the format of the array.
@@ -106,10 +130,12 @@ class OgRoleCacheContextTest extends OgCacheContextTestBase {
    *   identical cache context keys, since they have identical memberships in
    *   the defined test groups.
    *
+   * @see \Drupal\Tests\og\Kernel\Cache\Context\OgRoleCacheContextTest::testMemberships()
+   *
    * @covers ::getContext
    * @dataProvider membershipsProvider
    */
-  public function testMemberships(array $group_memberships, array $expected_identical_role_groups) {
+  public function testMembershipsNoSql(array $group_memberships, array $expected_identical_role_groups): void {
     // 'Mock' the unmockable singleton that holds the Drupal settings array by
     // instantiating it and populating it with a random salt.
     new Settings(['hash_salt' => $this->randomMachineName()]);
@@ -137,19 +163,17 @@ class OgRoleCacheContextTest extends OgCacheContextTestBase {
       $memberships[$user_id] = [];
       foreach ($group_entity_type_ids as $group_entity_type_id => $group_ids) {
         foreach ($group_ids as $group_id => $roles) {
-          // Mock the role objects that will be contained in the memberships.
-          $roles = array_map(function ($role_name) {
-            /** @var \Drupal\og\OgRoleInterface|\Prophecy\Prophecy\ObjectProphecy $role */
-            $role = $this->prophesize(OgRoleInterface::class);
-            $role->getName()->willReturn($role_name);
-            return $role->reveal();
+          // Construct the role IDs that will be returned by the membership.
+          $roles_ids = array_map(function (string $role_name) use ($group_entity_type_id) {
+            return "{$group_entity_type_id}-bundle-{$role_name}";
           }, $roles);
           // Mock the expected returns of method calls on the membership.
           /** @var \Drupal\og\OgMembershipInterface|\Prophecy\Prophecy\ObjectProphecy $membership */
           $membership = $this->prophesize(OgMembershipInterface::class);
           $membership->getGroupEntityType()->willReturn($group_entity_type_id);
+          $membership->getGroupBundle()->willReturn('bundle');
           $membership->getGroupId()->willReturn($group_id);
-          $membership->getRoles()->willReturn($roles);
+          $membership->getRolesIds()->willReturn($roles_ids);
           $memberships[$user_id][++$membership_id] = $membership->reveal();
         }
       }
@@ -161,7 +185,7 @@ class OgRoleCacheContextTest extends OgCacheContextTestBase {
       // When the memberships for every user in the test case are requested from
       // the membership manager, the respective array of memberships will be
       // returned.
-      $this->membershipManager->getMemberships($user)->willReturn($memberships[$user_id]);
+      $this->membershipManager->getMemberships($user_id)->willReturn($memberships[$user_id]);
       $cache_context_ids[$user_id] = $this->getContextResult($user);
     }
 
@@ -184,167 +208,8 @@ class OgRoleCacheContextTest extends OgCacheContextTestBase {
   /**
    * {@inheritdoc}
    */
-  protected function getContextResult(AccountInterface $user = NULL) {
-    return $this->getCacheContext($user)->getContext();
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  protected function getCacheContext(AccountInterface $user = NULL) {
-    return new OgRoleCacheContext($user, $this->membershipManager->reveal(), $this->privateKey->reveal());
-  }
-
-  /**
-   * Data provider for testMemberships().
-   *
-   * Format of the user list:
-   *
-   * @code
-   *   $user_id => [
-   *     $group_entity_type_id => [
-   *       $group_id => [
-   *         $role_name,
-   *       ],
-   *     ],
-   *   ],
-   * @endcode
-   *
-   * @return array
-   *   An array of test data, each array consisting of two arrays. The first
-   *   array defines a list of users, the groups of which they are a member, and
-   *   the roles the users have in the groups. It is in the format described
-   *   above.
-   *   The second array contains arrays of user IDs that are expected to have
-   *   identical cache context keys, since they have identical memberships in
-   *   the defined test groups.
-   *
-   * @see ::testMemberships()
-   */
-  public function membershipsProvider() {
-    return [
-      [
-        // Set up a number of users with different roles within different
-        // groups.
-        [
-          // An anonymous user which is not a member of any groups.
-          0 => [],
-          // A user which is a normal member of three groups, one group of type
-          // node, and two groups of type entity_test.
-          1 => [
-            'node' => [
-              1 => [OgRoleInterface::AUTHENTICATED],
-            ],
-            'entity_test' => [
-              1 => [OgRoleInterface::AUTHENTICATED],
-              2 => [OgRoleInterface::AUTHENTICATED],
-            ],
-          ],
-          // A user which is a member of one single group.
-          2 => ['entity_test' => [2 => [OgRoleInterface::AUTHENTICATED]]],
-          // A user which is an administrator in one group and a regular member
-          // in another. Note that an administrator is also a normal member, so
-          // the user will have two roles.
-          3 => [
-            'node' => [
-              1 => [
-                OgRoleInterface::AUTHENTICATED,
-                OgRoleInterface::ADMINISTRATOR,
-              ],
-              2 => [OgRoleInterface::AUTHENTICATED],
-            ],
-          ],
-          // A user which has a custom role 'moderator' in three different
-          // groups.
-          4 => [
-            'node' => [
-              1 => ['moderator', OgRoleInterface::AUTHENTICATED],
-            ],
-            'entity_test' => [
-              1 => ['moderator', OgRoleInterface::AUTHENTICATED],
-              2 => ['moderator', OgRoleInterface::AUTHENTICATED],
-            ],
-          ],
-          // A user which has the same memberships as user 1, and one additional
-          // membership.
-          5 => [
-            'node' => [
-              1 => [OgRoleInterface::AUTHENTICATED],
-              2 => [OgRoleInterface::AUTHENTICATED],
-            ],
-            'entity_test' => [
-              1 => [OgRoleInterface::AUTHENTICATED],
-              2 => [OgRoleInterface::AUTHENTICATED],
-            ],
-          ],
-          // A user which has the same memberships as user 1, but defined in a
-          // different order.
-          6 => [
-            'entity_test' => [
-              2 => [OgRoleInterface::AUTHENTICATED],
-              1 => [OgRoleInterface::AUTHENTICATED],
-            ],
-            'node' => [
-              1 => [OgRoleInterface::AUTHENTICATED],
-            ],
-          ],
-          // A user which has the same memberships as user 3.
-          7 => [
-            'node' => [
-              1 => [
-                OgRoleInterface::AUTHENTICATED,
-                OgRoleInterface::ADMINISTRATOR,
-              ],
-              2 => [OgRoleInterface::AUTHENTICATED],
-            ],
-          ],
-          // A user which has the same memberships as user 4, with the
-          // memberships declared in a different order.
-          8 => [
-            'node' => [
-              1 => [OgRoleInterface::AUTHENTICATED, 'moderator'],
-            ],
-            'entity_test' => [
-              1 => [OgRoleInterface::AUTHENTICATED, 'moderator'],
-              2 => [OgRoleInterface::AUTHENTICATED, 'moderator'],
-            ],
-          ],
-          // A user which has the same memberships as user 4, with the
-          // memberships declared in the same order.
-          9 => [
-            'node' => [
-              1 => ['moderator', OgRoleInterface::AUTHENTICATED],
-            ],
-            'entity_test' => [
-              1 => ['moderator', OgRoleInterface::AUTHENTICATED],
-              2 => ['moderator', OgRoleInterface::AUTHENTICATED],
-            ],
-          ],
-          // A user which has the same memberships as user 4, but with one
-          // role missing.
-          10 => [
-            'node' => [
-              1 => ['moderator', OgRoleInterface::AUTHENTICATED],
-            ],
-            'entity_test' => [
-              1 => ['moderator'],
-              2 => ['moderator', OgRoleInterface::AUTHENTICATED],
-            ],
-          ],
-        ],
-        // Define the users which have identical memberships and should have an
-        // identical hash in their cache context key.
-        [
-          [0],
-          [1, 6],
-          [2],
-          [3, 7],
-          [4, 8, 9],
-          [5],
-          [10],
-        ],
-      ],
-    ];
+  protected function getCacheContext(AccountInterface $user = NULL): CacheContextInterface {
+    return new OgRoleCacheContext($user, $this->entityTypeManager->reveal(), $this->membershipManager->reveal(), $this->database->reveal(), $this->privateKey->reveal());
   }
 
 }

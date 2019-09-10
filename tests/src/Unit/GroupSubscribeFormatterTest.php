@@ -319,7 +319,7 @@ class GroupSubscribeFormatterTest extends UnitTestCase {
 
     $this
       ->membershipManager
-      ->isMember($this->group->reveal(), $this->user->reveal(), [OgMembershipInterface::STATE_BLOCKED])
+      ->isMember($this->group->reveal(), $this->user->reveal()->id(), [OgMembershipInterface::STATE_BLOCKED])
       ->willReturn(TRUE);
 
     $elements = $this->getElements();
@@ -334,12 +334,12 @@ class GroupSubscribeFormatterTest extends UnitTestCase {
 
     $this
       ->membershipManager
-      ->isMember($this->group->reveal(), $this->user->reveal(), [OgMembershipInterface::STATE_BLOCKED])
+      ->isMember($this->group->reveal(), $this->user->reveal()->id(), [OgMembershipInterface::STATE_BLOCKED])
       ->willReturn(FALSE);
 
     $this
       ->membershipManager
-      ->isMember($this->group->reveal(), $this->user->reveal(), [OgMembershipInterface::STATE_ACTIVE, OgMembershipInterface::STATE_PENDING])
+      ->isMember($this->group->reveal(), $this->user->reveal()->id(), [OgMembershipInterface::STATE_ACTIVE, OgMembershipInterface::STATE_PENDING])
       ->willReturn(TRUE);
 
     $elements = $this->getElements();
