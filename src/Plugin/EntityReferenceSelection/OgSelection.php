@@ -12,7 +12,6 @@ use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\og\MembershipManagerInterface;
 use Drupal\og\OgAccessInterface;
-use Drupal\user\Entity\User;
 use Drupal\og\Og;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
