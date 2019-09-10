@@ -30,7 +30,7 @@ function og_access_node_grants(AccountInterface $account, $op) {
 
   /** @var \Drupal\og\MembershipManager $membership_manager */
   $membership_manager = \Drupal::service('og.membership_manager');
-  if ($groups = $membership_manager->getUserGroups($account)) {
+  if ($groups = $membership_manager->getUserGroups($account->id())) {
     foreach ($groups as $group_type => $entity_groups) {
       /** @var \Drupal\core\Entity\EntityInterface $group */
       foreach ($entity_groups as $group) {
