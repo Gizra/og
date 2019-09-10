@@ -123,6 +123,7 @@ function og_entity_delete(EntityInterface $entity) {
  * Implements hook_entity_access().
  */
 function og_entity_access(EntityInterface $entity, $operation, AccountInterface $account) {
+
   // Grant access to view roles, so that they can be shown in listings.
   if ($entity instanceof OgRoleInterface && $operation == 'view') {
     return AccessResult::allowed();
@@ -159,6 +160,21 @@ function og_entity_access(EntityInterface $entity, $operation, AccountInterface 
   /** @var \Drupal\Core\Access\AccessResult $access */
   $access = \Drupal::service('og.access')->userAccessEntity($operation, $entity, $account);
 
+  $audience_fields = \Drupal::service('og.group_audience_helper')->getAllGroupAudienceFields($entity_type_id, $bundle_id);
+  if (count($audience_fields) === 1) {
+    $field_definitions = \Drupal::service('entity_field.manager')->getFieldDefinitions($entity_type_id, $bundle_id);
+    foreach ($field_definitions as $field_name => $field_definition) {
+
+      /** @var \Drupal\Core\Field\FieldDefinitionInterface $field_definition */
+      if (!in_array($field_definition->getName(), array_keys($audience_fields))) {
+        continue;
+      }
+
+      // Check if the field needs to be required.
+      $field_definition->setRequired($access);
+    }
+  }
+
   if ($access->isAllowed()) {
     return $access;
   }
@@ -178,6 +194,11 @@ function og_entity_access(EntityInterface $entity, $operation, AccountInterface 
  */
 function og_entity_create_access(AccountInterface $account, array $context, $bundle) {
   $entity_type_id = $context['entity_type_id'];
+
+  if (!empty($context['skip_og_permission'])) {
+    // We've already been here or we want to skip the access check.
+    return;
+  }
 
   if (!Og::isGroupContent($entity_type_id, $bundle)) {
     // Not a group content.
@@ -203,17 +224,32 @@ function og_entity_create_access(AccountInterface $account, array $context, $bun
   // @see \Drupal\og\Plugin\EntityReferenceSelection\OgSelection::buildEntityQuery()
   $required = FALSE;
 
+  /** @var \Drupal\og\OgGroupAudienceHelperInterface $audience_helper */
+  $audience_helper = \Drupal::service('og.group_audience_helper');
+  $audience_fields = $audience_helper->getAllGroupAudienceFields($entity_type_id, $bundle);
   $field_definitions = \Drupal::service('entity_field.manager')->getFieldDefinitions($entity_type_id, $bundle);
+
   foreach ($field_definitions as $field_name => $field_definition) {
     /** @var \Drupal\Core\Field\FieldDefinitionInterface $field_definition */
-    if (!\Drupal::service('og.group_audience_helper')->isGroupAudienceField($field_definition)) {
+    if (!in_array($field_definition->getName(), array_keys($audience_fields))) {
       continue;
     }
 
-    $handler = Og::getSelectionHandler($field_definition);
+    if (count($audience_fields) === 1) {
+      // Set the field to required only if we have a single audience field.
+      // If we have multiple fields then the require logic will perform at the
+      // entity constraint level.
+      $field_definition->setRequired(!\Drupal::entityTypeManager()
+        ->getAccessControlHandler($entity_type_id)
+        ->createAccess($bundle, $account, ['skip_og_permission' => TRUE]));
+    }
 
-    if ($handler->getReferenceableEntities()) {
-      return AccessResult::neutral();
+    $handler = Og::getSelectionHandler($field_definition);
+    if ($handler->countReferenceableEntities()) {
+      // At least one of the fields has referenceable groups. That mean that
+      // the user can create group content when referencing the group content in
+      // at least one of the fields.
+      return AccessResult::allowed();
     }
 
     // Allow users to create content outside of groups, if none of the
@@ -284,7 +320,16 @@ function og_field_formatter_info_alter(array &$info) {
  * Implements hook_field_widget_info_alter().
  */
 function og_field_widget_info_alter(array &$info) {
-  $info['options_buttons']['field_types'][] = OgGroupAudienceHelperInterface::GROUP_REFERENCE;
+  $field_types = [
+    'entity_reference_autocomplete',
+    'entity_reference_autocomplete_tags',
+    'options_buttons',
+    'options_select',
+  ];
+
+  foreach ($field_types as $field_type) {
+    $info[$field_type]['field_types'][] = OgGroupAudienceHelperInterface::GROUP_REFERENCE;
+  }
 }
 
 /**
@@ -297,9 +342,24 @@ function og_field_widget_info_alter(array &$info) {
  * be rebuilt via RouteBuilder::setRebuildNeeded.
  */
 function og_entity_type_alter(array &$entity_types) {
+
   /** @var \Drupal\Core\Entity\EntityTypeInterface $entity_type */
   foreach ($entity_types as $entity_type_id => $entity_type) {
+
+    // Add link template to groups. We add it to all the entity types, and later
+    // on return the correct access, depending if the bundle is indeed a group
+    // and accessible. We do not filter here the entity type by groups, so
+    // whenever GroupTypeManager::addGroup is called, it's enough to mark route
+    // to be rebuilt via RouteBuilder::setRebuildNeeded.
     $entity_type->setLinkTemplate('og-admin-routes', "/group/$entity_type_id/{{$entity_type_id}}/admin");
+
+    // We won't check if an entity might be group content because we need to
+    // check if that entity has any bundle that could be a group entity and this
+    // would cause a recursion. The constraint will check there if the entity is
+    // group content or not.
+    if ($entity_type->entityClassImplements(ContentEntityInterface::class)) {
+      $entity_type->addConstraint('ValidOgMembershipMultipleReference');
+    }
   }
 }
 

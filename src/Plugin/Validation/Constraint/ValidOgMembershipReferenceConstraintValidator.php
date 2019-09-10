@@ -20,20 +20,33 @@ class ValidOgMembershipReferenceConstraintValidator extends ConstraintValidator 
       return;
     }
 
-    $entity = \Drupal::entityTypeManager()
+    $group = \Drupal::entityTypeManager()
       ->getStorage($value->getFieldDefinition()->getFieldStorageDefinition()->getSetting('target_type'))
       ->load($value->get('target_id')->getValue());
 
-    if (!$entity) {
-      // Entity with that entity ID does not exists. This could happen if a
-      // stale entity is passed for validation.
+    if (!$group) {
+      // Entity with that group ID does not exists. This could happen if a
+      // stale group is passed for validation.
       return;
     }
 
-    $params['%label'] = $entity->label();
+    $params['%label'] = $group->label();
 
-    if (!Og::isGroup($entity->getEntityTypeId(), $entity->bundle())) {
+    if (!Og::isGroup($group->getEntityTypeId(), $group->bundle())) {
       $this->context->addViolation($constraint->NotValidGroup, $params);
+    }
+
+    /** @var \Drupal\Core\Entity\ContentEntityInterface $entity */
+    $entity = $this->context->getRoot()->getValue();
+
+    /** @var \Drupal\Core\Access\AccessResult $access */
+    // @todo: Refactor the permission format in #510.
+    $permission = "create {$entity->bundle()} content";
+    $user = \Drupal::currentUser()->getAccount();
+    $access = \Drupal::service('og.access')->userAccessEntity($permission, $group, $user);
+
+    if ($access->isForbidden()) {
+      $this->context->addViolation($constraint->NotAllowedToPostInGroup, $params);
     }
   }
 
