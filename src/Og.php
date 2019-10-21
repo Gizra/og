@@ -143,7 +143,7 @@ class Og {
   public static function getMemberships(AccountInterface $user, array $states = [OgMembershipInterface::STATE_ACTIVE]) {
     /** @var \Drupal\og\MembershipManagerInterface $membership_manager */
     $membership_manager = \Drupal::service('og.membership_manager');
-    return $membership_manager->getMemberships($user, $states);
+    return $membership_manager->getMemberships($user->id(), $states);
   }
 
   /**
@@ -165,7 +165,7 @@ class Og {
   public static function getMembership(EntityInterface $group, AccountInterface $user, array $states = [OgMembershipInterface::STATE_ACTIVE]) {
     /** @var \Drupal\og\MembershipManagerInterface $membership_manager */
     $membership_manager = \Drupal::service('og.membership_manager');
-    return $membership_manager->getMembership($group, $user, $states);
+    return $membership_manager->getMembership($group, $user->id(), $states);
   }
 
   /**
@@ -205,7 +205,7 @@ class Og {
   public static function isMember(EntityInterface $group, AccountInterface $user, array $states = [OgMembershipInterface::STATE_ACTIVE]) {
     /** @var \Drupal\og\MembershipManagerInterface $membership_manager */
     $membership_manager = \Drupal::service('og.membership_manager');
-    return $membership_manager->isMember($group, $user, $states);
+    return $membership_manager->isMember($group, $user->id(), $states);
   }
 
   /**

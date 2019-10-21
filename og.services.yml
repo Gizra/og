@@ -16,7 +16,7 @@ services:
       - { name: 'cache.context'}
   cache_context.og_role:
     class: 'Drupal\og\Cache\Context\OgRoleCacheContext'
-    arguments: ['@current_user', '@og.membership_manager', '@private_key']
+    arguments: ['@current_user', '@entity_type.manager', '@og.membership_manager', '@database', '@private_key']
     tags:
       - { name: 'cache.context'}
   og.access:

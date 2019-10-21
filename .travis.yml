@@ -1,5 +1,6 @@
 language: php
 sudo: true
+dist: xenial
 
 php:
   - 7.1
@@ -28,6 +29,9 @@ mysql:
   database: og
   username: root
   encoding: utf8
+
+services:
+  - mysql
 
 before_script:
   # Remove Xdebug as we don't need it and it causes "PHP Fatal error: Maximum
