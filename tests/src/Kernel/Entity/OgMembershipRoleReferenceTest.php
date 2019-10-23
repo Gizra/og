@@ -20,11 +20,12 @@ class OgMembershipRoleReferenceTest extends KernelTestBase {
    * {@inheritdoc}
    */
   public static $modules = [
-    'og',
     'field',
     'node',
-    'user',
+    'og',
+    'options',
     'system',
+    'user',
   ];
 
   /**

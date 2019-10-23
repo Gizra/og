@@ -33,6 +33,7 @@ class MemberCountBlockTest extends KernelTestBase {
     'og',
     'system',
     'user',
+    'options',
   ];
 
   /**

@@ -137,6 +137,7 @@ class GroupSubscribeFormatter extends FormatterBase implements ContainerFactoryP
         $parameters = [
           'entity_type_id' => $group->getEntityTypeId(),
           'group' => $group->id(),
+          'og_membership_type' => OgMembershipInterface::TYPE_DEFAULT,
         ];
 
         $url = Url::fromRoute('og.subscribe', $parameters);

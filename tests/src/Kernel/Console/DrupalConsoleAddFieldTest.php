@@ -24,6 +24,7 @@ class DrupalConsoleAddFieldTest extends KernelTestBase {
     'field',
     'node',
     'og',
+    'options',
     'system',
     'user',
   ];

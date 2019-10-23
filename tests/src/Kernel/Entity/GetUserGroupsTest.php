@@ -29,6 +29,7 @@ class GetUserGroupsTest extends KernelTestBase {
     'user',
     'field',
     'og',
+    'options',
     'entity_test',
   ];
 
