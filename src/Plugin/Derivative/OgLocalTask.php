@@ -28,7 +28,7 @@ class OgLocalTask extends DeriverBase implements ContainerDeriverInterface {
    *
    * @var \Drupal\Core\Routing\RouteProvider
    */
-  protected $routProvider;
+  protected $routeProvider;
 
   /**
    * Creates an OgLocalTask object.
@@ -40,7 +40,7 @@ class OgLocalTask extends DeriverBase implements ContainerDeriverInterface {
    */
   public function __construct(GroupTypeManagerInterface $group_type_manager, RouteProvider $route_provider) {
     $this->groupTypeManager = $group_type_manager;
-    $this->routProvider = $route_provider;
+    $this->routeProvider = $route_provider;
   }
 
   /**
@@ -62,7 +62,7 @@ class OgLocalTask extends DeriverBase implements ContainerDeriverInterface {
     foreach (array_keys($this->groupTypeManager->getGroupMap()) as $entity_type_id) {
       $route_name = "entity.$entity_type_id.og_admin_routes";
 
-      if (!$this->routProvider->getRoutesByNames([$route_name])) {
+      if (!$this->routeProvider->getRoutesByNames([$route_name])) {
         // Route not found.
         continue;
       }
