@@ -394,9 +394,7 @@ class Og {
     $options = NestedArray::mergeDeep([
       'target_type' => $field_definition->getFieldStorageDefinition()->getSetting('target_type'),
       'handler' => $field_definition->getSetting('handler'),
-      'handler_settings' => [
-        'field_mode' => 'default',
-      ],
+      'field_mode' => 'default',
     ], $options);
 
     // Deep merge the handler settings.
