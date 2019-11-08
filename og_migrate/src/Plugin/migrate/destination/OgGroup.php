@@ -18,6 +18,8 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
  * @MigrateDestination(
  *   id = "og_group"
  * )
+ *
+ * @internal
  */
 class OgGroup extends DestinationBase implements ContainerFactoryPluginInterface {
 

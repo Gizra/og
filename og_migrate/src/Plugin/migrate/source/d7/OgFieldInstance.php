@@ -12,6 +12,8 @@ use Drupal\migrate\Row;
  *   id = "d7_og_field_instance",
  *   source_module = "og_migrate"
  * )
+ *
+ * @internal
  */
 class OgFieldInstance extends SqlBase {
 

@@ -1,6 +1,6 @@
 <?php
 
-namespace Drupal\Tests\og\Kernel\Migrate;
+namespace Drupal\Tests\og_migrate\Kernel\Migrate;
 
 use Drupal\og\Entity\OgRole;
 use Drupal\Tests\migrate_drupal\Kernel\d6\MigrateDrupal6TestBase;
@@ -9,6 +9,8 @@ use Drupal\Tests\migrate_drupal\Kernel\d6\MigrateDrupal6TestBase;
  * Tests migration of admin roles for Drupal 6.
  *
  * @group og_migrate
+ *
+ * @internal
  */
 class OgAdminRoleD6MigrateTest extends MigrateDrupal6TestBase {
   /**

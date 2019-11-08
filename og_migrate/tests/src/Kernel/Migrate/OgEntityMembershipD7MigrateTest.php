@@ -1,6 +1,6 @@
 <?php
 
-namespace Drupal\Tests\og\Kernel\Migrate;
+namespace Drupal\Tests\og_migrate\Kernel\Migrate;
 
 use Drupal\Tests\migrate_drupal\Kernel\d7\MigrateDrupal7TestBase;
 
@@ -8,6 +8,8 @@ use Drupal\Tests\migrate_drupal\Kernel\d7\MigrateDrupal7TestBase;
  * Tests organic group membership (group content) migration.
  *
  * @group og_migrate
+ *
+ * @internal
  */
 class OgEntityMembershipD7MigrateTest extends MigrateDrupal7TestBase {
 

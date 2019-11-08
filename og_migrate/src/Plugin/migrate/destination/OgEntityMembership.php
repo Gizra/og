@@ -16,6 +16,8 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
  * @MigrateDestination(
  *   id = "og_entity_membership"
  * )
+ *
+ * @internal
  */
 class OgEntityMembership extends DestinationBase implements ContainerFactoryPluginInterface {
 

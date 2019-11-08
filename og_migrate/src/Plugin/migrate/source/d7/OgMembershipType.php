@@ -11,6 +11,8 @@ use Drupal\migrate\Plugin\migrate\source\SqlBase;
  *   id = "d7_og_membership_type",
  *   source_module = "og_migrate"
  * )
+ *
+ * @internal
  */
 class OgMembershipType extends SqlBase {
 

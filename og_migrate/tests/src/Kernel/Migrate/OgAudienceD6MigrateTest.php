@@ -1,6 +1,6 @@
 <?php
 
-namespace Drupal\Tests\og\Kernel\Migrate;
+namespace Drupal\Tests\og_migrate\Kernel\Migrate;
 
 use Drupal\og\Og;
 use Drupal\Tests\migrate_drupal\Kernel\d6\MigrateDrupal6TestBase;
@@ -9,6 +9,8 @@ use Drupal\Tests\migrate_drupal\Kernel\d6\MigrateDrupal6TestBase;
  * Tests the creation of og_audience fields.
  *
  * @group og_migrate
+ *
+ * @internal
  */
 class OgAudienceD6MigrateTest extends MigrateDrupal6TestBase {
 

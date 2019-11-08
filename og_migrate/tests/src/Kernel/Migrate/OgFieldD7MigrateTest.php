@@ -1,6 +1,6 @@
 <?php
 
-namespace Drupal\Tests\og\Kernel\Migrate;
+namespace Drupal\Tests\og_migrate\Kernel\Migrate;
 
 use Drupal\field\Entity\FieldConfig;
 use Drupal\Tests\file\Kernel\Migrate\d7\FileMigrationSetupTrait;
@@ -10,6 +10,8 @@ use Drupal\Tests\migrate_drupal\Kernel\d7\MigrateDrupal7TestBase;
  * Tests organic group field migration.
  *
  * @group og_migrate
+ *
+ * @internal
  */
 class OgFieldD7MigrateTest extends MigrateDrupal7TestBase {
 

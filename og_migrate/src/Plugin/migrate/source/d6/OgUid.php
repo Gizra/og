@@ -12,6 +12,8 @@ use Drupal\migrate\Row;
  *   id = "d6_og_uid",
  *   source_module = "og_migrate"
  * )
+ *
+ * @internal
  */
 class OgUid extends SqlBase {
 

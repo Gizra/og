@@ -11,6 +11,8 @@ use Drupal\migrate\Plugin\migrate\source\SqlBase;
  *   id = "d6_og_audience",
  *   source_module = "og_migrate"
  * )
+ *
+ * @internal
  */
 class OgAudience extends SqlBase {
 

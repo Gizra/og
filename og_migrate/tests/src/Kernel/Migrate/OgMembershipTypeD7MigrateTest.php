@@ -1,6 +1,6 @@
 <?php
 
-namespace Drupal\Tests\og\Kernel\Migrate;
+namespace Drupal\Tests\og_migrate\Kernel\Migrate;
 
 use Drupal\Core\Entity\Entity\EntityFormDisplay;
 use Drupal\Core\Entity\Entity\EntityViewDisplay;
@@ -11,6 +11,8 @@ use Drupal\Tests\migrate_drupal\Kernel\d7\MigrateDrupal7TestBase;
  * Tests organic groups membership type migration.
  *
  * @group og_migrate
+ *
+ * @internal
  */
 class OgMembershipTypeD7MigrateTest extends MigrateDrupal7TestBase {
 

@@ -13,6 +13,8 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Deriver for Drupal 7 og membership migrations.
+ *
+ * @internal
  */
 class OgEntityDeriver extends DeriverBase implements ContainerDeriverInterface {
   use MigrationDeriverTrait;

@@ -12,6 +12,8 @@ use Drupal\migrate\Row;
  *   id = "d7_og_role",
  *   source_module = "og_migrate"
  * )
+ *
+ * @internal
  */
 class OgRole extends SqlBase {
 

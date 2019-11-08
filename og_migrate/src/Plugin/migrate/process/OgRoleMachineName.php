@@ -16,6 +16,8 @@ use Drupal\migrate\Row;
  * @MigrateProcessPlugin(
  *   id = "og_role_machine_name"
  * )
+ *
+ * @internal
  */
 class OgRoleMachineName extends ProcessPluginBase {
 

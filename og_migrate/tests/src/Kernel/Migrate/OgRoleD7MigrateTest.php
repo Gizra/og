@@ -1,6 +1,6 @@
 <?php
 
-namespace Drupal\Tests\og\Kernel\Migrate;
+namespace Drupal\Tests\og_migrate\Kernel\Migrate;
 
 use Drupal\og\Entity\OgRole;
 use Drupal\Tests\migrate_drupal\Kernel\d7\MigrateDrupal7TestBase;
@@ -9,6 +9,8 @@ use Drupal\Tests\migrate_drupal\Kernel\d7\MigrateDrupal7TestBase;
  * Tests organic group role migration.
  *
  * @group og_migrate
+ *
+ * @internal
  */
 class OgRoleD7MigrateTest extends MigrateDrupal7TestBase {
 

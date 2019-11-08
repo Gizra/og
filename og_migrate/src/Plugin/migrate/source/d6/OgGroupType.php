@@ -11,6 +11,8 @@ use Drupal\migrate\Plugin\migrate\source\SqlBase;
  *   id = "d6_og_group_type",
  *   source_module = "og_migrate"
  * )
+ *
+ * @internal
  */
 class OgGroupType extends SqlBase {
 

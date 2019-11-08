@@ -15,6 +15,8 @@ use Drupal\migrate\Row;
  *   id = "d7_og_membership",
  *   source_module = "og_migrate"
  * )
+ *
+ * @internal
  */
 class OgMembership extends SqlBase implements ConfigurableInterface {
 

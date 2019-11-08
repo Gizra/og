@@ -13,6 +13,8 @@ use Drupal\og\Og;
  * @MigrateDestination(
  *   id = "og_field"
  * )
+ *
+ * @internal
  */
 class OgField extends DestinationBase {
 

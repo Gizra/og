@@ -11,7 +11,7 @@ mysql_to_ramdisk() {
   sudo service mysql start
 }
 
-TEST_DIRS=($DRUPAL_DIR/modules/og/tests $DRUPAL_DIR/modules/og/og_ui/tests)
+TEST_DIRS=($DRUPAL_DIR/modules/og/tests $DRUPAL_DIR/modules/og/og_ui/tests $DRUPAL_DIR/modules/og/og_migrate/tests)
 
 case "$1" in
     PHP_CodeSniffer)

@@ -17,6 +17,8 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
  * @MigrateProcessPlugin(
  *   id = "og_entity_type_exists"
  * )
+ *
+ * @internal
  */
 class OgEntityTypeExists extends ProcessPluginBase implements ContainerFactoryPluginInterface {
 

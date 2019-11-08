@@ -17,6 +17,8 @@ use Drupal\migrate\Plugin\MigrationInterface;
  * @todo https://www.drupal.org/node/2952459
  *
  * @throws \Drupal\migrate\MigrateSkipRowException
+ *
+ * @internal
  */
 function og_migrate_migrate_prepare_row(Row $row, MigrateSourceInterface $source, MigrationInterface $migration) {
   // Use the source plugin id instead of the migration id,

@@ -8,6 +8,8 @@ use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
 /**
  * Subscribes to migrate.pre_save event.
+ *
+ * @internal
  */
 class OgMigratePreSaveSubscriber implements EventSubscriberInterface {
 
