@@ -2019,6 +2019,11 @@ function og_group($group_type, $gid, $values = array(), $save_created = TRUE) {
     $group = entity_load_single($group_type, $gid);
   }
 
+  if (!$group) {
+    // The group might have been loaded from a deleted group ID.
+    return;
+  }
+
   // the group ID might be the entity, so re-popualte it.
   list($gid,, $group_bundle) = entity_extract_ids($group_type, $group);
 
