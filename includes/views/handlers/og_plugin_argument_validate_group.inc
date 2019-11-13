@@ -39,7 +39,17 @@ class og_plugin_argument_validate_group extends views_plugin_argument_validate {
       return;
     }
     $group_type = $this->options['group_type'];
-    $entity = entity_load_single($group_type, $argument);
+    //if serialized, get first id for validation
+    foreach (array('+', ',') as $key => $delim) {
+      if (strpos($argument, $delim)) {
+        $ids = explode($delim, $argument);
+        if (is_numeric($ids[0])) {
+          $newarg = $ids[0];
+        }
+        break;
+      }
+    }
+    $entity = entity_load_single($group_type, isset($newarg) ? $newarg : $argument);
     if (!$entity || !og_is_group($group_type, $entity)) {
       return FALSE;
     }
