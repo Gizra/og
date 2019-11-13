@@ -23,8 +23,11 @@ class OgMembershipMetadataController extends EntityDefaultMetadataController {
       'language' => array(),
     );
 
-    // Group ID is provided in the "group" property.
-    unset($properties['gid']);
+    $properties['gid'] += array(
+      'setter callback' => 'entity_property_verbatim_set',
+      'required' => TRUE,
+    );
+
     $properties['group'] = array(
       'label' => t("OG group"),
       'type' => 'entity',
@@ -35,8 +38,25 @@ class OgMembershipMetadataController extends EntityDefaultMetadataController {
       'required' => TRUE,
     );
 
-    // Entity id is provided via the "entity" property.
-    unset($properties['etid']);
+    // Add a property for all group entity types, in order to use tokens for
+    // these entities. See https://drupal.org/node/1973686
+    foreach (og_get_all_group_entity() as $entity_type => $entity_label) {
+      $properties['group__' . $entity_type] = array(
+        'label' => $entity_label,
+        'type' => $entity_type,
+        'description' => t('The OG group when the group is a !type.', array(
+          '!type' => $entity_label,
+        )),
+        'getter callback' => 'og_entity_getter',
+        'setter callback' => 'og_entity_setter',
+        'setter permission' => 'administer group',
+      );
+    }
+
+    $properties['etid'] += array(
+      'setter callback' => 'entity_property_verbatim_set',
+      'required' => TRUE,
+    );
 
     $properties['entity'] = array(
       'label' => t('Entity'),
@@ -47,6 +67,21 @@ class OgMembershipMetadataController extends EntityDefaultMetadataController {
       'setter permission' => 'administer group',
       'required' => TRUE,
     );
+
+    // Add a property for all group content entity types, in order to use tokens
+    // for these entities. See https://drupal.org/node/1973686
+    foreach (og_get_all_group_content_entity() as $entity_type => $entity_label) {
+      $properties['entity__' . $entity_type] = array(
+        'label' => $entity_label,
+        'type' => $entity_type,
+        'description' => t('The OG entity that is a group content when it is a !type.', array(
+          '!type' => $entity_label,
+        )),
+        'getter callback' => 'og_entity_getter',
+        'setter callback' => 'og_entity_setter',
+        'setter permission' => 'administer group',
+      );
+    }
 
     $properties['created']['type'] = 'date';
     $properties['created'] += array(

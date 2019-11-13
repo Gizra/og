@@ -377,11 +377,25 @@ function og_get_field_og_membership_properties($entity, array $options, $name, $
  * We have to return the entity wrapped.
  */
 function og_entity_getter($object, array $options, $property_name) {
-  switch ($property_name) {
+  // Check that property name contains double underscores, ignoring ones that
+  // start with a double underscore.
+  if (strpos($property_name, '__')) {
+    list($real_property, $sub_property) = explode('__', $property_name, 2);
+  }
+  else {
+    $real_property = $property_name;
+  }
+  switch ($real_property) {
     case 'entity':
-      return entity_metadata_wrapper($object->entity_type, $object->etid);
+      if (empty($sub_property) || $sub_property == $object->entity_type) {
+        return entity_metadata_wrapper($object->entity_type, $object->etid);
+      }
+      break;
     case 'group':
-      return entity_metadata_wrapper($object->group_type, $object->gid);
+      if (empty($sub_property) || $sub_property == $object->group_type) {
+        return entity_metadata_wrapper($object->group_type, $object->gid);
+      }
+      break;
   }
 }
 
@@ -393,7 +407,15 @@ function og_entity_getter($object, array $options, $property_name) {
  * entity.
  */
 function og_entity_setter($object, $property_name, $wrapper) {
-  switch ($property_name) {
+  // Check that property name contains double underscores, ignoring ones that
+  // start with a double underscore.
+  if (strpos($property_name, '__')) {
+    list($real_property, $sub_property) = explode('__', $property_name, 2);
+  }
+  else {
+    $real_property = $property_name;
+  }
+  switch ($real_property) {
     case 'entity':
       $object->entity_type = $wrapper->type();
       $object->etid = $wrapper->getIdentifier();
@@ -750,7 +772,7 @@ function og_form_group_reference_validate($form, &$form_state) {
 
   $account = user_load($user->uid);
   $bundle = $form['#bundle'];
-  $entity = $form['#entity'];
+  $entity = isset($form["#$entity_type"]) ? $form["#$entity_type"] : $form['#entity'];
   list($id) = entity_extract_ids($entity_type, $entity);
 
   $op = empty($id) ? 'create' : 'update';
