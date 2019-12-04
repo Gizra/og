@@ -7,11 +7,9 @@ namespace Drupal\og;
 use Drupal\Component\Utility\NestedArray;
 use Drupal\Core\Cache\Cache;
 use Drupal\Core\Cache\CacheBackendInterface;
-use Drupal\Core\Cache\CacheTagsInvalidatorInterface;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Session\AccountInterface;
-use Drupal\Core\Update\UpdateBackend;
 use Drupal\field\Entity\FieldStorageConfig;
 use Drupal\field\FieldStorageConfigInterface;
 use Drupal\og\Entity\OgMembership;
@@ -54,7 +52,6 @@ class MembershipManager implements MembershipManagerInterface {
    *   The static cache backend.
    */
   public function __construct(EntityTypeManagerInterface $entity_type_manager, OgGroupAudienceHelperInterface $group_audience_helper, CacheBackendInterface $cache) {
-    assert($cache instanceof CacheTagsInvalidatorInterface || $cache instanceof UpdateBackend, 'The runtime cache backend must support cache tag invalidation.');
     $this->entityTypeManager = $entity_type_manager;
     $this->groupAudienceHelper = $group_audience_helper;
     $this->staticCache = $cache;
