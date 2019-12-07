@@ -27,7 +27,7 @@ abstract class OgAccessEntityTestBase extends OgAccessTestBase {
   /**
    * {@inheritdoc}
    */
-  public function setup() {
+  public function setUp() {
     parent::setUp();
 
     // Mock a group content entity.
