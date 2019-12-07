@@ -39,6 +39,8 @@ class SelectionHandlerSettingsSchemaTest extends KernelTestBase {
     $node_type->og_target_type = 'node';
     $node_type->og_target_bundles = [$bundle];
     $node_type->save();
+    // Provide at least one assertion.
+    $this->assertTrue(TRUE);
   }
 
 }
