@@ -19,7 +19,7 @@ use Drupal\og\Og;
  *   id = "og:default",
  *   label = @Translation("OG selection"),
  *   group = "og",
- *   weight = 1
+ *   weight = 1,
  * )
  */
 class OgSelection extends DefaultSelection {
