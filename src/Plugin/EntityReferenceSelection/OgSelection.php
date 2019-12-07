@@ -31,13 +31,11 @@ class OgSelection extends DefaultSelection {
    *   Returns the selection handler.
    */
   public function getSelectionHandler() {
-    $options = [
-      'target_type' => $this->configuration['target_type'],
-      // 'handler' key intentionally absent as we want the selection manager to
-      // choose the best option.
-      // @see \Drupal\Core\Entity\EntityReferenceSelection\SelectionPluginManager::getInstance()
-      'handler_settings' => $this->configuration['handler_settings'],
-    ];
+    $options = $this->getConfiguration();
+    // The 'handler' key intentionally absent as we want the selection manager
+    // to choose the best option.
+    // @see \Drupal\Core\Entity\EntityReferenceSelection\SelectionPluginManager::getInstance()
+    unset($options['handler']);
     return \Drupal::service('plugin.manager.entity_reference_selection')->getInstance($options);
   }
 
@@ -84,7 +82,7 @@ class OgSelection extends DefaultSelection {
     $identifier_key = $definition->getKey('id');
 
     $ids = [];
-    if (!empty($this->configuration['handler_settings']['field_mode']) && $this->configuration['handler_settings']['field_mode'] == 'admin') {
+    if (!empty($this->getConfiguration()['field_mode']) && $this->getConfiguration()['field_mode'] === 'admin') {
       // Don't include the groups, the user doesn't have create permission.
       foreach ($user_groups as $delta => $group) {
         $ids[] = $group->id();
