@@ -1,10 +1,6 @@
 field.storage_settings.og_standard_reference:
-  type: mapping
+  type: field.storage_settings.entity_reference
   label: 'Organic Groups reference field storage settings'
-  mapping:
-    target_type:
-      type: string
-      label: 'Type of entity to reference'
 
 field.field_settings.og_standard_reference:
   type: mapping
