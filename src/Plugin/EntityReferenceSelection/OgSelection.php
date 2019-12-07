@@ -36,6 +36,11 @@ class OgSelection extends DefaultSelection {
     // to choose the best option.
     // @see \Drupal\Core\Entity\EntityReferenceSelection\SelectionPluginManager::getInstance()
     unset($options['handler']);
+    // Remove also de backwards compatibility layer because that will be passed
+    // to the chosen selection handler setter and, as an effect, will trigger a
+    // deprecation notice.
+    // @see \Drupal\Core\Entity\EntityReferenceSelection\SelectionPluginBase::resolveBackwardCompatibilityConfiguration()
+    unset($options['handler_settings']);
     return \Drupal::service('plugin.manager.entity_reference_selection')->getInstance($options);
   }
 
