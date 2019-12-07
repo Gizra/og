@@ -15,7 +15,7 @@ use Drupal\og\OgGroupAudienceHelperInterface;
 /**
  * OG access entity base class.
  */
-class OgAccessEntityTestBase extends OgAccessTestBase {
+abstract class OgAccessEntityTestBase extends OgAccessTestBase {
 
   /**
    * A test group content entity.
