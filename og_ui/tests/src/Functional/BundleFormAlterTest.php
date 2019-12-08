@@ -21,6 +21,11 @@ class BundleFormAlterTest extends BrowserTestBase {
   public static $modules = ['block_content', 'entity_test', 'node', 'og_ui'];
 
   /**
+   * {@inheritdoc}
+   */
+  protected $defaultTheme = 'stark';
+
+  /**
    * An administrator user.
    *
    * @var \Drupal\user\Entity\User
