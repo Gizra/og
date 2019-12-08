@@ -107,7 +107,7 @@ class SelectionHandlerTest extends KernelTestBase {
     $this->fieldDefinition = Og::createField(OgGroupAudienceHelperInterface::DEFAULT_FIELD, 'node', $this->groupContentBundle);
 
     // Get the storage of the field.
-    $this->selectionHandler = Og::getSelectionHandler($this->fieldDefinition, ['handler_settings' => ['field_mode' => 'default']]);
+    $this->selectionHandler = Og::getSelectionHandler($this->fieldDefinition, ['field_mode' => 'default']);
 
     // Create two users.
     $this->user1 = User::create(['name' => $this->randomString()]);
@@ -151,7 +151,7 @@ class SelectionHandlerTest extends KernelTestBase {
     $this->assertEquals($user2_groups, array_keys($groups[$this->groupBundle]));
 
     // Check the other groups.
-    $this->selectionHandler = Og::getSelectionHandler($this->fieldDefinition, ['handler_settings' => ['field_mode' => 'admin']]);
+    $this->selectionHandler = Og::getSelectionHandler($this->fieldDefinition, ['field_mode' => 'admin']);
 
     $this->setCurrentAccount($this->user1);
     $groups = $this->selectionHandler->getReferenceableEntities();
