@@ -20,8 +20,6 @@
         <exclude name="Drupal.Semantics.FunctionTriggerError.TriggerErrorVersion" />
     </rule>
     <rule ref="./vendor/drupal/coder/coder_sniffer/DrupalPractice">
-        <!-- https://github.com/Gizra/og/issues/549 -->
-        <exclude name="DrupalPractice.CodeAnalysis.VariableAnalysis.UndefinedVariable" />
         <!-- https://github.com/Gizra/og/issues/545 -->
         <exclude name="DrupalPractice.CodeAnalysis.VariableAnalysis.UnusedVariable" />
         <!-- https://github.com/Gizra/og/issues/548 -->
