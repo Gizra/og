@@ -21,7 +21,7 @@ class ValidOgMembershipReferenceConstraint extends Constraint {
    *
    * @var string
    */
-  public $NotValidGroup = 'The entity %label is not defined as a group.';
+  public $notValidGroup = 'The entity %label is not defined as a group.';
 
   /**
    * Not a valid group message.

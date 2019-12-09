@@ -29,7 +29,7 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
  *   id = "og:default",
  *   label = @Translation("OG selection"),
  *   group = "og",
- *   weight = 1
+ *   weight = 1,
  * )
  */
 class OgSelection extends DefaultSelection {
@@ -106,13 +106,16 @@ class OgSelection extends DefaultSelection {
    *   Returns the selection handler.
    */
   public function getSelectionHandler() {
-    $options = [
-      'target_type' => $this->configuration['target_type'],
-      // 'handler' key intentionally absent as we want the selection manager to
-      // choose the best option.
-      // @see \Drupal\Core\Entity\EntityReferenceSelection\SelectionPluginManager::getInstance()
-      'handler_settings' => $this->configuration['handler_settings'],
-    ];
+    $options = $this->getConfiguration();
+    // The 'handler' key intentionally absent as we want the selection manager
+    // to choose the best option.
+    // @see \Drupal\Core\Entity\EntityReferenceSelection\SelectionPluginManager::getInstance()
+    unset($options['handler']);
+    // Remove also the backwards compatibility layer because that will be passed
+    // to the chosen selection handler setter and, as an effect, will trigger a
+    // deprecation notice.
+    // @see \Drupal\Core\Entity\EntityReferenceSelection\SelectionPluginBase::resolveBackwardCompatibilityConfiguration()
+    unset($options['handler_settings']);
     return \Drupal::service('plugin.manager.entity_reference_selection')->getInstance($options);
   }
 

@@ -29,6 +29,11 @@ class GroupUpdateTest extends BrowserTestBase {
   public static $modules = ['node', 'entity_test', 'og'];
 
   /**
+   * {@inheritdoc}
+   */
+  protected $defaultTheme = 'stark';
+
+  /**
    * Test content group.
    *
    * @var \Drupal\Core\Entity\EntityInterface
