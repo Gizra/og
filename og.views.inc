@@ -66,7 +66,7 @@ function og_field_views_data(FieldStorageConfigInterface $field_storage) {
         // Provide a reverse relationship for the entity type that is referenced
         // by the field.
         $args['@entity'] = $entity_type->getLabel();
-        $args['@label'] = $target_entity_type->getLowercaseLabel();
+        $args['@label'] = $target_entity_type->getSingularLabel();
         $pseudo_field_name = 'reverse__' . $entity_type_id . '__' . $field_name;
         $data[$target_base_table][$pseudo_field_name]['relationship'] = [
           'title' => t('@entity using @field_name', $args),

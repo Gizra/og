@@ -87,8 +87,12 @@ class GroupAudienceTest extends KernelTestBase {
     Og::createField(OgGroupAudienceHelperInterface::DEFAULT_FIELD, 'entity_test', $bundle, ['field_name' => $field_name1]);
     Og::createField(OgGroupAudienceHelperInterface::DEFAULT_FIELD, 'entity_test', $bundle, ['field_name' => $field_name2]);
 
-    $field_names = $this->groupAudienceHelper->getAllGroupAudienceFields('entity_test', $bundle);
-    $this->assertEquals([$field_name1, $field_name2], array_keys($field_names));
+    $expected_field_names = [$field_name1, $field_name2];
+    $actual_field_names = array_keys($this->groupAudienceHelper->getAllGroupAudienceFields('entity_test', $bundle));
+    sort($expected_field_names);
+    sort($actual_field_names);
+
+    $this->assertEquals($expected_field_names, $actual_field_names);
 
     // Test Og::isGroupContent method, which is just a wrapper around
     // OgGroupAudienceHelper::hasGroupAudienceFields().

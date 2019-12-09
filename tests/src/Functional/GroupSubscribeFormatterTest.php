@@ -22,6 +22,11 @@ class GroupSubscribeFormatterTest extends BrowserTestBase {
   public static $modules = ['node', 'og', 'options'];
 
   /**
+   * {@inheritdoc}
+   */
+  protected $defaultTheme = 'stark';
+
+  /**
    * Test entity group.
    *
    * @var \Drupal\node\NodeInterface

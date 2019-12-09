@@ -77,7 +77,9 @@ class DrupalConsoleAddFieldTest extends KernelTestBase {
     }
 
     $field_names = \Drupal::service('og.group_audience_helper')->getAllGroupAudienceFields('node', 'article');
-    $this->assertEquals(['og_group_ref', 'og_audience'], array_keys($field_names));
+    // Make the order predictable for test.
+    ksort($field_names);
+    $this->assertEquals(['og_audience', 'og_group_ref'], array_keys($field_names));
   }
 
 }
