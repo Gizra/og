@@ -46,7 +46,7 @@ class ValidOgMembershipReferenceConstraintValidator extends ConstraintValidator 
     $access = \Drupal::service('og.access')->userAccessEntity($permission, $group, $user);
 
     if ($access->isForbidden()) {
-      $this->context->addViolation($constraint->NotAllowedToPostInGroup, $params);
+      $this->context->addViolation($constraint->notAllowedToPostInGroup, $params);
     }
   }
 
