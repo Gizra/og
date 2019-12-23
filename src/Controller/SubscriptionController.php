@@ -5,12 +5,12 @@ namespace Drupal\og\Controller;
 use Drupal\Core\Controller\ControllerBase;
 use Drupal\Core\Entity\ContentEntityInterface;
 use Drupal\Core\Entity\EntityInterface;
+use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Messenger\MessengerInterface;
 use Drupal\Core\Url;
 use Drupal\og\OgAccessInterface;
 use Drupal\og\OgMembershipInterface;
 use Drupal\og\OgMembershipTypeInterface;
-use Drupal\user\Entity\User;
 use Drupal\user\EntityOwnerInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpFoundation\RedirectResponse;
@@ -37,16 +37,30 @@ class SubscriptionController extends ControllerBase {
   protected $messenger;
 
   /**
+   * Entity type manager service.
+   *
+   * @var \Drupal\Core\Entity\EntityStorageInterface|mixed|object
+   *    Gets storage of user.
+   */
+  protected $entityTypeManager;
+
+  /**
    * Constructs a SubscriptionController object.
    *
    * @param \Drupal\og\OgAccessInterface $og_access
    *   The OG access service.
    * @param \Drupal\Core\Messenger\MessengerInterface $messenger
    *   The messenger service.
+   * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entity_type_manager
+   *   The entity type manager service.
+   *
+   * @throws \Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException
+   * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundException
    */
-  public function __construct(OgAccessInterface $og_access, MessengerInterface $messenger) {
+  public function __construct(OgAccessInterface $og_access, MessengerInterface $messenger, EntityTypeManagerInterface $entity_type_manager) {
     $this->ogAccess = $og_access;
     $this->messenger = $messenger;
+    $this->entityTypeManager = $entity_type_manager->getStorage('user');
   }
 
   /**
@@ -55,7 +69,8 @@ class SubscriptionController extends ControllerBase {
   public static function create(ContainerInterface $container) {
     return new static(
       $container->get('og.access'),
-      $container->get('messenger')
+      $container->get('messenger'),
+      $container->get('entity_type.manager')
     );
   }
 
@@ -84,7 +99,7 @@ class SubscriptionController extends ControllerBase {
       throw new AccessDeniedHttpException();
     }
 
-    $user = User::load($this->currentUser()->id());
+    $user = $this->entityTypeManager->load($this->currentUser()->id());
 
     if ($user->isAnonymous()) {
       // Anonymous user can't request membership.
