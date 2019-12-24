@@ -132,6 +132,13 @@ class GroupTypeManager implements GroupTypeManagerInterface {
   protected $groupAudienceHelper;
 
   /**
+   * The Entity type manager service.
+   *
+   * @var \Drupal\Core\Entity\EntityTypeManagerInterface
+   */
+  protected $entityTypeManager;
+
+  /**
    * Constructs a GroupTypeManager object.
    *
    * @param \Drupal\Core\Config\ConfigFactoryInterface $config_factory
@@ -162,6 +169,7 @@ class GroupTypeManager implements GroupTypeManagerInterface {
     $this->ogRoleManager = $og_role_manager;
     $this->routeBuilder = $route_builder;
     $this->groupAudienceHelper = $group_audience_helper;
+    $this->entityTypeManager = $entity_type_manager;
   }
 
   /**
@@ -377,7 +385,7 @@ class GroupTypeManager implements GroupTypeManagerInterface {
 
     $this->groupRelationMap = [];
 
-    $user_bundles = \Drupal::entityTypeManager()->getDefinition('user')->getKey('bundle') ?: ['user'];
+    $user_bundles = $this->entityTypeManager->getDefinition('user')->getKey('bundle') ?: ['user'];
 
     foreach ($this->entityTypeBundleInfo->getAllBundleInfo() as $group_content_entity_type_id => $bundles) {
       foreach ($bundles as $group_content_bundle_id => $bundle_info) {
