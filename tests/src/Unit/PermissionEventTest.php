@@ -445,6 +445,8 @@ class PermissionEventTest extends UnitTestCase {
   public function testOffsetSetInvalidPermission($key, $permission) {
     $event = new PermissionEvent($this->randomMachineName(), $this->randomMachineName(), []);
     $event[$key] = $permission;
+
+    return $event;
   }
 
   /**
