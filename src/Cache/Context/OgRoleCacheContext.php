@@ -121,9 +121,9 @@ class OgRoleCacheContext extends UserCacheContextBase implements CacheContextInt
       // Sort the memberships, so that the same key can be generated, even if
       // the memberships were defined in a different order.
       ksort($memberships);
-      foreach ($memberships as $entity_type_id => &$groups) {
+      foreach ($memberships as &$groups) {
         ksort($groups);
-        foreach ($groups as $group_id => &$role_names) {
+        foreach ($groups as &$role_names) {
           sort($role_names);
         }
       }
