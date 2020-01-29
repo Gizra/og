@@ -22,7 +22,6 @@
     <rule ref="./vendor/drupal/coder/coder_sniffer/DrupalPractice">
         <!-- https://github.com/Gizra/og/issues/549 -->
         <exclude name="DrupalPractice.CodeAnalysis.VariableAnalysis.UndefinedVariable" />
-        <!-- https://github.com/Gizra/og/issues/545 -->
         <!-- https://github.com/Gizra/og/issues/548 -->
         <exclude name="DrupalPractice.Commenting.ExpectedException.TagFound" />
         <!-- https://github.com/Gizra/og/issues/550 -->
