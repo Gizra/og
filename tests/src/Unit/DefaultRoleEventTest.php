@@ -325,7 +325,7 @@ class DefaultRoleEventTest extends UnitTestCase {
     $this->expectOgRoleCreation($invalid_roles);
 
     try {
-      foreach ($invalid_roles as $name => $invalid_role) {
+      foreach ($invalid_roles as $invalid_role) {
         $this->defaultRoleEvent->addRole($invalid_role);
       }
       $this->fail('An invalid role cannot be added.');
@@ -368,8 +368,8 @@ class DefaultRoleEventTest extends UnitTestCase {
   public function testSetInvalidRole(array $invalid_roles) {
     $this->expectOgRoleCreation($invalid_roles);
 
-    foreach ($invalid_roles as $name => $invalid_role) {
-      $this->expectException(\InvalidArgumentException::class);
+    $this->expectException(\InvalidArgumentException::class);
+    foreach ($invalid_roles as $invalid_role) {
       $this->defaultRoleEvent->setRole($invalid_role);
     }
   }

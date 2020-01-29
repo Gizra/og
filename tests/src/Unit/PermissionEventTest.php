@@ -441,8 +441,11 @@ class PermissionEventTest extends UnitTestCase {
    */
   public function testOffsetSetInvalidPermission($key, $permission) {
     $this->expectException(\InvalidArgumentException::class);
+
+    // phpcs:disable DrupalPractice.CodeAnalysis.VariableAnalysis.UnusedVariable
     $event = new PermissionEvent($this->randomMachineName(), $this->randomMachineName(), []);
     $event[$key] = $permission;
+    // phpcs:enable DrupalPractice.CodeAnalysis.VariableAnalysis.UnusedVariable
   }
 
   /**
