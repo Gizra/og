@@ -126,7 +126,6 @@ class OgContext implements OgContextInterface, ContextProviderInterface {
    */
   protected function getBestCandidate() {
     $collection = new OgResolvedGroupCollection();
-    $plugins = [];
 
     // Retrieve the list of group resolvers. These are stored in config, and are
     // ordered by priority.
@@ -135,8 +134,6 @@ class OgContext implements OgContextInterface, ContextProviderInterface {
     foreach ($group_resolvers as $plugin_id) {
       /** @var \Drupal\og\OgGroupResolverInterface $plugin */
       if ($plugin = $this->pluginManager->createInstance($plugin_id)) {
-        $plugins[$plugin_id] = $plugin;
-
         // Set the default vote weight according to the plugin's priority.
         $collection->setVoteWeight($priority);
 
