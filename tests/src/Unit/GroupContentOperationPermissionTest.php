@@ -332,11 +332,11 @@ class GroupContentOperationPermissionTest extends UnitTestCase {
    * Tests getting an invalid property from a group content permission.
    *
    * @covers ::get
-   *
-   * @expectedException \InvalidArgumentException
    */
   public function testGetInvalidProperty() {
     $permission = new GroupContentOperationPermission();
+
+    $this->expectException(\InvalidArgumentException::class);
     $permission->get('invalid property');
   }
 
@@ -344,11 +344,11 @@ class GroupContentOperationPermissionTest extends UnitTestCase {
    * Tests setting an invalid property for a group content permission.
    *
    * @covers ::set
-   *
-   * @expectedException \InvalidArgumentException
    */
   public function testSetInvalidProperty() {
     $permission = new GroupContentOperationPermission();
+
+    $this->expectException(\InvalidArgumentException::class);
     $permission->set('invalid property', 'a value');
   }
 
@@ -356,11 +356,11 @@ class GroupContentOperationPermissionTest extends UnitTestCase {
    * Tests setting an invalid restrict access for a group content permission.
    *
    * @covers ::set
-   *
-   * @expectedException \InvalidArgumentException
    */
   public function testSetInvalidRestrictAccessValue() {
     $permission = new GroupContentOperationPermission();
+
+    $this->expectException(\InvalidArgumentException::class);
     $permission->set('restrict access', 'invalid value');
   }
 
@@ -368,11 +368,11 @@ class GroupContentOperationPermissionTest extends UnitTestCase {
    * Tests setting an invalid ownership property for a group content permission.
    *
    * @covers ::set
-   *
-   * @expectedException \InvalidArgumentException
    */
   public function testSetInvalidOwnershipValue() {
     $permission = new GroupContentOperationPermission();
+
+    $this->expectException(\InvalidArgumentException::class);
     $permission->set('owner', 'invalid value');
   }
 

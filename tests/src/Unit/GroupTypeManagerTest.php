@@ -221,7 +221,6 @@ class GroupTypeManagerTest extends UnitTestCase {
    * Tests adding an existing group.
    *
    * @covers ::addGroup
-   * @expectedException \InvalidArgumentException
    */
   public function testAddGroupExisting() {
     // It is expected that the group map will be retrieved from config.
@@ -237,6 +236,7 @@ class GroupTypeManagerTest extends UnitTestCase {
     $manager = $this->createGroupManager();
 
     // Add to existing.
+    $this->expectException(\InvalidArgumentException::class);
     $manager->addGroup('test_entity', 'c');
 
     $this->assertSame(['a', 'b', 'c'], $manager->getGroupBundleIdsByEntityType('test_entity'));
