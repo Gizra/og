@@ -363,7 +363,9 @@ class Og {
   protected static function getFieldBaseDefinition($plugin_id) {
     /** @var OgFieldsPluginManager $plugin_manager */
     $plugin_manager = \Drupal::service('plugin.manager.og.fields');
-    if (!$field_config = $plugin_manager->getDefinition($plugin_id)) {
+
+    $field_config = $plugin_manager->getDefinition($plugin_id);
+    if (!$field_config) {
       throw new \Exception("The Organic Groups field with plugin ID $plugin_id is not a valid plugin.");
     }
 
@@ -391,16 +393,14 @@ class Og {
       throw new \Exception("The field $field_name is not an audience field.");
     }
 
-    $options = NestedArray::mergeDeep([
+    $default_options = [
       'target_type' => $field_definition->getFieldStorageDefinition()->getSetting('target_type'),
       'handler' => $field_definition->getSetting('handler'),
-      'handler_settings' => [
-        'field_mode' => 'default',
-      ],
-    ], $options);
+      'field_mode' => 'default',
+    ] + $field_definition->getSetting('handler_settings');
 
-    // Deep merge the handler settings.
-    $options['handler_settings'] = NestedArray::mergeDeep($field_definition->getSetting('handler_settings'), $options['handler_settings']);
+    // Override with passed $options.
+    $options = NestedArray::mergeDeep($default_options, $options);
 
     return \Drupal::service('plugin.manager.entity_reference_selection')->createInstance('og:default', $options);
   }
