@@ -53,7 +53,6 @@ class OgEntityMembership extends DestinationBase implements ContainerFactoryPlug
   public function import(Row $row, array $old_destination_id_values = []) {
     $entity_type = $row->getDestinationProperty('entity_type');
     $entity_id = $row->getDestinationProperty('entity_id');
-    $langcode = $row->getDestinationProperty('language');
 
     /** @var \Drupal\Core\Entity\EntityStorageInterface $entityStorage */
     $entityStorage = $this->entityTypeManager->getStorage($entity_type);
