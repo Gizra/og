@@ -306,7 +306,7 @@ class GroupMembershipManagerTest extends KernelTestBase {
         /** @var \Drupal\Core\Entity\EntityInterface $expected_group */
         $expected_group = $this->groups[$expected_type][$expected_key];
         /** @var \Drupal\Core\Entity\EntityInterface $group */
-        foreach ($result[$expected_type] as $key => $group) {
+        foreach ($result[$expected_type] as $group) {
           if ($group->getEntityTypeId() === $expected_group->getEntityTypeId() && $group->id() === $expected_group->id()) {
             // The expected result was found. Continue the test.
             continue 2;

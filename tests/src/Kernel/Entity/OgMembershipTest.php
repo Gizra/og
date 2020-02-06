@@ -2,6 +2,7 @@
 
 namespace Drupal\Tests\og\Kernel\Entity;
 
+use Drupal\Core\Entity\EntityStorageException;
 use Drupal\entity_test\Entity\EntityTest;
 use Drupal\entity_test\Entity\EntityTestMul;
 use Drupal\KernelTests\KernelTestBase;
@@ -139,12 +140,12 @@ class OgMembershipTest extends KernelTestBase {
    * Tests getting the owner of a newly created membership.
    *
    * @covers ::getOwner
-   * @expectedException \LogicException
    */
   public function testGetOwnerOnNewMembership() {
     // A brand new entity does not have an owner set yet. It should throw a
     // logic exception.
     $membership = OgMembership::create();
+    $this->expectException(\LogicException::class);
     $membership->getOwner();
   }
 
@@ -152,12 +153,12 @@ class OgMembershipTest extends KernelTestBase {
    * Tests getting the owner ID of a newly created membership.
    *
    * @covers ::getOwnerId
-   * @expectedException \LogicException
    */
   public function testGetOwnerIdOnNewMembership() {
     // A brand new entity does not have an owner set yet. It should throw a
     // logic exception.
     $membership = OgMembership::create();
+    $this->expectException(\LogicException::class);
     $membership->getOwnerId();
   }
 
@@ -226,11 +227,11 @@ class OgMembershipTest extends KernelTestBase {
    * Tests exceptions are thrown when trying to save a membership with no user.
    *
    * @covers ::preSave
-   * @expectedException \Drupal\Core\Entity\EntityStorageException
    */
   public function testSetNoUserException() {
     /** @var \Drupal\og\OgMembershipInterface $membership */
     $membership = OgMembership::create(['type' => OgMembershipInterface::TYPE_DEFAULT]);
+    $this->expectException(EntityStorageException::class);
     $membership
       ->setGroup($this->group)
       ->save();
@@ -240,11 +241,11 @@ class OgMembershipTest extends KernelTestBase {
    * Tests exceptions are thrown when trying to save a membership with no group.
    *
    * @covers ::preSave
-   * @expectedException \Drupal\Core\Entity\EntityStorageException
    */
   public function testSetNoGroupException() {
     /** @var \Drupal\og\OgMembershipInterface $membership */
     $membership = OgMembership::create();
+    $this->expectException(EntityStorageException::class);
     $membership
       ->setOwner($this->user)
       ->save();
@@ -278,7 +279,6 @@ class OgMembershipTest extends KernelTestBase {
    * Tests saving a membership with a non group entity.
    *
    * @covers ::preSave
-   * @expectedException \Drupal\Core\Entity\EntityStorageException
    */
   public function testSetNonValidGroupException() {
     $non_group = EntityTest::create([
@@ -289,6 +289,8 @@ class OgMembershipTest extends KernelTestBase {
     $non_group->save();
     /** @var \Drupal\og\OgMembershipInterface $membership */
     $membership = Og::createMembership($non_group, $this->user);
+
+    $this->expectException(EntityStorageException::class);
     $membership->save();
   }
 
@@ -296,7 +298,6 @@ class OgMembershipTest extends KernelTestBase {
    * Tests saving an existing membership.
    *
    * @covers ::preSave
-   * @expectedException \Drupal\Core\Entity\EntityStorageException
    */
   public function testSaveExistingMembership() {
     $group = EntityTest::create([
@@ -313,6 +314,8 @@ class OgMembershipTest extends KernelTestBase {
     $membership1->save();
 
     $membership2 = Og::createMembership($group, $this->user);
+
+    $this->expectException(EntityStorageException::class);
     $membership2->save();
   }
 
@@ -320,7 +323,6 @@ class OgMembershipTest extends KernelTestBase {
    * Tests saving a membership with a role with a different group type.
    *
    * @covers ::preSave
-   * @expectedException \Drupal\Core\Entity\EntityStorageException
    * @dataProvider saveRoleWithWrongGroupTypeProvider
    */
   public function testSaveRoleWithWrongGroupType($group_entity_type_id, $group_bundle_id) {
@@ -339,6 +341,7 @@ class OgMembershipTest extends KernelTestBase {
       ->setName(mb_strtolower($this->randomMachineName()));
     $wrong_role->save();
 
+    $this->expectException(EntityStorageException::class);
     Og::createMembership($group, $this->user)->addRole($wrong_role)->save();
   }
 
@@ -439,7 +442,6 @@ class OgMembershipTest extends KernelTestBase {
    *   An array of test role metadata.
    *
    * @covers ::save
-   * @expectedException \Drupal\Core\Entity\EntityStorageException
    * @dataProvider saveMembershipWithInvalidRolesProvider
    */
   public function testSaveMembershipWithInvalidRoles(array $roles_metadata): void {
@@ -487,6 +489,7 @@ class OgMembershipTest extends KernelTestBase {
 
     // Create a membership with the test group and roles. This should throw an
     // exception since the roles are invalid.
+    $this->expectException(EntityStorageException::class);
     OgMembership::create()
       ->setOwner($this->user)
       ->setGroup($this->group)
@@ -568,7 +571,6 @@ class OgMembershipTest extends KernelTestBase {
    * Tests the exception thrown if the validity of a role cannot be established.
    *
    * @covers ::isRoleValid
-   * @expectedException \LogicException
    */
   public function testIsRoleValidException() {
     $role = OgRole::create([
@@ -579,6 +581,7 @@ class OgMembershipTest extends KernelTestBase {
 
     // If a membership doesn't have a group yet it is not possible to determine
     // wheter a role is valid.
+    $this->expectException(\LogicException::class);
     $membership->isRoleValid($role);
   }
 
@@ -644,12 +647,12 @@ class OgMembershipTest extends KernelTestBase {
    * Tests getting the group from a new membership.
    *
    * @covers ::getGroup
-   * @expectedException \LogicException
    */
   public function testGetGroupOnNewMembership() {
     $membership = OgMembership::create();
 
     // When no group has been set yet, the method should throw an assertion.
+    $this->expectException(\LogicException::class);
     $membership->getGroup();
   }
 
@@ -672,10 +675,11 @@ class OgMembershipTest extends KernelTestBase {
    * Tests getting the group bundle of a newly created membership.
    *
    * @covers ::getGroupBundle
-   * @expectedException \LogicException
    */
   public function testGetGroupBundleOnNewMembership() {
     $membership = OgMembership::create();
+
+    $this->expectException(\LogicException::class);
     $membership->getGroupBundle();
   }
 
@@ -694,10 +698,11 @@ class OgMembershipTest extends KernelTestBase {
    * Tests getting the group entity type ID of a newly created membership.
    *
    * @covers ::getGroupEntityType
-   * @expectedException \LogicException
    */
   public function testGetGroupEntityTypeOnNewMembership() {
     $membership = OgMembership::create();
+
+    $this->expectException(\LogicException::class);
     $membership->getGroupEntityType();
   }
 
@@ -716,10 +721,11 @@ class OgMembershipTest extends KernelTestBase {
    * Tests getting the group ID of a newly created membership.
    *
    * @covers ::getGroupId
-   * @expectedException \LogicException
    */
   public function testGetGroupIdOnNewMembership() {
     $membership = OgMembership::create();
+
+    $this->expectException(\LogicException::class);
     $membership->getGroupId();
   }
 

@@ -380,7 +380,9 @@ class Og {
   protected static function getFieldBaseDefinition($plugin_id) {
     /** @var OgFieldsPluginManager $plugin_manager */
     $plugin_manager = \Drupal::service('plugin.manager.og.fields');
-    if (!$field_config = $plugin_manager->getDefinition($plugin_id)) {
+
+    $field_config = $plugin_manager->getDefinition($plugin_id);
+    if (!$field_config) {
       throw new \Exception("The Organic Groups field with plugin ID $plugin_id is not a valid plugin.");
     }
 
