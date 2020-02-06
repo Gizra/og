@@ -2,6 +2,7 @@
 
 namespace Drupal\Tests\og\Kernel\Entity;
 
+use Drupal\Core\Entity\EntityReferenceSelection\SelectionPluginManager;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\node\Entity\Node;
 use Drupal\node\Entity\NodeType;
@@ -72,6 +73,13 @@ class SelectionHandlerTest extends KernelTestBase {
   protected $fieldDefinition;
 
   /**
+   * Selection plugin manager.
+   *
+   * @var \Drupal\Core\Entity\EntityReferenceSelection\SelectionPluginManager
+   */
+  protected $selectionPluginManager;
+
+  /**
    * {@inheritdoc}
    */
   protected function setUp() {
@@ -87,6 +95,7 @@ class SelectionHandlerTest extends KernelTestBase {
     // Setting up variables.
     $this->groupBundle = mb_strtolower($this->randomMachineName());
     $this->groupContentBundle = mb_strtolower($this->randomMachineName());
+    $this->selectionPluginManager = $this->container->get('plugin.manager.entity_reference_selection');
 
     // Create a group.
     NodeType::create([
@@ -107,7 +116,7 @@ class SelectionHandlerTest extends KernelTestBase {
     $this->fieldDefinition = Og::createField(OgGroupAudienceHelperInterface::DEFAULT_FIELD, 'node', $this->groupContentBundle);
 
     // Get the storage of the field.
-    $this->selectionHandler = Og::getSelectionHandler($this->fieldDefinition, ['field_mode' => 'default']);
+    $this->selectionHandler = $this->selectionPluginManager->getSelectionHandler($this->fieldDefinition);
 
     // Create two users.
     $this->user1 = User::create(['name' => $this->randomString()]);
@@ -151,7 +160,7 @@ class SelectionHandlerTest extends KernelTestBase {
     $this->assertEquals($user2_groups, array_keys($groups[$this->groupBundle]));
 
     // Check the other groups.
-    $this->selectionHandler = Og::getSelectionHandler($this->fieldDefinition, ['field_mode' => 'admin']);
+    $this->selectionHandler = $this->selectionPluginManager->getSelectionHandler($this->fieldDefinition);
 
     $this->setCurrentAccount($this->user1);
     $groups = $this->selectionHandler->getReferenceableEntities();
