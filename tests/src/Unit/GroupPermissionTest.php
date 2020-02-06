@@ -239,11 +239,11 @@ class GroupPermissionTest extends UnitTestCase {
    * Tests getting an invalid property of a permission.
    *
    * @covers ::get
-   *
-   * @expectedException \InvalidArgumentException
    */
   public function testGetInvalidProperty() {
     $permission = new GroupPermission();
+
+    $this->expectException(\InvalidArgumentException::class);
     $permission->get('invalid property');
   }
 
@@ -251,11 +251,11 @@ class GroupPermissionTest extends UnitTestCase {
    * Tests setting an invalid property for a permission.
    *
    * @covers ::set
-   *
-   * @expectedException \InvalidArgumentException
    */
   public function testSetInvalidProperty() {
     $permission = new GroupPermission();
+
+    $this->expectException(\InvalidArgumentException::class);
     $permission->set('invalid property', 'a value');
   }
 
@@ -263,11 +263,11 @@ class GroupPermissionTest extends UnitTestCase {
    * Tests setting an invalid restrict access value for  a permission.
    *
    * @covers ::set
-   *
-   * @expectedException \InvalidArgumentException
    */
   public function testSetInvalidRestrictAccessValue() {
     $permission = new GroupPermission();
+
+    $this->expectException(\InvalidArgumentException::class);
     $permission->set('restrict access', 'invalid value');
   }
 

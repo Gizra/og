@@ -73,7 +73,7 @@ class DefaultRoleEvent extends Event implements DefaultRoleEventInterface {
    * {@inheritdoc}
    */
   public function setRoles(array $roles) {
-    foreach ($roles as $name => $properties) {
+    foreach ($roles as $properties) {
       $this->setRole($properties);
     }
   }
