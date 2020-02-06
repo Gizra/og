@@ -228,8 +228,7 @@ function og_entity_create_access(AccountInterface $account, array $context, $bun
   $audience_helper = \Drupal::service('og.group_audience_helper');
   $audience_fields = $audience_helper->getAllGroupAudienceFields($entity_type_id, $bundle);
   $field_definitions = \Drupal::service('entity_field.manager')->getFieldDefinitions($entity_type_id, $bundle);
-
-  foreach ($field_definitions as $field_name => $field_definition) {
+  foreach ($field_definitions as $field_definition) {
     /** @var \Drupal\Core\Field\FieldDefinitionInterface $field_definition */
     if (!in_array($field_definition->getName(), array_keys($audience_fields))) {
       continue;
@@ -419,7 +418,7 @@ function og_invalidate_group_content_cache_tags(EntityInterface $entity) {
       }
     }
 
-    foreach ($membership_manager->getGroups($entity) as $group_entity_type_id => $groups) {
+    foreach ($membership_manager->getGroups($entity) as $groups) {
       /** @var \Drupal\Core\Entity\ContentEntityInterface $group */
       foreach ($groups as $group) {
         $tags = Cache::mergeTags($tags, $group->getCacheTagsToInvalidate());
