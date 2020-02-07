@@ -2,7 +2,6 @@
 
 namespace Drupal\Tests\og\Kernel\Entity;
 
-use Drupal\Core\Entity\EntityReferenceSelection\SelectionPluginManager;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\node\Entity\Node;
 use Drupal\node\Entity\NodeType;
@@ -21,7 +20,7 @@ class SelectionHandlerTest extends KernelTestBase {
   /**
    * The selection handler.
    *
-   * @var \Drupal\og\Plugin\EntityReferenceSelection\OgSelection
+   * @var \Drupal\Core\Entity\EntityReferenceSelection\SelectionInterface|false|object
    */
   protected $selectionHandler;
 
@@ -116,6 +115,12 @@ class SelectionHandlerTest extends KernelTestBase {
     $this->fieldDefinition = Og::createField(OgGroupAudienceHelperInterface::DEFAULT_FIELD, 'node', $this->groupContentBundle);
 
     // Get the storage of the field.
+    $options = [
+      'target_type' => $this->fieldDefinition->getFieldStorageDefinition()->getSetting('target_type'),
+      'handler' => $this->fieldDefinition->getSetting('handler'),
+      'field_mode' => 'admin',
+    ];
+    $this->selectionPluginManager->createInstance('og:default', $options);
     $this->selectionHandler = $this->selectionPluginManager->getSelectionHandler($this->fieldDefinition);
 
     // Create two users.
@@ -160,12 +165,16 @@ class SelectionHandlerTest extends KernelTestBase {
     $this->assertEquals($user2_groups, array_keys($groups[$this->groupBundle]));
 
     // Check the other groups.
-    $this->selectionHandler = $this->selectionPluginManager->getSelectionHandler($this->fieldDefinition);
+    $options = [
+      'target_type' => $this->fieldDefinition->getFieldStorageDefinition()->getSetting('target_type'),
+      'handler' => $this->fieldDefinition->getSetting('handler'),
+      'field_mode' => 'admin',
+    ];
+    $this->selectionHandler = $this->selectionPluginManager->createInstance('og:default', $options);
 
     $this->setCurrentAccount($this->user1);
     $groups = $this->selectionHandler->getReferenceableEntities();
     $this->assertEquals($user2_groups, array_keys($groups[$this->groupBundle]));
-
     $this->setCurrentAccount($this->user2);
     $groups = $this->selectionHandler->getReferenceableEntities();
     $this->assertEquals($user1_groups, array_keys($groups[$this->groupBundle]));

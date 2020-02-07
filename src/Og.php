@@ -389,7 +389,7 @@ class Og {
    *
    * @deprecated in og:8.x-1.0-alpha4 and is removed from og:8.x-1.0-alpha5.
    *   Use
-   *   \Drupal\Core\Entity\EntityReferenceSelection\SelectionPluginManager::getSelectionHandler()
+   *   \Drupal\Core\Entity\EntityReferenceSelection\SelectionPluginManager::getInstance()
    *   Instead.
    * @codingStandardsIgnoreStart
    * @see https://github.com/Gizra/og/issues/580
@@ -399,7 +399,7 @@ class Og {
     // @codingStandardsIgnoreStart
     @trigger_error('Og:getSelectionHandler() is deprecated in og:8.x-1.0-alpha4
       and is removed from og:8.x-1.0-alpha5.
-      Use \Drupal\Core\Entity\EntityReferenceSelection\SelectionPluginManager::gegetSelectionHandler()
+      Use \Drupal\Core\Entity\EntityReferenceSelection\SelectionPluginManager::getInstance()
       instead. See https://github.com/Gizra/og/issues/580', E_USER_DEPRECATED
     );
     // @codingStandardsIgnoreEnd
