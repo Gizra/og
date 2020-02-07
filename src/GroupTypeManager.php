@@ -162,6 +162,7 @@ class GroupTypeManager implements GroupTypeManagerInterface {
    */
   public function __construct(ConfigFactoryInterface $config_factory, EntityTypeManagerInterface $entity_type_manager, EntityTypeBundleInfoInterface $entity_type_bundle_info, EventDispatcherInterface $event_dispatcher, CacheBackendInterface $cache, PermissionManagerInterface $permission_manager, OgRoleManagerInterface $og_role_manager, RouteBuilderInterface $route_builder, OgGroupAudienceHelperInterface $group_audience_helper) {
     $this->configFactory = $config_factory;
+    $this->entityTypeManager = $entity_type_manager;
     $this->entityTypeBundleInfo = $entity_type_bundle_info;
     $this->eventDispatcher = $event_dispatcher;
     $this->cache = $cache;
@@ -169,7 +170,6 @@ class GroupTypeManager implements GroupTypeManagerInterface {
     $this->ogRoleManager = $og_role_manager;
     $this->routeBuilder = $route_builder;
     $this->groupAudienceHelper = $group_audience_helper;
-    $this->entityTypeManager = $entity_type_manager;
   }
 
   /**
