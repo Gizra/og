@@ -1,43 +1,11 @@
-field.storage_settings.og_membership_reference:
-  type: mapping
-  label: 'Organic Groups reference field storage settings'
-  mapping:
-    target_type:
-      type: string
-      label: 'Type of entity to reference'
-
-field.field_settings.og_membership_reference:
-  type: mapping
-  label: 'Organic Groups reference field settings'
-  mapping:
-    handler:
-      type: string
-      label: 'Reference method'
-    handler_settings:
-      type: entity_reference_selection.[%parent.handler]
-      label: 'Organic Groups reference selection plugin settings'
-    access_override:
-      type: boolean
-      label: 'Access Override'
-
 field.storage_settings.og_standard_reference:
-  type: mapping
+  type: field.storage_settings.entity_reference
   label: 'Organic Groups reference field storage settings'
-  mapping:
-    target_type:
-      type: string
-      label: 'Type of entity to reference'
 
 field.field_settings.og_standard_reference:
-  type: mapping
+  type: field.field_settings.entity_reference
   label: 'Organic Groups reference field settings'
   mapping:
-    handler:
-      type: string
-      label: 'Reference method'
-    handler_settings:
-      type: entity_reference_selection.[%parent.handler]
-      label: 'Organic Groups reference selection plugin settings'
     access_override:
       type: boolean
       label: 'Access Override'
@@ -137,18 +105,17 @@ og.og_role.*:
       label: 'Role type'
 
 field.widget.settings.og_complex:
-  type: mapping
+  type: field.widget.settings.entity_reference_autocomplete
   label: 'OG Group Audience field widget'
   mapping:
-    match_operator:
-      type: string
-      label: 'Autocomplete matching'
-    size:
+    # This already exists in field.widget.settings.entity_reference_autocomplete
+    # in Drupal 8.8.x and is added here just to ensure backwards compatibility
+    # with Drupal 8.7.x.
+    # @todo Remove this entry in https://github.com/Gizra/og/issues/581
+    # @see https://github.com/Gizra/og/issues/581
+    match_limit:
       type: integer
-      label: 'Size of textfield'
-    placeholder:
-      type: label
-      label: 'Placeholder'
+      label: 'Maximum number of autocomplete suggestions.'
 
 views.field.og_membership_bulk_form:
   type: views_field_bulk_form
