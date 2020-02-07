@@ -32,7 +32,6 @@
         <exclude name="DrupalPractice.InfoFiles.NamespacedDependency.NonNamespaced" />
         <!-- https://github.com/Gizra/og/issues/546 -->
         <exclude name="DrupalPractice.Objects.GlobalClass.GlobalClass" />
-        <!-- https://github.com/Gizra/og/issues/547 -->
         <!-- https://github.com/Gizra/og/issues/543 -->
         <exclude name="DrupalPractice.Objects.GlobalFunction.GlobalFunction" />
     </rule>
