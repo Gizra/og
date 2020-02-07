@@ -89,7 +89,7 @@ class OgSelection extends DefaultSelection {
     $ids = [];
     if (!empty($this->getConfiguration()['field_mode']) && $this->getConfiguration()['field_mode'] === 'admin') {
       // Don't include the groups, the user doesn't have create permission.
-      foreach ($user_groups as $delta => $group) {
+      foreach ($user_groups as $group) {
         $ids[] = $group->id();
       }
 

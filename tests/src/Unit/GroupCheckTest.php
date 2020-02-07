@@ -284,8 +284,6 @@ class GroupCheckTest extends UnitTestCase {
 
   /**
    * Tests fetching arguments from the route match without "getOption" defined.
-   *
-   * @expectedException BadMethodCallException
    */
   public function testNoArgumentsFromRouteMatch() {
     $this
@@ -300,6 +298,7 @@ class GroupCheckTest extends UnitTestCase {
 
     // Call the group check without the entity related arguments.
     $group_check = new GroupCheck($this->entityTypeManager->reveal(), $this->ogAccess->reveal());
+    $this->expectException(\BadMethodCallException::class);
     $group_check->access($this->user->reveal(), $this->route->reveal(), $this->routeMatch->reveal());
   }
 

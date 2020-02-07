@@ -363,7 +363,9 @@ class Og {
   protected static function getFieldBaseDefinition($plugin_id) {
     /** @var OgFieldsPluginManager $plugin_manager */
     $plugin_manager = \Drupal::service('plugin.manager.og.fields');
-    if (!$field_config = $plugin_manager->getDefinition($plugin_id)) {
+
+    $field_config = $plugin_manager->getDefinition($plugin_id);
+    if (!$field_config) {
       throw new \Exception("The Organic Groups field with plugin ID $plugin_id is not a valid plugin.");
     }
 
@@ -384,8 +386,23 @@ class Og {
    * @throws \Exception
    *   Thrown when the passed in field definition is not of a group audience
    *   field.
+   *
+   * @deprecated in og:8.x-1.0-alpha4 and is removed from og:8.x-1.0-alpha5.
+   *   Use
+   *   \Drupal\Core\Entity\EntityReferenceSelection\SelectionPluginManager::getInstance()
+   *   Instead.
+   * @codingStandardsIgnoreStart
+   * @see https://github.com/Gizra/og/issues/580
+   * @codingStandardsIgnoreEnd
    */
   public static function getSelectionHandler(FieldDefinitionInterface $field_definition, array $options = []) {
+    // @codingStandardsIgnoreStart
+    @trigger_error('Og:getSelectionHandler() is deprecated in og:8.x-1.0-alpha4
+      and is removed from og:8.x-1.0-alpha5.
+      Use \Drupal\Core\Entity\EntityReferenceSelection\SelectionPluginManager::getInstance()
+      instead. See https://github.com/Gizra/og/issues/580', E_USER_DEPRECATED
+    );
+    // @codingStandardsIgnoreEnd
     if (!\Drupal::service('og.group_audience_helper')->isGroupAudienceField($field_definition)) {
       $field_name = $field_definition->getName();
       throw new \Exception("The field $field_name is not an audience field.");

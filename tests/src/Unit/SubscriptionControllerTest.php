@@ -15,6 +15,7 @@ use Drupal\og\OgAccessInterface;
 use Drupal\og\OgMembershipInterface;
 use Drupal\Tests\UnitTestCase;
 use Drupal\user\EntityOwnerInterface;
+use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 
 /**
  * Tests the subscription controller.
@@ -126,7 +127,6 @@ class SubscriptionControllerTest extends UnitTestCase {
    * Tests non-member trying to unsubscribe from group.
    *
    * @covers ::unsubscribe
-   * @expectedException \Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException
    */
   public function testNotMember() {
     $states = [
@@ -140,6 +140,7 @@ class SubscriptionControllerTest extends UnitTestCase {
       ->getMembership($this->group->reveal(), $this->userId, $states)
       ->willReturn(NULL);
 
+    $this->expectException(AccessDeniedHttpException::class);
     $this->unsubscribe();
   }
 
@@ -147,7 +148,6 @@ class SubscriptionControllerTest extends UnitTestCase {
    * Tests blocked member trying to unsubscribe from group.
    *
    * @covers ::unsubscribe
-   * @expectedException \Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException
    */
   public function testBlockedMember() {
     $states = [
@@ -166,6 +166,7 @@ class SubscriptionControllerTest extends UnitTestCase {
       ->getState()
       ->willReturn(OgMembershipInterface::STATE_BLOCKED);
 
+    $this->expectException(AccessDeniedHttpException::class);
     $this->unsubscribe();
   }
 
