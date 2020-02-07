@@ -7,6 +7,7 @@ use Drupal\Core\Cache\CacheableDependencyInterface;
 use Drupal\Core\Entity\ContentEntityInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Plugin\Context\ContextProviderInterface;
+use Drupal\og\OgRoleInterface;
 use Drupal\views\Plugin\views\argument_default\ArgumentDefaultPluginBase;
 use Drupal\og\MembershipManagerInterface;
 use Drupal\Core\Session\AccountInterface;
@@ -87,6 +88,8 @@ class Membership extends ArgumentDefaultPluginBase implements CacheableDependenc
   protected function defineOptions() {
     $options = parent::defineOptions();
     $options['og_group_membership'] = ['default' => ''];
+    $options['entity_type'] = ['default' => 'node'];
+    $options['role_id'] = ['default' => OgRoleInterface::AUTHENTICATED];
 
     return $options;
   }
@@ -96,6 +99,16 @@ class Membership extends ArgumentDefaultPluginBase implements CacheableDependenc
    */
   public function buildOptionsForm(&$form, FormStateInterface $form_state) {
     $form['og_group_membership'] = [];
+    $form['entity_type'] = [
+      '#type' => 'text',
+      '#title' => $this->t('Entity type'),
+      '#default_value' => $this->options['entity_type'],
+    ];    
+    $form['role_id'] = [
+      '#type' => 'text',
+      '#title' => $this->t('Role'),
+      '#default_value' => $this->options['role_id'],
+    ];
   }
 
   /**
@@ -103,7 +116,7 @@ class Membership extends ArgumentDefaultPluginBase implements CacheableDependenc
    */
   public function getArgument() {
     // Currently restricted to node entities.
-    return implode(',', $this->getCurrentUserGroupIds('node'));
+    return implode(',', $this->getCurrentUserGroupIds());
   }
 
   /**
@@ -141,14 +154,13 @@ class Membership extends ArgumentDefaultPluginBase implements CacheableDependenc
   /**
    * Returns groups that current user is a member of.
    *
-   * @param string $entity_type
-   *   The entity type, defaults to 'node'.
-   *
    * @return array
    *   An array of groups, or an empty array if no group is found.
    */
-  protected function getCurrentUserGroupIds($entity_type = 'node') {
-    $groups = $this->ogMembership->getUserGroupIds($this->ogUser->id());
+  protected function getCurrentUserGroupIds() {
+    $entity_type = $this->options['entity_type'];
+    $role_ids = [$this->options['role_id']];
+    $groups = $this->ogMembership->getUserGroupIdsByRoleIds($this->ogUser->id(), $role_ids);
     if (!empty($groups) && isset($groups[$entity_type])) {
       return $groups[$entity_type];
     }
