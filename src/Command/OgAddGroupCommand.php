@@ -74,7 +74,7 @@ class OgAddGroupCommand extends Command {
   protected function execute(InputInterface $input, OutputInterface $output) {
     $io = new DrupalStyle($input, $output);
 
-    $io->info('You added the group. A good job indeed.');
+    $io->info('The group was added successfully.');
   }
 
 }
