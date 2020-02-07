@@ -13,6 +13,13 @@ use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 class OgRoleManager implements OgRoleManagerInterface {
 
   /**
+   * The entity type manager.
+   *
+   * @var \Drupal\Core\Entity\EntityTypeManagerInterface
+   */
+  protected $entityTypeManager;
+
+  /**
    * The entity storage for OgRole entities.
    *
    * @var \Drupal\Core\Entity\EntityStorageInterface
@@ -38,13 +45,13 @@ class OgRoleManager implements OgRoleManagerInterface {
    *
    * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entity_type_manager
    *   The entity type manager.
-   * @param EventDispatcherInterface $event_dispatcher
+   * @param \Symfony\Component\EventDispatcher\EventDispatcherInterface $event_dispatcher
    *   The event dispatcher.
    * @param \Drupal\og\PermissionManagerInterface $permission_manager
    *   The OG permission manager.
    */
   public function __construct(EntityTypeManagerInterface $entity_type_manager, EventDispatcherInterface $event_dispatcher, PermissionManagerInterface $permission_manager) {
-    $this->ogRoleStorage = $entity_type_manager->getStorage('og_role');
+    $this->entityTypeManager = $entity_type_manager;
     $this->eventDispatcher = $event_dispatcher;
     $this->permissionManager = $permission_manager;
   }
@@ -108,7 +115,7 @@ class OgRoleManager implements OgRoleManagerInterface {
     ];
 
     foreach ($role_properties as $properties) {
-      $roles[$properties['name']] = $this->ogRoleStorage->create($properties);
+      $roles[$properties['name']] = $this->ogRoleStorage()->create($properties);
     }
 
     return $roles;
@@ -122,7 +129,36 @@ class OgRoleManager implements OgRoleManagerInterface {
       'group_type' => $entity_type_id,
       'group_bundle' => $bundle,
     ];
-    return $this->ogRoleStorage->loadByProperties($properties);
+    return $this->ogRoleStorage()->loadByProperties($properties);
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getRolesByPermissions(array $permissions, $entity_type_id = NULL, $bundle = NULL, $require_all = TRUE): array {
+    $role_storage = $this->ogRoleStorage();
+    $query = $role_storage->getQuery();
+    if ($require_all) {
+      // If all permissions are requested, we need to add an AND condition for
+      // each permission because there is not an easy way to explicitly request
+      // a subset of an array.
+      foreach ($permissions as $permission) {
+        $query->condition('permissions.*', $permission);
+      }
+    }
+    else {
+      $query->condition('permissions.*', $permissions, 'IN');
+    }
+
+    if (!empty($entity_type_id)) {
+      $query->condition('group_type', $entity_type_id);
+    }
+    if (!empty($bundle)) {
+      $query->condition('group_bundle', $bundle);
+    }
+
+    $role_ids = $query->execute();
+    return $role_storage->loadMultiple($role_ids);
   }
 
   /**
@@ -133,9 +169,23 @@ class OgRoleManager implements OgRoleManagerInterface {
       'group_type' => $entity_type_id,
       'group_bundle' => $bundle_id,
     ];
-    foreach ($this->ogRoleStorage->loadByProperties($properties) as $role) {
+    foreach ($this->ogRoleStorage()->loadByProperties($properties) as $role) {
       $role->delete();
     }
+  }
+
+  /**
+   * Retrieves the OG Role storage.
+   *
+   * @return \Drupal\Core\Entity\EntityStorageInterface
+   *   The OG Role storage
+   */
+  protected function ogRoleStorage() {
+    if (!$this->ogRoleStorage) {
+      $this->ogRoleStorage = $this->entityTypeManager->getStorage('og_role');
+    }
+
+    return $this->ogRoleStorage;
   }
 
 }

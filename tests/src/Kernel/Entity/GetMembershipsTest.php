@@ -3,6 +3,7 @@
 namespace Drupal\Tests\og\Kernel\Entity;
 
 use Drupal\KernelTests\KernelTestBase;
+use Drupal\Tests\og\Traits\OgMembershipCreationTrait;
 use Drupal\node\Entity\Node;
 use Drupal\node\Entity\NodeType;
 use Drupal\og\Og;
@@ -16,6 +17,8 @@ use Drupal\user\Entity\User;
  * @coversDefaultClass \Drupal\og\Og
  */
 class GetMembershipsTest extends KernelTestBase {
+
+  use OgMembershipCreationTrait;
 
   /**
    * {@inheritdoc}
@@ -44,6 +47,13 @@ class GetMembershipsTest extends KernelTestBase {
   protected $users;
 
   /**
+   * The entity type manager.
+   *
+   * @var \Drupal\Core\Entity\EntityTypeManagerInterface
+   */
+  protected $entityTypeManager;
+
+  /**
    * {@inheritdoc}
    */
   protected function setUp() {
@@ -54,6 +64,9 @@ class GetMembershipsTest extends KernelTestBase {
     $this->installEntitySchema('og_membership');
     $this->installEntitySchema('user');
     $this->installSchema('system', 'sequences');
+    $this->installSchema('user', ['users_data']);
+
+    $this->entityTypeManager = $this->container->get('entity_type.manager');
 
     // Create group admin user.
     $group_admin = User::create(['name' => $this->randomString()]);
@@ -77,7 +90,7 @@ class GetMembershipsTest extends KernelTestBase {
       $this->groups[] = $group;
     }
 
-    // Create test users with different membership statuses in the two groups.
+    // Create test users with different membership states in the two groups.
     $matrix = [
       // A user which is an active member of the first group.
       [OgMembershipInterface::STATE_ACTIVE, NULL],
@@ -96,17 +109,14 @@ class GetMembershipsTest extends KernelTestBase {
       [NULL, NULL],
     ];
 
-    foreach ($matrix as $user_key => $statuses) {
+    foreach ($matrix as $user_key => $states) {
       $user = User::create(['name' => $this->randomString()]);
       $user->save();
       $this->users[$user_key] = $user;
-      foreach ($statuses as $group_key => $status) {
+      foreach ($states as $group_key => $state) {
         $group = $this->groups[$group_key];
-        if ($status) {
-          $membership = Og::createMembership($group, $user);
-          $membership
-            ->setState($status)
-            ->save();
+        if ($state) {
+          $this->createOgMembership($group, $user, NULL, $state);
         }
       }
     }
@@ -246,6 +256,27 @@ class GetMembershipsTest extends KernelTestBase {
       ], [],
       ],
     ];
+  }
+
+  /**
+   * Tests that memberships are deleted when a user is deleted.
+   */
+  public function testOrphanedMembershipsDeletion() {
+    foreach ($this->users as $user) {
+      // Keep track of the user ID before deleting the user.
+      $user_id = $user->id();
+
+      $user->delete();
+
+      // Check that the memberships for the user are deleted from the database.
+      $memberships = $this->entityTypeManager
+        ->getStorage('og_membership')
+        ->getQuery()
+        ->condition('uid', $user_id)
+        ->execute();
+
+      $this->assertEmpty($memberships);
+    }
   }
 
 }

@@ -3,14 +3,16 @@
 namespace Drupal\Tests\og\Kernel\Access;
 
 use Drupal\KernelTests\KernelTestBase;
+use Drupal\Tests\og\Traits\OgMembershipCreationTrait;
 use Drupal\block_content\Entity\BlockContent;
 use Drupal\block_content\Entity\BlockContentType;
 use Drupal\node\Entity\Node;
 use Drupal\node\Entity\NodeType;
-use Drupal\og\Entity\OgMembership;
+use Drupal\og\Entity\OgRole;
 use Drupal\og\Og;
 use Drupal\og\OgGroupAudienceHelperInterface;
 use Drupal\og\OgMembershipInterface;
+use Drupal\og\OgRoleInterface;
 use Drupal\user\Entity\Role;
 use Drupal\user\Entity\User;
 
@@ -20,6 +22,8 @@ use Drupal\user\Entity\User;
  * @group og
  */
 class OgAccessHookTest extends KernelTestBase {
+
+  use OgMembershipCreationTrait;
 
   /**
    * {@inheritdoc}
@@ -46,6 +50,13 @@ class OgAccessHookTest extends KernelTestBase {
    * @var \Drupal\Core\Entity\EntityInterface[]
    */
   protected $groupContent;
+
+  /**
+   * Test non group content entity.
+   *
+   * @var \Drupal\Core\Entity\EntityInterface
+   */
+  protected $nonGroupContent;
 
   /**
    * Test users.
@@ -118,7 +129,7 @@ class OgAccessHookTest extends KernelTestBase {
     // Create a "group" bundle on the Custom Block entity type and turn it into
     // a group. Note we're not using the Entity Test entity for this since it
     // does not have real support for multiple bundles.
-    BlockContentType::create(['type' => 'group']);
+    BlockContentType::create(['id' => 'group'])->save();
     Og::groupTypeManager()->addGroup('block_content', 'group');
 
     // Create a group.
@@ -146,23 +157,14 @@ class OgAccessHookTest extends KernelTestBase {
 
     // Grant members permission to edit their own content.
     /** @var \Drupal\og\Entity\OgRole $role */
-    $role = $this->container->get('entity_type.manager')
-      ->getStorage('og_role')
-      ->load('block_content-group-member');
+    $role = OgRole::getRole('block_content', 'group', OgRoleInterface::AUTHENTICATED);
     $role->grantPermission('edit own group_content content');
     $role->save();
 
     // Subscribe the normal member and the blocked member to the group.
     foreach (['member', 'blocked'] as $membership_type) {
       $state = $membership_type === 'member' ? OgMembershipInterface::STATE_ACTIVE : OgMembershipInterface::STATE_BLOCKED;
-      /** @var \Drupal\og\Entity\OgMembership $membership */
-      $membership = OgMembership::create();
-      $membership
-        ->setUser($this->users[$membership_type])
-        ->setGroup($this->group)
-        ->addRole($role)
-        ->setState($state)
-        ->save();
+      $this->createOgMembership($this->group, $this->users[$membership_type], NULL, $state);
     }
 
     // Create three group content items, one owned by the group owner, one by
@@ -176,6 +178,14 @@ class OgAccessHookTest extends KernelTestBase {
       ]);
       $this->groupContent[$membership_type]->save();
     }
+
+    $this->nonGroupContent = Node::create([
+      'title' => $this->randomString(),
+      'type' => 'group_content',
+      'uid' => $this->users['member']->id(),
+      OgGroupAudienceHelperInterface::DEFAULT_FIELD => [],
+    ]);
+    $this->nonGroupContent->save();
   }
 
   /**
@@ -195,6 +205,9 @@ class OgAccessHookTest extends KernelTestBase {
       $result = og_entity_access($this->groupContent[$group_content], 'update', $this->users[$user]);
       $this->assertEquals($expected_result, $result->isAllowed());
     }
+
+    $result = og_entity_access($this->nonGroupContent, 'update', $this->users['member']);
+    $this->assertEquals(TRUE, $result->isNeutral());
   }
 
   /**

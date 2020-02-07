@@ -2,7 +2,6 @@
 
 namespace Drupal\Tests\og\Kernel;
 
-use Drupal\Component\Utility\Unicode;
 use Drupal\KernelTests\KernelTestBase;
 use Drupal\node\Entity\Node;
 use Drupal\node\Entity\NodeType;
@@ -44,6 +43,13 @@ class OgDeleteOrphansTest extends KernelTestBase {
   protected $group;
 
   /**
+   * A test group content.
+   *
+   * @var \Drupal\Core\Entity\EntityInterface
+   */
+  protected $groupContent;
+
+  /**
    * {@inheritdoc}
    */
   public function setUp() {
@@ -55,14 +61,14 @@ class OgDeleteOrphansTest extends KernelTestBase {
     $this->installEntitySchema('user');
     $this->installEntitySchema('node');
     $this->installSchema('node', 'node_access');
-    $this->installSchema('system', ['queue', 'sequences']);
+    $this->installSchema('system', ['sequences']);
 
     /** @var \Drupal\og\OgDeleteOrphansPluginManager $plugin_manager */
     $plugin_manager = \Drupal::service('plugin.manager.og.delete_orphans');
     $this->ogDeleteOrphansPluginManager = $plugin_manager;
 
     // Create a group entity type.
-    $group_bundle = Unicode::strtolower($this->randomMachineName());
+    $group_bundle = mb_strtolower($this->randomMachineName());
     NodeType::create([
       'type' => $group_bundle,
       'name' => $this->randomString(),
@@ -70,7 +76,7 @@ class OgDeleteOrphansTest extends KernelTestBase {
     Og::groupTypeManager()->addGroup('node', $group_bundle);
 
     // Create a group content entity type.
-    $group_content_bundle = Unicode::strtolower($this->randomMachineName());
+    $group_content_bundle = mb_strtolower($this->randomMachineName());
     NodeType::create([
       'type' => $group_content_bundle,
       'name' => $this->randomString(),
@@ -90,12 +96,12 @@ class OgDeleteOrphansTest extends KernelTestBase {
     $this->group->save();
 
     // Create a group content item.
-    $group_content = Node::create([
+    $this->groupContent = Node::create([
       'title' => $this->randomString(),
       'type' => $group_content_bundle,
       OgGroupAudienceHelperInterface::DEFAULT_FIELD => [['target_id' => $this->group->id()]],
     ]);
-    $group_content->save();
+    $this->groupContent->save();
   }
 
   /**
@@ -105,6 +111,8 @@ class OgDeleteOrphansTest extends KernelTestBase {
    *   The machine name of the plugin under test.
    * @param bool $run_cron
    *   Whether or not cron jobs should be run as part of the test.
+   * @param bool $run_shutdown_functions
+   *   Whether or not shutdown functions should be run as part of the test.
    * @param bool $asynchronous
    *   Whether or not the actual deletion of the orphans happens in an
    *   asynchronous operation (e.g. pressing the button that launches the batch
@@ -114,7 +122,7 @@ class OgDeleteOrphansTest extends KernelTestBase {
    *
    * @dataProvider ogDeleteOrphansPluginProvider
    */
-  public function testDeleteOrphans($plugin_id, $run_cron, $asynchronous, $queue_id) {
+  public function testDeleteOrphans($plugin_id, $run_cron, $run_shutdown_functions, $asynchronous, $queue_id) {
     // Turn on deletion of orphans in the configuration and configure the chosen
     // plugin.
     $this->config('og.settings')
@@ -142,6 +150,11 @@ class OgDeleteOrphansTest extends KernelTestBase {
       $this->container->get('cron')->run();
     }
 
+    // Run shutdown functions if needed.
+    if ($run_shutdown_functions) {
+      _drupal_shutdown_function();
+    }
+
     // Simulate the initiation of the queue process by an asynchronous operation
     // (such as pressing the button that starts a batch operation).
     if ($asynchronous) {
@@ -149,7 +162,7 @@ class OgDeleteOrphansTest extends KernelTestBase {
     }
 
     // Verify the group content is deleted.
-    $this->assertFalse($this->group_content, 'The orphaned node is deleted.');
+    $this->assertNull(Node::load($this->groupContent->id()), 'The orphaned node is deleted.');
 
     // Verify that the user membership is now deleted.
     $this->assertUserMembershipCount(0);
@@ -198,15 +211,16 @@ class OgDeleteOrphansTest extends KernelTestBase {
    *   following items:
    *   - A string containing the plugin name being tested.
    *   - A boolean indicating whether or not cron jobs should be run.
+   *   - A boolean indicating whether or not shutdown functions should be run.
    *   - A boolean indicating whether the deletion happens in an asynchronous
    *     process.
    *   - A string defining the queue that is used by the plugin.
    */
   public function ogDeleteOrphansPluginProvider() {
     return [
-      ['batch', FALSE, TRUE, 'og_orphaned_group_content'],
-      ['cron', TRUE, FALSE, 'og_orphaned_group_content_cron'],
-      ['simple', FALSE, FALSE, 'og_orphaned_group_content'],
+      ['batch', FALSE, FALSE, TRUE, 'og_orphaned_group_content'],
+      ['cron', TRUE, FALSE, FALSE, 'og_orphaned_group_content_cron'],
+      ['simple', FALSE, TRUE, FALSE, 'og_orphaned_group_content'],
     ];
   }
 

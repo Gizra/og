@@ -21,8 +21,18 @@ class Simple extends OgDeleteOrphansBase {
    */
   public function register(EntityInterface $entity) {
     parent::register($entity);
-    // Delete the orphans on the fly.
-    $this->process();
+
+    // Check if our cleanup process is already registered, so we don't add any
+    // duplicates.
+    $callbacks = array_filter(drupal_register_shutdown_function(), function ($callback) {
+      $callable = $callback['callback'];
+      return is_array($callable) && $callable[0] instanceof $this && $callable[1] === 'process';
+    });
+
+    // Register a shutdown function that deletes the orphans on the fly.
+    if (empty($callbacks)) {
+      drupal_register_shutdown_function([$this, 'process']);
+    }
   }
 
   /**

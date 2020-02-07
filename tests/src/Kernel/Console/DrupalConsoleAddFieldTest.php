@@ -11,6 +11,7 @@ use Symfony\Component\Console\Helper\HelperSet;
  * Tests CLI integration for fields creation.
  *
  * @group og
+ * @group console
  * @coversDefaultClass \Drupal\og\Og
  */
 class DrupalConsoleAddFieldTest extends KernelTestBase {
@@ -75,7 +76,9 @@ class DrupalConsoleAddFieldTest extends KernelTestBase {
     }
 
     $field_names = \Drupal::service('og.group_audience_helper')->getAllGroupAudienceFields('node', 'article');
-    $this->assertEquals(['og_group_ref', 'og_audience'], array_keys($field_names));
+    // Make the order predictable for test.
+    ksort($field_names);
+    $this->assertEquals(['og_audience', 'og_group_ref'], array_keys($field_names));
   }
 
 }

@@ -2,7 +2,6 @@
 
 namespace Drupal\Tests\og\Functional;
 
-use Drupal\Component\Utility\Unicode;
 use Drupal\node\Entity\Node;
 use Drupal\node\Entity\NodeType;
 use Drupal\og\Og;
@@ -19,6 +18,11 @@ class GroupTabTest extends BrowserTestBase {
    * {@inheritdoc}
    */
   public static $modules = ['node', 'og'];
+
+  /**
+   * {@inheritdoc}
+   */
+  protected $defaultTheme = 'stark';
 
   /**
    * Test entity group.
@@ -55,8 +59,8 @@ class GroupTabTest extends BrowserTestBase {
     parent::setUp();
 
     // Create bundles.
-    $this->bundle1 = Unicode::strtolower($this->randomMachineName());
-    $this->bundle2 = Unicode::strtolower($this->randomMachineName());
+    $this->bundle1 = mb_strtolower($this->randomMachineName());
+    $this->bundle2 = mb_strtolower($this->randomMachineName());
 
     // Create node types.
     $node_type1 = NodeType::create(['type' => $this->bundle1, 'name' => $this->bundle1]);

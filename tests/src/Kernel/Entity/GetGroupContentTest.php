@@ -2,7 +2,6 @@
 
 namespace Drupal\Tests\og\Kernel\Entity;
 
-use Drupal\Component\Utility\Unicode;
 use Drupal\KernelTests\KernelTestBase;
 use Drupal\entity_test\Entity\EntityTest;
 use Drupal\node\Entity\Node;
@@ -74,7 +73,7 @@ class GetGroupContentTest extends KernelTestBase {
     $groups = [];
 
     // Create two groups of different entity types.
-    $bundle = Unicode::strtolower($this->randomMachineName());
+    $bundle = mb_strtolower($this->randomMachineName());
     NodeType::create([
       'name' => $this->randomString(),
       'type' => $bundle,
@@ -90,7 +89,7 @@ class GetGroupContentTest extends KernelTestBase {
 
     // The Entity Test entity doesn't have 'real' bundles, so we don't need to
     // create one, we can just add the group to the fake bundle.
-    $bundle = Unicode::strtolower($this->randomMachineName());
+    $bundle = mb_strtolower($this->randomMachineName());
     Og::groupTypeManager()->addGroup('entity_test', $bundle);
 
     $groups['entity_test'] = EntityTest::create([
@@ -107,7 +106,7 @@ class GetGroupContentTest extends KernelTestBase {
       foreach (['node', 'entity_test'] as $target_group_type) {
         // Create the group content bundle if it's a node. Entity Test doesn't
         // have real bundles.
-        $bundle = Unicode::strtolower($this->randomMachineName());
+        $bundle = mb_strtolower($this->randomMachineName());
         if ($entity_type === 'node') {
           NodeType::create([
             'type' => $bundle,
@@ -126,6 +125,7 @@ class GetGroupContentTest extends KernelTestBase {
           ],
           'field_config' => [
             'settings' => [
+              'handler' => 'default',
               'handler_settings' => [
                 'target_bundles' => [$groups[$target_group_type]->bundle() => $groups[$target_group_type]->bundle()],
               ],
@@ -174,7 +174,7 @@ class GetGroupContentTest extends KernelTestBase {
     $groups = [];
 
     // Create two groups.
-    $bundle = Unicode::strtolower($this->randomMachineName());
+    $bundle = mb_strtolower($this->randomMachineName());
     NodeType::create([
       'name' => $this->randomString(),
       'type' => $bundle,
@@ -191,7 +191,7 @@ class GetGroupContentTest extends KernelTestBase {
     }
 
     // Create a group content type.
-    $bundle = Unicode::strtolower($this->randomMachineName());
+    $bundle = mb_strtolower($this->randomMachineName());
 
     $settings = [
       'field_storage_config' => [
@@ -232,7 +232,7 @@ class GetGroupContentTest extends KernelTestBase {
     $groups = [];
 
     // Create two groups of different entity types.
-    $bundle = Unicode::strtolower($this->randomMachineName());
+    $bundle = mb_strtolower($this->randomMachineName());
     NodeType::create([
       'name' => $this->randomString(),
       'type' => $bundle,
@@ -248,7 +248,7 @@ class GetGroupContentTest extends KernelTestBase {
 
     // The Entity Test entity doesn't have 'real' bundles, so we don't need to
     // create one, we can just add the group to the fake bundle.
-    $bundle = Unicode::strtolower($this->randomMachineName());
+    $bundle = mb_strtolower($this->randomMachineName());
     Og::groupTypeManager()->addGroup('entity_test', $bundle);
 
     $groups['entity_test'] = EntityTest::create([
@@ -260,7 +260,7 @@ class GetGroupContentTest extends KernelTestBase {
 
     // Create a group content type with two group audience fields, one for each
     // group.
-    $bundle = Unicode::strtolower($this->randomMachineName());
+    $bundle = mb_strtolower($this->randomMachineName());
     foreach (['entity_test', 'node'] as $target_type) {
       $settings = [
         'field_name' => 'group_audience_' . $target_type,

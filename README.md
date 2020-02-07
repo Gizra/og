@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/Gizra/og.svg?branch=8.x-1.x)](https://travis-ci.org/Gizra/og)
+![Status](https://travis-ci.org/Gizra/og.svg?branch=8.x-1.x)
 
 ## DESCRIPTION
 
@@ -92,12 +92,11 @@ types, groups and group content given here are suggestions and are given to
 provide a quick way to get started with Organic groups.
 
 1. Enable the Group and the Group UI modules.
-2. Create a new content type via admin/structure/types/add. Call it "Group", and
-   define it to be of Group type.
-3. Create a second content type. Call it "Group content", and set it to be of
-   Group content type.
-4. Add a Group by going to node/add/group. Call it First group, and enable the
-   Group through the "Group type" field.
+2. Create a new content type via admin/structure/types/add. Call it "Group",
+   and click on tab "Organic groups" then define it to be of Group type.
+3. Create a second content type. Call it "Group content", and click on tab 
+   "Organic groups" then set it to be of Group content type.
+4. Add a Group by going to node/add/group. Call it First group.
 5. Add a Group Content by going to node/add/group-content. In the Groups
    audience field, select First group. In the group content view a link was
    added to the group.
@@ -111,16 +110,17 @@ provide a quick way to get started with Organic groups.
    will notice that these options have the same look and feel as Drupal core in
    matters relating to management of roles and permissions.
 9. You can enable your privileged users to subscribe to a group by providing a
-   'Subscribe' link. (Subscribing is the act of associating a user with a group.)
+   'Subscribe' link. (Subscribing is the act of associating a user with a 
+    group.)
    To show this subscribe link:
    9.1 Make sure you have the Group UI module enabled
-   9.2 Go to admin/config/group/permissions and make sure that the "Subscribe user to group"
-       permission is given to the appropriate user-roles.
+   9.2 Go to admin/config/group/permissions and make sure that the "Subscribe 
+       user to group" permission is given to the appropriate user-roles.
    9.3 Navigate to the "manage display" tab of your content type
       (admin/structure/types/manage/group/display)
        and choose the Group subscription format for the Group type field.
-   9.4 Back in the group view you will now notice a 'Subscribe' link (If you are the
-       group administrator it will say "You are the group manager").
+   9.4 Back in the group view you will now notice a 'Subscribe' link (If you are 
+       the group administrator it will say "You are the group manager").
 10. In order to associate other entities with group or group content, navigate
     to Organic Groups field settings", in admin/config/group/fields.
 11. In order to define default permissions for groups that are newly created or
@@ -163,11 +163,14 @@ provide a quick way to get started with Organic groups.
 ## API
 
 ```php
-// Define the "Page" node type as group.
-\Drupal\og\Og::groupTypeManager()->addGroup('node', 'page');
+use Drupal\og\Og;
+use Drupal\og\OgGroupAudienceHelperInterface;
 
-// Add og audience field to "Article" node type, thus making is a group content.
-\Drupal\og\Og::createField(\Drupal\og\OgGroupAudienceHelper::DEFAULT_FIELD, 'node', 'article');
+// Define the "Page" node type as a group.
+Og::groupTypeManager()->addGroup('node', 'page');
+
+// Add OG audience field to the "News" node type, thus making it group content.
+Og::createField(OgGroupAudienceHelperInterface::DEFAULT_FIELD, 'node', 'news');
 ```
 
 ## DRUPAL CONSOLE INTEGRATION
