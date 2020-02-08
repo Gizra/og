@@ -23,6 +23,7 @@ before_script:
   # Install Drush
   - composer global require drush/drush:8
   - export PATH=$PATH:$HOME/.config/composer/vendor/bin
+  - cd ../../
 
   # Install php packages required for running Drupal
   - sudo apt-get update > /dev/null
@@ -40,7 +41,6 @@ before_script:
   - export DRUPAL_ROOT=og/drupal-7.x
 
   # Reference and enable module in build site
-  - cd ../../
   - ln -s $(readlink -e $(cd -)) $DRUPAL_ROOT/sites/all/modules/og
   - cd $DRUPAL_ROOT
 
