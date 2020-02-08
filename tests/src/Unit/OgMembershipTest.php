@@ -9,7 +9,7 @@ use Drupal\og\OgRoleInterface;
 use Drupal\Tests\UnitTestCase;
 
 /**
- * Tests set role method from the og membership.
+ * Tests the OgMembership entity.
  *
  * @group og
  * @coversDefaultClass \Drupal\og\Entity\OgMembership
