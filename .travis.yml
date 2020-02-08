@@ -35,11 +35,6 @@ services:
   - mysql
 
 before_script:
-  # Remove Xdebug as we don't need it and it causes "PHP Fatal error: Maximum
-  # function nesting level of '256' reached."
-  # We also don't care if that file exists or not on PHP 7.
-  - phpenv config-rm xdebug.ini || true
-
   # Make sure Composer is up to date.
   - composer self-update
 
@@ -48,7 +43,7 @@ before_script:
 
   # Navigate out of module directory to prevent blown stack by recursive module
   # lookup.
-  - cd ..
+  - cd ../../
 
   # Create database.
   - mysql -e 'create database og'
@@ -81,4 +76,12 @@ before_script:
   # Export database variable for kernel tests.
   - export SIMPLETEST_DB=mysql://root:@127.0.0.1/og
 
+  # Get the CodeClimate test reporter.
+  - curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
+  - chmod +x ./cc-test-reporter
+  - ./cc-test-reporter before-build
+
 script: DRUPAL_DIR=$DRUPAL_DIR MODULE_DIR=$MODULE_DIR $MODULE_DIR/scripts/travis-ci/run-test.sh $TEST_SUITE
+
+after_script:
+  - if [ "$TRAVIS_PULL_REQUEST" == "false" ] && [ "${TEST_SUITE}" != "PHP_CodeSniffer" ]; then ./cc-test-reporter after-build --coverage-input-type clover --exit-code $TRAVIS_TEST_RESULT; fi
