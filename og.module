@@ -23,6 +23,8 @@ use Drupal\user\EntityOwnerInterface;
 use Drupal\user\UserInterface;
 
 $unused = 1;
+$test  =  2 ;
+// Comment
 
 /**
  * Implements hook_entity_insert().
