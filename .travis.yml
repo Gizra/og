@@ -18,7 +18,6 @@ services:
   - mysql
 
 before_script:
-  - phpenv config-rm xdebug.ini || true
 
   # Install Drush
   - composer global require drush/drush:8
