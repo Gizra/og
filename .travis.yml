@@ -40,6 +40,7 @@ before_script:
   - export DRUPAL_ROOT=og/drupal-7.x
 
   # Reference and enable module in build site
+  - cd ../../
   - ln -s $(readlink -e $(cd -)) $DRUPAL_ROOT/sites/all/modules/og
   - cd $DRUPAL_ROOT
 
