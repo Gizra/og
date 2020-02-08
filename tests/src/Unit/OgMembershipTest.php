@@ -54,7 +54,6 @@ class OgMembershipTest extends UnitTestCase {
 
     $this->assertEquals(count($roles), count($actual_roles));
   }
-
   /**
    * Asserts that the given role properties matches the expected result.
    *
