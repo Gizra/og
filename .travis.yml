@@ -22,7 +22,6 @@ before_script:
   # Install Drush
   - composer global require drush/drush:8
   - export PATH=$PATH:$HOME/.config/composer/vendor/bin
-  - cd ../../
 
   # Install php packages required for running Drupal
   - sudo apt-get update > /dev/null
@@ -33,9 +32,16 @@ before_script:
   - mysql -e "SHOW VARIABLES LIKE 'max_allowed_packet';"
   - mysql -e "SHOW VARIABLES LIKE 'wait_timeout';"
 
-  # Create new site, stubbing sendmail path with true to prevent delivery errors
+  # Create new database
   - mysql -e 'CREATE DATABASE drupal'
+  
+  # Stub sendmail path with true to prevent delivery errors
   - export PHP_OPTIONS="-d sendmail_path=`which true`"
+  
+  # Navigate out of module directory to prevent blown stack by recursive module lookup
+  - cd ../../
+
+  # Install Drupal
   - drush --yes core-quick-drupal --core=drupal-7.x --profile=testing --no-server --db-url=mysql://root:@127.0.0.1/drupal --enable=simpletest og
   - export DRUPAL_ROOT=og/drupal-7.x
 
