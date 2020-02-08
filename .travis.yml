@@ -28,7 +28,6 @@ before_script:
 
   # Install php packages required for running Drupal
   - sudo apt-get update > /dev/null
-  - sudo apt-get install -y --force-yes php5-mysql
 
   # Try to avoid MySQL has gone away errors
   - mysql -e "SET GLOBAL wait_timeout = 36000;"
