@@ -26,6 +26,9 @@ $unused = 1;
 $test  =  2 ;
 // Comment
 
+
+// Another very long comment. Another very long comment. Another very long comment. Another very long comment. Another very long comment.
+
 /**
  * Implements hook_entity_insert().
  *
