@@ -18,6 +18,8 @@ services:
   - mysql
 
 before_script:
+  - echo "xdebug.max_nesting_level=-1" >> ~/.phpenv/versions/$(phpenv version-name)/etc/php.ini
+
   # Install Drush
   - composer global require drush/drush:8
   - export PATH=$PATH:$HOME/.config/composer/vendor/bin
