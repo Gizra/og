@@ -39,7 +39,7 @@ plugins:
   phpcodesniffer:
     enabled: true
     config:
-      standard: "Drupal Module"
+      standard: "phpcs.xml"
       file_extensions: "php,inc,module,install,info,test,profile,theme,css,js"
   phpmd:
     enabled: false
