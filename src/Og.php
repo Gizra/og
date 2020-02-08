@@ -2,7 +2,6 @@
 
 namespace Drupal\og;
 
-use UnusedUseStatement;
 use Drupal\Component\Utility\NestedArray;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Field\FieldDefinitionInterface;
@@ -49,7 +48,6 @@ class Og {
    *   The created or existing field config.
    */
   public static function createField($plugin_id, $entity_type, $bundle, array $settings = []) {
-    $unusedvar = 1;
     $settings = $settings + [
       'field_storage_config' => [],
       'field_config' => [],
