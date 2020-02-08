@@ -4,27 +4,12 @@ dist: xenial
 
 php:
   - 7.2
-  - 7.3
-  - 7.4
 
 env:
   global:
     - COMPOSER_MEMORY_LIMIT=2G
   matrix:
-    - TEST_SUITE=8.7.x
-    - TEST_SUITE=8.8.x
-    - TEST_SUITE=8.9.x
     - TEST_SUITE=PHP_CodeSniffer
-
-# Only run the coding standards check once.
-matrix:
-  exclude:
-    - php: 7.2
-      env: TEST_SUITE=PHP_CodeSniffer
-    - php: 7.4
-      env: TEST_SUITE=PHP_CodeSniffer
-  allow_failures:
-    - php: 7.4
 
 mysql:
   database: og
