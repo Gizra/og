@@ -25,7 +25,7 @@ use Drupal\user\UserInterface;
 $unused = 1;
 $unused = 2;
 $test  =  2 ;
-// Comment
+// Comment without a point
 
 
 // Another very long comment. Another very long comment. Another very long comment. Another very long comment. Another very long comment.
