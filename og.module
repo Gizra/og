@@ -22,6 +22,8 @@ use Drupal\system\Entity\Action;
 use Drupal\user\EntityOwnerInterface;
 use Drupal\user\UserInterface;
 
+$unused = 1;
+
 /**
  * Implements hook_entity_insert().
  *
