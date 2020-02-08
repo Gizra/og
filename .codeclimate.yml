@@ -2,10 +2,6 @@ version: "2"
 
 prepare:
   fetch:
-  - url: "https://github.com/Gizra/og/blob/8.x-1.x/phpcs.xml"
-    path: "/usr/src/app/vendor/drupal/coder/coder_sniffer/phpcs.xml"
-  - url: "https://github.com/Gizra/og/blob/8.x-1.x/phpcs-ruleset.xml.dist"
-    path: "/usr/src/app/vendor/drupal/coder/coder_sniffer/phpcs-ruleset.xml.dist"
   - url: "https://git.drupalcode.org/project/drupal/raw/8.8.x/.csslintrc"
     path: ".csslintrc"
   - url: "https://git.drupalcode.org/project/drupal/raw/8.8.x/core/.eslintrc.json"
@@ -43,7 +39,7 @@ plugins:
   phpcodesniffer:
     enabled: true
     config:
-      standard: "/usr/src/app/vendor/drupal/coder/coder_sniffer/phpcs.xml"
+      standard: "Drupal,DrupalPractice"
       file_extensions: "php,inc,module,install,info,test,profile,theme,css,js"
   phpmd:
     enabled: false
