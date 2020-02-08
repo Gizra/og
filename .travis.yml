@@ -18,12 +18,10 @@ services:
   - mysql
 
 before_script:
-  # Navigate out of module directory to prevent blown stack by recursive module lookup
-  - cd ../..
-
   # Install Drush
   - composer global require drush/drush:8
   - export PATH=$PATH:$HOME/.composer/vendor/bin
+  - ls -alR ~/.composer/vendor/bin
 
   # Install php packages required for running Drupal
   - sudo apt-get update > /dev/null
