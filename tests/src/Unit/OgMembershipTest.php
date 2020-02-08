@@ -17,7 +17,7 @@ use Drupal\Tests\UnitTestCase;
 class OgMembershipTest extends UnitTestCase {
 
   /**
-   * OG Role entity.
+   * OgRole entity.
    *
    * @var \Drupal\og\Entity\OgRole|\Prophecy\Prophecy\ObjectProphecy
    */
