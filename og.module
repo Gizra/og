@@ -23,11 +23,6 @@ use Drupal\user\EntityOwnerInterface;
 use Drupal\user\UserInterface;
 
 /**
- * Group default roles and permissions field.
- */
-define('OG_DEFAULT_ACCESS_FIELD', 'og_roles_permissions');
-
-/**
  * Implements hook_entity_insert().
  *
  * Subscribe the group manager.
