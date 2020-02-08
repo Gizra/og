@@ -2,7 +2,7 @@
 
 namespace Drupal\og\Plugin\Field\FieldType;
 
-use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Field\Plugin\Field\FieldType\EntityReferenceItem;
 
 /**
  * Class OgStandardReferenceItem.
