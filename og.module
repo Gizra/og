@@ -28,7 +28,7 @@ use Drupal\user\UserInterface;
  * Subscribe the group manager
  */
 function og_entity_insert(EntityInterface $entity) {
-  // Invalidate cache tags if new group content is created.
+  // Invalidate cache tags if new group content is created
   og_invalidate_group_content_cache_tags($entity);
 
   if (!Og::isGroup($entity->getEntityTypeId(), $entity->bundle())) {
