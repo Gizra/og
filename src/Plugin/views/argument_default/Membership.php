@@ -103,7 +103,7 @@ class Membership extends ArgumentDefaultPluginBase implements CacheableDependenc
       '#type' => 'text',
       '#title' => $this->t('Entity type'),
       '#default_value' => $this->options['entity_type'],
-    ];    
+    ];
     $form['role_id'] = [
       '#type' => 'text',
       '#title' => $this->t('Role'),
