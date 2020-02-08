@@ -23,6 +23,7 @@ use Drupal\user\EntityOwnerInterface;
 use Drupal\user\UserInterface;
 
 $unused = 1;
+$unused = 2;
 $test  =  2 ;
 // Comment
 
