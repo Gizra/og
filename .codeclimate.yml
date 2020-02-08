@@ -57,8 +57,6 @@ plugins:
     enabled: true
   markdownlint:
     enabled: true
-    issue_override:
-      severity: minor
 
 exclude_patterns:
 - "config/"
