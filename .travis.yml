@@ -11,6 +11,9 @@ mysql:
   username: root
   encoding: utf8
 
+services:
+  - mysql
+
 before_script:
   # Navigate out of module directory to prevent blown stack by recursive module lookup
   - cd ../..
