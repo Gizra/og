@@ -20,8 +20,7 @@ services:
 before_script:
   # Install Drush
   - composer global require drush/drush:8
-  - export PATH=$PATH:$HOME/.composer/vendor/bin
-  - ls -alR $HOME/.composer/vendor
+  - export PATH=$PATH:$HOME/.config/composer/vendor/bin
 
   # Install php packages required for running Drupal
   - sudo apt-get update > /dev/null
