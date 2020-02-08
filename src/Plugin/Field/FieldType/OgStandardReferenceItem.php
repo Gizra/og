@@ -2,7 +2,6 @@
 
 namespace Drupal\og\Plugin\Field\FieldType;
 
-use Drupal\Core\Field\Plugin\Field\FieldType\EntityReferenceItem;
 use Drupal\Core\Form\FormStateInterface;
 
 /**
