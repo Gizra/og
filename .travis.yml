@@ -35,11 +35,6 @@ services:
   - mysql
 
 before_script:
-  # Remove Xdebug as we don't need it and it causes "PHP Fatal error: Maximum
-  # function nesting level of '256' reached."
-  # We also don't care if that file exists or not on PHP 7.
-  - phpenv config-rm xdebug.ini || true
-
   # Make sure Composer is up to date.
   - composer self-update
 
@@ -48,7 +43,7 @@ before_script:
 
   # Navigate out of module directory to prevent blown stack by recursive module
   # lookup.
-  - cd ..
+  - cd ../../
 
   # Create database.
   - mysql -e 'create database og'
