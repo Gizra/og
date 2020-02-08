@@ -1,27 +1,30 @@
-dist: precise
-sudo: required
+dist: xenial
 language: php
 
 php:
-  - 5.6
   - 7.3
+  - 7.4
+
+matrix:
+  allow_failures:
+    - php: 7.4
 
 mysql:
   database: drupal
   username: root
   encoding: utf8
 
+services:
+  - mysql
+
 before_script:
-  # Navigate out of module directory to prevent blown stack by recursive module lookup
-  - cd ../..
 
   # Install Drush
   - composer global require drush/drush:8
-  - export PATH=$PATH:~/.composer/vendor/bin
+  - export PATH=$PATH:$HOME/.config/composer/vendor/bin
 
   # Install php packages required for running Drupal
   - sudo apt-get update > /dev/null
-  - sudo apt-get install -y --force-yes php5-mysql
 
   # Try to avoid MySQL has gone away errors
   - mysql -e "SET GLOBAL wait_timeout = 36000;"
@@ -29,9 +32,16 @@ before_script:
   - mysql -e "SHOW VARIABLES LIKE 'max_allowed_packet';"
   - mysql -e "SHOW VARIABLES LIKE 'wait_timeout';"
 
-  # Create new site, stubbing sendmail path with true to prevent delivery errors
+  # Create new database
   - mysql -e 'CREATE DATABASE drupal'
+  
+  # Stub sendmail path with true to prevent delivery errors
   - export PHP_OPTIONS="-d sendmail_path=`which true`"
+  
+  # Navigate out of module directory to prevent blown stack by recursive module lookup
+  - cd ../../
+
+  # Install Drupal
   - drush --yes core-quick-drupal --core=drupal-7.x --profile=testing --no-server --db-url=mysql://root:@127.0.0.1/drupal --enable=simpletest og
   - export DRUPAL_ROOT=og/drupal-7.x
 
