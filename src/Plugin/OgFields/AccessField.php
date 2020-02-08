@@ -18,6 +18,11 @@ use Drupal\og\OgFieldsInterface;
 class AccessField extends OgFieldBase implements OgFieldsInterface {
 
   /**
+   * The default OG access field name.
+   */
+  const DEFAULT_FIELD = 'og_access';
+
+  /**
    * {@inheritdoc}
    */
   public function getFieldStorageBaseDefinition(array $values = []) {
