@@ -8,7 +8,6 @@ use Drupal\Core\Routing\Access\AccessInterface;
 use Drupal\Core\Routing\RouteMatchInterface;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\og\Og;
-use Drupal\og\OgAccess;
 use Drupal\og\OgAccessInterface;
 use Symfony\Component\Routing\Route;
 
@@ -59,11 +58,13 @@ class GroupCheck implements AccessInterface {
    *   The currently logged in user.
    * @param \Symfony\Component\Routing\Route $route
    *   The route to check against.
+   * @param \Drupal\Core\Routing\RouteMatchInterface $route_match
+   *   The rout match object.
    * @param string $entity_type_id
    *   (optional) The entity type ID.
    * @param string $entity_id
-   *   (optional) The entity ID. If the ID is not sent, the access method will
-   *   try to extract it from the route matcher.
+   *   The entity ID. If the ID is not sent, the access method will try to
+   *   extract it from the route matcher.
    *
    * @return \Drupal\Core\Access\AccessResultInterface
    *   The access result.

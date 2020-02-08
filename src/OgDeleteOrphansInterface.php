@@ -43,9 +43,9 @@ interface OgDeleteOrphansInterface {
    * @param \Drupal\Core\Form\FormStateInterface $form_state
    *   The current state of the form.
    *
-   * @return array $form
+   * @return array
    *   The renderable form array representing the entire configuration form.
    */
-  public function configurationForm($form, FormStateInterface $form_state);
+  public function configurationForm(array $form, FormStateInterface $form_state);
 
 }

@@ -19,8 +19,15 @@ class OgAdminRoutesEvent extends Event implements OgAdminRoutesEventInterface {
   /**
    * {@inheritdoc}
    */
-  public function setRoutes(array $routes_info) {
+  public function setRoutesInfo(array $routes_info) {
     $this->routesInfo = $routes_info;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getRoutesInfo() {
+    return $this->routesInfo;
   }
 
   /**

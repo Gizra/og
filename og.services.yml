@@ -4,38 +4,65 @@ services:
     arguments: ['@entity_type.manager', '@og.access']
     tags:
       - { name: access_check, applies_to: _og_user_access_group }
+  cache_context.og_group_context:
+    class: 'Drupal\og\Cache\Context\OgGroupContextCacheContext'
+    arguments: ['@og.context']
+    tags:
+      - { name: 'cache.context'}
+  cache_context.og_membership_state:
+    class: 'Drupal\og\Cache\Context\OgMembershipStateCacheContext'
+    arguments: ['@current_user', '@og.context', '@og.membership_manager']
+    tags:
+      - { name: 'cache.context'}
+  cache_context.og_role:
+    class: 'Drupal\og\Cache\Context\OgRoleCacheContext'
+    arguments: ['@current_user', '@entity_type.manager', '@og.membership_manager', '@database', '@private_key']
+    tags:
+      - { name: 'cache.context'}
   og.access:
     class: Drupal\og\OgAccess
-    arguments: ['@config.factory', '@current_user', '@module_handler', '@og.group_type_manager', '@og.permission_manager', '@og.membership_manager']
-  og.membership_manager:
-    class: Drupal\og\MembershipManager
-    arguments: ['@entity_type.manager']
+    arguments: ['@config.factory', '@current_user', '@module_handler', '@og.group_type_manager', '@og.permission_manager', '@og.membership_manager', '@og.group_audience_helper']
+  og.add_field:
+    class: Drupal\og\Command\OgAddFieldCommand
+    arguments: ['@entity_type.bundle.info', '@entity_type.repository', '@plugin.manager.og.fields']
+    tags:
+      - { name: drupal.command }
+  og.context:
+    class: Drupal\og\ContextProvider\OgContext
+    arguments: ['@plugin.manager.og.group_resolver', '@config.factory']
+    tags:
+      - { name: 'context_provider' }
   og.event_subscriber:
     class: Drupal\og\EventSubscriber\OgEventSubscriber
     arguments: ['@og.permission_manager', '@entity_type.manager', '@entity_type.bundle.info']
     tags:
       - { name: 'event_subscriber' }
+  og.group_audience_helper:
+    class: Drupal\og\OgGroupAudienceHelper
+    arguments: ['@entity_type.manager', '@entity_field.manager']
   og.group_type_manager:
     class: Drupal\og\GroupTypeManager
-    arguments: ['@config.factory', '@entity_type.manager', '@entity_type.bundle.info', '@event_dispatcher', '@state', '@og.permission_manager', '@og.role_manager', '@router.builder']
-  og.permissions:
-    class: Drupal\og\OgPermissionHandler
-    arguments: ['@module_handler', '@string_translation', '@controller_resolver']
+    arguments: ['@config.factory', '@entity_type.manager', '@entity_type.bundle.info', '@event_dispatcher', '@cache.data', '@og.permission_manager', '@og.role_manager', '@router.builder', '@og.group_audience_helper']
+  og.membership_manager:
+    class: Drupal\og\MembershipManager
+    arguments: ['@entity_type.manager', '@og.group_audience_helper', '@cache.static']
   og.permission_manager:
     class: Drupal\og\PermissionManager
     arguments: ['@event_dispatcher']
+  og.role_manager:
+    class: Drupal\og\OgRoleManager
+    arguments: ['@entity_type.manager', '@event_dispatcher', '@og.permission_manager']
   og.route_subscriber:
     class: Drupal\og\Routing\RouteSubscriber
     arguments: ['@entity_type.manager', '@router.route_provider', '@event_dispatcher']
     tags:
       - { name: event_subscriber }
-  og.role_manager:
-    class: Drupal\og\OgRoleManager
-    arguments: ['@entity_type.manager', '@event_dispatcher', '@og.permission_manager']
   plugin.manager.og.delete_orphans:
     class: Drupal\og\OgDeleteOrphansPluginManager
     parent: default_plugin_manager
   plugin.manager.og.fields:
     class: Drupal\og\OgFieldsPluginManager
     parent: default_plugin_manager
-
+  plugin.manager.og.group_resolver:
+    class: Drupal\og\OgGroupResolverPluginManager
+    parent: default_plugin_manager

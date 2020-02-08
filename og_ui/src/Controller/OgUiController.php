@@ -6,7 +6,7 @@ use Drupal\Core\Controller\ControllerBase;
 use Drupal\Core\Entity\EntityTypeBundleInfoInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Link;
-use Drupal\og\GroupTypeManager;
+use Drupal\og\GroupTypeManagerInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
@@ -17,7 +17,7 @@ class OgUiController extends ControllerBase {
   /**
    * The OG group manager.
    *
-   * @var \Drupal\og\GroupTypeManager
+   * @var \Drupal\og\GroupTypeManagerInterface
    */
   protected $groupTypeManager;
 
@@ -38,14 +38,14 @@ class OgUiController extends ControllerBase {
   /**
    * Constructs a OgUiController object.
    *
-   * @param \Drupal\og\GroupTypeManager $group_manager
+   * @param \Drupal\og\GroupTypeManagerInterface $group_manager
    *   The OG group manager.
    * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entity_type_manager
    *   The entity type manager.
    * @param \Drupal\Core\Entity\EntityTypeBundleInfoInterface $entity_type_bundle_info
    *   The entity type bundle info service.
    */
-  public function __construct(GroupTypeManager $group_manager, EntityTypeManagerInterface $entity_type_manager, EntityTypeBundleInfoInterface $entity_type_bundle_info) {
+  public function __construct(GroupTypeManagerInterface $group_manager, EntityTypeManagerInterface $entity_type_manager, EntityTypeBundleInfoInterface $entity_type_bundle_info) {
     $this->groupTypeManager = $group_manager;
     $this->entityTypeManager = $entity_type_manager;
     $this->entityTypeBundleInfo = $entity_type_bundle_info;
@@ -75,6 +75,7 @@ class OgUiController extends ControllerBase {
     $action = $type === 'roles' ? t('Edit roles') : t('Edit permissions');
     $header = [t('Group type'), t('Operations')];
     $rows = [];
+    $build = [];
 
     foreach ($this->groupTypeManager->getAllGroupBundles() as $entity_type => $bundles) {
       $definition = $this->entityTypeManager->getDefinition($entity_type);

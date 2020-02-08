@@ -2,11 +2,10 @@
 
 namespace Drupal\Tests\og\Kernel\Entity;
 
-use Drupal\Component\Utility\Unicode;
 use Drupal\entity_test\Entity\EntityTestStringId;
 use Drupal\KernelTests\KernelTestBase;
 use Drupal\og\Og;
-use Drupal\og\OgGroupAudienceHelper;
+use Drupal\og\OgGroupAudienceHelperInterface;
 
 /**
  * Checks that groups with string IDs can be referenced.
@@ -57,7 +56,7 @@ class ReferenceStringIdTest extends KernelTestBase {
     // Create two bundles, one will serve as group, the other as group content.
     for ($i = 0; $i < 2; $i++) {
       $bundle = EntityTestStringId::create([
-        'type' => Unicode::strtolower($this->randomMachineName()),
+        'type' => mb_strtolower($this->randomMachineName()),
         'name' => $this->randomString(),
         'id' => $this->randomMachineName(),
       ]);
@@ -79,7 +78,7 @@ class ReferenceStringIdTest extends KernelTestBase {
     // Add a group audience field to the second bundle, this will turn it into a
     // group content type.
     $this->fieldName = strtolower($this->randomMachineName());
-    Og::CreateField(OgGroupAudienceHelper::DEFAULT_FIELD, 'entity_test_string_id', $this->bundles[1], [
+    Og::CreateField(OgGroupAudienceHelperInterface::DEFAULT_FIELD, 'entity_test_string_id', $this->bundles[1], [
       'field_name' => $this->fieldName,
     ]);
   }
@@ -98,7 +97,7 @@ class ReferenceStringIdTest extends KernelTestBase {
     $entity->save();
 
     // Check that the group content entity is referenced.
-    $references = $this->container->get('entity.query')->get('entity_test_string_id')
+    $references = $this->container->get('entity_type.manager')->getStorage('entity_test_string_id')->getQuery()
       ->condition($this->fieldName, $this->group->id())
       ->execute();
     $this->assertEquals([$entity->id()], array_keys($references), 'The correct group is referenced.');

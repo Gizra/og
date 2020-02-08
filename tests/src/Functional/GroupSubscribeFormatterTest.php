@@ -2,11 +2,11 @@
 
 namespace Drupal\Tests\og\Functional;
 
-use Drupal\Component\Utility\Unicode;
 use Drupal\node\Entity\Node;
 use Drupal\node\Entity\NodeType;
 use Drupal\og\Og;
 use Drupal\og\OgRoleInterface;
+use Drupal\og\Entity\OgRole;
 use Drupal\Tests\BrowserTestBase;
 
 /**
@@ -20,6 +20,11 @@ class GroupSubscribeFormatterTest extends BrowserTestBase {
    * {@inheritdoc}
    */
   public static $modules = ['node', 'og'];
+
+  /**
+   * {@inheritdoc}
+   */
+  protected $defaultTheme = 'stark';
 
   /**
    * Test entity group.
@@ -56,7 +61,7 @@ class GroupSubscribeFormatterTest extends BrowserTestBase {
     parent::setUp();
 
     // Create bundle.
-    $this->groupBundle = Unicode::strtolower($this->randomMachineName());
+    $this->groupBundle = mb_strtolower($this->randomMachineName());
 
     // Create a node type.
     $node_type = NodeType::create(['type' => $this->groupBundle, 'name' => $this->groupBundle]);
@@ -77,7 +82,7 @@ class GroupSubscribeFormatterTest extends BrowserTestBase {
     $this->group->save();
 
     /** @var \Drupal\og\Entity\OgRole $role */
-    $role = Og::getRole('node', $this->groupBundle, OgRoleInterface::ANONYMOUS);
+    $role = OgRole::getRole('node', $this->groupBundle, OgRoleInterface::ANONYMOUS);
     $role
       ->grantPermission('subscribe without approval')
       ->save();
@@ -104,7 +109,6 @@ class GroupSubscribeFormatterTest extends BrowserTestBase {
     $this->drupalLogin($this->user2);
     $this->drupalGet('node/' . $this->group->id());
     $this->clickLink('Subscribe to group');
-
   }
 
 }

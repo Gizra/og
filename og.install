@@ -5,6 +5,8 @@
  * Install, update, and uninstall functions for the Organic groups module.
  */
 
+use Drupal\Core\Field\BaseFieldDefinition;
+
 /**
  * Implements hook_uninstall().
  */
@@ -14,63 +16,77 @@ function og_uninstall() {
 }
 
 /**
- * Implements hook_schema().
+ * Add a base field to store the group bundle in memberships.
  */
-function og_schema() {
-  $schema = array();
+function og_update_8001(&$sandbox) {
+  $storage = \Drupal::entityTypeManager()->getStorage('og_membership');
 
-  $schema['og_users_roles'] = array(
-    'description' => 'Maps users to roles.',
-    'fields' => array(
-      'id' => array(
-        'type' => 'serial',
-        'description' => "The unique identifier.",
-        'unsigned' => TRUE,
-        'not null' => TRUE,
-      ),
-      'uid' => array(
-        'type' => 'int',
-        'unsigned' => TRUE,
-        'not null' => TRUE,
-        'default' => 0,
-        'description' => 'Primary Key: {users}.uid for user.',
-      ),
-      'rid' => array(
-        'type' => 'int',
-        'unsigned' => TRUE,
-        'not null' => TRUE,
-        'default' => 0,
-        'description' => 'Primary Key: {og_role}.rid for role.',
-      ),
-      'gid' => array(
-        'description' => "The group's unique ID.",
-        'type' => 'int',
-        'size' => 'normal',
-        'not null' => TRUE,
-      ),
-      'group_type' => array(
-        'type' => 'varchar',
-        'length' => 255,
-        'not null' => TRUE,
-        'default' => '',
-        'description' => "The group's entity type.",
-      ),
-    ),
-    'primary key' => array('id'),
-    'indexes' => array(
-      'rid' => array('rid'),
-    ),
-    'foreign keys' => array(
-      'user' => array(
-        'table' => 'users',
-        'columns' => array('uid' => 'uid'),
-      ),
-      'og_role' => array(
-        'table' => 'og_role',
-        'columns' => array('rid' => 'rid'),
-      ),
-    ),
-  );
+  if (!isset($sandbox['total'])) {
+    $storage_definition = BaseFieldDefinition::create('string')
+      ->setLabel(t('Group bundle ID'))
+      ->setDescription(t('The bundle ID of the group.'));
+    \Drupal::entityDefinitionUpdateManager()->installFieldStorageDefinition('entity_bundle', 'og_membership', 'og', $storage_definition);
 
-  return $schema;
+    $sandbox['#finished'] = 0;
+    $sandbox['batch_size'] = 500;
+    $sandbox['current'] = 0;
+    $sandbox['total'] = $storage->getQuery()->count()->execute();
+
+    if (!$sandbox['total']) {
+      $sandbox['#finished'] = 1;
+      return t('No OG memberships found.');
+    }
+  }
+
+  // Update the existing memberships to include the group bundle ID.
+  $membership_ids = $storage->getQuery()
+    ->range($sandbox['current'], $sandbox['batch_size'])
+    ->sort('id')
+    ->execute();
+
+  /** @var \Drupal\og\Entity\OgMembership $membership */
+  foreach ($storage->loadMultiple($membership_ids) as $membership) {
+    $group = $membership->getGroup();
+    if (!empty($group)) {
+      $membership->set('entity_bundle', $group->bundle());
+      $membership->save();
+    }
+    else {
+      // The membership is for a group that no longer exists. We cannot no
+      // longer retrieve the group bundle ID so the membership cannot be
+      // updated. Delete the membership since it is invalid, and inform the
+      // user.
+      \Drupal::logger('og')->warning('Deleted orphaned membership with ID @id since the group it refers to no longer exists.', [
+        '@id' => $membership->id(),
+      ]);
+      $membership->delete();
+    }
+  }
+
+  $sandbox['current'] += $sandbox['batch_size'];
+  if ($sandbox['current'] >= $sandbox['total']) {
+    $sandbox['current'] = $sandbox['total'];
+  }
+  $sandbox['#finished'] = $sandbox['current'] / $sandbox['total'];
+
+  $message = t('Processed @current of @total memberships (@percentage% complete)', [
+    '@current' => $sandbox['current'],
+    '@total' => $sandbox['total'],
+    '@percentage' => number_format($sandbox['#finished'] * 100, 2),
+  ]);
+
+  return $message;
+}
+
+/**
+ * Add uuid field to OgMembership.
+ */
+function og_update_8002() {
+  $manager = \Drupal::entityDefinitionUpdateManager();
+  $entity_type = $manager->getEntityType('og_membership');
+  $entity_keys = $entity_type->getKeys();
+  $entity_keys['uuid'] = 'uuid';
+  $entity_type->set('entity_keys', $entity_keys);
+  $manager->updateEntityType($entity_type);
+  $manager->updateFieldStorageDefinition($manager->getFieldStorageDefinition('uuid', 'og_membership'));
 }

@@ -11,7 +11,7 @@ use Drupal\Core\Form\FormStateInterface;
  * @FieldType(
  *   id = "og_standard_reference",
  *   label = @Translation("OG membership reference"),
- *   description = @Translation("An entity field containing an OG membership reference for user based entity."),
+ *   description = @Translation("An entity field containing an OG membership reference for a non-user entity."),
  *   category = @Translation("Reference"),
  *   no_ui = TRUE,
  *   default_widget = "og_complex",

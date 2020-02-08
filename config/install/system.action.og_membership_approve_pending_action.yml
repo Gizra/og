@@ -1,0 +1,10 @@
+langcode: en
+status: true
+dependencies:
+  module:
+    - og
+id: og_membership_approve_pending_action
+label: 'Approve the pending membership(s)'
+type: og_membership
+plugin: og_membership_approve_pending_action
+configuration: {  }

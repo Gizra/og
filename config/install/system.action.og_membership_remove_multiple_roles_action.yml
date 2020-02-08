@@ -1,0 +1,10 @@
+langcode: en
+status: true
+dependencies:
+  module:
+    - og
+id: og_membership_remove_multiple_roles_action
+label: 'Remove roles from the selected membership(s)'
+type: og_membership
+plugin: og_membership_remove_multiple_roles_action
+configuration: {  }

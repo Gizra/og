@@ -132,16 +132,9 @@ class OgEventSubscriber implements EventSubscriberInterface {
         'restrict access' => TRUE,
       ]),
       new GroupPermission([
-        'name' => 'manage roles',
-        'title' => t('Add roles'),
-        'description' => t('Users may view group roles and add new roles if group default roles are overridden.'),
-        'default roles' => [OgRoleInterface::ADMINISTRATOR],
-        'restrict access' => TRUE,
-      ]),
-      new GroupPermission([
-        'name' => 'manage permissions',
-        'title' => t('Manage permissions'),
-        'description' => t('Users may view the group permissions page and change permissions if group default roles are overridden.'),
+        'name' => 'administer permissions',
+        'title' => t('Administer permissions'),
+        'description' => t('Users may view, create, edit and delete permissions and roles within the group.'),
         'default roles' => [OgRoleInterface::ADMINISTRATOR],
         'restrict access' => TRUE,
       ]),
@@ -349,22 +342,21 @@ class OgEventSubscriber implements EventSubscriberInterface {
    *   The OG admin routes event object.
    */
   public function provideOgAdminRoutes(OgAdminRoutesEventInterface $event) {
-    $routes_info = [
-      'members' => [
-        'controller' => '\Drupal\og\Controller\OgAdminMembersController::membersList',
-        'title' => 'Members',
-        'description' => 'Manage members',
-        'path' => 'members',
-        'requirements' => [
-          '_permission' => 'administer group',
-          // Views module must be enabled.
-          '_module_dependencies' => 'views',
-        ],
+    $routes_info = $event->getRoutesInfo();
 
+    $routes_info['members'] = [
+      'controller' => '\Drupal\og\Controller\OgAdminMembersController::membersList',
+      'title' => 'Members',
+      'description' => 'Manage members',
+      'path' => 'members',
+      'requirements' => [
+        '_og_user_access_group' => 'administer group',
+        // Views module must be enabled.
+        '_module_dependencies' => 'views',
       ],
     ];
 
-    $event->setRoutes($routes_info);
+    $event->setRoutesInfo($routes_info);
   }
 
 }

@@ -10,12 +10,12 @@ use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Entity\FieldableEntityInterface;
 use Drupal\Core\Field\FieldDefinitionInterface;
 use Drupal\Core\Field\FieldStorageDefinitionInterface;
-use Drupal\og\OgGroupAudienceHelper;
+use Drupal\og\OgGroupAudienceHelperInterface;
 
 /**
  * OG access entity base class.
  */
-class OgAccessEntityTestBase extends OgAccessTestBase {
+abstract class OgAccessEntityTestBase extends OgAccessTestBase {
 
   /**
    * A test group content entity.
@@ -27,7 +27,7 @@ class OgAccessEntityTestBase extends OgAccessTestBase {
   /**
    * {@inheritdoc}
    */
-  public function setup() {
+  public function setUp() {
     parent::setUp();
 
     // Mock a group content entity.
@@ -50,6 +50,11 @@ class OgAccessEntityTestBase extends OgAccessTestBase {
     $this->groupContentEntity->getEntityTypeId()->willReturn($entity_type_id);
     $this->addCache($this->groupContentEntity);
 
+    // If the group audience helper is asked if the group content entity has any
+    // group audience fields, it is expected that this will return TRUE.
+    $this->groupAudienceHelper->hasGroupAudienceField($entity_type_id, $bundle)
+      ->willReturn(TRUE);
+
     // It is expected that a list of entity operation permissions is retrieved
     // from the permission manager so that the passed in permission can be
     // checked against this list. Our permissions are not in the list, so it is
@@ -62,7 +67,7 @@ class OgAccessEntityTestBase extends OgAccessTestBase {
 
     // Mock retrieval of field definitions.
     $field_definition = $this->prophesize(FieldDefinitionInterface::class);
-    $field_definition->getType()->willReturn(OgGroupAudienceHelper::GROUP_REFERENCE);
+    $field_definition->getType()->willReturn(OgGroupAudienceHelperInterface::GROUP_REFERENCE);
     $field_definition->getFieldStorageDefinition()
       ->willReturn($this->prophesize(FieldStorageDefinitionInterface::class)->reveal());
     $field_definition->getSetting('handler_settings')->willReturn([]);
