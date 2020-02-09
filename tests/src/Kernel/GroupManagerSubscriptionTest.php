@@ -108,7 +108,7 @@ class GroupManagerSubscriptionTest extends KernelTestBase {
 
     // Check that a membership has only been created if the group had an owner
     // set.
-    $membership = $this->membershipManager->getMembership($group, $this->owner);
+    $membership = $this->membershipManager->getMembership($group, $this->owner->id());
     $this->assertEquals($group_has_owner, !empty($membership));
 
     // Check if the membership has been overridden.

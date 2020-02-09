@@ -20,6 +20,11 @@ class GroupTabTest extends BrowserTestBase {
   public static $modules = ['node', 'og'];
 
   /**
+   * {@inheritdoc}
+   */
+  protected $defaultTheme = 'stark';
+
+  /**
    * Test entity group.
    *
    * @var \Drupal\node\NodeInterface

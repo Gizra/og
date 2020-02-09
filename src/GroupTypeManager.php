@@ -132,6 +132,13 @@ class GroupTypeManager implements GroupTypeManagerInterface {
   protected $groupAudienceHelper;
 
   /**
+   * The Entity type manager service.
+   *
+   * @var \Drupal\Core\Entity\EntityTypeManagerInterface
+   */
+  protected $entityTypeManager;
+
+  /**
    * Constructs a GroupTypeManager object.
    *
    * @param \Drupal\Core\Config\ConfigFactoryInterface $config_factory
@@ -155,6 +162,7 @@ class GroupTypeManager implements GroupTypeManagerInterface {
    */
   public function __construct(ConfigFactoryInterface $config_factory, EntityTypeManagerInterface $entity_type_manager, EntityTypeBundleInfoInterface $entity_type_bundle_info, EventDispatcherInterface $event_dispatcher, CacheBackendInterface $cache, PermissionManagerInterface $permission_manager, OgRoleManagerInterface $og_role_manager, RouteBuilderInterface $route_builder, OgGroupAudienceHelperInterface $group_audience_helper) {
     $this->configFactory = $config_factory;
+    $this->entityTypeManager = $entity_type_manager;
     $this->entityTypeBundleInfo = $entity_type_bundle_info;
     $this->eventDispatcher = $event_dispatcher;
     $this->cache = $cache;
@@ -200,7 +208,7 @@ class GroupTypeManager implements GroupTypeManagerInterface {
    */
   public function getAllGroupContentBundleIds() {
     $bundles = [];
-    foreach ($this->getGroupRelationMap() as $group_entity_type_id => $group_bundle_ids) {
+    foreach ($this->getGroupRelationMap() as $group_bundle_ids) {
       foreach ($group_bundle_ids as $group_content_entity_type_ids) {
         foreach ($group_content_entity_type_ids as $group_content_entity_type_id => $group_content_bundle_ids) {
           $bundles[$group_content_entity_type_id] = array_merge(isset($bundles[$group_content_entity_type_id]) ? $bundles[$group_content_entity_type_id] : [], $group_content_bundle_ids);
@@ -352,7 +360,7 @@ class GroupTypeManager implements GroupTypeManagerInterface {
    */
   protected function getGroupRelationMap() {
     if (empty($this->groupRelationMap)) {
-      $this->refreshGroupRelationMap();
+      $this->populateGroupRelationMap();
     }
     return $this->groupRelationMap;
   }
@@ -368,16 +376,16 @@ class GroupTypeManager implements GroupTypeManagerInterface {
   /**
    * Populates the map of relations between group types and group content types.
    */
-  protected function refreshGroupRelationMap() {
+  protected function populateGroupRelationMap(): void {
     // Retrieve a cached version of the map if it exists.
-    if ($group_relation_map = $this->cache->get(self::GROUP_RELATION_MAP_CACHE_KEY)) {
-      $this->groupRelationMap = $group_relation_map;
+    if ($cached_map = $this->getCachedGroupRelationMap()) {
+      $this->groupRelationMap = $cached_map;
       return;
     }
 
     $this->groupRelationMap = [];
 
-    $user_bundles = \Drupal::entityTypeManager()->getDefinition('user')->getKey('bundle') ?: ['user'];
+    $user_bundles = $this->entityTypeManager->getDefinition('user')->getKey('bundle') ?: ['user'];
 
     foreach ($this->entityTypeBundleInfo->getAllBundleInfo() as $group_content_entity_type_id => $bundles) {
       foreach ($bundles as $group_content_bundle_id => $bundle_info) {
@@ -396,6 +404,17 @@ class GroupTypeManager implements GroupTypeManagerInterface {
     }
     // Cache the map.
     $this->cache->set(self::GROUP_RELATION_MAP_CACHE_KEY, $this->groupRelationMap);
+  }
+
+  /**
+   * Returns the group relation map from the cache.
+   *
+   * @return array|null
+   *   An associative array representing group and group content relations, or
+   *   NULL if the group relation map was not found in the cache.
+   */
+  protected function getCachedGroupRelationMap(): ?array {
+    return $this->cache->get(self::GROUP_RELATION_MAP_CACHE_KEY)->data ?? NULL;
   }
 
 }

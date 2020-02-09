@@ -5,6 +5,7 @@ namespace Drupal\Tests\og\Unit;
 use Drupal\Core\DependencyInjection\ContainerBuilder;
 use Drupal\Core\Entity\ContentEntityInterface;
 use Drupal\Core\Entity\EntityFormBuilderInterface;
+use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Messenger\MessengerInterface;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\Core\Url;
@@ -14,6 +15,7 @@ use Drupal\og\OgAccessInterface;
 use Drupal\og\OgMembershipInterface;
 use Drupal\Tests\UnitTestCase;
 use Drupal\user\EntityOwnerInterface;
+use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 
 /**
  * Tests the subscription controller.
@@ -80,6 +82,20 @@ class SubscriptionControllerTest extends UnitTestCase {
   protected $user;
 
   /**
+   * A user ID to use in the test.
+   *
+   * @var int
+   */
+  protected $userId;
+
+  /**
+   * The mocked entity type manager.
+   *
+   * @var \Drupal\Core\Entity\EntityTypeManagerInterface|\Prophecy\Prophecy\ObjectProphecy
+   */
+  protected $entityTypeManager;
+
+  /**
    * {@inheritdoc}
    */
   public function setUp() {
@@ -91,6 +107,10 @@ class SubscriptionControllerTest extends UnitTestCase {
     $this->ogMembership = $this->prophesize(OgMembershipInterface::class);
     $this->url = $this->prophesize(Url::class);
     $this->user = $this->prophesize(AccountInterface::class);
+    $this->entityTypeManager = $this->prophesize(EntityTypeManagerInterface::class);
+
+    $this->userId = rand(20, 50);
+    $this->user->id()->willReturn($this->userId);
 
     // Set the container for the string translation service.
     $container = new ContainerBuilder();
@@ -98,6 +118,7 @@ class SubscriptionControllerTest extends UnitTestCase {
     $container->set('entity.form_builder', $this->entityFormBuilder->reveal());
     $container->set('og.membership_manager', $this->membershipManager->reveal());
     $container->set('string_translation', $this->getStringTranslationStub());
+    $container->set('entity_type.manager', $this->entityTypeManager->reveal());
     \Drupal::setContainer($container);
 
   }
@@ -106,7 +127,6 @@ class SubscriptionControllerTest extends UnitTestCase {
    * Tests non-member trying to unsubscribe from group.
    *
    * @covers ::unsubscribe
-   * @expectedException \Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException
    */
   public function testNotMember() {
     $states = [
@@ -117,9 +137,10 @@ class SubscriptionControllerTest extends UnitTestCase {
 
     $this
       ->membershipManager
-      ->getMembership($this->group->reveal(), $this->user->reveal(), $states)
+      ->getMembership($this->group->reveal(), $this->userId, $states)
       ->willReturn(NULL);
 
+    $this->expectException(AccessDeniedHttpException::class);
     $this->unsubscribe();
   }
 
@@ -127,7 +148,6 @@ class SubscriptionControllerTest extends UnitTestCase {
    * Tests blocked member trying to unsubscribe from group.
    *
    * @covers ::unsubscribe
-   * @expectedException \Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException
    */
   public function testBlockedMember() {
     $states = [
@@ -138,7 +158,7 @@ class SubscriptionControllerTest extends UnitTestCase {
 
     $this
       ->membershipManager
-      ->getMembership($this->group->reveal(), $this->user->reveal(), $states)
+      ->getMembership($this->group->reveal(), $this->userId, $states)
       ->willReturn($this->ogMembership->reveal());
 
     $this
@@ -146,6 +166,7 @@ class SubscriptionControllerTest extends UnitTestCase {
       ->getState()
       ->willReturn(OgMembershipInterface::STATE_BLOCKED);
 
+    $this->expectException(AccessDeniedHttpException::class);
     $this->unsubscribe();
   }
 
@@ -164,7 +185,7 @@ class SubscriptionControllerTest extends UnitTestCase {
 
     $this
       ->membershipManager
-      ->getMembership($this->group->reveal(), $this->user->reveal(), $states)
+      ->getMembership($this->group->reveal(), $this->userId, $states)
       ->willReturn($this->ogMembership->reveal());
 
     $this
@@ -212,7 +233,7 @@ class SubscriptionControllerTest extends UnitTestCase {
 
     $this
       ->membershipManager
-      ->getMembership($this->group->reveal(), $this->user->reveal(), $states)
+      ->getMembership($this->group->reveal(), $this->userId, $states)
       ->willReturn($this->ogMembership->reveal());
 
     $this
@@ -220,17 +241,10 @@ class SubscriptionControllerTest extends UnitTestCase {
       ->getState()
       ->willReturn($state);
 
-    $entity_id = rand(20, 50);
-
-    $this
-      ->user
-      ->id()
-      ->willReturn($entity_id);
-
     $this
       ->group
       ->getOwnerId()
-      ->willReturn($entity_id);
+      ->willReturn($this->userId);
 
     $this
       ->group
@@ -264,7 +278,7 @@ class SubscriptionControllerTest extends UnitTestCase {
    * Invoke the unsubscribe method.
    */
   protected function unsubscribe() {
-    $controller = new SubscriptionController($this->ogAccess->reveal(), $this->messenger->reveal());
+    $controller = new SubscriptionController($this->ogAccess->reveal(), $this->messenger->reveal(), $this->entityTypeManager->reveal());
     $controller->unsubscribe($this->group->reveal());
   }
 

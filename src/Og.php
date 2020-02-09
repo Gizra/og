@@ -143,7 +143,7 @@ class Og {
   public static function getMemberships(AccountInterface $user, array $states = [OgMembershipInterface::STATE_ACTIVE]) {
     /** @var \Drupal\og\MembershipManagerInterface $membership_manager */
     $membership_manager = \Drupal::service('og.membership_manager');
-    return $membership_manager->getMemberships($user, $states);
+    return $membership_manager->getMemberships($user->id(), $states);
   }
 
   /**
@@ -165,7 +165,7 @@ class Og {
   public static function getMembership(EntityInterface $group, AccountInterface $user, array $states = [OgMembershipInterface::STATE_ACTIVE]) {
     /** @var \Drupal\og\MembershipManagerInterface $membership_manager */
     $membership_manager = \Drupal::service('og.membership_manager');
-    return $membership_manager->getMembership($group, $user, $states);
+    return $membership_manager->getMembership($group, $user->id(), $states);
   }
 
   /**
@@ -205,7 +205,7 @@ class Og {
   public static function isMember(EntityInterface $group, AccountInterface $user, array $states = [OgMembershipInterface::STATE_ACTIVE]) {
     /** @var \Drupal\og\MembershipManagerInterface $membership_manager */
     $membership_manager = \Drupal::service('og.membership_manager');
-    return $membership_manager->isMember($group, $user, $states);
+    return $membership_manager->isMember($group, $user->id(), $states);
   }
 
   /**
@@ -363,7 +363,9 @@ class Og {
   protected static function getFieldBaseDefinition($plugin_id) {
     /** @var OgFieldsPluginManager $plugin_manager */
     $plugin_manager = \Drupal::service('plugin.manager.og.fields');
-    if (!$field_config = $plugin_manager->getDefinition($plugin_id)) {
+
+    $field_config = $plugin_manager->getDefinition($plugin_id);
+    if (!$field_config) {
       throw new \Exception("The Organic Groups field with plugin ID $plugin_id is not a valid plugin.");
     }
 
@@ -384,23 +386,36 @@ class Og {
    * @throws \Exception
    *   Thrown when the passed in field definition is not of a group audience
    *   field.
+   *
+   * @deprecated in og:8.x-1.0-alpha4 and is removed from og:8.x-1.0-alpha5.
+   *   Use
+   *   \Drupal\Core\Entity\EntityReferenceSelection\SelectionPluginManager::getInstance()
+   *   Instead.
+   * @codingStandardsIgnoreStart
+   * @see https://github.com/Gizra/og/issues/580
+   * @codingStandardsIgnoreEnd
    */
   public static function getSelectionHandler(FieldDefinitionInterface $field_definition, array $options = []) {
+    // @codingStandardsIgnoreStart
+    @trigger_error('Og:getSelectionHandler() is deprecated in og:8.x-1.0-alpha4
+      and is removed from og:8.x-1.0-alpha5.
+      Use \Drupal\Core\Entity\EntityReferenceSelection\SelectionPluginManager::getInstance()
+      instead. See https://github.com/Gizra/og/issues/580', E_USER_DEPRECATED
+    );
+    // @codingStandardsIgnoreEnd
     if (!\Drupal::service('og.group_audience_helper')->isGroupAudienceField($field_definition)) {
       $field_name = $field_definition->getName();
       throw new \Exception("The field $field_name is not an audience field.");
     }
 
-    $options = NestedArray::mergeDeep([
+    $default_options = [
       'target_type' => $field_definition->getFieldStorageDefinition()->getSetting('target_type'),
       'handler' => $field_definition->getSetting('handler'),
-      'handler_settings' => [
-        'field_mode' => 'default',
-      ],
-    ], $options);
+      'field_mode' => 'default',
+    ] + $field_definition->getSetting('handler_settings');
 
-    // Deep merge the handler settings.
-    $options['handler_settings'] = NestedArray::mergeDeep($field_definition->getSetting('handler_settings'), $options['handler_settings']);
+    // Override with passed $options.
+    $options = NestedArray::mergeDeep($default_options, $options);
 
     return \Drupal::service('plugin.manager.entity_reference_selection')->createInstance('og:default', $options);
   }

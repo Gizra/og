@@ -114,7 +114,7 @@ abstract class ActionTestBase extends KernelTestBase {
 
     // Store a reference to the group owner membership that is automatically
     // created along with the group.
-    $this->memberships['group_owner'] = $this->membershipManager->getMembership($this->group, $this->users['group_owner']);
+    $this->memberships['group_owner'] = $this->membershipManager->getMembership($this->group, $this->users['group_owner']->id());
 
     // Store a reference to the administrator role for our group type.
     $this->roles['administrator'] = OgRole::getRole('node', $group_bundle, OgRoleInterface::ADMINISTRATOR);
