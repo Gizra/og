@@ -23,9 +23,6 @@ case "$1" in
         ln -s $MODULE_DIR $DRUPAL_DIR/modules/og
         cd $DRUPAL_DIR
         EXIT=0
-        for i in ${TEST_DIRS[@]}; do
-          echo " > Executing tests from $i"
-          ./vendor/bin/phpunit --coverage-clover "$TRAVIS_BUILD_DIR/build/logs/clover.xml" -c $DRUPAL_DIR/modules/og/phpunit.xml.dist || EXIT=1
-        done
+        ./vendor/bin/phpunit --coverage-clover "$TRAVIS_BUILD_DIR/build/logs/clover.xml" -c $DRUPAL_DIR/modules/og/phpunit.xml.dist || EXIT=1
         exit $EXIT
 esac
