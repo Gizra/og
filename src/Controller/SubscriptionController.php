@@ -10,7 +10,6 @@ use Drupal\Core\Url;
 use Drupal\og\OgAccessInterface;
 use Drupal\og\OgMembershipInterface;
 use Drupal\og\OgMembershipTypeInterface;
-use Drupal\user\Entity\User;
 use Drupal\user\EntityOwnerInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpFoundation\RedirectResponse;
@@ -84,7 +83,7 @@ class SubscriptionController extends ControllerBase {
       throw new AccessDeniedHttpException();
     }
 
-    $user = User::load($this->currentUser()->id());
+    $user = $this->entityTypeManager()->getStorage('user')->load($this->currentUser()->id());
 
     if ($user->isAnonymous()) {
       // Anonymous user can't request membership.
