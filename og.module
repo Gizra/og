@@ -241,7 +241,6 @@ function og_entity_create_access(AccountInterface $account, array $context, $bun
     $options = [
       'target_type' => $field_definition->getFieldStorageDefinition()->getSetting('target_type'),
       'handler' => $field_definition->getSetting('handler'),
-      'field_mode' => 'admin',
     ];
     /** @var \Drupal\Core\Entity\EntityReferenceSelection\SelectionPluginManager $handler */
     $handler = \Drupal::service('plugin.manager.entity_reference_selection');
