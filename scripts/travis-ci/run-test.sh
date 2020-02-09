@@ -23,6 +23,7 @@ case "$1" in
         ln -s $MODULE_DIR $DRUPAL_DIR/modules/og
         cd $DRUPAL_DIR
         cp $DRUPAL_DIR/modules/og/phpunit.xml.dist ./core/phpunit.xml.dist
-        ./vendor/bin/phpunit --coverage-clover "$TRAVIS_BUILD_DIR/build/logs/clover.xml" -c ./core/phpunit.xml.dist || EXIT=1
+        cat ./core/phpunit.xml.dist
+        ./vendor/bin/phpunit --coverage-clover "$TRAVIS_BUILD_DIR/build/logs/clover.xml" -c ./core/phpunit.xml.dist
         exit $?
 esac
