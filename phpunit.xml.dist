@@ -64,8 +64,8 @@
   <!-- Filter for coverage reports. -->
   <filter>
     <whitelist processUncoveredFilesFromWhitelist="true">
-      <directory suffix=".php">./modules/og</directory>
-      <directory suffix=".php">./modules/og/og_ui</directory>
+      <directory suffix=".php">modules/og</directory>
+      <directory suffix=".php">modules/og/og_ui</directory>
       <exclude>
           <!-- API documentation files have no tests. -->
           <directory suffix=".api.php">./</directory>
