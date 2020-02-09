@@ -11,8 +11,6 @@ mysql_to_ramdisk() {
   sudo service mysql start
 }
 
-TEST_DIRS=($DRUPAL_DIR/modules/og/tests $DRUPAL_DIR/modules/og/og_ui/tests)
-
 case "$1" in
     PHP_CodeSniffer)
         cd $MODULE_DIR
@@ -27,7 +25,7 @@ case "$1" in
         EXIT=0
         for i in ${TEST_DIRS[@]}; do
           echo " > Executing tests from $i"
-          ./vendor/bin/phpunit --coverage-clover "$TRAVIS_BUILD_DIR/build/logs/clover.xml" -c ./core/phpunit.xml.dist $i || EXIT=1
+          ./vendor/bin/phpunit --coverage-clover "$TRAVIS_BUILD_DIR/build/logs/clover.xml" -c $DRUPAL_DIR/modules/og/phpunit.xml.dist || EXIT=1
         done
         exit $EXIT
 esac
