@@ -22,7 +22,6 @@ case "$1" in
         mysql_to_ramdisk
         ln -s $MODULE_DIR $DRUPAL_DIR/modules/og
         cd $DRUPAL_DIR
-        EXIT=0
         ./vendor/bin/phpunit --coverage-clover "$TRAVIS_BUILD_DIR/build/logs/clover.xml" -c $DRUPAL_DIR/modules/og/phpunit.xml.dist || EXIT=1
-        exit $EXIT
+        exit $?
 esac
