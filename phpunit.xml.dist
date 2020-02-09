@@ -64,8 +64,7 @@
   <!-- Filter for coverage reports. -->
   <filter>
     <whitelist processUncoveredFilesFromWhitelist="true">
-      <directory suffix=".php">./drupal/modules/og</directory>
-      <directory suffix=".php">./drupal/modules/og/og_ui</directory>
+      <directory suffix=".php">/home/travis/build/drupal/modules/og</directory>
       <exclude>
           <!-- API documentation files have no tests. -->
           <directory suffix=".api.php">./</directory>
