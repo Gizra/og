@@ -3,7 +3,7 @@
 namespace Drupal\og;
 
 use Drupal\Core\Entity\EntityInterface;
-use Drupal\Core\Session\AccountInterface;
+use Drupal\user\UserInterface;
 
 /**
  * Membership manager interface.
@@ -169,7 +169,7 @@ interface MembershipManagerInterface {
    *
    * @param \Drupal\Core\Entity\EntityInterface $group
    *   The group entity.
-   * @param \Drupal\Core\Session\AccountInterface $user
+   * @param \Drupal\user\UserInterface $user
    *   The user object.
    * @param string $membership_type
    *   (optional) The membership type. Defaults to
@@ -178,7 +178,7 @@ interface MembershipManagerInterface {
    * @return \Drupal\og\OgMembershipInterface
    *   The unsaved membership object.
    */
-  public function createMembership(EntityInterface $group, AccountInterface $user, $membership_type = OgMembershipInterface::TYPE_DEFAULT);
+  public function createMembership(EntityInterface $group, UserInterface $user, $membership_type = OgMembershipInterface::TYPE_DEFAULT);
 
   /**
    * Returns all group IDs associated with the given group content entity.

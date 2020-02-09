@@ -5,6 +5,7 @@ namespace Drupal\Tests\og\Unit;
 use Drupal\Core\DependencyInjection\ContainerBuilder;
 use Drupal\Core\Entity\ContentEntityInterface;
 use Drupal\Core\Entity\EntityFormBuilderInterface;
+use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Messenger\MessengerInterface;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\Core\Url;
@@ -88,6 +89,13 @@ class SubscriptionControllerTest extends UnitTestCase {
   protected $userId;
 
   /**
+   * The mocked entity type manager.
+   *
+   * @var \Drupal\Core\Entity\EntityTypeManagerInterface|\Prophecy\Prophecy\ObjectProphecy
+   */
+  protected $entityTypeManager;
+
+  /**
    * {@inheritdoc}
    */
   public function setUp() {
@@ -99,6 +107,7 @@ class SubscriptionControllerTest extends UnitTestCase {
     $this->ogMembership = $this->prophesize(OgMembershipInterface::class);
     $this->url = $this->prophesize(Url::class);
     $this->user = $this->prophesize(AccountInterface::class);
+    $this->entityTypeManager = $this->prophesize(EntityTypeManagerInterface::class);
 
     $this->userId = rand(20, 50);
     $this->user->id()->willReturn($this->userId);
@@ -109,6 +118,7 @@ class SubscriptionControllerTest extends UnitTestCase {
     $container->set('entity.form_builder', $this->entityFormBuilder->reveal());
     $container->set('og.membership_manager', $this->membershipManager->reveal());
     $container->set('string_translation', $this->getStringTranslationStub());
+    $container->set('entity_type.manager', $this->entityTypeManager->reveal());
     \Drupal::setContainer($container);
 
   }
@@ -268,7 +278,7 @@ class SubscriptionControllerTest extends UnitTestCase {
    * Invoke the unsubscribe method.
    */
   protected function unsubscribe() {
-    $controller = new SubscriptionController($this->ogAccess->reveal(), $this->messenger->reveal());
+    $controller = new SubscriptionController($this->ogAccess->reveal(), $this->messenger->reveal(), $this->entityTypeManager->reveal());
     $controller->unsubscribe($this->group->reveal());
   }
 

@@ -23,7 +23,7 @@ class OgSelectionTest extends KernelTestBase {
   /**
    * The selection handler.
    *
-   * @var \Drupal\og\Plugin\EntityReferenceSelection\OgSelection
+   * @var \Drupal\Core\Entity\EntityReferenceSelection\SelectionInterface|false|object
    */
   protected $selectionHandler;
 
@@ -82,6 +82,13 @@ class OgSelectionTest extends KernelTestBase {
   protected $fieldDefinition;
 
   /**
+   * Selection plugin manager.
+   *
+   * @var \Drupal\Core\Entity\EntityReferenceSelection\SelectionPluginManager
+   */
+  protected $selectionPluginManager;
+
+  /**
    * {@inheritdoc}
    */
   protected function setUp() {
@@ -97,6 +104,7 @@ class OgSelectionTest extends KernelTestBase {
     // Setting up variables.
     $this->groupBundle = mb_strtolower($this->randomMachineName());
     $this->groupContentBundle = mb_strtolower($this->randomMachineName());
+    $this->selectionPluginManager = $this->container->get('plugin.manager.entity_reference_selection');
 
     // Create a group.
     NodeType::create([
@@ -117,7 +125,14 @@ class OgSelectionTest extends KernelTestBase {
     $this->fieldDefinition = Og::createField(OgGroupAudienceHelperInterface::DEFAULT_FIELD, 'node', $this->groupContentBundle);
 
     // The selection handler for the field.
-    $this->selectionHandler = Og::getSelectionHandler($this->fieldDefinition);
+    // Get the storage of the field.
+    $options = [
+      'target_type' => $this->fieldDefinition->getFieldStorageDefinition()->getSetting('target_type'),
+      'handler' => $this->fieldDefinition->getSetting('handler'),
+      'field_mode' => 'admin',
+    ];
+    $this->selectionPluginManager->createInstance('og:default', $options);
+    $this->selectionHandler = $this->selectionPluginManager->getSelectionHandler($this->fieldDefinition);
 
     // Create users.
     $this->groupAdmin = User::create(['name' => $this->randomString()]);

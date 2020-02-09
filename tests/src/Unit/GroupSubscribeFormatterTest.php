@@ -362,7 +362,8 @@ class GroupSubscribeFormatterTest extends UnitTestCase {
       '',
       [],
       $this->accountProxy->reveal(),
-      $this->ogAccess->reveal()
+      $this->ogAccess->reveal(),
+      $this->entityTypeManager->reveal()
     );
     return $formatter->viewElements($this->fieldItemList->reveal(), $this->randomMachineName());
   }
