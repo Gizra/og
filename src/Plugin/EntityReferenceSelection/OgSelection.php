@@ -174,7 +174,6 @@ class OgSelection extends DefaultSelection {
 
     /** @var \Drupal\Core\Entity\EntityInterface $entity */
     $entity = $this->configuration['entity'];
-    $entity_type_id = $entity->getEntityTypeId();
     $bundle = $entity->bundle();
 
     $ids = [];

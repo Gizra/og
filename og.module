@@ -158,7 +158,7 @@ function og_entity_access(EntityInterface $entity, $operation, AccountInterface 
   $audience_fields = \Drupal::service('og.group_audience_helper')->getAllGroupAudienceFields($entity_type_id, $bundle_id);
   if (count($audience_fields) === 1) {
     $field_definitions = \Drupal::service('entity_field.manager')->getFieldDefinitions($entity_type_id, $bundle_id);
-    foreach ($field_definitions as $field_name => $field_definition) {
+    foreach ($field_definitions as $field_definition) {
 
       /** @var \Drupal\Core\Field\FieldDefinitionInterface $field_definition */
       if (!in_array($field_definition->getName(), array_keys($audience_fields))) {
