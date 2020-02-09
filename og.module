@@ -213,7 +213,7 @@ function og_entity_create_access(AccountInterface $account, array $context, $bun
     /** @var \Drupal\Core\Entity\EntityReferenceSelection\SelectionPluginManager $handler */
     $handler = \Drupal::service('plugin.manager.entity_reference_selection');
 
-    if ($handler->createInstance('og:default', $options)) {
+    if ($handler->getInstance($options)) {
       return AccessResult::neutral();
     }
     // Allow users to create content outside of groups, if none of the
