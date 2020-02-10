@@ -244,7 +244,7 @@ function og_entity_create_access(AccountInterface $account, array $context, $bun
     ];
     /** @var \Drupal\Core\Entity\EntityReferenceSelection\SelectionPluginManager $handler */
     $handler = \Drupal::service('plugin.manager.entity_reference_selection');
-    $handler = $handler->createInstance('og:default', $options);
+    $handler = $handler->getInstance($options);
 
     // @todo: remove deprecated call to Og::getSelectionHandler.
     $handler = Og::getSelectionHandler($field_definition);

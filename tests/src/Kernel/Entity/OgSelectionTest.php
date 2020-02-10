@@ -131,7 +131,7 @@ class OgSelectionTest extends KernelTestBase {
       'handler' => $this->fieldDefinition->getSetting('handler'),
       'field_mode' => 'admin',
     ];
-    $this->selectionPluginManager->createInstance('og:default', $options);
+    $this->selectionPluginManager->getInstance($options);
     $this->selectionHandler = $this->selectionPluginManager->getSelectionHandler($this->fieldDefinition);
     // @todo: remove deprecated call to Og::getSelectionHandler.
     $this->selectionHandler = Og::getSelectionHandler($this->fieldDefinition);
