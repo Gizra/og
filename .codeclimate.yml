@@ -39,8 +39,7 @@ plugins:
   phpcodesniffer:
     enabled: true
     config:
-      standard: "Drupal,DrupalPractice"
-      file_extensions: "php,inc,module,install,info,test,profile,theme,css,js"
+      standard: "phpcs-ruleset.xml.dist"
   phpmd:
     enabled: false
   csslint:
