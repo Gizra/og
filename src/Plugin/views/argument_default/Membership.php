@@ -7,7 +7,7 @@ use Drupal\Core\Cache\CacheableDependencyInterface;
 use Drupal\Core\Entity\ContentEntityInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Plugin\Context\ContextProviderInterface;
-use Drupal\og\OgRoleInterface;
+use Drupal\og\OgMembershipInterface;
 use Drupal\views\Plugin\views\argument_default\ArgumentDefaultPluginBase;
 use Drupal\og\MembershipManagerInterface;
 use Drupal\Core\Session\AccountInterface;
@@ -89,7 +89,7 @@ class Membership extends ArgumentDefaultPluginBase implements CacheableDependenc
     $options = parent::defineOptions();
     $options['og_group_membership'] = ['default' => ''];
     $options['entity_type'] = ['default' => 'node'];
-    $options['role_id'] = ['default' => OgRoleInterface::AUTHENTICATED];
+    $options['role_ids'] = ['default' => ''];
 
     return $options;
   }
@@ -98,16 +98,17 @@ class Membership extends ArgumentDefaultPluginBase implements CacheableDependenc
    * {@inheritdoc}
    */
   public function buildOptionsForm(&$form, FormStateInterface $form_state) {
+    parent::buildOptionsForm($form, $form_state);
     $form['og_group_membership'] = [];
     $form['entity_type'] = [
       '#type' => 'text',
       '#title' => $this->t('Entity type'),
       '#default_value' => $this->options['entity_type'],
     ];
-    $form['role_id'] = [
+    $form['role_ids'] = [
       '#type' => 'text',
-      '#title' => $this->t('Role'),
-      '#default_value' => $this->options['role_id'],
+      '#title' => $this->t('Roles'),
+      '#default_value' => $this->options['role_ids'],
     ];
   }
 
@@ -159,8 +160,11 @@ class Membership extends ArgumentDefaultPluginBase implements CacheableDependenc
    */
   protected function getCurrentUserGroupIds() {
     $entity_type = $this->options['entity_type'];
-    $role_ids = [$this->options['role_id']];
-    $groups = $this->ogMembership->getUserGroupIdsByRoleIds($this->ogUser->id(), $role_ids);
+    $role_ids = [];
+    if ($this->options['role_ids'] !== '') {
+      $role_ids = explode(',', $this->options['role_ids']);
+    }
+    $groups = $this->ogMembership->getUserGroupIdsByRoleIds($this->ogUser->id(), $role_ids, [OgMembershipInterface::STATE_ACTIVE], FALSE);
     if (!empty($groups) && isset($groups[$entity_type])) {
       return $groups[$entity_type];
     }
