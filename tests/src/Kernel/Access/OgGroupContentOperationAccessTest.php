@@ -6,12 +6,12 @@ use Drupal\comment\Entity\CommentType;
 use Drupal\entity_test\Entity\EntityTest;
 use Drupal\KernelTests\KernelTestBase;
 use Drupal\node\Entity\NodeType;
-use Drupal\og\Entity\OgMembership;
 use Drupal\og\Entity\OgRole;
 use Drupal\og\Og;
 use Drupal\og\OgGroupAudienceHelperInterface;
 use Drupal\og\OgMembershipInterface;
 use Drupal\og\OgRoleInterface;
+use Drupal\Tests\og\Traits\OgMembershipCreationTrait;
 use Drupal\user\Entity\User;
 
 /**
@@ -20,6 +20,8 @@ use Drupal\user\Entity\User;
  * @group og
  */
 class OgGroupContentOperationAccessTest extends KernelTestBase {
+
+  use OgMembershipCreationTrait;
 
   /**
    * {@inheritdoc}
@@ -167,28 +169,15 @@ class OgGroupContentOperationAccessTest extends KernelTestBase {
       // fine to save this membership, but in the most common use case this
       // membership will not exist in the database.
       if ($role_name !== OgRoleInterface::ANONYMOUS) {
-        /** @var \Drupal\og\Entity\OgMembership $membership */
-        $membership = OgMembership::create();
-        $membership
-          ->setOwner($this->users[$role_name])
-          ->setGroup($this->group)
-          ->addRole($this->roles[$role_name])
-          ->setState(OgMembershipInterface::STATE_ACTIVE)
-          ->save();
+        $this->createOgMembership($this->group, $this->users[$role_name], [$role_name]);
       }
     }
 
     // Create a 'blocked' user. This user is identical to the normal
-    // 'authenticated' member, except that she has the 'blocked' state.
+    // 'authenticated' member, except that they have the 'blocked' state.
     $this->users['blocked'] = User::create(['name' => $this->randomString()]);
     $this->users['blocked']->save();
-    $membership = OgMembership::create();
-    $membership
-      ->setOwner($this->users['blocked'])
-      ->setGroup($this->group)
-      ->addRole($this->roles[OgRoleInterface::AUTHENTICATED])
-      ->setState(OgMembershipInterface::STATE_BLOCKED)
-      ->save();
+    $this->createOgMembership($this->group, $this->users['blocked'], NULL, OgMembershipInterface::STATE_BLOCKED);
 
     // Create a 'newsletter' group content type. We are using the Comment entity
     // for this to verify that this functionality works for all entity types. We
@@ -246,6 +235,7 @@ class OgGroupContentOperationAccessTest extends KernelTestBase {
               'comment_type' => $bundle_id,
               'entity_id' => $this->group->id(),
               'entity_type' => 'entity_test',
+              'field_name' => 'an_imaginary_field',
               OgGroupAudienceHelperInterface::DEFAULT_FIELD => [['target_id' => $this->group->id()]],
             ];
             break;

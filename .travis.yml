@@ -1,36 +1,38 @@
+dist: xenial
+
 language: php
-sudo: true
 
 php:
-  - 5.6
-  - 7.0
-  - 7.1
   - 7.2
+  - 7.3
+  - 7.4
 
 env:
   global:
     - COMPOSER_MEMORY_LIMIT=2G
   matrix:
-    - TEST_SUITE=8.5.x
-    - TEST_SUITE=8.6.x
+    - TEST_SUITE=8.7.x
+    - TEST_SUITE=8.8.x
+    - TEST_SUITE=8.9.x
     - TEST_SUITE=PHP_CodeSniffer
 
 # Only run the coding standards check once.
 matrix:
   exclude:
-    - php: 5.6
+    - php: 7.2
       env: TEST_SUITE=PHP_CodeSniffer
-    - php: 7.0
-      env: TEST_SUITE=PHP_CodeSniffer
-    - php: 7.1
+    - php: 7.4
       env: TEST_SUITE=PHP_CodeSniffer
   allow_failures:
-    - env: TEST_SUITE=8.6.x
+    - php: 7.4
 
 mysql:
   database: og
   username: root
   encoding: utf8
+
+services:
+  - mysql
 
 before_script:
   # Remove Xdebug as we don't need it and it causes "PHP Fatal error: Maximum
@@ -43,9 +45,6 @@ before_script:
 
   # Remember the current directory for later use in the Drupal installation.
   - MODULE_DIR=$(pwd)
-
-  # Install Composer dependencies for OG.
-  - composer install
 
   # Navigate out of module directory to prevent blown stack by recursive module
   # lookup.

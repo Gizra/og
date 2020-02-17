@@ -10,6 +10,7 @@ use Drupal\og\Og;
 use Drupal\og\OgMembershipInterface;
 use Drupal\og\OgRoleInterface;
 use Drupal\Tests\BrowserTestBase;
+use Drupal\Tests\og\Traits\OgMembershipCreationTrait;
 
 /**
  * Tests subscribe and un-subscribe to groups.
@@ -18,10 +19,17 @@ use Drupal\Tests\BrowserTestBase;
  */
 class GroupSubscribeTest extends BrowserTestBase {
 
+  use OgMembershipCreationTrait;
+
   /**
    * {@inheritdoc}
    */
   public static $modules = ['node', 'og'];
+
+  /**
+   * {@inheritdoc}
+   */
+  protected $defaultTheme = 'stark';
 
   /**
    * Test entity group.
@@ -278,8 +286,7 @@ class GroupSubscribeTest extends BrowserTestBase {
    * Tests access to un-subscribe page.
    */
   public function testUnSubscribeAccess() {
-    $membership = Og::createMembership($this->group1, $this->normalUser);
-    $membership->save();
+    $this->createOgMembership($this->group1, $this->normalUser);
 
     $this->drupalLogin($this->normalUser);
 

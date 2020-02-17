@@ -1,13 +1,17 @@
 <?php
 
+declare(strict_types = 1);
+
 namespace Drupal\og\Entity;
 
+use Drupal\Core\Cache\Cache;
 use Drupal\Core\Entity\ContentEntityBase;
-use Drupal\Core\Entity\EntityInterface;
+use Drupal\Core\Entity\ContentEntityInterface;
 use Drupal\Core\Entity\EntityStorageInterface;
 use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Field\BaseFieldDefinition;
 use Drupal\Core\Field\FieldStorageDefinitionInterface;
+use Drupal\Core\Language\LanguageInterface;
 use Drupal\user\UserInterface;
 use Drupal\og\Og;
 use Drupal\og\OgMembershipInterface;
@@ -59,6 +63,7 @@ use Drupal\user\EntityOwnerInterface;
  *   fieldable = TRUE,
  *   bundle_entity_type = "og_membership_type",
  *   entity_keys = {
+ *     "uuid" = "uuid",
  *     "id" = "id",
  *     "bundle" = "type",
  *   },
@@ -79,14 +84,14 @@ class OgMembership extends ContentEntityBase implements OgMembershipInterface {
   /**
    * {@inheritdoc}
    */
-  public function getCreatedTime() {
-    return $this->get('created')->value;
+  public function getCreatedTime(): int {
+    return $this->getFieldValue('created', 'value') ?: 0;
   }
 
   /**
    * {@inheritdoc}
    */
-  public function setCreatedTime($timestamp) {
+  public function setCreatedTime(int $timestamp): OgMembershipInterface {
     $this->set('created', $timestamp);
     return $this;
   }
@@ -95,6 +100,7 @@ class OgMembership extends ContentEntityBase implements OgMembershipInterface {
    * {@inheritdoc}
    */
   public function getOwner() {
+    assert(!empty($this->get('uid')->entity), new \LogicException(__METHOD__ . '() should only be called on loaded memberships, or on newly created memberships that already have the owner set.'));
     return $this->get('uid')->entity;
   }
 
@@ -102,7 +108,9 @@ class OgMembership extends ContentEntityBase implements OgMembershipInterface {
    * {@inheritdoc}
    */
   public function getOwnerId() {
-    return $this->get('uid')->target_id;
+    $owner_id = $this->getFieldValue('uid', 'target_id');
+    assert(!empty($owner_id), new \LogicException(__METHOD__ . '() should only be called on loaded memberships, or on newly created memberships that already have the owner set.'));
+    return $owner_id;
   }
 
   /**
@@ -124,8 +132,9 @@ class OgMembership extends ContentEntityBase implements OgMembershipInterface {
   /**
    * {@inheritdoc}
    */
-  public function setGroup(EntityInterface $group) {
+  public function setGroup(ContentEntityInterface $group): OgMembershipInterface {
     $this->set('entity_type', $group->getEntityTypeId());
+    $this->set('entity_bundle', $group->bundle());
     $this->set('entity_id', $group->id());
     return $this;
   }
@@ -133,27 +142,61 @@ class OgMembership extends ContentEntityBase implements OgMembershipInterface {
   /**
    * {@inheritdoc}
    */
-  public function getGroupEntityType() {
-    return $this->get('entity_type')->value;
+  public function getGroupEntityType(): string {
+    $entity_type = $this->getFieldValue('entity_type', 'value') ?: '';
+    assert(!empty($entity_type), new \LogicException(__METHOD__ . '() should only be called on loaded memberships, or on newly created memberships that already have the group type set.'));
+    return $entity_type;
   }
 
   /**
    * {@inheritdoc}
    */
-  public function getGroupId() {
-    return $this->get('entity_id')->value;
+  public function getGroupBundle(): string {
+    $bundle = $this->getFieldValue('entity_bundle', 'value') ?: '';
+    assert(!empty($bundle), new \LogicException(__METHOD__ . '() should only be called on loaded memberships, or on newly created memberships that already have the group bundle set.'));
+    return $bundle;
   }
 
   /**
    * {@inheritdoc}
    */
-  public function getGroup() {
-    $entity_type = $this->get('entity_type')->value;
-    $entity_id = $this->get('entity_id')->value;
+  public function getGroupId(): string {
+    $entity_id = $this->getFieldValue('entity_id', 'value') ?: '';
+    assert(!empty($entity_id), new \LogicException(__METHOD__ . '() should only be called on loaded memberships, or on newly created memberships that already have the group ID set.'));
+    return $entity_id;
+  }
 
-    if (empty($entity_type) || empty($entity_id)) {
-      return NULL;
-    }
+  /**
+   * Checks if a group has already been populated on the membership.
+   *
+   * The group is required for a membership, so it is always present if a
+   * membership has been saved. This is intended for internal use to verify if
+   * a group is present when methods are called on a membership that is possibly
+   * still under construction.
+   *
+   * For performance reasons this avoids loading the full group entity just for
+   * this purpose, and relies only on the fact that the data for the entity is
+   * populated in the relevant fields. This should give us the same indication,
+   * but with a lower performance cost, especially for users that are a member
+   * of a large number of groups.
+   *
+   * @return bool
+   *   Whether or not the group is already present.
+   */
+  protected function hasGroup(): bool {
+    $has_group =
+      !empty($this->getFieldValue('entity_type', 'value')) &&
+      !empty($this->getFieldValue('entity_bundle', 'value')) &&
+      !empty($this->getFieldValue('entity_id', 'value'));
+    return $has_group;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getGroup(): ?ContentEntityInterface {
+    $entity_type = $this->getGroupEntityType();
+    $entity_id = $this->getGroupId();
 
     return \Drupal::entityTypeManager()->getStorage($entity_type)->load($entity_id);
   }
@@ -161,7 +204,7 @@ class OgMembership extends ContentEntityBase implements OgMembershipInterface {
   /**
    * {@inheritdoc}
    */
-  public function setState($state) {
+  public function setState(string $state): OgMembershipInterface {
     $this->set('state', $state);
     return $this;
   }
@@ -169,21 +212,21 @@ class OgMembership extends ContentEntityBase implements OgMembershipInterface {
   /**
    * {@inheritdoc}
    */
-  public function getState() {
-    return $this->get('state')->value;
+  public function getState(): string {
+    return $this->getFieldValue('state', 'value') ?: '';
   }
 
   /**
    * {@inheritdoc}
    */
-  public function getType() {
+  public function getType(): string {
     return $this->bundle();
   }
 
   /**
    * {@inheritdoc}
    */
-  public function addRole(OgRoleInterface $role) {
+  public function addRole(OgRoleInterface $role): OgMembershipInterface {
     $roles = $this->getRoles();
     $roles[] = $role;
 
@@ -193,14 +236,14 @@ class OgMembership extends ContentEntityBase implements OgMembershipInterface {
   /**
    * {@inheritdoc}
    */
-  public function revokeRole(OgRoleInterface $role) {
+  public function revokeRole(OgRoleInterface $role): OgMembershipInterface {
     return $this->revokeRoleById($role->id());
   }
 
   /**
    * {@inheritdoc}
    */
-  public function revokeRoleById($role_id) {
+  public function revokeRoleById(string $role_id): OgMembershipInterface {
     $roles = $this->getRoles();
 
     foreach ($roles as $key => $existing_role) {
@@ -218,14 +261,14 @@ class OgMembership extends ContentEntityBase implements OgMembershipInterface {
   /**
    * {@inheritdoc}
    */
-  public function getRoles() {
+  public function getRoles(): array {
     $roles = [];
 
     // Add the member role. This is only possible if a group has been set on the
     // membership.
-    if ($group = $this->getGroup()) {
+    if ($this->hasGroup()) {
       $roles = [
-        OgRole::getRole($this->getGroupEntityType(), $group->bundle(), OgRoleInterface::AUTHENTICATED),
+        OgRole::getRole($this->getGroupEntityType(), $this->getGroupBundle(), OgRoleInterface::AUTHENTICATED),
       ];
     }
     $roles = array_merge($roles, $this->get('roles')->referencedEntities());
@@ -235,7 +278,7 @@ class OgMembership extends ContentEntityBase implements OgMembershipInterface {
   /**
    * {@inheritdoc}
    */
-  public function setRoles(array $roles = []) {
+  public function setRoles(array $roles = []): OgMembershipInterface {
     $roles = array_filter($roles, function (OgRole $role) {
       return !($role->getName() == OgRoleInterface::AUTHENTICATED);
     });
@@ -251,16 +294,32 @@ class OgMembership extends ContentEntityBase implements OgMembershipInterface {
   /**
    * {@inheritdoc}
    */
-  public function getRolesIds() {
-    return array_map(function (OgRole $role) {
-      return $role->id();
-    }, $this->getRoles());
+  public function getRolesIds(): array {
+    // Only use $this->get() if it is already populated. If it is not available
+    // then use the raw value. This field is not translatable so we do not need
+    // the slow field definition lookup from $this->getTranslatedField().
+    if (isset($this->fields['roles'][LanguageInterface::LANGCODE_DEFAULT])) {
+      $values = $this->get('roles')->getValue();
+    }
+    else {
+      $values = $this->values['roles'][LanguageInterface::LANGCODE_DEFAULT] ?? [];
+    }
+
+    $roles_ids = array_column($values, 'target_id');
+
+    // Add the member role. This is only possible if a group has been set on the
+    // membership.
+    if ($this->hasGroup()) {
+      $roles_ids[] = "{$this->getGroupEntityType()}-{$this->getGroupBundle()}-" . OgRoleInterface::AUTHENTICATED;
+    }
+
+    return $roles_ids;
   }
 
   /**
    * {@inheritdoc}
    */
-  public function isRoleValid(OgRoleInterface $role) {
+  public function isRoleValid(OgRoleInterface $role): bool {
     $group = $this->getGroup();
 
     // If there is no group yet then we cannot determine whether the role is
@@ -286,14 +345,14 @@ class OgMembership extends ContentEntityBase implements OgMembershipInterface {
   /**
    * {@inheritdoc}
    */
-  public function hasRole($role_id) {
+  public function hasRole(string $role_id): bool {
     return in_array($role_id, $this->getRolesIds());
   }
 
   /**
    * {@inheritdoc}
    */
-  public function hasPermission($permission) {
+  public function hasPermission(string $permission): bool {
     // Blocked users do not have any permissions.
     if ($this->isBlocked()) {
       return FALSE;
@@ -335,9 +394,13 @@ class OgMembership extends ContentEntityBase implements OgMembershipInterface {
       ->setLabel(t('Group entity type'))
       ->setDescription(t('The entity type of the group.'));
 
+    $fields['entity_bundle'] = BaseFieldDefinition::create('string')
+      ->setLabel(t('Group bundle ID'))
+      ->setDescription(t('The bundle ID of the group.'));
+
     $fields['entity_id'] = BaseFieldDefinition::create('string')
-      ->setLabel(t('Group entity id'))
-      ->setDescription(t("The entity ID of the group."));
+      ->setLabel(t('Group entity ID'))
+      ->setDescription(t('The entity ID of the group.'));
 
     $fields['state'] = BaseFieldDefinition::create('string')
       ->setLabel(t('State'))
@@ -430,7 +493,7 @@ class OgMembership extends ContentEntityBase implements OgMembershipInterface {
       ->execute();
 
     if ($count) {
-      throw new \LogicException(sprintf('An OG membership already exists for group of entity-type %s and ID: %s', $entity_type_id, $this->getGroup()->id()));
+      throw new \LogicException(sprintf('An OG membership already exists for uid %s in group of entity-type %s and ID: %s', $this->get('uid')->target_id, $entity_type_id, $this->getGroup()->id()));
     }
 
     parent::preSave($storage);
@@ -446,10 +509,43 @@ class OgMembership extends ContentEntityBase implements OgMembershipInterface {
     Og::reset();
     \Drupal::service('og.access')->reset();
 
-    // Invalidate the group membership manager.
-    \Drupal::service('og.membership_manager')->reset();
-
     return $result;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  protected function invalidateTagsOnSave($update) {
+    parent::invalidateTagsOnSave($update);
+
+    // A membership was created or updated: invalidate the membership list cache
+    // tags of its group. An updated membership may start to appear in a group's
+    // membership listings because it now meets those listings' filtering
+    // requirements. A newly created membership may start to appear in listings
+    // because it did not exist before.
+    $group = $this->getGroup();
+    if (!empty($group)) {
+      $tags = Cache::buildTags(OgMembershipInterface::GROUP_MEMBERSHIP_LIST_CACHE_TAG_PREFIX, $group->getCacheTagsToInvalidate());
+      Cache::invalidateTags($tags);
+    }
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  protected static function invalidateTagsOnDelete(EntityTypeInterface $entity_type, array $entities) {
+    parent::invalidateTagsOnDelete($entity_type, $entities);
+
+    // A membership was deleted: invalidate the list cache tags of its group
+    // membership lists, so that any lists that contain the membership will be
+    // recalculated.
+    $tags = [];
+    foreach ($entities as $entity) {
+      if ($group = $entity->getGroup()) {
+        $tags = Cache::mergeTags(Cache::buildTags(OgMembershipInterface::GROUP_MEMBERSHIP_LIST_CACHE_TAG_PREFIX, $group->getCacheTagsToInvalidate()), $tags);
+      }
+    }
+    Cache::invalidateTags($tags);
   }
 
   /**
@@ -464,30 +560,80 @@ class OgMembership extends ContentEntityBase implements OgMembershipInterface {
   /**
    * {@inheritdoc}
    */
-  public function isActive() {
+  public function isActive(): bool {
     return $this->getState() === OgMembershipInterface::STATE_ACTIVE;
   }
 
   /**
    * {@inheritdoc}
    */
-  public function isPending() {
+  public function isPending(): bool {
     return $this->getState() === OgMembershipInterface::STATE_PENDING;
   }
 
   /**
    * {@inheritdoc}
    */
-  public function isBlocked() {
+  public function isBlocked(): bool {
     return $this->getState() === OgMembershipInterface::STATE_BLOCKED;
   }
 
   /**
    * {@inheritdoc}
    */
-  public function isOwner() {
+  public function isOwner(): bool {
     $group = $this->getGroup();
     return $group instanceof EntityOwnerInterface && $group->getOwnerId() == $this->getOwnerId();
+  }
+
+  /**
+   * Gets the value of a specific property of a field.
+   *
+   * Only the first delta can be accessed with this method.
+   *
+   * @todo Remove this once issue #2580551 is fixed.
+   *
+   * @see https://www.drupal.org/project/drupal/issues/2580551
+   *
+   * @param string $field_name
+   *   The name of the field.
+   * @param string $property
+   *   The field property, "value" for many field types.
+   *
+   * @return mixed
+   *   The value.
+   */
+  public function getFieldValue($field_name, $property) {
+    // Attempt to get the value from the values directly if the field is not
+    // initialized yet.
+    if (!isset($this->fields[$field_name])) {
+      $field_values = NULL;
+      if (isset($this->values[$field_name][$this->activeLangcode])) {
+        $field_values = $this->values[$field_name][$this->activeLangcode];
+      }
+      elseif (isset($this->values[$field_name][LanguageInterface::LANGCODE_DEFAULT])) {
+        $field_values = $this->values[$field_name][LanguageInterface::LANGCODE_DEFAULT];
+      }
+
+      if ($field_values !== NULL) {
+        // If there are field values, try to get the property value.
+        // Configurable/Multi-value fields are stored differently, try accessing
+        // with delta and property first, then without delta and last, if the
+        // value is a scalar, just return that.
+        if (isset($field_values[0][$property]) && is_array($field_values[0])) {
+          return $field_values[0][$property];
+        }
+        elseif (isset($field_values[$property]) && is_array($field_values)) {
+          return $field_values[$property];
+        }
+        elseif (!is_array($field_values)) {
+          return $field_values;
+        }
+      }
+    }
+
+    // Fall back to access the property through the field object.
+    return $this->get($field_name)->$property;
   }
 
 }

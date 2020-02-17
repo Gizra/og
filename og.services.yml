@@ -16,7 +16,7 @@ services:
       - { name: 'cache.context'}
   cache_context.og_role:
     class: 'Drupal\og\Cache\Context\OgRoleCacheContext'
-    arguments: ['@current_user', '@og.membership_manager', '@private_key']
+    arguments: ['@current_user', '@entity_type.manager', '@og.membership_manager', '@database', '@private_key']
     tags:
       - { name: 'cache.context'}
   og.access:
@@ -42,10 +42,10 @@ services:
     arguments: ['@entity_type.manager', '@entity_field.manager']
   og.group_type_manager:
     class: Drupal\og\GroupTypeManager
-    arguments: ['@config.factory', '@entity_type.manager', '@entity_type.bundle.info', '@event_dispatcher', '@state', '@og.permission_manager', '@og.role_manager', '@router.builder', '@og.group_audience_helper']
+    arguments: ['@config.factory', '@entity_type.manager', '@entity_type.bundle.info', '@event_dispatcher', '@cache.data', '@og.permission_manager', '@og.role_manager', '@router.builder', '@og.group_audience_helper']
   og.membership_manager:
     class: Drupal\og\MembershipManager
-    arguments: ['@entity_type.manager', '@og.group_audience_helper']
+    arguments: ['@entity_type.manager', '@og.group_audience_helper', '@cache.static']
   og.permission_manager:
     class: Drupal\og\PermissionManager
     arguments: ['@event_dispatcher']
