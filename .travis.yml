@@ -21,6 +21,8 @@ env:
 matrix:
   exclude:
     - php: 7.2
+      env: TEST_SUITE=9.0.x
+    - php: 7.2
       env: TEST_SUITE=PHP_CodeSniffer
     - php: 7.4
       env: TEST_SUITE=PHP_CodeSniffer
