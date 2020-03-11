@@ -179,7 +179,7 @@ abstract class OgRouteGroupResolverTestBase extends OgGroupResolverTestBase {
       // The plugin will need to know if this is a content entity, so we will
       // provide this information. We are not requiring this to be called since
       // there are other ways of determining this (e.g. `instanceof`).
-      $entity_type->isSubclassOf(ContentEntityInterface::class)->willReturn(TRUE);
+      $entity_type->entityClassImplements(ContentEntityInterface::class)->willReturn(TRUE);
 
       // The plugin will need to inquire about the link templates that the
       // entity provides. This should be called.
