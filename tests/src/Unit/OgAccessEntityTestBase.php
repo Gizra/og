@@ -39,7 +39,7 @@ abstract class OgAccessEntityTestBase extends OgAccessTestBase {
 
     $entity_type = $this->prophesize(EntityTypeInterface::class);
     $entity_type->getListCacheTags()->willReturn([]);
-    $entity_type->isSubclassOf(FieldableEntityInterface::class)->willReturn(TRUE);
+    $entity_type->entityClassImplements(FieldableEntityInterface::class)->willReturn(TRUE);
     $entity_type->id()->willReturn($entity_type_id);
 
     $this->groupContentEntity = $this->prophesize(ContentEntityInterface::class);
