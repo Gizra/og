@@ -15,7 +15,7 @@
         "drupal/core": "~8.7 || ^9.0"
     },
     "require-dev": {
-        "drupal/coder": "~8.2 | ^8.3"
+        "drupal/coder": "^8.2"
     },
     "minimum-stability": "RC"
 }
