@@ -11,6 +11,7 @@ use Drupal\og\OgAccessInterface;
 use Drupal\og\OgMembershipInterface;
 use Drupal\og\OgMembershipTypeInterface;
 use Drupal\user\EntityOwnerInterface;
+use Drupal\user\UserInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
@@ -91,7 +92,7 @@ class SubscriptionController extends ControllerBase {
 
       $user_login_url = Url::fromRoute('user.login', [], $destination)->toString();
 
-      if ($this->config('user.settings')->get('register') === USER_REGISTER_ADMINISTRATORS_ONLY) {
+      if ($this->config('user.settings')->get('register') === UserInterface::REGISTER_ADMINISTRATORS_ONLY) {
         $params = [':login' => $user_login_url];
         $this->messenger->addMessage($this->t('In order to join any group, you must <a href=":login">login</a>. After you have successfully done so, you will need to request membership again.', $params));
       }

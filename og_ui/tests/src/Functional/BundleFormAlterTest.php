@@ -1,6 +1,6 @@
 <?php
 
-namespace Drupal\og_ui\Tests;
+namespace Drupal\Tests\og_ui\Functional;
 
 use Drupal\Core\Form\FormState;
 use Drupal\node\Entity\NodeType;

@@ -273,7 +273,8 @@ class MemberCountBlockTest extends KernelTestBase {
    */
   protected function assertMemberCount($group_key, $expected_count) {
     $expected_string = (string) $this->formatPlural($expected_count, '@label has 1 member.', '@label has @count members', ['@label' => $this->groups[$group_key]->label()]);
-    $this->assertContains($expected_string, (string) $this->renderBlock($group_key));
+    // @todo Use assertStringContainsString() once we are on PHPUnit 9.
+    $this->assertTrue(strpos((string) $this->renderBlock($group_key), $expected_string) !== FALSE);
   }
 
   /**
