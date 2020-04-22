@@ -71,7 +71,7 @@ before_script:
 
   # Drupal 8.7.x still uses the legacy PHPUnit 4.x which is not compatible with
   # PHP 7. Update it to 6.x.
-  - test ${TEST_SUITE} == "PHP_CodeSniffer" || test ${TEST_SUITE} == "8.7.x" || composer require --dev phpunit/phpunit:~6 --update-with-dependencies --working-dir=$DRUPAL_DIR
+  - test ${TEST_SUITE} == "8.7.x" && composer require --dev phpunit/phpunit:~6 --update-with-dependencies --working-dir=$DRUPAL_DIR || true
 
   # Start a web server on port 8888 in the background.
   - test ${TEST_SUITE} == "PHP_CodeSniffer" || nohup php -S localhost:8888 --docroot $DRUPAL_DIR > /dev/null 2>&1 &
