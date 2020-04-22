@@ -15,6 +15,7 @@ env:
     - TEST_SUITE=8.8.x
     - TEST_SUITE=8.9.x
     - TEST_SUITE=9.0.x
+    - TEST_SUITE=9.1.x
     - TEST_SUITE=PHP_CodeSniffer
 
 # Only run the coding standards check once.
@@ -22,6 +23,8 @@ matrix:
   exclude:
     - php: 7.2
       env: TEST_SUITE=9.0.x
+    - php: 7.2
+      env: TEST_SUITE=9.1.x
     - php: 7.2
       env: TEST_SUITE=PHP_CodeSniffer
     - php: 7.4
