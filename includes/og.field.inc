@@ -27,7 +27,7 @@ function og_field_widget_form(&$form, &$form_state, $field, $instance, $langcode
   $entity = isset($element['#entity']) ? $element['#entity'] : NULL;
 
   if (!$entity) {
-    return;
+    $entity = entity_create_stub_entity($instance['entity_type'], array(0, 0, $instance['bundle']));
   }
 
   if ($field['settings']['handler'] != 'og' && strpos($field['settings']['handler'], 'og_') !== 0) {
@@ -183,6 +183,14 @@ function og_field_widget_form(&$form, &$form_state, $field, $instance, $langcode
     }
   }
 
+  // Save field names to be used in og_complex_widget_after_build().
+  if (isset($form_state['og_complex'])) {
+    $form_state['og_complex'][] = $field_name;
+  }
+  else {
+    $form_state['og_complex'] = array($field_name);
+  }
+
   $form['#after_build']['og'] = 'og_complex_widget_after_build';
   $form['#validate'][] = 'og_validate_widgets';
 
@@ -267,6 +275,20 @@ function og_get_mocked_instance($instance, $field_mode) {
 
   // See OgSelectionHandler::buildEntityFieldQuery().
   $mocked_instance['field_mode'] = $field_mode;
+
+  // Filter the default value on $field_mode.
+  if (!empty($mocked_instance['default_value'])) {
+    $defaultvalue = array();
+
+    foreach ($mocked_instance['default_value'] as $value) {
+      if (isset($value['field_mode']) && $value['field_mode'] === $field_mode) {
+        $defaultvalue[] = $value;
+      }
+    }
+
+    $mocked_instance['default_value'] = $defaultvalue;
+  }
+
   return $mocked_instance;
 }
 
@@ -274,7 +296,7 @@ function og_get_mocked_instance($instance, $field_mode) {
  * Rebuild the element's values, using the default and admin if exists.
  */
 function og_complex_widget_element_validate($element, &$form_state, $form) {
-  $subform = drupal_array_get_nested_value($form_state['values'], $element['#array_parents']);
+  $subform = drupal_array_get_nested_value($form_state['values'], $element['#parents']);
   $ids = array();
   foreach (array('default', 'admin') as $field_mode) {
     if (empty($subform[$field_mode])) {
@@ -337,7 +359,7 @@ function og_validate_widgets($form, &$form_state) {
  * @see theme_field_multiple_value_form()
  */
 function og_complex_widget_after_build($form, &$form_state) {
-  foreach (og_get_group_audience_fields($form['#entity_type'], $form['#bundle']) as $field_name => $value) {
+  foreach ($form_state['og_complex'] as $field_name) {
     if (empty($form[$field_name])) {
       continue;
     }
@@ -390,4 +412,3 @@ function og_entityreference_autocomplete_callback($type, $field_name, $entity_ty
 
   return entityreference_autocomplete_callback_get_matches($type, $field, $instance, $entity_type, $entity_id, $string);
 }
-
