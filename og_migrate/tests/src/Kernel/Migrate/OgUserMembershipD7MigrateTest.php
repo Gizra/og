@@ -68,6 +68,7 @@ class OgUserMembershipD7MigrateTest extends MigrateDrupal7TestBase {
       'd7_node:page',
       'd7_node:forum',
       'd7_node:blog',
+      'd7_node:et',
       'd7_comment_type',
       'd7_comment_field',
       'd7_comment_field_instance',
