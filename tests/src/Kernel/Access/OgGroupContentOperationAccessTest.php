@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types = 1);
+
 namespace Drupal\Tests\og\Kernel\Access;
 
 use Drupal\comment\Entity\CommentType;
@@ -12,6 +14,7 @@ use Drupal\og\OgGroupAudienceHelperInterface;
 use Drupal\og\OgMembershipInterface;
 use Drupal\og\OgRoleInterface;
 use Drupal\Tests\og\Traits\OgMembershipCreationTrait;
+use Drupal\user\Entity\Role;
 use Drupal\user\Entity\User;
 
 /**
@@ -55,7 +58,7 @@ class OgGroupContentOperationAccessTest extends KernelTestBase {
    *
    * @var string
    */
-  protected $groupBundle;
+  protected $groupBundle = 'community';
 
   /**
    * An array of test roles.
@@ -96,8 +99,6 @@ class OgGroupContentOperationAccessTest extends KernelTestBase {
 
     $this->entityTypeManager = $this->container->get('entity_type.manager');
 
-    $this->groupBundle = mb_strtolower($this->randomMachineName());
-
     // Create a test user with UID 1. This user has universal access.
     $this->users['uid1'] = User::create(['name' => $this->randomString()]);
     $this->users['uid1']->save();
@@ -119,7 +120,7 @@ class OgGroupContentOperationAccessTest extends KernelTestBase {
     ]);
     $this->group->save();
 
-    // Create 3 test roles with associated permissions. We will simulate a
+    // Create 3 test OG roles with associated permissions. We will simulate a
     // project that has two group content types:
     // - 'newsletter': Any registered user can create entities of this type,
     //   even if they are not a member of the group.
@@ -179,6 +180,23 @@ class OgGroupContentOperationAccessTest extends KernelTestBase {
     $this->users['blocked']->save();
     $this->createOgMembership($this->group, $this->users['blocked'], NULL, OgMembershipInterface::STATE_BLOCKED);
 
+    // Create an 'editor' Drupal role with associated test users. Editors have
+    // permission to edit group entities but are not group administrators, so
+    // they do not have the right to edit any group content, only their own.
+    $editor_role = Role::create([
+      'id' => 'editor',
+      'permissions' => ['administer entity_test content'],
+    ]);
+    $editor_role->save();
+
+    // Create two editors: one which is a member of the group and one which is
+    // a freelancer with no allegiance to any specific group.
+    foreach (['editor_member', 'editor_non_member'] as $name) {
+      $this->users[$name] = User::create(['name' => $name]);
+      $this->users[$name]->save();
+    }
+    $this->createOgMembership($this->group, $this->users['editor_member'], [OgRoleInterface::AUTHENTICATED]);
+
     // Create a 'newsletter' group content type. We are using the Comment entity
     // for this to verify that this functionality works for all entity types. We
     // cannot use the 'entity_test' entity for this since it has no support for
@@ -215,6 +233,8 @@ class OgGroupContentOperationAccessTest extends KernelTestBase {
       OgRoleInterface::AUTHENTICATED,
       OgRoleInterface::ADMINISTRATOR,
       'blocked',
+      'editor_member',
+      'editor_non_member',
     ];
     foreach (['newsletter', 'article'] as $bundle_id) {
       foreach ($user_ids as $user_id) {
@@ -314,6 +334,16 @@ class OgGroupContentOperationAccessTest extends KernelTestBase {
             'update' => ['own' => TRUE, 'any' => FALSE],
             'delete' => ['own' => TRUE, 'any' => FALSE],
           ],
+          'editor_member' => [
+            'create' => ['any' => TRUE],
+            'update' => ['own' => TRUE, 'any' => FALSE],
+            'delete' => ['own' => TRUE, 'any' => FALSE],
+          ],
+          'editor_non_member' => [
+            'create' => ['any' => TRUE],
+            'update' => ['own' => TRUE, 'any' => FALSE],
+            'delete' => ['own' => TRUE, 'any' => FALSE],
+          ],
           // Blocked users cannot do anything, not even update or delete their
           // own content.
           'blocked' => [
@@ -344,9 +374,19 @@ class OgGroupContentOperationAccessTest extends KernelTestBase {
             'update' => ['own' => FALSE, 'any' => FALSE],
             'delete' => ['own' => FALSE, 'any' => FALSE],
           ],
+          'editor_non_member' => [
+            'create' => ['any' => FALSE],
+            'update' => ['own' => FALSE, 'any' => FALSE],
+            'delete' => ['own' => FALSE, 'any' => FALSE],
+          ],
           // Members have the right to create new articles, and to manage their
           // own articles.
           OgRoleInterface::AUTHENTICATED => [
+            'create' => ['any' => TRUE],
+            'update' => ['own' => TRUE, 'any' => FALSE],
+            'delete' => ['own' => TRUE, 'any' => FALSE],
+          ],
+          'editor_member' => [
             'create' => ['any' => TRUE],
             'update' => ['own' => TRUE, 'any' => FALSE],
             'delete' => ['own' => TRUE, 'any' => FALSE],
