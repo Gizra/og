@@ -253,9 +253,9 @@ class OgAccess implements OgAccessInterface {
         return $user_access;
       }
       else {
-        // An entity can be a group and group content in the same time. The
+        // An entity can be a group and group content at the same time. The
         // group didn't allow access, but the user still might have access to
-        // the permission in group content context. So instead of retuning a
+        // the permission in group content context. So instead of returning a
         // deny here, we set the result, that might change if an access is
         // found.
         $result = AccessResult::forbidden()->inheritCacheability($user_access);
