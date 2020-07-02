@@ -34,7 +34,7 @@ class OgComplexWidgetTest extends BrowserTestBase {
   /**
    * {@inheritdoc}
    */
-  public function setUp() {
+  protected function setUp(): void {
     parent::setUp();
 
     // Create a "group" bundle on the Custom Block entity type and turn it into

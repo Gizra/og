@@ -103,7 +103,7 @@ class OgAdminRoutesControllerTest extends UnitTestCase {
   /**
    * {@inheritdoc}
    */
-  public function setUp() {
+  protected function setUp(): void {
 
     $this->accessManager = $this->prophesize(AccessManagerInterface::class);
     $this->routeMatch = $this->prophesize(RouteMatchInterface::class);

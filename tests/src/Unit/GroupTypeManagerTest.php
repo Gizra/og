@@ -124,7 +124,7 @@ class GroupTypeManagerTest extends UnitTestCase {
   /**
    * {@inheritdoc}
    */
-  public function setUp() {
+  protected function setUp(): void {
     $this->config = $this->prophesize(Config::class);
     $this->configFactory = $this->prophesize(ConfigFactoryInterface::class);
     $this->entityTypeBundleInfo = $this->prophesize(EntityTypeBundleInfoInterface::class);

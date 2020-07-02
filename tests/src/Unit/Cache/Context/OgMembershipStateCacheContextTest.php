@@ -39,7 +39,7 @@ class OgMembershipStateCacheContextTest extends OgContextCacheContextTestBase {
   /**
    * {@inheritdoc}
    */
-  public function setUp() {
+  protected function setUp(): void {
     parent::setUp();
 
     $this->user = $this->prophesize(AccountInterface::class);

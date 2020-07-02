@@ -150,7 +150,7 @@ class GroupSubscribeFormatterTest extends UnitTestCase {
   /**
    * {@inheritdoc}
    */
-  public function setUp() {
+  protected function setUp(): void {
     parent::setUp();
 
     $this->accessResult = $this->prophesize(AccessResultInterface::class);
