@@ -129,7 +129,7 @@ class OgAccessTestBase extends UnitTestCase {
   /**
    * {@inheritdoc}
    */
-  public function setUp() {
+  protected function setUp(): void {
     $this->groupId = $this->randomMachineName();
     $this->entityTypeId = $this->randomMachineName();
     $this->bundle = $this->randomMachineName();

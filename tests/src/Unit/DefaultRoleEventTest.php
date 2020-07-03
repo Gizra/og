@@ -34,7 +34,7 @@ class DefaultRoleEventTest extends UnitTestCase {
   /**
    * {@inheritdoc}
    */
-  public function setUp() {
+  protected function setUp(): void {
     parent::setUp();
 
     $entity_type_manager = $this->prophesize(EntityTypeManagerInterface::class);
