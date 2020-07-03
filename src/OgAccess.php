@@ -151,6 +151,8 @@ class OgAccess implements OgAccessInterface {
     }
 
     // User ID 1 has all privileges.
+    // @todo If we drop the 'user' cache context then at this point we should
+    //   add the "user.is_super_user" cache context.
     if ($user->id() == 1) {
       return AccessResult::allowed()->addCacheableDependency($cacheable_metadata);
     }
@@ -172,6 +174,8 @@ class OgAccess implements OgAccessInterface {
     }
 
     if ($config->get('group_manager_full_access') && $user->isAuthenticated() && $group instanceof EntityOwnerInterface) {
+      // @todo If we drop the 'user' cache context, then at this point we should
+      //   add a cache context that varies by entity ownership.
       $cacheable_metadata->addCacheableDependency($group);
       if ($group->getOwnerId() == $user->id()) {
         return AccessResult::allowed()->addCacheableDependency($cacheable_metadata);
@@ -283,6 +287,24 @@ class OgAccess implements OgAccessInterface {
 
             // Check if the operation matches a group level operation such as
             // 'subscribe without approval'.
+            // @todo This doesn't seem to make sense, why would we need to check
+            //   group level permissions when checking access on group content?
+            //   This code is checking for permissions such as 'manage members',
+            //   'update group' and 'subscribe without approval'. Why would we
+            //   be asked to check for these operations on group content rather
+            //   than on the group entities themselves? The group entity access
+            //   is already handled above. Also this will grant permission if
+            //   only one of the group content's many groups has the given
+            //   permission for the user?
+            //   So to recap, when a user has 'manage members' permission in a
+            //   single group to which this group content belongs, then the user
+            //   will get 'manage members' permission on this group _content_??
+            //   It is possible this was added at some point to ensure that the
+            //   access can be altered using hook_og_user_access_alter() but
+            //   even that seems to be a mistake, since the original entity
+            //   that access is being checked for is not even passed to the
+            //   hook implementations. We would need a dedicated alter hook.
+            //   Probably the safest would be to remove this entirely.
             $user_access = $this->userAccess($group, $operation, $user);
             if ($user_access->isAllowed()) {
               return $user_access->addCacheTags($cache_tags);
