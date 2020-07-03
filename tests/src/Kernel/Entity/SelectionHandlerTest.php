@@ -120,7 +120,7 @@ class SelectionHandlerTest extends KernelTestBase {
       'handler' => $this->fieldDefinition->getSetting('handler'),
       'field_mode' => 'admin',
     ];
-    $this->selectionPluginManager->createInstance('og:default', $options);
+    $this->selectionPluginManager->getInstance($options);
     $this->selectionHandler = $this->selectionPluginManager->getSelectionHandler($this->fieldDefinition);
 
     // Create two users.
@@ -170,7 +170,7 @@ class SelectionHandlerTest extends KernelTestBase {
       'handler' => $this->fieldDefinition->getSetting('handler'),
       'field_mode' => 'admin',
     ];
-    $this->selectionHandler = $this->selectionPluginManager->createInstance('og:default', $options);
+    $this->selectionHandler = $this->selectionPluginManager->getInstance($options);
 
     $this->setCurrentAccount($this->user1);
     $groups = $this->selectionHandler->getReferenceableEntities();

@@ -7,6 +7,7 @@ use Drupal\node\Entity\NodeType;
 use Drupal\KernelTests\KernelTestBase;
 use Drupal\og\Og;
 use Drupal\og\OgGroupAudienceHelperInterface;
+use Drupal\og\Plugin\OgFields\AccessField;
 
 /**
  * Testing field definition overrides.
@@ -67,7 +68,7 @@ class FieldCreateTest extends KernelTestBase {
     // Simple create, for all the fields defined by OG core.
     $field_names = [
       OgGroupAudienceHelperInterface::DEFAULT_FIELD,
-      OG_DEFAULT_ACCESS_FIELD,
+      AccessField::DEFAULT_FIELD,
     ];
 
     foreach ($field_names as $field_name) {

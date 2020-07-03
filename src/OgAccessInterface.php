@@ -55,6 +55,33 @@ interface OgAccessInterface {
   public function userAccessEntity($operation, EntityInterface $entity, AccountInterface $user = NULL);
 
   /**
+   * Checks access for entity operations on group content entities.
+   *
+   * This checks if the user has permission to perform the requested operation
+   * on the given group content entity according to the user's membership status
+   * in the given group. There is no formal support for access control on entity
+   * operations in core, so the mapping of permissions to operations is provided
+   * by PermissionManager::getEntityOperationPermissions().
+   *
+   * @param string $operation
+   *   The entity operation.
+   * @param \Drupal\Core\Entity\EntityInterface $group_entity
+   *   The group entity, to retrieve the permissions from.
+   * @param \Drupal\Core\Entity\EntityInterface $group_content_entity
+   *   The group content entity for which access to the entity operation is
+   *   requested.
+   * @param \Drupal\Core\Session\AccountInterface $user
+   *   Optional user for which to check access. If omitted, the currently logged
+   *   in user will be used.
+   *
+   * @return \Drupal\Core\Access\AccessResult
+   *   The access result object.
+   *
+   * @see \Drupal\og\PermissionManager::getEntityOperationPermissions()
+   */
+  public function userAccessGroupContentEntityOperation($operation, EntityInterface $group_entity, EntityInterface $group_content_entity, AccountInterface $user = NULL);
+
+  /**
    * Resets the static cache.
    */
   public function reset();
