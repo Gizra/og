@@ -288,16 +288,21 @@ class OgComplex extends EntityReferenceAutocompleteWidget {
    *   A single entity reference input.
    */
   public function otherGroupsSingle($delta, EntityInterface $entity = NULL, $weight_delta = 10) {
+    $selection_settings = [
+      'other_groups' => TRUE,
+      'field_mode' => 'admin',
+    ];
+    if ($this->getFieldSetting('handler_settings')) {
+      $selection_settings += $this->getFieldSetting('handler_settings');
+    }
+
     return [
       'target_id' => [
         // @todo Allow this to be configurable with a widget setting.
         '#type' => 'entity_autocomplete',
         '#target_type' => $this->fieldDefinition->getFieldStorageDefinition()->getSetting('target_type'),
         '#selection_handler' => 'og:default',
-        '#selection_settings' => [
-          'other_groups' => TRUE,
-          'field_mode' => 'admin',
-        ],
+        '#selection_settings' => $selection_settings,
         '#default_value' => $entity,
       ],
       '_weight' => [
