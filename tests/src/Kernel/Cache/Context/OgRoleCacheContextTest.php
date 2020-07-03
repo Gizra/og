@@ -79,7 +79,7 @@ class OgRoleCacheContextTest extends KernelTestBase {
   /**
    * {@inheritdoc}
    */
-  protected function setUp(): void: void {
+  protected function setUp(): void {
     parent::setUp();
 
     // Add membership and config schema.
