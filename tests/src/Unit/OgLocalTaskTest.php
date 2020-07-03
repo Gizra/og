@@ -43,7 +43,7 @@ class OgLocalTaskTest extends UnitTestCase {
   /**
    * {@inheritdoc}
    */
-  public function setUp() {
+  protected function setUp(): void {
     $this->groupTypeManager = $this->prophesize(GroupTypeManagerInterface::class);
     $this->routeProvider = $this->prophesize(RouteProvider::class);
     $this->route = $this->prophesize(Route::class);
