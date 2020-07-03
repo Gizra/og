@@ -99,10 +99,10 @@ class GroupTabTest extends BrowserTestBase {
   public function testGroupTab() {
     $this->drupalLogin($this->user1);
     $this->drupalGet('group/node/' . $this->group->id() . '/admin');
-    $this->assertResponse(200);
+    $this->assertSession()->statusCodeEquals(200);
 
     $this->drupalGet('group/node/' . $this->nonGroup->id() . '/admin');
-    $this->assertResponse(403);
+    $this->assertSession()->statusCodeEquals(403);
   }
 
 }
