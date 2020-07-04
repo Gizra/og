@@ -74,8 +74,8 @@ class OgUiController extends ControllerBase {
    */
   public function rolesPermissionsOverviewPage($type) {
     $route = $type === 'roles' ? 'entity.og_role.collection' : 'og_ui.permissions_overview';
-    $action = $type === 'roles' ? t('Edit roles') : t('Edit permissions');
-    $header = [t('Group type'), t('Operations')];
+    $action = $type === 'roles' ? $this->t('Edit roles') : $this->t('Edit permissions');
+    $header = [$this->t('Group type'), $this->t('Operations')];
     $rows = [];
     $build = [];
 

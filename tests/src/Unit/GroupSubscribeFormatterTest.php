@@ -150,7 +150,7 @@ class GroupSubscribeFormatterTest extends UnitTestCase {
   /**
    * {@inheritdoc}
    */
-  public function setUp() {
+  protected function setUp(): void {
     parent::setUp();
 
     $this->accessResult = $this->prophesize(AccessResultInterface::class);
@@ -362,7 +362,8 @@ class GroupSubscribeFormatterTest extends UnitTestCase {
       '',
       [],
       $this->accountProxy->reveal(),
-      $this->ogAccess->reveal()
+      $this->ogAccess->reveal(),
+      $this->entityTypeManager->reveal()
     );
     return $formatter->viewElements($this->fieldItemList->reveal(), $this->randomMachineName());
   }

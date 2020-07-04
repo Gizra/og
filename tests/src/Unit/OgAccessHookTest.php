@@ -15,7 +15,7 @@ class OgAccessHookTest extends OgAccessEntityTestBase {
   /**
    * {@inheritdoc}
    */
-  public function setUp() {
+  protected function setUp(): void {
     parent::setUp();
     // Since this is a unit test, we don't enable the module. However, we test
     // a hook implementation inside the module so include the module manually.
@@ -44,17 +44,7 @@ class OgAccessHookTest extends OgAccessEntityTestBase {
   public function testGetEntityGroups($operation) {
     $this->user->hasPermission(OgAccess::ADMINISTER_GROUP_PERMISSION)->willReturn(TRUE);
     $user_entity_access = og_entity_access($this->groupContentEntity->reveal(), $operation, $this->user->reveal());
-
-    // @todo This is strange, 'view' is not part of the operations supplied by
-    //   ::permissionsProvider(). And why would a group administrator be allowed
-    //   access to all operations, except 'view'? Shouldn't this also return
-    //   'allowed'?
-    if ($operation == 'view') {
-      $this->assertTrue($user_entity_access->isNeutral());
-    }
-    else {
-      $this->assertTrue($user_entity_access->isAllowed());
-    }
+    $this->assertTrue($user_entity_access->isAllowed());
   }
 
 }

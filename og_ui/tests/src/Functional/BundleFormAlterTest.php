@@ -1,8 +1,9 @@
 <?php
 
-namespace Drupal\og_ui\Tests;
+namespace Drupal\Tests\og_ui\Functional;
 
 use Drupal\Core\Form\FormState;
+use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\node\Entity\NodeType;
 use Drupal\og\Og;
 use Drupal\og_ui\BundleFormAlter;
@@ -42,7 +43,7 @@ class BundleFormAlterTest extends BrowserTestBase {
   /**
    * {@inheritdoc}
    */
-  public function setUp() {
+  protected function setUp(): void {
     parent::setUp();
 
     $this->entityTypeManager = \Drupal::entityTypeManager();
@@ -69,7 +70,7 @@ class BundleFormAlterTest extends BrowserTestBase {
       'og_is_group' => 1,
     ];
     $this->drupalGet('admin/structure/block/block-content/types/add');
-    $this->submitForm($edit, t('Save'));
+    $this->submitForm($edit, new TranslatableMarkup('Save'));
 
     $edit = [
       'name' => 'class',
@@ -79,7 +80,7 @@ class BundleFormAlterTest extends BrowserTestBase {
       'og_target_bundles[]' => ['school'],
     ];
     $this->drupalGet('admin/structure/types/add');
-    $this->submitForm($edit, t('Save content type'));
+    $this->submitForm($edit, new TranslatableMarkup('Save content type'));
     $this->content = $this->drupalGet('admin/structure/types/manage/class');
     $this->assertOptionSelected('edit-og-target-bundles', 'school');
     $this->assertTargetType('block_content', 'The target type is set to the "Custom Block" entity type.');
@@ -97,7 +98,7 @@ class BundleFormAlterTest extends BrowserTestBase {
       'og_target_bundles[]' => [],
     ];
     $this->drupalGet('admin/structure/types/manage/class');
-    $this->submitForm($edit, t('Save content type'));
+    $this->submitForm($edit, new TranslatableMarkup('Save content type'));
     $this->assertTargetBundles(NULL, 'When the target bundle field is cleared from all values, it takes on the value NULL.');
   }
 
