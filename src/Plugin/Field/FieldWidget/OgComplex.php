@@ -166,7 +166,7 @@ class OgComplex extends EntityReferenceAutocompleteWidget {
         $elements['add_more'] = [
           '#type' => 'submit',
           '#name' => strtr($id_prefix, '-', '_') . '_add_more',
-          '#value' => t('Add another item'),
+          '#value' => $this->t('Add another item'),
           '#attributes' => ['class' => ['field-add-more-submit']],
           '#limit_validation_errors' => [array_merge($parents, [$field_name])],
           '#submit' => [[get_class($this), 'addMoreSubmit']],
