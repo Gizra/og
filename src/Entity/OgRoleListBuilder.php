@@ -100,7 +100,7 @@ class OgRoleListBuilder extends DraggableListBuilder {
    * {@inheritdoc}
    */
   public function buildHeader() {
-    $header['label'] = t('Name');
+    $header['label'] = $this->t('Name');
     return $header + parent::buildHeader();
   }
 
@@ -120,7 +120,7 @@ class OgRoleListBuilder extends DraggableListBuilder {
 
     // @TODO if ($entity->hasLinkTemplate('edit-permissions-form')).
     $operations['permissions'] = [
-      'title' => t('Edit permissions'),
+      'title' => $this->t('Edit permissions'),
       'weight' => 20,
       'url' => Url::fromRoute('og_ui.permissions_edit_form', [
         'entity_type_id' => $this->groupType,
