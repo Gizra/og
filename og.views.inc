@@ -5,6 +5,7 @@
  * Integration with the Views module.
  */
 
+use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\field\FieldStorageConfigInterface;
 
 /**
@@ -16,8 +17,8 @@ function og_views_data_alter(array &$data) {
     'real field' => 'uid',
     'base' => 'og_membership',
     'base field' => 'uid',
-    'label' => t('OG Membership'),
-    'title' => t('OG Membership'),
+    'label' => new TranslatableMarkup('OG Membership'),
+    'title' => new TranslatableMarkup('OG Membership'),
     'id' => 'standard',
   ];
 }
@@ -53,10 +54,10 @@ function og_field_views_data(FieldStorageConfigInterface $field_storage) {
           '@field_name' => $field_name,
         ];
         $data[$table_name][$field_name]['relationship'] = [
-          'title' => t('@label referenced from @field_name', $args),
-          'label' => t('@field_name: @label', $args),
+          'title' => new TranslatableMarkup('@label referenced from @field_name', $args),
+          'label' => new TranslatableMarkup('@field_name: @label', $args),
           'group' => $entity_type->getLabel(),
-          'help' => t('Appears in: @bundles.', ['@bundles' => implode(', ', $field_storage->getBundles())]),
+          'help' => new TranslatableMarkup('Appears in: @bundles.', ['@bundles' => implode(', ', $field_storage->getBundles())]),
           'id' => 'standard',
           'base' => $target_base_table,
           'entity type' => $target_entity_type_id,
@@ -69,10 +70,10 @@ function og_field_views_data(FieldStorageConfigInterface $field_storage) {
         $args['@label'] = $target_entity_type->getSingularLabel();
         $pseudo_field_name = 'reverse__' . $entity_type_id . '__' . $field_name;
         $data[$target_base_table][$pseudo_field_name]['relationship'] = [
-          'title' => t('@entity using @field_name', $args),
-          'label' => t('@field_name', ['@field_name' => $field_name]),
+          'title' => new TranslatableMarkup('@entity using @field_name', $args),
+          'label' => new TranslatableMarkup('@field_name', ['@field_name' => $field_name]),
           'group' => $target_entity_type->getLabel(),
-          'help' => t('Relate each @entity with a @field_name set to the @label.', $args),
+          'help' => new TranslatableMarkup('Relate each @entity with a @field_name set to the @label.', $args),
           'id' => 'entity_reverse',
           'base' => $entity_type->getDataTable() ?: $entity_type->getBaseTable(),
           'entity_type' => $entity_type_id,

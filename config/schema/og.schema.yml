@@ -5,10 +5,6 @@ field.storage_settings.og_standard_reference:
 field.field_settings.og_standard_reference:
   type: field.field_settings.entity_reference
   label: 'Organic Groups reference field settings'
-  mapping:
-    access_override:
-      type: boolean
-      label: 'Access Override'
 
 entity_reference_selection.og:default:
   type: entity_reference_selection.default

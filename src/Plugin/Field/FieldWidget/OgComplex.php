@@ -166,7 +166,7 @@ class OgComplex extends EntityReferenceAutocompleteWidget {
         $elements['add_more'] = [
           '#type' => 'submit',
           '#name' => strtr($id_prefix, '-', '_') . '_add_more',
-          '#value' => t('Add another item'),
+          '#value' => $this->t('Add another item'),
           '#attributes' => ['class' => ['field-add-more-submit']],
           '#limit_validation_errors' => [array_merge($parents, [$field_name])],
           '#submit' => [[get_class($this), 'addMoreSubmit']],
@@ -288,16 +288,21 @@ class OgComplex extends EntityReferenceAutocompleteWidget {
    *   A single entity reference input.
    */
   public function otherGroupsSingle($delta, EntityInterface $entity = NULL, $weight_delta = 10) {
+    $selection_settings = [
+      'other_groups' => TRUE,
+      'field_mode' => 'admin',
+    ];
+    if ($this->getFieldSetting('handler_settings')) {
+      $selection_settings += $this->getFieldSetting('handler_settings');
+    }
+
     return [
       'target_id' => [
         // @todo Allow this to be configurable with a widget setting.
         '#type' => 'entity_autocomplete',
         '#target_type' => $this->fieldDefinition->getFieldStorageDefinition()->getSetting('target_type'),
         '#selection_handler' => 'og:default',
-        '#selection_settings' => [
-          'other_groups' => TRUE,
-          'field_mode' => 'admin',
-        ],
+        '#selection_settings' => $selection_settings,
         '#default_value' => $entity,
       ],
       '_weight' => [

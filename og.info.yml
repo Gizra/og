@@ -2,7 +2,7 @@ name: Organic Groups
 description: API to allow associating content with groups.
 package: Organic Groups
 
-core: 8.x
+core_version_requirement: ^8.8 || ^9
 type: module
 php: 7.1
 

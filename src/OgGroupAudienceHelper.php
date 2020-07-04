@@ -60,7 +60,7 @@ class OgGroupAudienceHelper implements OgGroupAudienceHelperInterface {
     $return = [];
     $entity_type = $this->entityTypeManager->getDefinition($group_content_entity_type_id);
 
-    if (!$entity_type->isSubclassOf(FieldableEntityInterface::class)) {
+    if (!$entity_type->entityClassImplements(FieldableEntityInterface::class)) {
       // This entity type is not fieldable.
       return [];
     }
