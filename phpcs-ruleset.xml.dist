@@ -19,8 +19,5 @@
         <!-- Deprecation versions are allowed to include beta versions. -->
         <exclude name="Drupal.Semantics.FunctionTriggerError.TriggerErrorVersion" />
     </rule>
-    <rule ref="./vendor/drupal/coder/coder_sniffer/DrupalPractice">
-        <!-- https://github.com/Gizra/og/issues/543 -->
-        <exclude name="DrupalPractice.Objects.GlobalFunction.GlobalFunction" />
-    </rule>
+    <rule ref="./vendor/drupal/coder/coder_sniffer/DrupalPractice"></rule>
 </ruleset>

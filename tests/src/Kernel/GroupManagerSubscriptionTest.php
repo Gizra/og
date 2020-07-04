@@ -52,7 +52,7 @@ class GroupManagerSubscriptionTest extends KernelTestBase {
   /**
    * {@inheritdoc}
    */
-  protected function setUp() {
+  protected function setUp(): void {
     parent::setUp();
 
     $this->groupTypeManager = $this->container->get('og.group_type_manager');

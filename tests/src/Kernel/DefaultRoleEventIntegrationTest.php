@@ -44,7 +44,7 @@ class DefaultRoleEventIntegrationTest extends KernelTestBase {
   /**
    * {@inheritdoc}
    */
-  public function setUp() {
+  protected function setUp(): void {
     parent::setUp();
 
     $this->eventDispatcher = $this->container->get('event_dispatcher');

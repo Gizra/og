@@ -98,7 +98,7 @@ class SubscriptionControllerTest extends UnitTestCase {
   /**
    * {@inheritdoc}
    */
-  public function setUp() {
+  protected function setUp(): void {
     $this->entityFormBuilder = $this->prophesize(EntityFormBuilderInterface::class);
     $this->group = $this->prophesize(ContentEntityInterface::class);
     $this->membershipManager = $this->prophesize(MembershipManagerInterface::class);
