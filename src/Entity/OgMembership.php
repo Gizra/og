@@ -508,7 +508,6 @@ class OgMembership extends ContentEntityBase implements OgMembershipInterface {
 
     // Reset internal cache.
     Og::reset();
-    \Drupal::service('og.access')->reset();
 
     return $result;
   }
