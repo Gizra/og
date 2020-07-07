@@ -79,6 +79,11 @@ interface OgAccessInterface {
 
   /**
    * Resets the static cache.
+   *
+   * @deprecated in og:8.x-1.0-alpha6 and is removed from og:8.x-1.0-beta1.
+   *   The static cache has been removed and this method no longer serves any
+   *   purpose. Any calls to this method can safely be removed.
+   * @see https://github.com/Gizra/og/issues/654
    */
   public function reset(): void;
 
