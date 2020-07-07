@@ -12,9 +12,9 @@ use Drupal\Core\Session\AccountInterface;
 interface OgAccessInterface {
 
   /**
-   * Determines whether a user has a given privilege.
+   * Determines whether a user can perform a given operation on a given group.
    *
-   * All permission checks in OG should go through this function. This way we
+   * All access checks in OG should go through this function. This way we
    * guarantee consistent behavior, and ensure that the superuser and group
    * administrators can perform all actions.
    *
