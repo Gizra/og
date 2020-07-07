@@ -3,6 +3,7 @@
 namespace Drupal\og;
 
 use Drupal\Core\Access\AccessResult;
+use Drupal\Core\Access\AccessResultInterface;
 use Drupal\Core\Cache\CacheableMetadata;
 use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Entity\EntityInterface;
@@ -112,7 +113,7 @@ class OgAccess implements OgAccessInterface {
   /**
    * {@inheritdoc}
    */
-  public function userAccess(EntityInterface $group, $operation, AccountInterface $user = NULL, $skip_alter = FALSE, $ignore_admin = FALSE) {
+  public function userAccess(EntityInterface $group, $operation, AccountInterface $user = NULL, $skip_alter = FALSE): AccessResultInterface {
     $group_type_id = $group->getEntityTypeId();
     $bundle = $group->bundle();
     // As Og::isGroup depends on this config, we retrieve it here and set it as
@@ -144,12 +145,11 @@ class OgAccess implements OgAccessInterface {
       return AccessResult::allowed()->addCacheableDependency($cacheable_metadata);
     }
 
-    // Administer group permission.
-    if (!$ignore_admin) {
-      $user_access = AccessResult::allowedIfHasPermission($user, self::ADMINISTER_GROUP_PERMISSION);
-      if ($user_access->isAllowed()) {
-        return $user_access->addCacheableDependency($cacheable_metadata);
-      }
+    // Check if the user has a global permission to administer all groups. This
+    // gives full access.
+    $user_access = AccessResult::allowedIfHasPermission($user, self::ADMINISTER_GROUP_PERMISSION);
+    if ($user_access->isAllowed()) {
+      return $user_access->addCacheableDependency($cacheable_metadata);
     }
 
     // Update group special permission. At this point, the operation should have
@@ -199,7 +199,11 @@ class OgAccess implements OgAccessInterface {
       $this->moduleHandler->alter('og_user_access', $permissions, $cacheable_metadata, $context);
     }
 
-    if (($user_is_group_admin && !$ignore_admin) || in_array($operation, $permissions)) {
+    // Check if the user is a group admin and who has access to all the group
+    // permissions.
+    // @todo It should be possible for modules to alter the permissions even if
+    //   the user is a group admin, UID 1 or has 'administer group' permission.
+    if ($user_is_group_admin || in_array($operation, $permissions)) {
       // User is a group admin, and we do not ignore this special permission
       // that grants access to all the group permissions.
       return AccessResult::allowed()->addCacheableDependency($cacheable_metadata);
@@ -211,7 +215,7 @@ class OgAccess implements OgAccessInterface {
   /**
    * {@inheritdoc}
    */
-  public function userAccessEntity($operation, EntityInterface $entity, AccountInterface $user = NULL) {
+  public function userAccessEntity($operation, EntityInterface $entity, AccountInterface $user = NULL): AccessResultInterface {
     $result = AccessResult::neutral();
 
     $entity_type = $entity->getEntityType();
@@ -276,7 +280,7 @@ class OgAccess implements OgAccessInterface {
   /**
    * {@inheritdoc}
    */
-  public function userAccessGroupContentEntityOperation($operation, EntityInterface $group_entity, EntityInterface $group_content_entity, AccountInterface $user = NULL) {
+  public function userAccessGroupContentEntityOperation($operation, EntityInterface $group_entity, EntityInterface $group_content_entity, AccountInterface $user = NULL): AccessResultInterface {
     // Default to the current user.
     $user = $user ?: $this->accountProxy->getAccount();
 
@@ -325,7 +329,7 @@ class OgAccess implements OgAccessInterface {
   /**
    * {@inheritdoc}
    */
-  public function reset() {
+  public function reset(): void {
     trigger_error('OgAccessInterface::reset() is deprecated in og:8.1.0-alpha6 and is removed from og:8.1.0-beta1. The static cache has been removed and this no longer server any purpose. See https://github.com/Gizra/og/issues/654', E_USER_DEPRECATED);
   }
 
