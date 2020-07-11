@@ -4,7 +4,7 @@
 # on the passed in parameter.
 
 mysql_to_ramdisk() {
-  echo " > Move MySQL datadir to RAM disk."
+  echo " > Move MySQL datadir to RAM disk for the sake of performance."
   sudo service mysql stop
   sudo mv /var/lib/mysql /var/run/tmpfs
   sudo ln -s /var/run/tmpfs /var/lib/mysql
