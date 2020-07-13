@@ -3,6 +3,7 @@
 namespace Drupal\Tests\og\Kernel\Access;
 
 use Drupal\KernelTests\KernelTestBase;
+use Drupal\og\OgAccess;
 use Drupal\Tests\og\Traits\OgMembershipCreationTrait;
 use Drupal\block_content\Entity\BlockContent;
 use Drupal\block_content\Entity\BlockContentType;
@@ -85,7 +86,7 @@ class OgAccessHookTest extends KernelTestBase {
     $this->installEntitySchema('user');
     $this->installSchema('system', 'sequences');
 
-    // Create two roles: one for normal users, and one for administrators.
+    // Create two Drupal roles: one for normal users and one for administrators.
     foreach (['authenticated', 'administrator'] as $role_id) {
       $role = Role::create([
         'id' => $role_id,
@@ -93,9 +94,10 @@ class OgAccessHookTest extends KernelTestBase {
       ]);
       $role->grantPermission('access content');
 
-      // Grant the 'administer group' permission to the administrator role.
+      // Grant the global 'administer organic groups' permission to the
+      // administrator role.
       if ($role_id === 'administrator') {
-        $role->grantPermission('administer group');
+        $role->grantPermission('administer organic groups');
       }
       $role->save();
       $this->roles[$role_id] = $role;

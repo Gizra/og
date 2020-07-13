@@ -1,4 +1,4 @@
-administer group:
+administer organic groups:
   title: 'Administer Organic groups permissions'
   description: 'Administer all groups and permissions.'
   restrict access: true

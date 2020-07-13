@@ -9,6 +9,7 @@ use Drupal\og\Event\PermissionEvent;
 use Drupal\og\Event\PermissionEventInterface;
 use Drupal\og\GroupContentOperationPermission;
 use Drupal\og\GroupPermission;
+use Drupal\og\OgAccess;
 use Drupal\og\OgRoleInterface;
 use Drupal\og\PermissionInterface;
 
@@ -128,7 +129,7 @@ class PermissionEventTest extends KernelTestBase {
     // Test permissions that should be available for both test groups.
     $default_permissions = [
       'add user',
-      'administer group',
+      OgAccess::ADMINISTER_GROUP_PERMISSION,
       'approve and deny subscription',
       'manage members',
       'administer permissions',
@@ -148,7 +149,7 @@ class PermissionEventTest extends KernelTestBase {
     // A full permission that should be available in both test groups. This is
     // used to test that all properties are correctly applied.
     $group_level_permission = new GroupPermission([
-      'name' => 'administer group',
+      'name' => OgAccess::ADMINISTER_GROUP_PERMISSION,
       'title' => $this->t('Administer group'),
       'description' => $this->t('Manage group members and content in the group.'),
       'default roles' => [OgRoleInterface::ADMINISTRATOR],
