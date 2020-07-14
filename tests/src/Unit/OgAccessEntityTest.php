@@ -2,8 +2,6 @@
 
 namespace Drupal\Tests\og\Unit;
 
-use Drupal\og\OgAccess;
-
 /**
  * OG Access entity tests.
  *
