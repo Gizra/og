@@ -11,7 +11,7 @@
         "source": "https://git.drupalcode.org/project/og"
     },
     "require": {
-        "php": "^7.1.0",
+        "php": "^7.2",
         "drupal/core": "^8.8 || ^9.0"
     },
     "require-dev": {
