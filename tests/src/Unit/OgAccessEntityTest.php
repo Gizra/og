@@ -2,8 +2,6 @@
 
 namespace Drupal\Tests\og\Unit;
 
-use Drupal\og\OgAccess;
-
 /**
  * OG Access entity tests.
  *
@@ -38,7 +36,7 @@ class OgAccessEntityTest extends OgAccessEntityTestBase {
   public function testAccessByOperationAdmin($operation) {
     $this->membershipManager->getGroups($this->groupContentEntity->reveal())->willReturn([$this->entityTypeId => [$this->group]]);
 
-    $this->user->hasPermission(OgAccess::ADMINISTER_GROUP_PERMISSION)->willReturn(TRUE);
+    $this->user->hasPermission('administer organic groups')->willReturn(TRUE);
     $user_entity_access = $this->ogAccess->userAccessEntity($operation, $this->groupContentEntity->reveal(), $this->user->reveal());
     $this->assertTrue($user_entity_access->isAllowed());
   }

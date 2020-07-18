@@ -20,16 +20,15 @@ use Drupal\user\UserInterface;
 class OgAccess implements OgAccessInterface {
 
   /**
-   * Administer permission string.
+   * Group level permission that grants full access to the group.
    *
-   * @var string
+   * Not to be confused with the 'administer organic groups' global permission
+   * which is intended for site builders and gives full access to _all_ groups.
    */
   const ADMINISTER_GROUP_PERMISSION = 'administer group';
 
   /**
-   * Update group permission string.
-   *
-   * @var string
+   * Group level permission that allows the user to update the group entity.
    */
   const UPDATE_GROUP_PERMISSION = 'update group';
 
@@ -147,7 +146,7 @@ class OgAccess implements OgAccessInterface {
 
     // Check if the user has a global permission to administer all groups. This
     // gives full access.
-    $user_access = AccessResult::allowedIfHasPermission($user, self::ADMINISTER_GROUP_PERMISSION);
+    $user_access = AccessResult::allowedIfHasPermission($user, 'administer organic groups');
     if ($user_access->isAllowed()) {
       return $user_access->addCacheableDependency($cacheable_metadata);
     }

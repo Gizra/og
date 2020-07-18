@@ -12,7 +12,7 @@ use Drupal\og\OgAccessInterface;
 use Symfony\Component\Routing\Route;
 
 /**
- * Determines access to routes based on group access for the current user.
+ * Determines access to routes based on group permissions for the current user.
  *
  * This is a general service that can be used to determine if a user has access
  * to a certain route.
@@ -47,7 +47,7 @@ class GroupCheck implements AccessInterface {
   }
 
   /**
-   * Checks access by OG related permissions.
+   * Checks if the user has group related permissions.
    *
    * If the route parameter names don't have {entity_type_id} or {entity_id} you
    * can still use this access check, by passing the "entity_type_id" definition
