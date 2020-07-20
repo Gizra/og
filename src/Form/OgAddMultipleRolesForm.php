@@ -35,7 +35,7 @@ class OgAddMultipleRolesForm extends OgChangeMultipleRolesFormBase {
 
     $form['roles'] = [
       '#type' => 'select',
-      '#title' => t('Add roles'),
+      '#title' => $this->t('Add roles'),
       '#multiple' => TRUE,
       '#required' => TRUE,
       '#options' => $options,

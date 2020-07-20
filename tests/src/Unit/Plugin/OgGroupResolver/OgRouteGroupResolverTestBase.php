@@ -54,7 +54,7 @@ abstract class OgRouteGroupResolverTestBase extends OgGroupResolverTestBase {
   /**
    * {@inheritdoc}
    */
-  public function setUp() {
+  protected function setUp(): void {
     parent::setUp();
 
     // Instantiate mocks of the classes that the plugins rely on.

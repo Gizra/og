@@ -21,6 +21,9 @@ case "$1" in
         exit $?
         ;;
     *)
+        # Disable deprecations checking in Drupal 9.
+        if [[ $1 == 9* ]]; then export SYMFONY_DEPRECATIONS_HELPER=disabled; fi
+
         mysql_to_ramdisk
         ln -s $MODULE_DIR $DRUPAL_DIR/modules/og
         cd $DRUPAL_DIR

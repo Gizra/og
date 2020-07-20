@@ -2,6 +2,7 @@
 
 namespace Drupal\og;
 
+use Drupal\Core\Access\AccessResultInterface;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Session\AccountInterface;
 
@@ -11,9 +12,9 @@ use Drupal\Core\Session\AccountInterface;
 interface OgAccessInterface {
 
   /**
-   * Determines whether a user has a given privilege.
+   * Determines whether a user can perform a given operation on a given group.
    *
-   * All permission checks in OG should go through this function. This way we
+   * All access checks in OG should go through this function. This way we
    * guarantee consistent behavior, and ensure that the superuser and group
    * administrators can perform all actions.
    *
@@ -28,16 +29,11 @@ interface OgAccessInterface {
    *   using drupal_alter(). This can be used by modules implementing
    *   hook_og_user_access_alter() that still want to use og_user_access(), but
    *   without causing a recursion. Defaults to FALSE.
-   * @param bool $ignore_admin
-   *   (optional) When TRUE the specific permission is checked, ignoring the
-   *   "administer group" permission if the user has it. When FALSE, a user
-   *   with "administer group" will be granted all permissions.
-   *   Defaults to FALSE.
    *
-   * @return \Drupal\Core\Access\AccessResult
+   * @return \Drupal\Core\Access\AccessResultInterface
    *   An access result object.
    */
-  public function userAccess(EntityInterface $group, $operation, AccountInterface $user = NULL, $skip_alter = FALSE, $ignore_admin = FALSE);
+  public function userAccess(EntityInterface $group, $operation, AccountInterface $user = NULL, $skip_alter = FALSE): AccessResultInterface;
 
   /**
    * Check if a user has access to a permission on a certain entity context.
@@ -49,10 +45,10 @@ interface OgAccessInterface {
    * @param \Drupal\Core\Session\AccountInterface $user
    *   (optional) The user object. If empty the current user will be used.
    *
-   * @return \Drupal\Core\Access\AccessResult
+   * @return \Drupal\Core\Access\AccessResultInterface
    *   An access result object.
    */
-  public function userAccessEntity($operation, EntityInterface $entity, AccountInterface $user = NULL);
+  public function userAccessEntity($operation, EntityInterface $entity, AccountInterface $user = NULL): AccessResultInterface;
 
   /**
    * Checks access for entity operations on group content entities.
@@ -74,16 +70,21 @@ interface OgAccessInterface {
    *   Optional user for which to check access. If omitted, the currently logged
    *   in user will be used.
    *
-   * @return \Drupal\Core\Access\AccessResult
+   * @return \Drupal\Core\Access\AccessResultInterface
    *   The access result object.
    *
    * @see \Drupal\og\PermissionManager::getEntityOperationPermissions()
    */
-  public function userAccessGroupContentEntityOperation($operation, EntityInterface $group_entity, EntityInterface $group_content_entity, AccountInterface $user = NULL);
+  public function userAccessGroupContentEntityOperation($operation, EntityInterface $group_entity, EntityInterface $group_content_entity, AccountInterface $user = NULL): AccessResultInterface;
 
   /**
    * Resets the static cache.
+   *
+   * @deprecated in og:8.x-1.0-alpha6 and is removed from og:8.x-1.0-beta1.
+   *   The static cache has been removed and this method no longer serves any
+   *   purpose. Any calls to this method can safely be removed.
+   * @see https://github.com/Gizra/og/issues/654
    */
-  public function reset();
+  public function reset(): void;
 
 }

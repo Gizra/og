@@ -13,6 +13,7 @@ use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Field\BaseFieldDefinition;
 use Drupal\Core\Session\AccountInterface;
+use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\og\Entity\OgRole;
 use Drupal\og\Og;
 use Drupal\og\OgGroupAudienceHelperInterface;
@@ -146,8 +147,9 @@ function og_entity_access(EntityInterface $entity, $operation, AccountInterface 
     return AccessResult::neutral();
   }
 
-  // If the user has permission to administer all groups, allow access.
-  if ($account->hasPermission('administer group')) {
+  // If the user has the global permission to administer all groups, allow
+  // access.
+  if ($account->hasPermission('administer organic groups')) {
     return AccessResult::allowed();
   }
 
@@ -179,7 +181,8 @@ function og_entity_create_access(AccountInterface $account, array $context, $bun
     return AccessResult::neutral();
   }
 
-  $access_result = AccessResult::allowedIfHasPermission($account, 'administer group');
+  // A user with the global permission to administer all groups has full access.
+  $access_result = AccessResult::allowedIfHasPermission($account, 'administer organic groups');
   if ($access_result->isAllowed()) {
     return $access_result;
   }
@@ -238,7 +241,7 @@ function og_entity_bundle_field_info(EntityTypeInterface $entity_type, $bundle, 
 
   $fields = [];
   $fields['og_group'] = BaseFieldDefinition::create('og_group')
-    ->setLabel(t('OG Group'))
+    ->setLabel(new TranslatableMarkup('OG Group'))
     ->setComputed(TRUE)
     ->setTranslatable(FALSE)
     ->setDefaultValue(TRUE)
@@ -390,7 +393,7 @@ function og_og_role_insert(OgRoleInterface $role) {
     $action = Action::create([
       'id' => $add_id,
       'type' => 'og_membership',
-      'label' => t('Add the @label role to the selected members', ['@label' => $role->getName()]),
+      'label' => new TranslatableMarkup('Add the @label role to the selected members', ['@label' => $role->getName()]),
       'configuration' => [
         'role_name' => $role->getName(),
       ],
@@ -403,7 +406,7 @@ function og_og_role_insert(OgRoleInterface $role) {
     $action = Action::create([
       'id' => $remove_id,
       'type' => 'og_membership',
-      'label' => t('Remove the @label role from the selected members', ['@label' => $role->getName()]),
+      'label' => new TranslatableMarkup('Remove the @label role from the selected members', ['@label' => $role->getName()]),
       'configuration' => [
         'role_name' => $role->getName(),
       ],
