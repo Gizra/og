@@ -26,6 +26,11 @@ class OgSelectionWidgetAutoCompleteTest extends BrowserTestBase {
   public static $modules = ['node', 'og'];
 
   /**
+   * {@inheritdoc}
+   */
+  protected $defaultTheme = 'stark';
+
+  /**
    * A group node for user 1.
    *
    * @var \Drupal\node\Entity\Node

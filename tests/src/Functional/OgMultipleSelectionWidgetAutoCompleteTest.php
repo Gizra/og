@@ -25,6 +25,11 @@ class OgMultipleSelectionWidgetAutoCompleteTest extends BrowserTestBase {
   public static $modules = ['node', 'og'];
 
   /**
+   * {@inheritdoc}
+   */
+  protected $defaultTheme = 'stark';
+
+  /**
    * A group node for user 1.
    *
    * @var \Drupal\node\Entity\Node
@@ -101,7 +106,7 @@ class OgMultipleSelectionWidgetAutoCompleteTest extends BrowserTestBase {
       ->save();
 
     // Create a role.
-    $role_storage = $this->container->get('entity.manager')->getStorage('user_role');
+    $role_storage = $this->container->get('entity_type.manager')->getStorage('user_role');
     $role_storage->create([
       'id' => 'dummy_role',
       'permissions' => [

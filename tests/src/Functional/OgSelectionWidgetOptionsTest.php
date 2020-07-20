@@ -27,6 +27,11 @@ class OgSelectionWidgetOptionsTest extends BrowserTestBase {
   public static $modules = ['node', 'og'];
 
   /**
+   * {@inheritdoc}
+   */
+  protected $defaultTheme = 'stark';
+
+  /**
    * A group node.
    *
    * @var \Drupal\node\Entity\Node
