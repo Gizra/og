@@ -6,7 +6,7 @@ og_ui.admin_index:
     _controller: '\Drupal\system\Controller\SystemController::systemAdminMenuBlockPage'
     _title: 'Organic groups'
   requirements:
-    _permission: 'administer group'
+    _permission: 'administer organic groups'
 
 og_ui.settings:
   path: 'admin/config/group/settings'
@@ -14,7 +14,7 @@ og_ui.settings:
     _form: '\Drupal\og_ui\Form\AdminSettingsForm'
     _title: 'OG settings'
   requirements:
-    _permission: 'administer group'
+    _permission: 'administer organic groups'
 
 og_ui.roles_permissions_overview:
   path: 'admin/config/group/{type}'
@@ -22,7 +22,7 @@ og_ui.roles_permissions_overview:
     _controller: '\Drupal\og_ui\Controller\OgUiController::rolesPermissionsOverviewPage'
     _title_callback: '\Drupal\og_ui\Controller\OgUiController::rolesPermissionsOverviewTitleCallback'
   requirements:
-    _permission: 'administer group'
+    _permission: 'administer organic groups'
     type: '^(roles|permissions)$'
 
 og_ui.permissions_overview:
@@ -31,7 +31,7 @@ og_ui.permissions_overview:
     _form: '\Drupal\og_ui\Form\OgPermissionsForm'
     _title_callback: '\Drupal\og_ui\Form\OgPermissionsForm::titleCallback'
   requirements:
-    _permission: 'administer group'
+    _permission: 'administer organic groups'
 
 og_ui.permissions_edit_form:
   path: 'admin/config/group/permissions/{entity_type_id}/{bundle_id}/{role_name}'
@@ -39,4 +39,4 @@ og_ui.permissions_edit_form:
     _form: '\Drupal\og_ui\Form\OgRolePermissionsForm'
     _title_callback: '\Drupal\og_ui\Form\OgRolePermissionsForm::rolePermissionTitleCallback'
   requirements:
-    _permission: 'administer group'
+    _permission: 'administer organic groups'

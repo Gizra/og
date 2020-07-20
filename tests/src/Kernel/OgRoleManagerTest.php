@@ -6,6 +6,7 @@ use Drupal\KernelTests\KernelTestBase;
 use Drupal\node\Entity\NodeType;
 use Drupal\og\Entity\OgRole;
 use Drupal\og\Og;
+use Drupal\og\OgAccess;
 
 /**
  * Kernel tests for the OG role manager service.
@@ -72,8 +73,7 @@ class OgRoleManagerTest extends KernelTestBase {
     // Bundles are implied for entity_test and don't need to be created.
     Og::groupTypeManager()->addGroup('entity_test', 'entity_test_group_type');
 
-    // Create a custom role to verify that the tests covers custom roles as
-    // well.
+    // Create a custom role to verify that the tests cover custom roles as well.
     $og_role = OgRole::create();
     $og_role
       ->setName($this->roleName)
@@ -81,7 +81,7 @@ class OgRoleManagerTest extends KernelTestBase {
       ->setGroupType('node')
       ->setGroupBundle('node_group_type')
       ->grantPermission('access content')
-      ->grantPermission('administer group')
+      ->grantPermission(OgAccess::ADMINISTER_GROUP_PERMISSION)
       ->grantPermission('view own unpublished content')
       ->save();
   }
@@ -127,7 +127,7 @@ class OgRoleManagerTest extends KernelTestBase {
       ->setGroupType('entity_test')
       ->setGroupBundle('entity_test_group_type')
       ->grantPermission('access content')
-      ->grantPermission('administer group')
+      ->grantPermission(OgAccess::ADMINISTER_GROUP_PERMISSION)
       // Random permission to test that queries are working properly when
       // requesting a subset of permissions.
       ->grantPermission('edit any group entity_test')
@@ -137,7 +137,7 @@ class OgRoleManagerTest extends KernelTestBase {
     $this->assertCount(3, $roles);
 
     // Filter based on the entity type id and bundle.
-    $roles = $this->ogRoleManager->getRolesByPermissions(['administer group'], 'entity_test', 'entity_test_group_type');
+    $roles = $this->ogRoleManager->getRolesByPermissions([OgAccess::ADMINISTER_GROUP_PERMISSION], 'entity_test', 'entity_test_group_type');
     $this->assertCount(1, $roles);
     $actual_role = reset($roles);
     $this->assertEquals($actual_role->id(), $og_role3->id());
@@ -145,14 +145,14 @@ class OgRoleManagerTest extends KernelTestBase {
     // By default, roles are that match all of the passed permissions.
     $roles = $this->ogRoleManager->getRolesByPermissions([
       'access content',
-      'administer group',
+      OgAccess::ADMINISTER_GROUP_PERMISSION,
     ]);
     $this->assertCount(2, $roles);
 
     // Request roles that match one or more of the passed permissions.
     $roles = $this->ogRoleManager->getRolesByPermissions([
       'access content',
-      'administer group',
+      OgAccess::ADMINISTER_GROUP_PERMISSION,
     ], NULL, NULL, FALSE);
     $this->assertCount(3, $roles);
 
@@ -160,7 +160,7 @@ class OgRoleManagerTest extends KernelTestBase {
     // type ID and bundle.
     $roles = $this->ogRoleManager->getRolesByPermissions([
       'access content',
-      'administer group',
+      OgAccess::ADMINISTER_GROUP_PERMISSION,
     ], 'entity_test', 'entity_test_group_type', TRUE);
     $this->assertCount(1, $roles);
   }

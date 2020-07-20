@@ -242,9 +242,6 @@ class OgRole extends Role implements OgRoleInterface {
       $this->setId($prefix . $this->getName());
     }
 
-    // Reset access cache, as the role might have changed.
-    $this->ogAccess()->reset();
-
     parent::save();
   }
 
@@ -286,8 +283,6 @@ class OgRole extends Role implements OgRoleInterface {
       throw new OgRoleException('The default roles "non-member" and "member" cannot be deleted.');
     }
 
-    // Reset access cache, as the role is no longer present.
-    $this->ogAccess()->reset();
     parent::delete();
   }
 

@@ -9,7 +9,6 @@ use Drupal\Core\Field\FieldItemListInterface;
 use Drupal\Core\Field\FieldStorageDefinitionInterface;
 use Drupal\Core\Field\Plugin\Field\FieldWidget\EntityReferenceAutocompleteWidget;
 use Drupal\Core\Form\FormStateInterface;
-use Drupal\og\OgAccess;
 
 /**
  * Plugin implementation of the 'entity_reference autocomplete' widget.
@@ -258,7 +257,7 @@ class OgComplex extends EntityReferenceAutocompleteWidget {
     // Get the trigger element and check if this the add another item button.
     $trigger_element = $form_state->getTriggeringElement();
 
-    if ($trigger_element['#name'] == 'add_another_group') {
+    if (!empty($trigger_element) && $trigger_element['#name'] == 'add_another_group') {
       // Increase the number of other groups.
       $delta = $form_state->get('other_group_delta') + 1;
       $form_state->set('other_group_delta', $delta);
@@ -353,7 +352,7 @@ class OgComplex extends EntityReferenceAutocompleteWidget {
    */
   protected function isGroupAdmin() {
     // @todo Inject current user service as a dependency.
-    return \Drupal::currentUser()->hasPermission(OgAccess::ADMINISTER_GROUP_PERMISSION);
+    return \Drupal::currentUser()->hasPermission('administer organic groups');
   }
 
 }
