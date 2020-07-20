@@ -87,7 +87,7 @@ class OgSelectionConfigurationFormTest extends KernelTestBase {
 
     $form = \Drupal::formBuilder()->buildForm($form_object, $form_state);
 
-    $options = array_keys($form['settings']['handler']['handler_settings']['target_bundles']['#options']);
+    $options = array_keys($form['settings']['handler']['target_bundles']['#options']);
     sort($options);
 
     $this->assertEquals(['group_type1', 'group_type2'], $options);
