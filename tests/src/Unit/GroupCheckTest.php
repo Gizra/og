@@ -117,7 +117,7 @@ class GroupCheckTest extends UnitTestCase {
   /**
    * {@inheritdoc}
    */
-  public function setUp() {
+  protected function setUp(): void {
     $this->entityTypeManager = $this->prophesize(EntityTypeManagerInterface::class);
     $this->entityType = $this->prophesize(EntityTypeInterface::class);
     $this->entityStorage = $this->prophesize(EntityStorageInterface::class);

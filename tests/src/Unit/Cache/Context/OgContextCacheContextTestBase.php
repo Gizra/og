@@ -32,7 +32,7 @@ abstract class OgContextCacheContextTestBase extends OgCacheContextTestBase {
   /**
    * {@inheritdoc}
    */
-  public function setUp() {
+  protected function setUp(): void {
     parent::setUp();
 
     $this->ogContext = $this->prophesize(OgContextInterface::class);
