@@ -63,7 +63,7 @@ class OgComplexWidgetTest extends BrowserTestBase {
    */
   public function testFields($field, $field_name) {
     $admin_user = $this->drupalCreateUser([
-      'administer group',
+      'administer organic groups',
       'access content',
       'create post content',
     ]);

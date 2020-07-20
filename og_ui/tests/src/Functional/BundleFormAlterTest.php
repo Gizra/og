@@ -82,7 +82,7 @@ class BundleFormAlterTest extends BrowserTestBase {
     $this->drupalGet('admin/structure/types/add');
     $this->submitForm($edit, new TranslatableMarkup('Save content type'));
     $this->content = $this->drupalGet('admin/structure/types/manage/class');
-    $this->assertOptionSelected('edit-og-target-bundles', 'school');
+    $this->assertTrue($this->assertSession()->optionExists('edit-og-target-bundles', 'school')->isSelected());
     $this->assertTargetType('block_content', 'The target type is set to the "Custom Block" entity type.');
     $this->assertTargetBundles(['school' => 'school'], 'The target bundles are set to the "school" bundle.');
 

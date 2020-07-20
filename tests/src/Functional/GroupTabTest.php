@@ -90,7 +90,7 @@ class GroupTabTest extends BrowserTestBase {
     ]);
     $this->nonGroup->save();
 
-    $this->user1 = $this->drupalCreateUser(['administer group']);
+    $this->user1 = $this->drupalCreateUser(['administer organic groups']);
   }
 
   /**

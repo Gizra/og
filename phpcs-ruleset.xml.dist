@@ -16,6 +16,7 @@
     <rule ref="./vendor/drupal/coder/coder_sniffer/Drupal">
         <!-- URLs in deprecation messages point to Github rather than drupal.org. -->
         <exclude name="Drupal.Semantics.FunctionTriggerError.TriggerErrorSeeUrlFormat" />
+        <exclude name="Drupal.Commenting.Deprecated.DeprecatedWrongSeeUrlFormat" />
         <!-- Deprecation versions are allowed to include beta versions. -->
         <exclude name="Drupal.Semantics.FunctionTriggerError.TriggerErrorVersion" />
     </rule>
