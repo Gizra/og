@@ -431,8 +431,6 @@ class Og {
    */
   public static function reset() {
     static::$cache = [];
-
-    \Drupal::service('og.access')->reset();
   }
 
 }
