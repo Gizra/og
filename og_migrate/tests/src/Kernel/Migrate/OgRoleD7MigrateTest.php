@@ -70,7 +70,7 @@ class OgRoleD7MigrateTest extends MigrateDrupal7TestBase {
     $adminRole = OgRole::load('node-test_content_type-administrator');
     $expected = [
       'add user',
-      'administer group',
+      'administer organic groups',
       'approve and deny subscription',
       'manage members',
       'manage permissions',
