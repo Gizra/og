@@ -33,7 +33,7 @@ use Drupal\user\Entity\Role;
  *     },
  *    "list_builder" = "Drupal\og\Entity\OgRoleListBuilder",
  *   },
- *   admin_permission = "administer group",
+ *   admin_permission = "administer organic groups",
  *   static_cache = TRUE,
  *   entity_keys = {
  *     "id" = "id",
