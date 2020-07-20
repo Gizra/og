@@ -104,7 +104,8 @@ class RolesAndPermissionsUiAccessTest extends KernelTestBase {
     $this->users['non-member'] = $this->createUser();
     $this->users['non-member']->save();
 
-    // Create a user which has the global permission to administer organic groups.
+    // Create a user which has the global permission to administer organic
+    // groups.
     $this->users['global group administrator'] = $this->createUser(['administer organic groups']);
     $this->users['global group administrator']->save();
 
@@ -303,8 +304,9 @@ class RolesAndPermissionsUiAccessTest extends KernelTestBase {
           // Since these routes are for managing the roles and permissions of
           // all groups of the tested entity type and bundle, the forms should
           // only be accessible to the root user, global administrators that
-          // have all permissions, and people with the 'administer organic groups'
-          // permission. Group administrators should not have access to these
+          // have all permissions, and users that have the permission
+          // 'administer organic groups'.
+          // Group administrators should not have access to these
           // pages, but they will have access to the forms that deal with
           // group-specific roles and permissions. These are not tested here.
           'root user' => TRUE,
