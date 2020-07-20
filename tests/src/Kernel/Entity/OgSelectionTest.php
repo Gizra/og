@@ -153,7 +153,7 @@ class OgSelectionTest extends KernelTestBase {
     ]);
 
     $role
-      ->grantPermission('administer group')
+      ->grantPermission('administer organic groups')
       ->save();
 
     $this

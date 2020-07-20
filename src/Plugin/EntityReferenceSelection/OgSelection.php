@@ -162,7 +162,7 @@ class OgSelection extends DefaultSelection {
       return $query->condition($identifier_key, -1);
     }
 
-    if ($this->currentUser->hasPermission('administer group')) {
+    if ($this->currentUser->hasPermission('administer organic groups')) {
       // User can see all the groups.
       return $query;
     }

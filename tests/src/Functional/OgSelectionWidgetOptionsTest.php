@@ -108,7 +108,7 @@ class OgSelectionWidgetOptionsTest extends BrowserTestBase {
     // Create users.
     $this->groupMemberUser = $this->drupalCreateUser();
     $this->groupOwnerUser = $this->drupalCreateUser();
-    $this->groupAdministratorUser = $this->drupalCreateUser(['administer group']);
+    $this->groupAdministratorUser = $this->drupalCreateUser(['administer organic groups']);
     $this->nonMemberUser = $this->drupalCreateUser();
 
     // Create groups.
