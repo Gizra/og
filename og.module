@@ -248,8 +248,6 @@ function og_entity_create_access(AccountInterface $account, array $context, $bun
     $handler = \Drupal::service('plugin.manager.entity_reference_selection');
     $handler = $handler->getInstance($options);
 
-    // @todo: remove deprecated call to Og::getSelectionHandler.
-    $handler = Og::getSelectionHandler($field_definition);
     if ($handler && $handler->countReferenceableEntities()) {
       // At least one of the fields has referenceable groups. That mean that
       // the user can create group content when referencing the group content in
