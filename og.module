@@ -147,8 +147,9 @@ function og_entity_access(EntityInterface $entity, $operation, AccountInterface 
     return AccessResult::neutral();
   }
 
-  // If the user has permission to administer all groups, allow access.
-  if ($account->hasPermission('administer group')) {
+  // If the user has the global permission to administer all groups, allow
+  // access.
+  if ($account->hasPermission('administer organic groups')) {
     return AccessResult::allowed();
   }
 
@@ -200,7 +201,8 @@ function og_entity_create_access(AccountInterface $account, array $context, $bun
     return AccessResult::neutral();
   }
 
-  $access_result = AccessResult::allowedIfHasPermission($account, 'administer group');
+  // A user with the global permission to administer all groups has full access.
+  $access_result = AccessResult::allowedIfHasPermission($account, 'administer organic groups');
   if ($access_result->isAllowed()) {
     return $access_result;
   }

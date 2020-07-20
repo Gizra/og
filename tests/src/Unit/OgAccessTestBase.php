@@ -168,7 +168,7 @@ class OgAccessTestBase extends UnitTestCase {
     $this->user = $this->prophesize(AccountInterface::class);
     $this->user->isAuthenticated()->willReturn(TRUE);
     $this->user->id()->willReturn($user_id);
-    $this->user->hasPermission(OgAccess::ADMINISTER_GROUP_PERMISSION)->willReturn(FALSE);
+    $this->user->hasPermission('administer organic groups')->willReturn(FALSE);
 
     $this->group = $this->groupEntity()->reveal();
 
@@ -253,7 +253,7 @@ class OgAccessTestBase extends UnitTestCase {
   }
 
   /**
-   * Provides permissions to use in access tests.
+   * Provides group level permissions to use in access tests.
    *
    * @return array
    *   An array of test permissions.
@@ -264,8 +264,8 @@ class OgAccessTestBase extends UnitTestCase {
       // can be an arbitrary string; except for
       // OgAccessTest::testUserAccessAdminPermission test which checks for
       // "administer group" permission.
-      ['update group'],
-      ['administer group'],
+      [OgAccess::UPDATE_GROUP_PERMISSION],
+      [OgAccess::ADMINISTER_GROUP_PERMISSION],
     ];
   }
 

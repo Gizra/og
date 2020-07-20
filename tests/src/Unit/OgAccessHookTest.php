@@ -3,7 +3,6 @@
 namespace Drupal\Tests\og\Unit;
 
 use Drupal\Core\Entity\EntityInterface;
-use Drupal\og\OgAccess;
 
 /**
  * Tests hook implementation of OG related access.
@@ -42,7 +41,7 @@ class OgAccessHookTest extends OgAccessEntityTestBase {
    * @dataProvider permissionsProvider
    */
   public function testGetEntityGroups($operation) {
-    $this->user->hasPermission(OgAccess::ADMINISTER_GROUP_PERMISSION)->willReturn(TRUE);
+    $this->user->hasPermission('administer organic groups')->willReturn(TRUE);
     $user_entity_access = og_entity_access($this->groupContentEntity->reveal(), $operation, $this->user->reveal());
     $this->assertTrue($user_entity_access->isAllowed());
   }
