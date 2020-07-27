@@ -168,7 +168,7 @@ class OgSelection extends DefaultSelection {
     }
 
     if (empty($this->configuration['entity'])) {
-      // @todo: Find out why we have this scenario.
+      // @todo Find out why we have this scenario.
       return $query;
     }
 
@@ -222,7 +222,6 @@ class OgSelection extends DefaultSelection {
     $bundles_info = $this->entityTypeBundleInfo->getBundleInfo($entity_type_id);
 
     if ($entity_type->hasKey('bundle')) {
-
       $bundles = Og::groupTypeManager()->getGroupBundlesByEntityType($entity_type_id);
       foreach ($bundles as $bundle) {
         $bundle_options[$bundle] = $bundles_info[$bundle]['label'];
