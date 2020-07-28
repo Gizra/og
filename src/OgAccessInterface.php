@@ -14,7 +14,19 @@ use Drupal\Core\Session\AccountInterface;
 interface OgAccessInterface {
 
   /**
-   * Determines whether a user can perform a given operation on a given group.
+   * Determines whether a user has a certain permission in a given group.
+   *
+   * The following conditions will result in a positive result:
+   * - The user is the global super user (UID 1).
+   * - The user has the global permission to administer all organic groups.
+   * - The user is the owner of the group, and OG has been configured to allow
+   *   full access to the group owner.
+   * - The user has the role of administrator in the group.
+   * - The user has a role in the group that specifically grants the permission.
+   * - The user is not a member of the group, and the permission has been
+   *   granted to non-members.
+   *
+   * The access result can be altered by implementing hook_og_user_access().
    *
    * All access checks in OG should go through this function. This way we
    * guarantee consistent behavior, and ensure that the superuser and group
@@ -22,8 +34,8 @@ interface OgAccessInterface {
    *
    * @param \Drupal\Core\Entity\EntityInterface $group
    *   The group entity.
-   * @param string $operation
-   *   The entity operation being checked for.
+   * @param string $permission
+   *   The permission being checked.
    * @param \Drupal\Core\Session\AccountInterface $user
    *   (optional) The user to check. Defaults to the current user.
    * @param bool $skip_alter
