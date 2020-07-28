@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types = 1);
+
 namespace Drupal\og;
 
 use Drupal\Core\Access\AccessResultInterface;
@@ -33,7 +35,7 @@ interface OgAccessInterface {
    * @return \Drupal\Core\Access\AccessResultInterface
    *   An access result object.
    */
-  public function userAccess(EntityInterface $group, $operation, AccountInterface $user = NULL, $skip_alter = FALSE): AccessResultInterface;
+  public function userAccess(EntityInterface $group, string $permission, AccountInterface $user = NULL, bool $skip_alter = FALSE): AccessResultInterface;
 
   /**
    * Check if a user has access to a permission on a certain entity context.
