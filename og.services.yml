@@ -22,11 +22,6 @@ services:
   og.access:
     class: Drupal\og\OgAccess
     arguments: ['@config.factory', '@current_user', '@module_handler', '@og.group_type_manager', '@og.permission_manager', '@og.membership_manager', '@og.group_audience_helper']
-  og.add_field:
-    class: Drupal\og\Command\OgAddFieldCommand
-    arguments: ['@entity_type.bundle.info', '@entity_type.repository', '@plugin.manager.og.fields']
-    tags:
-      - { name: drupal.command }
   og.context:
     class: Drupal\og\ContextProvider\OgContext
     arguments: ['@plugin.manager.og.group_resolver', '@config.factory']
