@@ -77,13 +77,6 @@ class OgAccess implements OgAccessInterface {
   protected $membershipManager;
 
   /**
-   * The OG group audience helper.
-   *
-   * @var \Drupal\og\OgGroupAudienceHelperInterface
-   */
-  protected $groupAudienceHelper;
-
-  /**
    * Constructs the OgAccess service.
    *
    * @param \Drupal\Core\Config\ConfigFactoryInterface $config_factory
@@ -98,17 +91,14 @@ class OgAccess implements OgAccessInterface {
    *   The permission manager.
    * @param \Drupal\og\MembershipManagerInterface $membership_manager
    *   The group membership manager.
-   * @param \Drupal\og\OgGroupAudienceHelperInterface $group_audience_helper
-   *   The OG group audience helper.
    */
-  public function __construct(ConfigFactoryInterface $config_factory, AccountProxyInterface $account_proxy, ModuleHandlerInterface $module_handler, GroupTypeManagerInterface $group_manager, PermissionManagerInterface $permission_manager, MembershipManagerInterface $membership_manager, OgGroupAudienceHelperInterface $group_audience_helper) {
+  public function __construct(ConfigFactoryInterface $config_factory, AccountProxyInterface $account_proxy, ModuleHandlerInterface $module_handler, GroupTypeManagerInterface $group_manager, PermissionManagerInterface $permission_manager, MembershipManagerInterface $membership_manager) {
     $this->configFactory = $config_factory;
     $this->accountProxy = $account_proxy;
     $this->moduleHandler = $module_handler;
     $this->groupTypeManager = $group_manager;
     $this->permissionManager = $permission_manager;
     $this->membershipManager = $membership_manager;
-    $this->groupAudienceHelper = $group_audience_helper;
   }
 
   /**
@@ -230,8 +220,7 @@ class OgAccess implements OgAccessInterface {
       }
     }
 
-    $is_group_content = $this->groupAudienceHelper->hasGroupAudienceField($entity_type_id, $bundle);
-    if ($is_group_content) {
+    if ($this->groupTypeManager->isGroupContent($entity_type_id, $bundle)) {
       $cache_tags = $entity_type->getListCacheTags();
 
       // The entity might be a user or a non-user entity.
