@@ -50,7 +50,41 @@ interface OgAccessInterface {
   public function userAccess(EntityInterface $group, string $permission, AccountInterface $user = NULL, bool $skip_alter = FALSE): AccessResultInterface;
 
   /**
-   * Check if a user has access to a permission on a certain entity context.
+   * Determines whether a user has a group permission in a given entity.
+   *
+   * This does an exhaustive, but slow, check to discover whether access can be
+   * granted and works both on groups and group content. It will iterate over
+   * all groups that are associated with the entity and do a permission check on
+   * each group. If a passed in entity is both a group and group content, it
+   * will return a positive result if the user has the requested permission in
+   * either the entity itself or its parent group(s).
+   *
+   * In case you know the specific group you want to check access for then it is
+   * recommended to use the faster ::userAccess().
+   *
+   * @param string $permission
+   *   The name of the OG permission being checked. This includes both group
+   *   level permissions such as 'subscribe without approval' and group content
+   *   entity operation permissions such as 'edit own article content'.
+   * @param \Drupal\Core\Entity\EntityInterface $entity
+   *   The entity object. This can be either a group or group content entity.
+   * @param \Drupal\Core\Session\AccountInterface $user
+   *   (optional) The user object. If empty the current user will be used.
+   *
+   * @return \Drupal\Core\Access\AccessResultInterface
+   *   An access result object.
+   */
+  public function userAccessEntity(string $permission, EntityInterface $entity, AccountInterface $user = NULL): AccessResultInterface;
+
+  /**
+   * Checks whether a user can perform an operation on a group content entity.
+   *
+   * This does an exhaustive, but slow, check to discover whether the operation
+   * can be performed. It will iterate over all groups that are associated with
+   * the group content entity and do an operation check on each group.
+   *
+   * In case you know the specific group you want to check access for then it is
+   * recommended to use the faster ::userAccessGroupContentEntityOperation().
    *
    * @param string $operation
    *   The operation to perform on the entity.
@@ -62,7 +96,7 @@ interface OgAccessInterface {
    * @return \Drupal\Core\Access\AccessResultInterface
    *   An access result object.
    */
-  public function userAccessEntity(string $operation, EntityInterface $entity, AccountInterface $user = NULL): AccessResultInterface;
+  public function userAccessEntityOperation(string $operation, EntityInterface $entity, AccountInterface $user = NULL): AccessResultInterface;
 
   /**
    * Checks access for entity operations on group content entities.

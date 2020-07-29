@@ -230,16 +230,6 @@ class OgAccess implements OgAccessInterface {
         $forbidden = AccessResult::forbidden()->addCacheTags($cache_tags);
         foreach ($groups as $entity_groups) {
           foreach ($entity_groups as $group) {
-            // Check if the operation matches a group content entity operation
-            // such as 'create article content'.
-            $operation_access = $this->userAccessGroupContentEntityOperation($operation, $group, $entity, $user);
-
-            if ($operation_access->isAllowed()) {
-              return $operation_access->addCacheTags($cache_tags);
-            }
-
-            // Check if the operation matches a group level operation such as
-            // 'subscribe without approval'.
             $user_access = $this->userAccess($group, $permission, $user);
             if ($user_access->isAllowed()) {
               return $user_access->addCacheTags($cache_tags);
@@ -254,8 +244,45 @@ class OgAccess implements OgAccessInterface {
       $result->addCacheTags($cache_tags);
     }
 
-    // Either the user didn't have permission, or the entity might be an
-    // orphaned group content.
+    // Either the user didn't have permission, or the entity might be orphaned
+    // group content.
+    return $result;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function userAccessEntityOperation(string $operation, EntityInterface $entity, AccountInterface $user = NULL): AccessResultInterface {
+    $result = AccessResult::neutral();
+
+    $entity_type = $entity->getEntityType();
+    $entity_type_id = $entity_type->id();
+    $bundle = $entity->bundle();
+
+    if ($this->groupTypeManager->isGroupContent($entity_type_id, $bundle)) {
+      $cache_tags = $entity_type->getListCacheTags();
+
+      // The entity might be a user or a non-user entity.
+      $groups = $entity instanceof UserInterface ? $this->membershipManager->getUserGroups($entity->id()) : $this->membershipManager->getGroups($entity);
+
+      if ($groups) {
+        $forbidden = AccessResult::forbidden()->addCacheTags($cache_tags);
+        foreach ($groups as $entity_groups) {
+          foreach ($entity_groups as $group) {
+            $operation_access = $this->userAccessGroupContentEntityOperation($operation, $group, $entity, $user);
+            if ($operation_access->isAllowed()) {
+              return $operation_access->addCacheTags($cache_tags);
+            }
+          }
+        }
+        return $forbidden;
+      }
+
+      $result->addCacheTags($cache_tags);
+    }
+
+    // Either the user didn't have permission, or the entity might be orphaned
+    // group content.
     return $result;
   }
 
