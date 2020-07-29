@@ -198,7 +198,7 @@ class OgAccess implements OgAccessInterface {
   /**
    * {@inheritdoc}
    */
-  public function userAccessEntity($operation, EntityInterface $entity, AccountInterface $user = NULL): AccessResultInterface {
+  public function userAccessEntity($permission, EntityInterface $entity, AccountInterface $user = NULL): AccessResultInterface {
     $result = AccessResult::neutral();
 
     $entity_type = $entity->getEntityType();
@@ -206,7 +206,7 @@ class OgAccess implements OgAccessInterface {
     $bundle = $entity->bundle();
 
     if ($this->groupTypeManager->isGroup($entity_type_id, $bundle)) {
-      $user_access = $this->userAccess($entity, $operation, $user);
+      $user_access = $this->userAccess($entity, $permission, $user);
       if ($user_access->isAllowed()) {
         return $user_access;
       }
@@ -240,7 +240,7 @@ class OgAccess implements OgAccessInterface {
 
             // Check if the operation matches a group level operation such as
             // 'subscribe without approval'.
-            $user_access = $this->userAccess($group, $operation, $user);
+            $user_access = $this->userAccess($group, $permission, $user);
             if ($user_access->isAllowed()) {
               return $user_access->addCacheTags($cache_tags);
             }
