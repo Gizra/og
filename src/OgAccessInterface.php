@@ -62,7 +62,7 @@ interface OgAccessInterface {
    * @return \Drupal\Core\Access\AccessResultInterface
    *   An access result object.
    */
-  public function userAccessEntity($operation, EntityInterface $entity, AccountInterface $user = NULL): AccessResultInterface;
+  public function userAccessEntity(string $operation, EntityInterface $entity, AccountInterface $user = NULL): AccessResultInterface;
 
   /**
    * Checks access for entity operations on group content entities.
@@ -89,7 +89,7 @@ interface OgAccessInterface {
    *
    * @see \Drupal\og\PermissionManager::getEntityOperationPermissions()
    */
-  public function userAccessGroupContentEntityOperation($operation, EntityInterface $group_entity, EntityInterface $group_content_entity, AccountInterface $user = NULL): AccessResultInterface;
+  public function userAccessGroupContentEntityOperation(string $operation, EntityInterface $group_entity, EntityInterface $group_content_entity, AccountInterface $user = NULL): AccessResultInterface;
 
   /**
    * Resets the static cache.

@@ -198,7 +198,7 @@ class OgAccess implements OgAccessInterface {
   /**
    * {@inheritdoc}
    */
-  public function userAccessEntity($permission, EntityInterface $entity, AccountInterface $user = NULL): AccessResultInterface {
+  public function userAccessEntity(string $permission, EntityInterface $entity, AccountInterface $user = NULL): AccessResultInterface {
     $result = AccessResult::neutral();
 
     $entity_type = $entity->getEntityType();
@@ -262,7 +262,7 @@ class OgAccess implements OgAccessInterface {
   /**
    * {@inheritdoc}
    */
-  public function userAccessGroupContentEntityOperation($operation, EntityInterface $group_entity, EntityInterface $group_content_entity, AccountInterface $user = NULL): AccessResultInterface {
+  public function userAccessGroupContentEntityOperation(string $operation, EntityInterface $group_entity, EntityInterface $group_content_entity, AccountInterface $user = NULL): AccessResultInterface {
     // Default to the current user.
     $user = $user ?: $this->accountProxy->getAccount();
 
