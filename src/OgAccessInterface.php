@@ -14,7 +14,7 @@ use Drupal\Core\Session\AccountInterface;
 interface OgAccessInterface {
 
   /**
-   * Determines whether a user has a certain permission in a given group.
+   * Determines whether a user has a group permission in a given group.
    *
    * The following conditions will result in a positive result:
    * - The user is the global super user (UID 1).
@@ -35,7 +35,9 @@ interface OgAccessInterface {
    * @param \Drupal\Core\Entity\EntityInterface $group
    *   The group entity.
    * @param string $permission
-   *   The permission being checked.
+   *   The name of the OG permission being checked. This includes both group
+   *   level permissions such as 'subscribe without approval' and group content
+   *   entity operation permissions such as 'edit own article content'.
    * @param \Drupal\Core\Session\AccountInterface $user
    *   (optional) The user to check. Defaults to the current user.
    * @param bool $skip_alter
@@ -87,9 +89,9 @@ interface OgAccessInterface {
    * recommended to use the faster ::userAccessGroupContentEntityOperation().
    *
    * @param string $operation
-   *   The operation to perform on the entity.
+   *   The entity operation, such as "create", "update" or "delete".
    * @param \Drupal\Core\Entity\EntityInterface $entity
-   *   The entity object.
+   *   The group content entity.
    * @param \Drupal\Core\Session\AccountInterface $user
    *   (optional) The user object. If empty the current user will be used.
    *
@@ -99,16 +101,14 @@ interface OgAccessInterface {
   public function userAccessEntityOperation(string $operation, EntityInterface $entity, AccountInterface $user = NULL): AccessResultInterface;
 
   /**
-   * Checks access for entity operations on group content entities.
+   * Checks access for entity operations on group content in a specific group.
    *
    * This checks if the user has permission to perform the requested operation
    * on the given group content entity according to the user's membership status
-   * in the given group. There is no formal support for access control on entity
-   * operations in core, so the mapping of permissions to operations is provided
-   * by PermissionManager::getEntityOperationPermissions().
+   * in the given group.
    *
    * @param string $operation
-   *   The entity operation.
+   *   The entity operation, such as "create", "update" or "delete".
    * @param \Drupal\Core\Entity\EntityInterface $group_entity
    *   The group entity, to retrieve the permissions from.
    * @param \Drupal\Core\Entity\EntityInterface $group_content_entity
@@ -120,8 +120,6 @@ interface OgAccessInterface {
    *
    * @return \Drupal\Core\Access\AccessResultInterface
    *   The access result object.
-   *
-   * @see \Drupal\og\PermissionManager::getEntityOperationPermissions()
    */
   public function userAccessGroupContentEntityOperation(string $operation, EntityInterface $group_entity, EntityInterface $group_content_entity, AccountInterface $user = NULL): AccessResultInterface;
 
