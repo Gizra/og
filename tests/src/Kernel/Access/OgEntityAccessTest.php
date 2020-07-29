@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types = 1);
+
 namespace Drupal\Tests\og\Kernel\Access;
 
 use Drupal\entity_test\Entity\EntityTest;
@@ -314,10 +316,6 @@ class OgEntityAccessTest extends KernelTestBase {
       ->save();
 
     $this->assertTrue($og_access->userAccess($this->group1, 'some_perm', $this->user3)->isAllowed());
-
-    // A member with permission to update the group. The operation edit is
-    // passed to the userAccess method.
-    $this->assertTrue($og_access->userAccess($this->group1, 'edit', $this->user4)->isAllowed());
 
     // Group admin user should have access regardless.
     $this->assertTrue($og_access->userAccess($this->group1, 'some_perm', $this->adminUser)->isAllowed());
