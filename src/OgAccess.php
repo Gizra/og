@@ -35,6 +35,13 @@ class OgAccess implements OgAccessInterface {
   const UPDATE_GROUP_PERMISSION = 'update group';
 
   /**
+   * Maps entity operations performed on groups to group level permissions.
+   */
+  const OPERATION_GROUP_PERMISSION_MAPPING = [
+    'update' => self::UPDATE_GROUP_PERMISSION,
+  ];
+
+  /**
    * The config factory.
    *
    * @var \Drupal\Core\Config\ConfigFactoryInterface
@@ -258,6 +265,27 @@ class OgAccess implements OgAccessInterface {
     $entity_type = $entity->getEntityType();
     $entity_type_id = $entity_type->id();
     $bundle = $entity->bundle();
+
+    if ($this->groupTypeManager->isGroup($entity_type_id, $bundle)) {
+      // We are performing an entity operation on a group entity. Map the
+      // operation to the corresponding group level permission.
+      if (array_key_exists($operation, self::OPERATION_GROUP_PERMISSION_MAPPING)) {
+        $permission = self::OPERATION_GROUP_PERMISSION_MAPPING[$operation];
+
+        $user_access = $this->userAccess($entity, $permission, $user);
+        if ($user_access->isAllowed()) {
+          return $user_access;
+        }
+        else {
+          // An entity can be a group and group content in the same time. The
+          // group permission check didn't allow access, but the user still
+          // might have access to perform the operation in group content
+          // context. So instead of returning a deny here, we set the result,
+          // that might change if an access is found.
+          $result = AccessResult::forbidden()->inheritCacheability($user_access);
+        }
+      }
+    }
 
     if ($this->groupTypeManager->isGroupContent($entity_type_id, $bundle)) {
       $cache_tags = $entity_type->getListCacheTags();

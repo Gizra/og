@@ -79,11 +79,16 @@ interface OgAccessInterface {
   public function userAccessEntity(string $permission, EntityInterface $entity, AccountInterface $user = NULL): AccessResultInterface;
 
   /**
-   * Checks whether a user can perform an operation on a group content entity.
+   * Checks whether a user can perform an operation on a given entity.
    *
    * This does an exhaustive, but slow, check to discover whether the operation
-   * can be performed. It will iterate over all groups that are associated with
-   * the group content entity and do an operation check on each group.
+   * can be performed. It works both with groups and group content entities. It
+   * will iterate over all groups that are associated with the entity and check
+   * if the user is allowed to perform the entity operation on the group content
+   * entity according to their role within each group. If a passed in entity is
+   * both a group and group content, it will return a positive result if the
+   * user has permission to perform the operation in either the entity itself or
+   * one of its parent group(s).
    *
    * In case you know the specific group you want to check access for then it is
    * recommended to use the faster ::userAccessGroupContentEntityOperation().
@@ -91,7 +96,7 @@ interface OgAccessInterface {
    * @param string $operation
    *   The entity operation, such as "create", "update" or "delete".
    * @param \Drupal\Core\Entity\EntityInterface $entity
-   *   The group content entity.
+   *   The entity object. This can be either a group or group content entity.
    * @param \Drupal\Core\Session\AccountInterface $user
    *   (optional) The user object. If empty the current user will be used.
    *
