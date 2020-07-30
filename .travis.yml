@@ -28,8 +28,6 @@ matrix:
       env: TEST_SUITE=PHP_CodeSniffer
     - php: 7.4
       env: TEST_SUITE=PHP_CodeSniffer
-  allow_failures:
-    - php: 7.4
 
 mysql:
   database: og
