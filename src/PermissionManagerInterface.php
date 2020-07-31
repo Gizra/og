@@ -44,9 +44,6 @@ interface PermissionManagerInterface {
    * PermissionEvent. The default permissions that ship with Organic Groups can
    * be found in OgEventSubscriber::provideDefaultOgPermissions().
    *
-   * @see \Drupal\og\Event\PermissionEventInterface
-   * @see \Drupal\og\EventSubscriber\OgEventSubscriber::provideDefaultOgPermissions()
-   *
    * @param string $group_entity_type_id
    *   The entity type ID of the group for which to return permissions.
    * @param string $group_bundle_id
@@ -57,6 +54,9 @@ interface PermissionManagerInterface {
    *
    * @return \Drupal\og\GroupPermission[]
    *   An array of permissions that are enabled by default for the given role.
+   *
+   * @see \Drupal\og\Event\PermissionEventInterface
+   * @see \Drupal\og\EventSubscriber\OgEventSubscriber::provideDefaultOgPermissions()
    */
   public function getDefaultGroupPermissions($group_entity_type_id, $group_bundle_id, $role_name = NULL);
 
@@ -71,10 +71,6 @@ interface PermissionManagerInterface {
    * content operation permissions that ship with Organic Groups can be found in
    * OgEventSubscriber.
    *
-   * @see \Drupal\og\Event\PermissionEventInterface
-   * @see \Drupal\og\EventSubscriber\OgEventSubscriber::provideDefaultNodePermissions()
-   * @see \Drupal\og\EventSubscriber\OgEventSubscriber::getDefaultEntityOperationPermissions()
-   *
    * @param string $group_entity_type_id
    *   The entity type ID of the group for which to return permissions.
    * @param string $group_bundle_id
@@ -88,6 +84,10 @@ interface PermissionManagerInterface {
    *
    * @return \Drupal\og\GroupContentOperationPermission[]
    *   The array of permissions.
+   *
+   * @see \Drupal\og\Event\PermissionEventInterface
+   * @see \Drupal\og\EventSubscriber\OgEventSubscriber::provideDefaultNodePermissions()
+   * @see \Drupal\og\EventSubscriber\OgEventSubscriber::getDefaultEntityOperationPermissions()
    */
   public function getDefaultEntityOperationPermissions($group_entity_type_id, $group_bundle_id, array $group_content_bundle_ids, $role_name = NULL);
 

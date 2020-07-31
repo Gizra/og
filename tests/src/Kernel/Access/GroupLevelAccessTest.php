@@ -329,7 +329,8 @@ class GroupLevelAccessTest extends KernelTestBase {
 
       // Also check that the access result is correctly communicated to
       // hook_entity_access().
-      $hook_result = \Drupal::moduleHandler()->invokeAll( 'entity_access', [$this->group, $operation, $user]);
+      $arguments = [$this->group, $operation, $user];
+      $hook_result = \Drupal::moduleHandler()->invokeAll('entity_access', $arguments);
 
       // The hook returns an array of access results, add them all up.
       if (empty($hook_result)) {
@@ -351,6 +352,7 @@ class GroupLevelAccessTest extends KernelTestBase {
    * Returns test users with permissions to perform group entity operations.
    *
    * @return \Drupal\user\UserInterface[]
+   *   The test users.
    */
   protected function setupGroupEntityOperationPermissions(): array {
     // Return the users from the generic test setup.
@@ -444,4 +446,5 @@ class GroupLevelAccessTest extends KernelTestBase {
       ],
     ];
   }
+
 }
