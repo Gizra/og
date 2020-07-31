@@ -4,20 +4,22 @@ declare(strict_types = 1);
 
 namespace Drupal\Tests\og\Kernel\Access;
 
+use Drupal\Core\Access\AccessResult;
 use Drupal\entity_test\Entity\EntityTest;
 use Drupal\KernelTests\KernelTestBase;
 use Drupal\og\Entity\OgRole;
 use Drupal\og\Og;
+use Drupal\og\OgAccess;
 use Drupal\og\OgRoleInterface;
 use Drupal\user\Entity\User;
 
 /**
- * Tests user access by group level permissions.
+ * Tests user access to group level entity operations and permissions.
  *
  * @coversDefaultClass \Drupal\og\OgAccess
  * @group og
  */
-class OgUserAccessTest extends KernelTestBase {
+class GroupLevelAccessTest extends KernelTestBase {
 
   /**
    * {@inheritdoc}
@@ -307,4 +309,139 @@ class OgUserAccessTest extends KernelTestBase {
     return [$roles, $users];
   }
 
+  /**
+   * Test access to the entity operation permissions on groups.
+   *
+   * This tests that the entity operations "update" and "delete" are controlled
+   * by the respective group level permissions.
+   *
+   * @covers ::userAccessEntityOperation
+   * @dataProvider groupEntityOperationPermissionsTestProvider
+   */
+  public function testGroupEntityOperationPermissions(string $user, array $access_matrix): void {
+    $users = $this->setupGroupEntityOperationPermissions();
+    $user = $users[$user];
+
+    foreach ($access_matrix as $operation => $expected_access) {
+      // Check that the correct access is returned.
+      $result = $this->ogAccess->userAccessEntityOperation($operation, $this->group, $user);
+      $this->assertEquals($expected_access, $result->isAllowed());
+
+      // Also check that the access result is correctly communicated to
+      // hook_entity_access().
+      $hook_result = \Drupal::moduleHandler()->invokeAll( 'entity_access', [$this->group, $operation, $user]);
+
+      // The hook returns an array of access results, add them all up.
+      if (empty($hook_result)) {
+        $result = AccessResult::neutral();
+      }
+      else {
+        /** @var \Drupal\Core\Access\AccessResultInterface $result */
+        $result = array_shift($hook_result);
+        foreach ($hook_result as $other) {
+          $result = $result->orIf($other);
+        }
+      }
+
+      $this->assertEquals($expected_access, $result->isAllowed());
+    }
+  }
+
+  /**
+   * Returns test users with permissions to perform group entity operations.
+   *
+   * @return \Drupal\user\UserInterface[]
+   */
+  protected function setupGroupEntityOperationPermissions(): array {
+    // Return the users from the generic test setup.
+    $users = [
+      'owner' => $this->ownerUser,
+      'non-member' => $this->nonMemberUser,
+      'admin' => $this->adminUser,
+      'alternative-admin' => $this->alternativeAdminUser,
+    ];
+
+    // A group member with the group level permission 'update group' which maps
+    // to the 'update' entity operation.
+    $user = User::create(['name' => $this->randomString()]);
+    $user->save();
+
+    /** @var \Drupal\og\OgRoleInterface $role_with_update_permission */
+    $role_with_update_permission = OgRole::create();
+    $role_with_update_permission
+      ->setName($this->randomMachineName())
+      ->setLabel($this->randomString())
+      ->setGroupType($this->group->getEntityTypeId())
+      ->setGroupBundle($this->groupBundle)
+      ->grantPermission(OgAccess::UPDATE_GROUP_PERMISSION)
+      ->save();
+
+    $membership = Og::createMembership($this->group, $user);
+    $membership
+      ->addRole($role_with_update_permission)
+      ->save();
+
+    $users['update'] = $user;
+
+    // A group member with the group level permission 'delete group' which maps
+    // to the 'delete' entity operation.
+    $user = User::create(['name' => $this->randomString()]);
+    $user->save();
+
+    /** @var \Drupal\og\OgRoleInterface $role_with_delete_permission */
+    $role_with_delete_permission = OgRole::create();
+    $role_with_delete_permission
+      ->setName($this->randomMachineName())
+      ->setLabel($this->randomString())
+      ->setGroupType($this->group->getEntityTypeId())
+      ->setGroupBundle($this->groupBundle)
+      ->grantPermission(OgAccess::DELETE_GROUP_PERMISSION)
+      ->save();
+
+    $membership = Og::createMembership($this->group, $user);
+    $membership
+      ->addRole($role_with_delete_permission)
+      ->save();
+
+    $users['delete'] = $user;
+
+    return $users;
+  }
+
+  /**
+   * Provides test data to check access to group level entity permissions.
+   *
+   * @see ::testDefaultGroupPermissions()
+   */
+  public function groupEntityOperationPermissionsTestProvider(): array {
+    return [
+      [
+        // The user performing the entity operations.
+        'owner',
+        // Whether or not the user should have access to the group entity
+        // operation.
+        ['update' => TRUE, 'delete' => TRUE],
+      ],
+      [
+        'non-member',
+        ['update' => FALSE, 'delete' => FALSE],
+      ],
+      [
+        'delete',
+        ['update' => FALSE, 'delete' => TRUE],
+      ],
+      [
+        'update',
+        ['update' => TRUE, 'delete' => FALSE],
+      ],
+      [
+        'admin',
+        ['update' => TRUE, 'delete' => TRUE],
+      ],
+      [
+        'alternative-admin',
+        ['update' => TRUE, 'delete' => TRUE],
+      ],
+    ];
+  }
 }
