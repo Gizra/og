@@ -75,6 +75,8 @@ interface OgAccessInterface {
    *
    * @return \Drupal\Core\Access\AccessResultInterface
    *   An access result object.
+   *
+   * @see \Drupal\og\userAccess();
    */
   public function userAccessEntity(string $permission, EntityInterface $entity, AccountInterface $user = NULL): AccessResultInterface;
 
@@ -102,6 +104,8 @@ interface OgAccessInterface {
    *
    * @return \Drupal\Core\Access\AccessResultInterface
    *   An access result object.
+   *
+   * @see \Drupal\og\userAccessGroupContentEntityOperation();
    */
   public function userAccessEntityOperation(string $operation, EntityInterface $entity, AccountInterface $user = NULL): AccessResultInterface;
 
