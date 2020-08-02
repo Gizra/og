@@ -324,6 +324,8 @@ class OgAccess implements OgAccessInterface {
    * {@inheritdoc}
    */
   public function userAccessGroupContentEntityOperation(string $operation, EntityInterface $group_entity, EntityInterface $group_content_entity, AccountInterface $user = NULL): AccessResultInterface {
+    $access_result = AccessResult::neutral();
+
     // Default to the current user.
     $user = $user ?: $this->accountProxy->getAccount();
 
@@ -350,9 +352,9 @@ class OgAccess implements OgAccessInterface {
 
     if ($permissions) {
       foreach ($permissions as $permission) {
-        $user_access = $this->userAccess($group_entity, $permission->getName(), $user);
-        if ($user_access->isAllowed()) {
-          return $user_access;
+        $access_result = $this->userAccess($group_entity, $permission->getName(), $user);
+        if ($access_result->isAllowed()) {
+          break;
         }
       }
     }
@@ -366,7 +368,16 @@ class OgAccess implements OgAccessInterface {
       $cacheable_metadata->addCacheContexts(['user']);
     }
 
-    return AccessResult::neutral()->addCacheableDependency($cacheable_metadata);
+    // Let modules alter the access result.
+    $context = [
+      'operation' => $operation,
+      'group' => $group_entity,
+      'group_content' => $group_content_entity,
+      'user' => $user,
+    ];
+    $this->moduleHandler->alter('og_user_access_entity_operation', $access_result, $cacheable_metadata, $context);
+
+    return $access_result->addCacheableDependency($cacheable_metadata);
   }
 
   /**
