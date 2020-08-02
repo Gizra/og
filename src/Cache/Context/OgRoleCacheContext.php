@@ -13,6 +13,7 @@ use Drupal\Core\Entity\Sql\SqlContentEntityStorage;
 use Drupal\Core\PrivateKey;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\Core\Site\Settings;
+use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\og\MembershipManagerInterface;
 use Drupal\og\OgMembershipInterface;
 use Drupal\og\OgRoleInterface;
@@ -79,7 +80,7 @@ class OgRoleCacheContext extends UserCacheContextBase implements CacheContextInt
    * {@inheritdoc}
    */
   public static function getLabel() {
-    return t('OG role');
+    return new TranslatableMarkup('OG role');
   }
 
   /**
@@ -121,9 +122,9 @@ class OgRoleCacheContext extends UserCacheContextBase implements CacheContextInt
       // Sort the memberships, so that the same key can be generated, even if
       // the memberships were defined in a different order.
       ksort($memberships);
-      foreach ($memberships as $entity_type_id => &$groups) {
+      foreach ($memberships as &$groups) {
         ksort($groups);
-        foreach ($groups as $group_id => &$role_names) {
+        foreach ($groups as &$role_names) {
           sort($role_names);
         }
       }

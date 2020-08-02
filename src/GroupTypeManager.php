@@ -132,6 +132,13 @@ class GroupTypeManager implements GroupTypeManagerInterface {
   protected $groupAudienceHelper;
 
   /**
+   * The Entity type manager service.
+   *
+   * @var \Drupal\Core\Entity\EntityTypeManagerInterface
+   */
+  protected $entityTypeManager;
+
+  /**
    * Constructs a GroupTypeManager object.
    *
    * @param \Drupal\Core\Config\ConfigFactoryInterface $config_factory
@@ -155,6 +162,7 @@ class GroupTypeManager implements GroupTypeManagerInterface {
    */
   public function __construct(ConfigFactoryInterface $config_factory, EntityTypeManagerInterface $entity_type_manager, EntityTypeBundleInfoInterface $entity_type_bundle_info, EventDispatcherInterface $event_dispatcher, CacheBackendInterface $cache, PermissionManagerInterface $permission_manager, OgRoleManagerInterface $og_role_manager, RouteBuilderInterface $route_builder, OgGroupAudienceHelperInterface $group_audience_helper) {
     $this->configFactory = $config_factory;
+    $this->entityTypeManager = $entity_type_manager;
     $this->entityTypeBundleInfo = $entity_type_bundle_info;
     $this->eventDispatcher = $event_dispatcher;
     $this->cache = $cache;
@@ -200,7 +208,7 @@ class GroupTypeManager implements GroupTypeManagerInterface {
    */
   public function getAllGroupContentBundleIds() {
     $bundles = [];
-    foreach ($this->getGroupRelationMap() as $group_entity_type_id => $group_bundle_ids) {
+    foreach ($this->getGroupRelationMap() as $group_bundle_ids) {
       foreach ($group_bundle_ids as $group_content_entity_type_ids) {
         foreach ($group_content_entity_type_ids as $group_content_entity_type_id => $group_content_bundle_ids) {
           $bundles[$group_content_entity_type_id] = array_merge(isset($bundles[$group_content_entity_type_id]) ? $bundles[$group_content_entity_type_id] : [], $group_content_bundle_ids);
@@ -377,7 +385,7 @@ class GroupTypeManager implements GroupTypeManagerInterface {
 
     $this->groupRelationMap = [];
 
-    $user_bundles = \Drupal::entityTypeManager()->getDefinition('user')->getKey('bundle') ?: ['user'];
+    $user_bundles = $this->entityTypeManager->getDefinition('user')->getKey('bundle') ?: ['user'];
 
     foreach ($this->entityTypeBundleInfo->getAllBundleInfo() as $group_content_entity_type_id => $bundles) {
       foreach ($bundles as $group_content_bundle_id => $bundle_info) {

@@ -29,7 +29,12 @@ class OgComplexWidgetTest extends BrowserTestBase {
   /**
    * {@inheritdoc}
    */
-  public function setUp() {
+  protected $defaultTheme = 'stark';
+
+  /**
+   * {@inheritdoc}
+   */
+  protected function setUp(): void {
     parent::setUp();
 
     // Create a "group" bundle on the Custom Block entity type and turn it into
@@ -58,7 +63,7 @@ class OgComplexWidgetTest extends BrowserTestBase {
    */
   public function testFields($field, $field_name) {
     $admin_user = $this->drupalCreateUser([
-      'administer group',
+      'administer organic groups',
       'access content',
       'create post content',
     ]);

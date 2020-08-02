@@ -1,0 +1,66 @@
+version: "2"
+
+prepare:
+  fetch:
+  - url: "https://git.drupalcode.org/project/drupal/raw/8.8.x/.csslintrc"
+    path: ".csslintrc"
+  - url: "https://git.drupalcode.org/project/drupal/raw/8.8.x/core/.eslintrc.json"
+    path: ".eslintrc.json"
+  - url: "https://git.drupalcode.org/project/drupal/raw/8.8.x/core/.eslintignore"
+    path: ".eslintignore"
+
+checks:
+  argument-count:
+    enabled: false
+  complex-logic:
+    enabled: false
+  file-lines:
+    enabled: false
+  method-complexity:
+    enabled: false
+  method-count:
+    enabled: false
+  method-lines:
+    enabled: false
+  nested-control-flow:
+    config:
+      threshold: 16
+  return-statements:
+    config:
+      threshold: 16
+  similar-code:
+    config:
+      threshold: # language-specific defaults. an override will affect all languages.
+  identical-code:
+    config:
+      threshold: # language-specific defaults. an override will affect all languages.
+
+plugins:
+  phpcodesniffer:
+    enabled: true
+    config:
+      standard: "phpcs-ruleset.xml.dist"
+  phpmd:
+    enabled: false
+  csslint:
+    enabled: true
+  eslint:
+    enabled: true
+  duplication:
+    enabled: false
+    config:
+      languages:
+        php:
+        javascript:
+  fixme:
+    enabled: true
+  markdownlint:
+    enabled: true
+
+exclude_patterns:
+- "config/"
+- "translations/"
+- "**/vendor/**/*"
+- "**/.idea/**/*"
+- "**/tests/**/*"
+- "**/*.settings.php"

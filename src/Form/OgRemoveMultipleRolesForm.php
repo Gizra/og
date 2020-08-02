@@ -34,7 +34,7 @@ class OgRemoveMultipleRolesForm extends OgChangeMultipleRolesFormBase {
 
     $form['roles'] = [
       '#type' => 'select',
-      '#title' => t('Remove roles'),
+      '#title' => $this->t('Remove roles'),
       '#multiple' => TRUE,
       '#required' => TRUE,
       '#options' => $options,

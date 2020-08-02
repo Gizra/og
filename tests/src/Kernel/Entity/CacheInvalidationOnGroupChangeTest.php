@@ -39,7 +39,7 @@ class CacheInvalidationOnGroupChangeTest extends KernelTestBase {
   /**
    * {@inheritdoc}
    */
-  protected function setUp() {
+  protected function setUp(): void {
     parent::setUp();
 
     $this->installEntitySchema('entity_test');
@@ -169,7 +169,7 @@ class CacheInvalidationOnGroupChangeTest extends KernelTestBase {
    *   The group for which to perform the check.
    */
   protected function assertCachePopulated(ContentEntityInterface $group): void {
-    $this->assertTrue($this->getCachedData($group));
+    $this->assertNotEmpty($this->getCachedData($group));
   }
 
   /**

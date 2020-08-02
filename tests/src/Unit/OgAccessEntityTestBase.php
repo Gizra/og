@@ -15,7 +15,7 @@ use Drupal\og\OgGroupAudienceHelperInterface;
 /**
  * OG access entity base class.
  */
-class OgAccessEntityTestBase extends OgAccessTestBase {
+abstract class OgAccessEntityTestBase extends OgAccessTestBase {
 
   /**
    * A test group content entity.
@@ -27,7 +27,7 @@ class OgAccessEntityTestBase extends OgAccessTestBase {
   /**
    * {@inheritdoc}
    */
-  public function setup() {
+  protected function setUp(): void {
     parent::setUp();
 
     // Mock a group content entity.
@@ -39,7 +39,7 @@ class OgAccessEntityTestBase extends OgAccessTestBase {
 
     $entity_type = $this->prophesize(EntityTypeInterface::class);
     $entity_type->getListCacheTags()->willReturn([]);
-    $entity_type->isSubclassOf(FieldableEntityInterface::class)->willReturn(TRUE);
+    $entity_type->entityClassImplements(FieldableEntityInterface::class)->willReturn(TRUE);
     $entity_type->id()->willReturn($entity_type_id);
 
     $this->groupContentEntity = $this->prophesize(ContentEntityInterface::class);
