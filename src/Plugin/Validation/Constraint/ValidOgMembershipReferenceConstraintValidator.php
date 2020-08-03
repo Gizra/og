@@ -40,10 +40,8 @@ class ValidOgMembershipReferenceConstraintValidator extends ConstraintValidator 
     $entity = $this->context->getRoot()->getValue();
 
     /** @var \Drupal\Core\Access\AccessResult $access */
-    // @todo: Refactor the permission format in #510.
-    $permission = "create {$entity->bundle()} content";
     $user = \Drupal::currentUser()->getAccount();
-    $access = \Drupal::service('og.access')->userAccessEntity($permission, $group, $user);
+    $access = \Drupal::service('og.access')-> userAccessGroupContentEntityOperation('create', $entity, $group, $user);
 
     if ($access->isForbidden()) {
       $this->context->addViolation($constraint->notAllowedToPostInGroup, $params);
