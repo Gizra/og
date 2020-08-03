@@ -28,6 +28,6 @@ class ValidOgMembershipReferenceConstraint extends Constraint {
    *
    * @var string
    */
-  public $notAllowedToPostInGroup = 'You are not allowed to post content in the group %label';
+  public $notAllowedToPostInGroup = 'You are not allowed to post content in the group %label.';
 
 }
