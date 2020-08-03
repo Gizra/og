@@ -154,7 +154,7 @@ function og_entity_access(EntityInterface $entity, $operation, AccountInterface 
   }
 
   /** @var \Drupal\Core\Access\AccessResult $access */
-  $access = \Drupal::service('og.access')->userAccessEntity($operation, $entity, $account);
+  $access = \Drupal::service('og.access')->userAccessEntityOperation($operation, $entity, $account);
 
   $audience_fields = \Drupal::service('og.group_audience_helper')->getAllGroupAudienceFields($entity_type_id, $bundle_id);
   if (count($audience_fields) === 1) {
