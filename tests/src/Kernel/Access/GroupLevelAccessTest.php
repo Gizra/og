@@ -5,13 +5,14 @@ declare(strict_types = 1);
 namespace Drupal\Tests\og\Kernel\Access;
 
 use Drupal\Core\Access\AccessResult;
-use Drupal\entity_test\Entity\EntityTest;
 use Drupal\KernelTests\KernelTestBase;
+use Drupal\entity_test\Entity\EntityTest;
 use Drupal\og\Entity\OgRole;
 use Drupal\og\Og;
 use Drupal\og\OgAccess;
 use Drupal\og\OgRoleInterface;
 use Drupal\user\Entity\User;
+use Drupal\user\UserInterface;
 
 /**
  * Tests user access to group level entity operations and permissions.
@@ -114,43 +115,22 @@ class GroupLevelAccessTest extends KernelTestBase {
     ]);
     $this->group->save();
 
-    // A non-member.
+    // Create a non-member.
     $this->nonMemberUser = User::create(['name' => $this->randomString()]);
     $this->nonMemberUser->save();
 
-    // Admin user.
-    $this->adminUser = User::create(['name' => $this->randomString()]);
-    $this->adminUser->save();
-
-    // The administrator role is added automatically when the group is created.
+    // Create an administrator user using the role that is created automatically
+    // when the group is created.
     // @see \Drupal\og\EventSubscriber\OgEventSubscriber::provideDefaultRoles()
     $admin_role = OgRole::loadByGroupAndName($this->group, OgRoleInterface::ADMINISTRATOR);
+    $this->adminUser = $this->createUserWithOgRole($admin_role);
 
-    $membership = Og::createMembership($this->group, $this->adminUser);
-    $membership
-      ->addRole($admin_role)
-      ->save();
-
-    // Create a second administration role and assign it to a test user. This is
-    // a supported use case: it is possible to have multiple administration
-    // roles.
+    // Create another administrator role and assign it to a second test user.
+    // This is a supported use case: it is possible to have multiple
+    // administration roles.
     /** @var \Drupal\og\OgRoleInterface $alternative_admin_role */
-    $alternative_admin_role = OgRole::create();
-    $alternative_admin_role
-      ->setName($this->randomMachineName())
-      ->setLabel($this->randomString())
-      ->setGroupType($this->group->getEntityTypeId())
-      ->setGroupBundle($this->groupBundle)
-      ->setIsAdmin(TRUE)
-      ->save();
-
-    $this->alternativeAdminUser = User::create(['name' => $this->randomString()]);
-    $this->alternativeAdminUser->save();
-
-    $membership = Og::createMembership($this->group, $this->alternativeAdminUser);
-    $membership
-      ->addRole($alternative_admin_role)
-      ->save();
+    $alternative_admin_role = $this->createOgRole([], TRUE);
+    $this->alternativeAdminUser = $this->createUserWithOgRole($alternative_admin_role);
   }
 
   /**
@@ -244,16 +224,7 @@ class GroupLevelAccessTest extends KernelTestBase {
     $alternate_group->save();
 
     // Create a role with an arbitrary permission to test with.
-    $role = OgRole::create();
-    $role
-      ->setName($this->randomMachineName())
-      ->setLabel($this->randomString())
-      ->setGroupType($this->group->getEntityTypeId())
-      ->setGroupBundle($this->groupBundle)
-      // Associate an arbitrary permission with the role.
-      ->grantPermission('some_perm')
-      ->save();
-    $roles['arbitrary_permission'] = $role;
+    $roles['arbitrary_permission'] = $this->createOgRole(['some_perm']);
 
     // Create a role with an arbitrary permission which will only be granted to
     // a member of the second group.
@@ -271,14 +242,7 @@ class GroupLevelAccessTest extends KernelTestBase {
     // Create a user which is a member of both test groups and has an arbitrary
     // permission in both. This allows us to test that permissions do not leak
     // between different groups.
-    $user = User::create(['name' => $this->randomString()]);
-    $user->save();
-
-    /** @var \Drupal\og\OgMembershipInterface $membership */
-    $membership = Og::createMembership($this->group, $user);
-    $membership
-      ->addRole($role)
-      ->save();
+    $user = $this->createUserWithOgRole($roles['arbitrary_permission']);
 
     $membership = Og::createMembership($alternate_group, $user);
     $membership
@@ -288,22 +252,8 @@ class GroupLevelAccessTest extends KernelTestBase {
     $users['has_permission_in_both_groups'] = $user;
 
     // Create a user which is a member and has a role without any permissions.
-    $user = User::create(['name' => $this->randomString()]);
-    $user->save();
-
-    $role_without_permissions = OgRole::create();
-    $role_without_permissions
-      ->setName($this->randomMachineName())
-      ->setLabel($this->randomString())
-      ->setGroupType($this->group->getEntityTypeId())
-      ->setGroupBundle($this->groupBundle)
-      ->save();
-
-    $membership = Og::createMembership($this->group, $user);
-    $membership
-      ->addRole($role_without_permissions)
-      ->save();
-
+    $role_without_permissions = $this->createOgRole();
+    $user = $this->createUserWithOgRole($role_without_permissions);
     $users['has_no_permission'] = $user;
 
     return [$roles, $users];
@@ -365,46 +315,14 @@ class GroupLevelAccessTest extends KernelTestBase {
 
     // A group member with the group level permission 'update group' which maps
     // to the 'update' entity operation.
-    $user = User::create(['name' => $this->randomString()]);
-    $user->save();
-
-    /** @var \Drupal\og\OgRoleInterface $role_with_update_permission */
-    $role_with_update_permission = OgRole::create();
-    $role_with_update_permission
-      ->setName($this->randomMachineName())
-      ->setLabel($this->randomString())
-      ->setGroupType($this->group->getEntityTypeId())
-      ->setGroupBundle($this->groupBundle)
-      ->grantPermission(OgAccess::UPDATE_GROUP_PERMISSION)
-      ->save();
-
-    $membership = Og::createMembership($this->group, $user);
-    $membership
-      ->addRole($role_with_update_permission)
-      ->save();
-
+    $role_with_update_permission = $this->createOgRole([OgAccess::UPDATE_GROUP_PERMISSION]);
+    $user = $this->createUserWithOgRole($role_with_update_permission);
     $users['update'] = $user;
 
     // A group member with the group level permission 'delete group' which maps
     // to the 'delete' entity operation.
-    $user = User::create(['name' => $this->randomString()]);
-    $user->save();
-
-    /** @var \Drupal\og\OgRoleInterface $role_with_delete_permission */
-    $role_with_delete_permission = OgRole::create();
-    $role_with_delete_permission
-      ->setName($this->randomMachineName())
-      ->setLabel($this->randomString())
-      ->setGroupType($this->group->getEntityTypeId())
-      ->setGroupBundle($this->groupBundle)
-      ->grantPermission(OgAccess::DELETE_GROUP_PERMISSION)
-      ->save();
-
-    $membership = Og::createMembership($this->group, $user);
-    $membership
-      ->addRole($role_with_delete_permission)
-      ->save();
-
+    $role_with_delete_permission = $this->createOgRole([OgAccess::DELETE_GROUP_PERMISSION]);
+    $user = $this->createUserWithOgRole($role_with_delete_permission);
     $users['delete'] = $user;
 
     return $users;
@@ -445,6 +363,57 @@ class GroupLevelAccessTest extends KernelTestBase {
         ['update' => TRUE, 'delete' => TRUE],
       ],
     ];
+  }
+
+  /**
+   * Creates an OG role with the given permissions and admin flag.
+   *
+   * @param string[] $permissions
+   *   The permissions to set on the role.
+   * @param bool $is_admin
+   *   Whether or not this is an admin role.
+   *
+   * @return \Drupal\og\OgRoleInterface
+   *   The newly created role.
+   */
+  protected function createOgRole(array $permissions = [], bool $is_admin = FALSE): OgRoleInterface {
+    /** @var \Drupal\og\OgRoleInterface $role */
+    $role = OgRole::create();
+    $role
+      ->setName($this->randomMachineName())
+      ->setLabel($this->randomString())
+      ->setGroupType($this->group->getEntityTypeId())
+      ->setGroupBundle($this->groupBundle)
+      ->setIsAdmin($is_admin);
+
+    foreach ($permissions as $permission) {
+      $role->grantPermission($permission);
+    }
+
+    $role->save();
+
+    return $role;
+  }
+
+  /**
+   * Creates a test user and assigns it a membership with the given role.
+   *
+   * @param \Drupal\og\OgRoleInterface $role
+   *   The OG role to assign to the newly created user.
+   *
+   * @return \Drupal\user\UserInterface
+   *   The newly created user.
+   */
+  protected function createUserWithOgRole(OgRoleInterface $role): UserInterface {
+    $user = User::create(['name' => $this->randomString()]);
+    $user->save();
+
+    $membership = Og::createMembership($this->group, $user);
+    $membership
+      ->addRole($role)
+      ->save();
+
+    return $user;
   }
 
 }
