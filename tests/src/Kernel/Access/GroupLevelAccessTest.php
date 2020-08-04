@@ -114,7 +114,7 @@ class GroupLevelAccessTest extends KernelTestBase {
     ]);
     $this->group->save();
 
-    // A non-member.
+    // Create a non-member.
     $this->nonMemberUser = User::create(['name' => $this->randomString()]);
     $this->nonMemberUser->save();
 
