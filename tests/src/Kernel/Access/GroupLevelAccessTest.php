@@ -408,7 +408,6 @@ class GroupLevelAccessTest extends KernelTestBase {
     $user = User::create(['name' => $this->randomString()]);
     $user->save();
 
-
     $membership = Og::createMembership($this->group, $user);
     $membership
       ->addRole($role)
