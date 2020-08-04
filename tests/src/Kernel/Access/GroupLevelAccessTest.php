@@ -118,11 +118,12 @@ class GroupLevelAccessTest extends KernelTestBase {
     $this->nonMemberUser = User::create(['name' => $this->randomString()]);
     $this->nonMemberUser->save();
 
-    // Admin user.
+    // Create an admin user.
     $this->adminUser = User::create(['name' => $this->randomString()]);
     $this->adminUser->save();
 
-    // The administrator role is added automatically when the group is created.
+    // Get the default administrator role that is created automatically when the
+    // group is created and assign it to the test user.
     // @see \Drupal\og\EventSubscriber\OgEventSubscriber::provideDefaultRoles()
     $admin_role = OgRole::loadByGroupAndName($this->group, OgRoleInterface::ADMINISTRATOR);
 
@@ -131,9 +132,9 @@ class GroupLevelAccessTest extends KernelTestBase {
       ->addRole($admin_role)
       ->save();
 
-    // Create a second administration role and assign it to a test user. This is
-    // a supported use case: it is possible to have multiple administration
-    // roles.
+    // Create another administrator role and assign it to a second test user.
+    // This is a supported use case: it is possible to have multiple
+    // administration roles.
     /** @var \Drupal\og\OgRoleInterface $alternative_admin_role */
     $alternative_admin_role = OgRole::create();
     $alternative_admin_role

@@ -94,7 +94,7 @@ class OgEventSubscriber implements EventSubscriberInterface {
       new GroupPermission([
         'name' => OgAccess::DELETE_GROUP_PERMISSION,
         'title' => $this->t('Delete group'),
-        'description' => $this->t('Delete the group.'),
+        'description' => $this->t('Delete the group entity.'),
         'default roles' => [OgRoleInterface::ADMINISTRATOR],
       ]),
       new GroupPermission([
