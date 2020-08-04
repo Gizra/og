@@ -86,17 +86,23 @@ class OgEventSubscriber implements EventSubscriberInterface {
   public function provideDefaultOgPermissions(PermissionEventInterface $event) {
     $event->setPermissions([
       new GroupPermission([
-        'name' => OgAccess::UPDATE_GROUP_PERMISSION,
-        'title' => $this->t('Edit group'),
-        'description' => $this->t('Edit the group. Note: This permission controls only node entity type groups.'),
-        'default roles' => [OgRoleInterface::ADMINISTRATOR],
-      ]),
-      new GroupPermission([
         'name' => OgAccess::ADMINISTER_GROUP_PERMISSION,
         'title' => $this->t('Administer group'),
         'description' => $this->t('Manage group members and content in the group.'),
         'default roles' => [OgRoleInterface::ADMINISTRATOR],
         'restrict access' => TRUE,
+      ]),
+      new GroupPermission([
+        'name' => OgAccess::DELETE_GROUP_PERMISSION,
+        'title' => $this->t('Delete group'),
+        'description' => $this->t('Delete the group entity.'),
+        'default roles' => [OgRoleInterface::ADMINISTRATOR],
+      ]),
+      new GroupPermission([
+        'name' => OgAccess::UPDATE_GROUP_PERMISSION,
+        'title' => $this->t('Edit group'),
+        'description' => $this->t('Edit the group entity.'),
+        'default roles' => [OgRoleInterface::ADMINISTRATOR],
       ]),
       new GroupPermission([
         'name' => 'subscribe',
