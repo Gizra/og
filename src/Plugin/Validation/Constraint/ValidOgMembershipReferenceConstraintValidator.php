@@ -80,7 +80,7 @@ class ValidOgMembershipReferenceConstraintValidator extends ConstraintValidator 
     $entity = $this->context->getRoot()->getValue();
 
     /** @var \Drupal\Core\Access\AccessResult $access */
-    $user = $this->currentUser->getAccount();
+    $user = \Drupal::currentUser()->getAccount();
     $access = \Drupal::service('og.access')->userAccessGroupContentEntityOperation('create', $group, $entity, $user);
 
     if ($access->isForbidden()) {
