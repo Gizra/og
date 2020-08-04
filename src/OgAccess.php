@@ -30,6 +30,11 @@ class OgAccess implements OgAccessInterface {
   const ADMINISTER_GROUP_PERMISSION = 'administer group';
 
   /**
+   * Group level permission that allows the user to delete the group entity.
+   */
+  const DELETE_GROUP_PERMISSION = 'delete group';
+
+  /**
    * Group level permission that allows the user to update the group entity.
    */
   const UPDATE_GROUP_PERMISSION = 'update group';
@@ -38,6 +43,7 @@ class OgAccess implements OgAccessInterface {
    * Maps entity operations performed on groups to group level permissions.
    */
   const OPERATION_GROUP_PERMISSION_MAPPING = [
+    'delete' => self::DELETE_GROUP_PERMISSION,
     'update' => self::UPDATE_GROUP_PERMISSION,
   ];
 
