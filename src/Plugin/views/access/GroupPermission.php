@@ -59,7 +59,7 @@ class GroupPermission extends AccessPluginBase implements CacheableDependencyInt
   /**
    * The OG access service.
    *
-   * @var \Drupal\og\OgAccess
+   * @var \Drupal\og\OgAccessInterface
    */
   protected $ogAccess;
 
