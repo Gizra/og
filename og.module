@@ -248,7 +248,7 @@ function og_entity_create_access(AccountInterface $account, array $context, $bun
     $handler = $handler->getInstance($options);
 
     // @todo Remove deprecated call to Og::getSelectionHandler.
-    $handler = Og::getSelectionHandler($field_definition);
+//    $handler = Og::getSelectionHandler($field_definition);
 
     if ($handler && $handler->countReferenceableEntities()) {
       // At least one of the fields has referenceable groups. That mean that
