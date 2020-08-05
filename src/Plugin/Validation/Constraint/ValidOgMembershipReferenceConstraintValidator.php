@@ -6,8 +6,8 @@ use Drupal\Core\DependencyInjection\ContainerInjectionInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\og\GroupTypeManagerInterface;
-use Drupal\og\Og;
 use Drupal\og\OgAccessInterface;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\Validator\Constraint;
 use Symfony\Component\Validator\ConstraintValidator;
 
@@ -66,7 +66,7 @@ class ValidOgMembershipReferenceConstraintValidator extends ConstraintValidator 
   /**
    * {@inheritdoc}
    */
-  public static function create(ContainerInjectionInterface $container) {
+  public static function create(ContainerInterface $container) {
     return new static(
       $container->get('entity_type.manager'),
       $container->get('og.group_type_manager'),
