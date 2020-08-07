@@ -1,0 +1,102 @@
+<?php
+
+/**
+ * @file
+ * Hooks provided by the Organic Groups module.
+ */
+
+declare(strict_types = 1);
+
+use Drupal\Core\Access\AccessResultInterface;
+use Drupal\Core\Cache\CacheableMetadata;
+use Drupal\Core\Entity\EntityPublishedInterface;
+use Drupal\og\OgAccess;
+
+/**
+ * @addtogroup hooks
+ * @{
+ */
+
+/**
+ * Allows modules to alter group level permissions.
+ *
+ * @param array $permissions
+ *   The list of group level permissions, passed by reference.
+ * @param \Drupal\Core\Cache\CacheableMetadata $cacheable_metadata
+ *   The cache metadata, passed by reference.
+ * @param array $context
+ *   An associative array containing contextual information, with keys:
+ *   - 'permission': The group level permission being checked, as a string.
+ *   - 'group': The group entity on which the permission applies.
+ *   - 'user': The user account for which access is being determined.
+ */
+function hook_og_user_access_alter(array &$permissions, CacheableMetadata &$cacheable_metadata, array $context): void {
+  // This example implements a use case where a custom module allows site
+  // builders to toggle a configuration setting that will prevent groups to be
+  // deleted if they are published.
+  // Retrieve the module configuration.
+  $config = \Drupal::config('mymodule.settings');
+
+  // Check if the site is configured to allow deletion of published groups.
+  $published_groups_can_be_deleted = \Drupal::config('mymodule')->get('delete_published_groups');
+
+  // If deletion is not allowed and the group is published, revoke the
+  // permission.
+  $group = $context['group'];
+  if ($group instanceof EntityPublishedInterface && !$group->isPublished() && !$published_groups_can_be_deleted) {
+    $key = array_search(OgAccess::DELETE_GROUP_PERMISSION, $permissions);
+    if ($key !== FALSE) {
+      unset($permissions[$key]);
+    }
+  }
+
+  // Since our access result depends on our custom module configuration, we need
+  // to add it to the cache metadata.
+  $cacheable_metadata->addCacheableDependency($config);
+}
+
+/**
+ * Allows to alter access to entity operations performed on group content.
+ *
+ * @param \Drupal\Core\Access\AccessResultInterface $access_result
+ *   The access result being altered.
+ * @param \Drupal\Core\Cache\CacheableMetadata $cacheable_metadata
+ *   The cache metadata, passed by reference.
+ * @param array $context
+ *   An associative array containing contextual information, with keys:
+ *   - 'operation': The entity operation being performed on the group content.
+ *   - 'group': The group entity to which the group content belongs.
+ *   - 'group_content': The group content entity upon which the operation is
+ *      performed.
+ *   - 'user': The user account for which access is being determined.
+ */
+function hook_og_user_access_entity_operation_alter(AccessResultInterface &$access_result, CacheableMetadata &$cacheable_metadata, array $context): void {
+  // This example implements a use case where a custom module allows site
+  // builders to toggle a configuration setting that will allow users with the
+  // site wide 'edit and delete comments in all groups' permission to edit and
+  // delete all comments in all groups, even if they are not a group member.
+  /** @var \Drupal\Core\Session\AccountProxyInterface $user */
+  $user = $context['user'];
+  $group_content = $context['group_content'];
+
+  // Retrieve the module configuration.
+  $config = \Drupal::config('mymodule.settings');
+
+  // If comment moderation is allowed and the user has the permission, grant
+  // access to the 'update' and 'delete' operations on comment entities.
+  $is_comment = $group_content->getEntityTypeId() === 'comment';
+  $user_can_moderate_comments = $user->hasPermission('edit and delete comments in all groups');
+  $comment_moderation_is_enabled = \Drupal::config('mymodule')->get('comment_moderation_enabled');
+
+  if ($is_comment && $user_can_moderate_comments && $comment_moderation_is_enabled) {
+    $access_result = new AccessResultAllowed();
+  }
+
+  // Since our access result depends on our custom module configuration, we need
+  // to add it to the cache metadata.
+  $cacheable_metadata->addCacheableDependency($config);
+}
+
+/**
+ * @} End of "addtogroup hooks".
+ */
