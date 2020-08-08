@@ -6,10 +6,8 @@ use Drupal\Core\Entity\EntityInterface;
 
 /**
  * Provides an interface defining an OG user role entity.
- *
- * Class cannot extend RoleInterface due to PHP 5 limitations.
  */
-interface OgRoleInterface {
+interface OgRoleInterface extends RoleInterface {
 
   /**
    * The role name of the group non-member.
