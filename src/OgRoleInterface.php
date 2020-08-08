@@ -3,6 +3,7 @@
 namespace Drupal\og;
 
 use Drupal\Core\Entity\EntityInterface;
+use Drupal\user\RoleInterface;
 
 /**
  * Provides an interface defining an OG user role entity.
