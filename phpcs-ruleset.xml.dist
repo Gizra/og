@@ -20,5 +20,13 @@
         <!-- Deprecation versions are allowed to include beta versions. -->
         <exclude name="Drupal.Semantics.FunctionTriggerError.TriggerErrorVersion" />
     </rule>
+
     <rule ref="./vendor/drupal/coder/coder_sniffer/DrupalPractice"></rule>
+
+    <!-- Require the strict types declaration in every PHP file. -->
+    <rule ref="SlevomatCodingStandard.TypeHints.DeclareStrictTypes">
+        <properties>
+            <property name="newlinesCountBetweenOpenTagAndDeclare" value="2"/>
+        </properties>
+    </rule>
 </ruleset>
