@@ -24,7 +24,7 @@
     <rule ref="./vendor/drupal/coder/coder_sniffer/DrupalPractice"></rule>
 
     <!-- Require the strict types declaration in every PHP file. -->
-	<config name="installed_paths" value="../../slevomat/coding-standard" />
+    <config name="installed_paths" value="../../slevomat/coding-standard" />
     <rule ref="SlevomatCodingStandard.TypeHints.DeclareStrictTypes">
         <properties>
             <property name="newlinesCountBetweenOpenTagAndDeclare" value="2" />
