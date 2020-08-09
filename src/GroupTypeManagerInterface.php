@@ -50,7 +50,7 @@ interface GroupTypeManagerInterface {
   /**
    * Get all group bundles keyed by entity type.
    *
-   * @return array
+   * @return string[][]
    *   An associative array, keyed by entity type, each value an indexed array
    *   of bundle IDs.
    */
