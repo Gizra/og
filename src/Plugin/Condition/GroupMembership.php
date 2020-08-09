@@ -14,7 +14,7 @@ use Drupal\og\Og;
  * @Condition(
  *   id = "og_group_membership",
  *   label = @Translation("Group Membership"),
- *   context = {
+ *   context_definitions = {
  *     "og" = @ContextDefinition("entity", label = @Translation("Group")),
  *     "user" = @ContextDefinition("entity:user", label = @Translation("User")),
  *   }
