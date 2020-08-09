@@ -83,7 +83,7 @@ class OgGroupContentOperationAccessTest extends KernelTestBase {
   /**
    * {@inheritdoc}
    */
-  protected function setUp() {
+  protected function setUp(): void {
     parent::setUp();
 
     $this->installConfig(['og']);
@@ -267,7 +267,7 @@ class OgGroupContentOperationAccessTest extends KernelTestBase {
           // group owner.
           $entity = $ownership === 'own' ? $this->groupContent[$group_content_bundle_id][$user_id] : $this->groupContent[$group_content_bundle_id]['group_owner'];
           $user = $this->users[$user_id];
-          $this->assertEquals($expected_access, $og_access->userAccessEntity($operation, $entity, $user)->isAllowed(), "Operation: $operation, ownership: $ownership, user: $user_id, bundle: $group_content_bundle_id");
+          $this->assertEquals($expected_access, $og_access->userAccessEntityOperation($operation, $entity, $user)->isAllowed(), "Operation: $operation, ownership: $ownership, user: $user_id, bundle: $group_content_bundle_id");
         }
       }
     }

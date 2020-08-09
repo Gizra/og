@@ -56,7 +56,7 @@ class OgRoleCacheContextTest extends OgCacheContextTestBase {
   /**
    * {@inheritdoc}
    */
-  public function setUp(): void {
+  protected function setUp(): void {
     parent::setUp();
 
     $this->entityTypeManager = $this->prophesize(EntityTypeManagerInterface::class);

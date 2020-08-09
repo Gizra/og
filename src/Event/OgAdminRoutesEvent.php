@@ -2,6 +2,7 @@
 
 namespace Drupal\og\Event;
 
+use Drupal\og\OgAccess;
 use Symfony\Component\EventDispatcher\Event;
 
 /**
@@ -45,7 +46,7 @@ class OgAdminRoutesEvent extends Event implements OgAdminRoutesEventInterface {
         'description' => '',
 
         'requirements' => [
-          '_og_user_access_group' => 'administer group',
+          '_og_user_access_group' => OgAccess::ADMINISTER_GROUP_PERMISSION,
         ],
 
         'options' => [

@@ -88,7 +88,7 @@ class OgChangeMultipleRolesFormBase extends FormBase {
   public function buildForm(array $form, FormStateInterface $form_state) {
     $form['submit'] = [
       '#type' => 'submit',
-      '#value' => t('Submit'),
+      '#value' => $this->t('Submit'),
     ];
 
     return $form;

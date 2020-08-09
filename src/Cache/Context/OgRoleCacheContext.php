@@ -13,6 +13,7 @@ use Drupal\Core\Entity\Sql\SqlContentEntityStorage;
 use Drupal\Core\PrivateKey;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\Core\Site\Settings;
+use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\og\MembershipManagerInterface;
 use Drupal\og\OgMembershipInterface;
 use Drupal\og\OgRoleInterface;
@@ -79,7 +80,7 @@ class OgRoleCacheContext extends UserCacheContextBase implements CacheContextInt
    * {@inheritdoc}
    */
   public static function getLabel() {
-    return t('OG role');
+    return new TranslatableMarkup('OG role');
   }
 
   /**

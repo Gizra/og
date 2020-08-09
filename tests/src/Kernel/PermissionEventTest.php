@@ -9,6 +9,7 @@ use Drupal\og\Event\PermissionEvent;
 use Drupal\og\Event\PermissionEventInterface;
 use Drupal\og\GroupContentOperationPermission;
 use Drupal\og\GroupPermission;
+use Drupal\og\OgAccess;
 use Drupal\og\OgRoleInterface;
 use Drupal\og\PermissionInterface;
 
@@ -47,7 +48,7 @@ class PermissionEventTest extends KernelTestBase {
   /**
    * {@inheritdoc}
    */
-  public function setUp() {
+  protected function setUp(): void {
     parent::setUp();
 
     $this->eventDispatcher = $this->container->get('event_dispatcher');
@@ -128,13 +129,14 @@ class PermissionEventTest extends KernelTestBase {
     // Test permissions that should be available for both test groups.
     $default_permissions = [
       'add user',
-      'administer group',
+      OgAccess::ADMINISTER_GROUP_PERMISSION,
+      OgAccess::DELETE_GROUP_PERMISSION,
+      OgAccess::UPDATE_GROUP_PERMISSION,
       'approve and deny subscription',
       'manage members',
       'administer permissions',
       'subscribe without approval',
       'subscribe',
-      'update group',
     ];
     // Test permissions that should only be available for the test group that
     // has group content.
@@ -148,7 +150,7 @@ class PermissionEventTest extends KernelTestBase {
     // A full permission that should be available in both test groups. This is
     // used to test that all properties are correctly applied.
     $group_level_permission = new GroupPermission([
-      'name' => 'administer group',
+      'name' => OgAccess::ADMINISTER_GROUP_PERMISSION,
       'title' => $this->t('Administer group'),
       'description' => $this->t('Manage group members and content in the group.'),
       'default roles' => [OgRoleInterface::ADMINISTRATOR],

@@ -27,7 +27,7 @@ abstract class OgAccessEntityTestBase extends OgAccessTestBase {
   /**
    * {@inheritdoc}
    */
-  public function setUp() {
+  protected function setUp(): void {
     parent::setUp();
 
     // Mock a group content entity.
@@ -39,7 +39,7 @@ abstract class OgAccessEntityTestBase extends OgAccessTestBase {
 
     $entity_type = $this->prophesize(EntityTypeInterface::class);
     $entity_type->getListCacheTags()->willReturn([]);
-    $entity_type->isSubclassOf(FieldableEntityInterface::class)->willReturn(TRUE);
+    $entity_type->entityClassImplements(FieldableEntityInterface::class)->willReturn(TRUE);
     $entity_type->id()->willReturn($entity_type_id);
 
     $this->groupContentEntity = $this->prophesize(ContentEntityInterface::class);
@@ -50,9 +50,9 @@ abstract class OgAccessEntityTestBase extends OgAccessTestBase {
     $this->groupContentEntity->getEntityTypeId()->willReturn($entity_type_id);
     $this->addCache($this->groupContentEntity);
 
-    // If the group audience helper is asked if the group content entity has any
-    // group audience fields, it is expected that this will return TRUE.
-    $this->groupAudienceHelper->hasGroupAudienceField($entity_type_id, $bundle)
+    // If the group type manager is asked if the group content entity is group
+    // content, it is expected that this will return TRUE.
+    $this->groupTypeManager->isGroupContent($entity_type_id, $bundle)
       ->willReturn(TRUE);
 
     // It is expected that a list of entity operation permissions is retrieved

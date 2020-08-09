@@ -9,7 +9,6 @@ use Drupal\Core\Field\FieldItemListInterface;
 use Drupal\Core\Field\FieldStorageDefinitionInterface;
 use Drupal\Core\Field\Plugin\Field\FieldWidget\EntityReferenceAutocompleteWidget;
 use Drupal\Core\Form\FormStateInterface;
-use Drupal\og\OgAccess;
 
 /**
  * Plugin implementation of the 'entity_reference autocomplete' widget.
@@ -166,7 +165,7 @@ class OgComplex extends EntityReferenceAutocompleteWidget {
         $elements['add_more'] = [
           '#type' => 'submit',
           '#name' => strtr($id_prefix, '-', '_') . '_add_more',
-          '#value' => t('Add another item'),
+          '#value' => $this->t('Add another item'),
           '#attributes' => ['class' => ['field-add-more-submit']],
           '#limit_validation_errors' => [array_merge($parents, [$field_name])],
           '#submit' => [[get_class($this), 'addMoreSubmit']],
@@ -258,7 +257,7 @@ class OgComplex extends EntityReferenceAutocompleteWidget {
     // Get the trigger element and check if this the add another item button.
     $trigger_element = $form_state->getTriggeringElement();
 
-    if ($trigger_element['#name'] == 'add_another_group') {
+    if (!empty($trigger_element) && $trigger_element['#name'] == 'add_another_group') {
       // Increase the number of other groups.
       $delta = $form_state->get('other_group_delta') + 1;
       $form_state->set('other_group_delta', $delta);
@@ -288,16 +287,21 @@ class OgComplex extends EntityReferenceAutocompleteWidget {
    *   A single entity reference input.
    */
   public function otherGroupsSingle($delta, EntityInterface $entity = NULL, $weight_delta = 10) {
+    $selection_settings = [
+      'other_groups' => TRUE,
+      'field_mode' => 'admin',
+    ];
+    if ($this->getFieldSetting('handler_settings')) {
+      $selection_settings += $this->getFieldSetting('handler_settings');
+    }
+
     return [
       'target_id' => [
         // @todo Allow this to be configurable with a widget setting.
         '#type' => 'entity_autocomplete',
         '#target_type' => $this->fieldDefinition->getFieldStorageDefinition()->getSetting('target_type'),
         '#selection_handler' => 'og:default',
-        '#selection_settings' => [
-          'other_groups' => TRUE,
-          'field_mode' => 'admin',
-        ],
+        '#selection_settings' => $selection_settings,
         '#default_value' => $entity,
       ],
       '_weight' => [
@@ -348,7 +352,7 @@ class OgComplex extends EntityReferenceAutocompleteWidget {
    */
   protected function isGroupAdmin() {
     // @todo Inject current user service as a dependency.
-    return \Drupal::currentUser()->hasPermission(OgAccess::ADMINISTER_GROUP_PERMISSION);
+    return \Drupal::currentUser()->hasPermission('administer organic groups');
   }
 
 }
