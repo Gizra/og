@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types = 1);
+
 namespace Drupal\Tests\og_ui\Functional;
 
 use Drupal\Core\Form\FormState;

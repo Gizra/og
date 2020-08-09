@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types = 1);
+
 namespace Drupal\Tests\og\Unit\Plugin\OgGroupResolver;
 
 use Drupal\og\OgResolvedGroupCollectionInterface;
