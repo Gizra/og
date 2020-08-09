@@ -88,7 +88,7 @@ class GroupMembership extends ConditionPluginBase {
     }
 
     // The membership status is not active.
-    if ($membership->getState() != OgMembership::STATE_ACTIVE) {
+    if ($membership->getState() !== OgMembership::STATE_ACTIVE) {
       return FALSE;
     }
 
