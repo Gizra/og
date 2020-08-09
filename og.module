@@ -162,7 +162,7 @@ function og_entity_access(EntityInterface $entity, $operation, AccountInterface 
 
   $entity_access_strict = \Drupal::config('og.settings')->get('entity_access_strict');
 
-  // Otherwise, ignore or deny based on whether strict node access is set.
+  // Otherwise, ignore or deny based on whether strict entity access is set.
   return AccessResult::forbiddenIf($entity_access_strict);
 }
 
