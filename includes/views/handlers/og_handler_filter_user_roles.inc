@@ -9,7 +9,7 @@ class og_handler_filter_user_roles extends views_handler_filter_many_to_one {
     $this->value_options = array();
     // Get all role names.
     $results = db_select('og_role', 'r')
-      ->fields('r')
+      ->fields('r', array('name'))
       ->groupBy('r.name')
       ->execute();
     foreach ($results as $result) {
