@@ -6,10 +6,10 @@ use Drupal\Core\Access\AccessResult;
 use Drupal\Core\Form\FormBase;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Session\AccountInterface;
+use Drupal\Core\TempStore\PrivateTempStoreFactory;
 use Drupal\og\Entity\OgMembership;
 use Drupal\og\Entity\OgRole;
 use Drupal\og\OgAccessInterface;
-use Drupal\user\PrivateTempStoreFactory;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
@@ -34,14 +34,14 @@ class OgChangeMultipleRolesFormBase extends FormBase {
   /**
    * The tempstore factory.
    *
-   * @var \Drupal\user\PrivateTempStoreFactory
+   * @var \Drupal\Core\TempStore\PrivateTempStoreFactory
    */
   protected $tempStoreFactory;
 
   /**
    * The temporary storage for the current user.
    *
-   * @var \Drupal\user\PrivateTempStore
+   * @var \Drupal\Core\TempStore\PrivateTempStore
    */
   protected $tempStore;
 
@@ -55,7 +55,7 @@ class OgChangeMultipleRolesFormBase extends FormBase {
   /**
    * Constructs a OgChangeMultipleRolesFormbase object.
    *
-   * @param \Drupal\user\PrivateTempStoreFactory $temp_store_factory
+   * @param \Drupal\Core\TempStore\PrivateTempStoreFactory $temp_store_factory
    *   The tempstore factory.
    * @param \Drupal\og\OgAccessInterface $og_access
    *   The OG access service.
@@ -70,7 +70,7 @@ class OgChangeMultipleRolesFormBase extends FormBase {
    */
   public static function create(ContainerInterface $container) {
     return new static(
-      $container->get('user.private_tempstore'),
+      $container->get('tempstore.private'),
       $container->get('og.access')
     );
   }
@@ -88,7 +88,7 @@ class OgChangeMultipleRolesFormBase extends FormBase {
   public function buildForm(array $form, FormStateInterface $form_state) {
     $form['submit'] = [
       '#type' => 'submit',
-      '#value' => t('Submit'),
+      '#value' => $this->t('Submit'),
     ];
 
     return $form;
@@ -144,7 +144,7 @@ class OgChangeMultipleRolesFormBase extends FormBase {
   /**
    * Returns the temporary storage for the current user.
    *
-   * @return \Drupal\user\PrivateTempStore
+   * @return \Drupal\Core\TempStore\PrivateTempStore
    *   The temporary storage for the current user.
    */
   protected function getTempStore() {

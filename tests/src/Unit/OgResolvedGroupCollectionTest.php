@@ -24,7 +24,7 @@ class OgResolvedGroupCollectionTest extends UnitTestCase {
   /**
    * {@inheritdoc}
    */
-  public function setUp() {
+  protected function setUp(): void {
     parent::setUp();
 
     // Mock some test groups.

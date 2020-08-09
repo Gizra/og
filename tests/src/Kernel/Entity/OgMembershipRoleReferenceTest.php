@@ -2,12 +2,12 @@
 
 namespace Drupal\Tests\og\Kernel\Entity;
 
-use Drupal\Component\Utility\Unicode;
 use Drupal\KernelTests\KernelTestBase;
 use Drupal\node\Entity\Node;
 use Drupal\node\Entity\NodeType;
 use Drupal\og\Entity\OgRole;
 use Drupal\og\Og;
+use Drupal\og\OgAccess;
 use Drupal\user\Entity\User;
 
 /**
@@ -52,7 +52,7 @@ class OgMembershipRoleReferenceTest extends KernelTestBase {
   /**
    * {@inheritdoc}
    */
-  protected function setUp() {
+  protected function setUp(): void {
     parent::setUp();
 
     // Installing needed schema.
@@ -63,7 +63,7 @@ class OgMembershipRoleReferenceTest extends KernelTestBase {
     $this->installSchema('system', 'sequences');
 
     // Create a "group" node type and turn it into a group type.
-    $this->groupBundle = Unicode::strtolower($this->randomMachineName());
+    $this->groupBundle = mb_strtolower($this->randomMachineName());
     NodeType::create([
       'type' => $this->groupBundle,
       'name' => $this->randomString(),
@@ -93,7 +93,7 @@ class OgMembershipRoleReferenceTest extends KernelTestBase {
       ->setGroupBundle($this->groupBundle)
       ->setName('content_editor')
       ->setLabel('Content editor')
-      ->grantPermission('administer group');
+      ->grantPermission(OgAccess::ADMINISTER_GROUP_PERMISSION);
     $content_editor->save();
 
     // Create a group member role.
@@ -124,9 +124,9 @@ class OgMembershipRoleReferenceTest extends KernelTestBase {
     $this->assertTrue($membership->hasRole($group_member->id()), 'The membership has the group member role.');
 
     // Check if the role has permission from the membership.
-    $this->assertFalse($membership->hasPermission('administer group'), 'The user has permission to administer groups.');
+    $this->assertFalse($membership->hasPermission(OgAccess::ADMINISTER_GROUP_PERMISSION), 'The user has permission to administer groups.');
     $membership->addRole($content_editor);
-    $this->assertTrue($membership->hasPermission('administer group'), 'The user has permission to administer groups.');
+    $this->assertTrue($membership->hasPermission(OgAccess::ADMINISTER_GROUP_PERMISSION), 'The user has permission to administer groups.');
 
     // Remove a role by ID.
     $membership->revokeRoleById($group_member->id());

@@ -2,7 +2,6 @@
 
 namespace Drupal\Tests\og\Kernel\Entity;
 
-use Drupal\Component\Utility\Unicode;
 use Drupal\KernelTests\KernelTestBase;
 use Drupal\entity_test\Entity\EntityTest;
 use Drupal\og\Og;
@@ -44,7 +43,7 @@ class GroupAudienceTest extends KernelTestBase {
   /**
    * {@inheritdoc}
    */
-  protected function setUp() {
+  protected function setUp(): void {
     parent::setUp();
 
     // Add membership and config schema.
@@ -58,7 +57,7 @@ class GroupAudienceTest extends KernelTestBase {
     // Create several bundles.
     for ($i = 0; $i <= 4; $i++) {
       $bundle = EntityTest::create([
-        'type' => Unicode::strtolower($this->randomMachineName()),
+        'type' => mb_strtolower($this->randomMachineName()),
         'name' => $this->randomString(),
       ]);
 
@@ -81,14 +80,18 @@ class GroupAudienceTest extends KernelTestBase {
     $this->assertEmpty($this->groupAudienceHelper->getAllGroupAudienceFields('entity_test', $bundle));
 
     // Set bundles as group content.
-    $field_name1 = Unicode::strtolower($this->randomMachineName());
-    $field_name2 = Unicode::strtolower($this->randomMachineName());
+    $field_name1 = mb_strtolower($this->randomMachineName());
+    $field_name2 = mb_strtolower($this->randomMachineName());
 
     Og::createField(OgGroupAudienceHelperInterface::DEFAULT_FIELD, 'entity_test', $bundle, ['field_name' => $field_name1]);
     Og::createField(OgGroupAudienceHelperInterface::DEFAULT_FIELD, 'entity_test', $bundle, ['field_name' => $field_name2]);
 
-    $field_names = $this->groupAudienceHelper->getAllGroupAudienceFields('entity_test', $bundle);
-    $this->assertEquals([$field_name1, $field_name2], array_keys($field_names));
+    $expected_field_names = [$field_name1, $field_name2];
+    $actual_field_names = array_keys($this->groupAudienceHelper->getAllGroupAudienceFields('entity_test', $bundle));
+    sort($expected_field_names);
+    sort($actual_field_names);
+
+    $this->assertEquals($expected_field_names, $actual_field_names);
 
     // Test Og::isGroupContent method, which is just a wrapper around
     // OgGroupAudienceHelper::hasGroupAudienceFields().
@@ -107,8 +110,8 @@ class GroupAudienceTest extends KernelTestBase {
     $bundle = $this->bundles[1];
 
     // Set bundle as group content.
-    $field_name1 = Unicode::strtolower($this->randomMachineName());
-    $field_name2 = Unicode::strtolower($this->randomMachineName());
+    $field_name1 = mb_strtolower($this->randomMachineName());
+    $field_name2 = mb_strtolower($this->randomMachineName());
 
     $overrides = [
       'field_name' => $field_name1,
@@ -141,8 +144,8 @@ class GroupAudienceTest extends KernelTestBase {
     $bundle = $this->bundles[2];
 
     // Set bundle as group content.
-    $field_name1 = Unicode::strtolower($this->randomMachineName());
-    $field_name2 = Unicode::strtolower($this->randomMachineName());
+    $field_name1 = mb_strtolower($this->randomMachineName());
+    $field_name2 = mb_strtolower($this->randomMachineName());
 
     // Add fields that explicitly references a bundle.
     $overrides = [

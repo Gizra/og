@@ -92,12 +92,11 @@ types, groups and group content given here are suggestions and are given to
 provide a quick way to get started with Organic groups.
 
 1. Enable the Group and the Group UI modules.
-2. Create a new content type via admin/structure/types/add. Call it "Group", and
-   define it to be of Group type.
-3. Create a second content type. Call it "Group content", and set it to be of
-   Group content type.
-4. Add a Group by going to node/add/group. Call it First group, and enable the
-   Group through the "Group type" field.
+2. Create a new content type via admin/structure/types/add. Call it "Group",
+   and click on tab "Organic groups" then define it to be of Group type.
+3. Create a second content type. Call it "Group content", and click on tab 
+   "Organic groups" then set it to be of Group content type.
+4. Add a Group by going to node/add/group. Call it First group.
 5. Add a Group Content by going to node/add/group-content. In the Groups
    audience field, select First group. In the group content view a link was
    added to the group.
@@ -164,12 +163,14 @@ provide a quick way to get started with Organic groups.
 ## API
 
 ```php
-// Define the "Page" node type as group.
-\Drupal\og\Og::groupTypeManager()->addGroup('node', 'page');
+use Drupal\og\Og;
+use Drupal\og\OgGroupAudienceHelperInterface;
 
-// Add og audience field to "Article" node type, thus making is a group content.
-$field = \Drupal\og\OgGroupAudienceHelper::DEFAULT_FIELD, 'node', 'article');
-\Drupal\og\Og::createField($field);
+// Define the "Page" node type as a group.
+Og::groupTypeManager()->addGroup('node', 'page');
+
+// Add OG audience field to the "News" node type, thus making it group content.
+Og::createField(OgGroupAudienceHelperInterface::DEFAULT_FIELD, 'node', 'news');
 ```
 
 ## DRUPAL CONSOLE INTEGRATION

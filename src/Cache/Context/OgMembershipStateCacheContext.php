@@ -5,6 +5,7 @@ namespace Drupal\og\Cache\Context;
 use Drupal\Core\Cache\CacheableMetadata;
 use Drupal\Core\Cache\Context\CacheContextInterface;
 use Drupal\Core\Session\AccountInterface;
+use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\og\MembershipManagerInterface;
 use Drupal\og\OgContextInterface;
 use Drupal\og\OgMembershipInterface;
@@ -62,7 +63,7 @@ class OgMembershipStateCacheContext implements CacheContextInterface {
    * {@inheritdoc}
    */
   public static function getLabel() {
-    return t('OG membership state');
+    return new TranslatableMarkup('OG membership state');
   }
 
   /**
@@ -76,14 +77,8 @@ class OgMembershipStateCacheContext implements CacheContextInterface {
       return self::NO_CONTEXT;
     }
 
-    $states = [
-      OgMembershipInterface::STATE_ACTIVE,
-      OgMembershipInterface::STATE_PENDING,
-      OgMembershipInterface::STATE_BLOCKED,
-    ];
-
     /** @var \Drupal\og\OgMembershipInterface $membership */
-    $membership = $this->membershipManager->getMembership($group, $this->user, $states);
+    $membership = $this->membershipManager->getMembership($group, $this->user->id(), OgMembershipInterface::ALL_STATES);
     return $membership ? $membership->getState() : self::NO_CONTEXT;
   }
 
