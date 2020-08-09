@@ -2,14 +2,16 @@
 
 namespace Drupal\Tests\og\Functional;
 
-use Drupal\Component\Utility\Unicode;
 use Drupal\node\Entity\Node;
+use Drupal\node\Entity\NodeType;
+use Drupal\node\NodeInterface;
 use Drupal\og\Entity\OgMembershipType;
 use Drupal\og\Entity\OgRole;
 use Drupal\og\Og;
 use Drupal\og\OgMembershipInterface;
 use Drupal\og\OgRoleInterface;
 use Drupal\Tests\BrowserTestBase;
+use Drupal\Tests\og\Traits\OgMembershipCreationTrait;
 
 /**
  * Tests subscribe and un-subscribe to groups.
@@ -18,10 +20,17 @@ use Drupal\Tests\BrowserTestBase;
  */
 class GroupSubscribeTest extends BrowserTestBase {
 
+  use OgMembershipCreationTrait;
+
   /**
    * {@inheritdoc}
    */
   public static $modules = ['node', 'og'];
+
+  /**
+   * {@inheritdoc}
+   */
+  protected $defaultTheme = 'stark';
 
   /**
    * Test entity group.
@@ -89,16 +98,18 @@ class GroupSubscribeTest extends BrowserTestBase {
   /**
    * {@inheritdoc}
    */
-  protected function setUp() {
+  protected function setUp(): void {
     parent::setUp();
 
     // Create bundles.
-    // We don't need to later call NodeType::create() on the bundles, as we
-    // don't call the node view.
-    $this->groupBundle1 = Unicode::strtolower($this->randomMachineName());
-    $this->groupBundle2 = Unicode::strtolower($this->randomMachineName());
-    $this->nonGroupBundle = Unicode::strtolower($this->randomMachineName());
-    $this->membershipTypeBundle = Unicode::strtolower($this->randomMachineName());
+    $this->groupBundle1 = mb_strtolower($this->randomMachineName());
+    NodeType::create(['type' => $this->groupBundle1])->save();
+    $this->groupBundle2 = mb_strtolower($this->randomMachineName());
+    NodeType::create(['type' => $this->groupBundle2])->save();
+    $this->nonGroupBundle = mb_strtolower($this->randomMachineName());
+    NodeType::create(['type' => $this->nonGroupBundle])->save();
+    $this->membershipTypeBundle = mb_strtolower($this->randomMachineName());
+    NodeType::create(['type' => $this->membershipTypeBundle])->save();
 
     // Define the entities as groups.
     Og::groupTypeManager()->addGroup('node', $this->groupBundle1);
@@ -127,7 +138,7 @@ class GroupSubscribeTest extends BrowserTestBase {
       'type' => $this->groupBundle1,
       'title' => $this->randomString(),
       'uid' => $user->id(),
-      'status' => NODE_NOT_PUBLISHED,
+      'status' => NodeInterface::NOT_PUBLISHED,
     ]);
     $this->group3->save();
 
@@ -183,7 +194,7 @@ class GroupSubscribeTest extends BrowserTestBase {
       [
         'entity' => $this->group1,
         // Set invalid membership type.
-        'membership_type' => Unicode::strtolower($this->randomMachineName()),
+        'membership_type' => mb_strtolower($this->randomMachineName()),
         'code' => 404,
       ],
       // Group with pending membership.
@@ -211,7 +222,7 @@ class GroupSubscribeTest extends BrowserTestBase {
       ],
       // A non existing entity type.
       [
-        'entity_type_id' => Unicode::strtolower($this->randomMachineName()),
+        'entity_type_id' => mb_strtolower($this->randomMachineName()),
         'entity_id' => 1,
         // @todo This currently returns a 500 error due to a bug in core. Change
         //   this to a 403 or 404 when the bug is fixed.
@@ -276,8 +287,7 @@ class GroupSubscribeTest extends BrowserTestBase {
    * Tests access to un-subscribe page.
    */
   public function testUnSubscribeAccess() {
-    $membership = Og::createMembership($this->group1, $this->normalUser);
-    $membership->save();
+    $this->createOgMembership($this->group1, $this->normalUser);
 
     $this->drupalLogin($this->normalUser);
 

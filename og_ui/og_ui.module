@@ -12,7 +12,7 @@ use Drupal\Core\Form\FormStateInterface;
 use Drupal\field\Entity\FieldConfig;
 use Drupal\field\Entity\FieldStorageConfig;
 use Drupal\og\Og;
-use Drupal\og\OgGroupAudienceHelper;
+use Drupal\og\OgGroupAudienceHelperInterface;
 use Drupal\og_ui\BundleFormAlter;
 
 /**
@@ -69,16 +69,16 @@ function og_ui_entity_type_save(EntityInterface $entity) {
   $is_group_content = Og::isGroupContent($entity_type_id, $bundle);
   if ($entity->og_group_content_bundle != $is_group_content) {
     if ($entity->og_group_content_bundle) {
-      Og::createField(OgGroupAudienceHelper::DEFAULT_FIELD, $entity_type_id, $bundle);
+      Og::createField(OgGroupAudienceHelperInterface::DEFAULT_FIELD, $entity_type_id, $bundle);
     }
-    elseif ($field = FieldConfig::loadByName($entity_type_id, $bundle, OgGroupAudienceHelper::DEFAULT_FIELD)) {
+    elseif ($field = FieldConfig::loadByName($entity_type_id, $bundle, OgGroupAudienceHelperInterface::DEFAULT_FIELD)) {
       $field->delete();
       return;
     }
   }
 
   // Change the field target type and bundle.
-  if ($field_storage = FieldStorageConfig::loadByName($entity_type_id, OgGroupAudienceHelper::DEFAULT_FIELD)) {
+  if ($field_storage = FieldStorageConfig::loadByName($entity_type_id, OgGroupAudienceHelperInterface::DEFAULT_FIELD)) {
     $target_type = $field_storage->getSetting('target_type');
     if (!empty($entity->og_target_type) && $entity->og_target_type !== $target_type) {
       // @todo It's probably not possible to change the field storage after the
@@ -87,7 +87,7 @@ function og_ui_entity_type_save(EntityInterface $entity) {
       $field_storage->save();
     }
   }
-  if ($field = FieldConfig::loadByName($entity_type_id, $bundle, OgGroupAudienceHelper::DEFAULT_FIELD)) {
+  if ($field = FieldConfig::loadByName($entity_type_id, $bundle, OgGroupAudienceHelperInterface::DEFAULT_FIELD)) {
     $handler_settings = $field->getSetting('handler_settings');
     if (!isset($handler_settings['target_bundles']) || $entity->og_target_bundles != $handler_settings['target_bundles']) {
       $handler_settings['target_bundles'] = $entity->og_target_bundles;

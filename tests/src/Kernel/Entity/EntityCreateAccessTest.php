@@ -6,9 +6,9 @@ use Drupal\KernelTests\KernelTestBase;
 use Drupal\node\Entity\Node;
 use Drupal\node\Entity\NodeType;
 use Drupal\og\Og;
-use Drupal\og\OgGroupAudienceHelper;
-use Drupal\simpletest\ContentTypeCreationTrait;
-use Drupal\simpletest\NodeCreationTrait;
+use Drupal\og\OgGroupAudienceHelperInterface;
+use Drupal\Tests\node\Traits\ContentTypeCreationTrait;
+use Drupal\Tests\node\Traits\NodeCreationTrait;
 use Drupal\user\Entity\Role;
 use Drupal\user\Entity\User;
 
@@ -52,7 +52,7 @@ class EntityCreateAccessTest extends KernelTestBase {
   /**
    * {@inheritdoc}
    */
-  public function setUp() {
+  protected function setUp(): void {
     parent::setUp();
 
     $this->installConfig(['og']);
@@ -76,7 +76,7 @@ class EntityCreateAccessTest extends KernelTestBase {
       'name' => $this->randomString(),
     ]);
     $this->groupContentType->save();
-    Og::createField(OgGroupAudienceHelper::DEFAULT_FIELD, 'node', 'post');
+    Og::createField(OgGroupAudienceHelperInterface::DEFAULT_FIELD, 'node', 'post');
   }
 
   /**
@@ -103,7 +103,7 @@ class EntityCreateAccessTest extends KernelTestBase {
       ->save();
 
     // Grant the anonymous user permission to view published content.
-    /** @var Role $role */
+    /** @var \Drupal\user\Entity\Role $role */
     $role = Role::create(['id' => Role::ANONYMOUS_ID, 'label' => 'anonymous user'])
       ->grantPermission('access content');
     $role->save();
@@ -118,7 +118,7 @@ class EntityCreateAccessTest extends KernelTestBase {
     // Test that the user can access the entity create form when the permission
     // to create group content is granted. Note that node access control is
     // cached, so we need to reset it when we change permissions.
-    $this->container->get('entity.manager')->getAccessControlHandler('node')->resetCache();
+    $this->container->get('entity_type.manager')->getAccessControlHandler('node')->resetCache();
     $role->grantPermission('create post content')->trustData()->save();
     $result = $node_access_check->access(User::getAnonymousUser(), $this->groupContentType);
     $this->assertInstanceOf('\Drupal\Core\Access\AccessResultAllowed', $result);

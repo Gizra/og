@@ -2,7 +2,7 @@
 
 namespace Drupal\og\Plugin\Field\FieldFormatter;
 
-use Drupal\Core\Entity\EntityManagerInterface;
+use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Field\FieldDefinitionInterface;
 use Drupal\Core\Field\FieldItemListInterface;
 use Drupal\Core\Field\FormatterBase;
@@ -13,7 +13,6 @@ use Drupal\Core\Url;
 use Drupal\og\Og;
 use Drupal\og\OgAccessInterface;
 use Drupal\og\OgMembershipInterface;
-use Drupal\user\Entity\User;
 use Drupal\user\EntityOwnerInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
@@ -48,6 +47,13 @@ class GroupSubscribeFormatter extends FormatterBase implements ContainerFactoryP
   protected $ogAccess;
 
   /**
+   * The entity type manager service.
+   *
+   * @var \Drupal\Core\Entity\EntityTypeManagerInterface
+   */
+  protected $entityTypeManager;
+
+  /**
    * Constructs a new GroupSubscribeFormatter object.
    *
    * @param string $plugin_id
@@ -64,18 +70,22 @@ class GroupSubscribeFormatter extends FormatterBase implements ContainerFactoryP
    *   The view mode.
    * @param array $third_party_settings
    *   Any third party settings settings.
-   * @param \Drupal\Core\Entity\EntityManagerInterface $entity_manager
-   *   The entity manager.
    * @param \Drupal\Core\Session\AccountInterface $current_user
    *   The current user.
    * @param \Drupal\og\OgAccessInterface $og_access
    *   The OG access service.
+   * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entity_type_manager
+   *   The entity type manager service.
+   *
+   * @throws \Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException
+   * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundException
    */
-  public function __construct($plugin_id, $plugin_definition, FieldDefinitionInterface $field_definition, array $settings, $label, $view_mode, array $third_party_settings, EntityManagerInterface $entity_manager, AccountInterface $current_user, OgAccessInterface $og_access) {
-    parent::__construct($plugin_id, $plugin_definition, $field_definition, $settings, $label, $view_mode, $third_party_settings, $entity_manager);
+  public function __construct($plugin_id, $plugin_definition, FieldDefinitionInterface $field_definition, array $settings, $label, $view_mode, array $third_party_settings, AccountInterface $current_user, OgAccessInterface $og_access, EntityTypeManagerInterface $entity_type_manager) {
+    parent::__construct($plugin_id, $plugin_definition, $field_definition, $settings, $label, $view_mode, $third_party_settings);
 
     $this->currentUser = $current_user;
     $this->ogAccess = $og_access;
+    $this->entityTypeManager = $entity_type_manager->getStorage('user');
   }
 
   /**
@@ -90,9 +100,9 @@ class GroupSubscribeFormatter extends FormatterBase implements ContainerFactoryP
       $configuration['label'],
       $configuration['view_mode'],
       $configuration['third_party_settings'],
-      $container->get('entity.manager'),
       $container->get('current_user'),
-      $container->get('og.access')
+      $container->get('og.access'),
+      $container->get('entity_type.manager')
     );
   }
 
@@ -108,7 +118,8 @@ class GroupSubscribeFormatter extends FormatterBase implements ContainerFactoryP
     $group = $items->getEntity();
     $entity_type_id = $group->getEntityTypeId();
 
-    $user = User::load($this->currentUser->id());
+    // $user = User::load($this->currentUser->id());
+    $user = $this->entityTypeManager->load(($this->currentUser->id()));
     if (($group instanceof EntityOwnerInterface) && ($group->getOwnerId() == $user->id())) {
       // User is the group manager.
       $elements[0] = [

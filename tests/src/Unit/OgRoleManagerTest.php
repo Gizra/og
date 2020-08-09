@@ -78,7 +78,7 @@ class OgRoleManagerTest extends UnitTestCase {
   /**
    * {@inheritdoc}
    */
-  public function setUp() {
+  protected function setUp(): void {
     parent::setUp();
 
     $this->entityTypeId = $this->randomMachineName();
@@ -222,7 +222,7 @@ class OgRoleManagerTest extends UnitTestCase {
   /**
    * Return a new OG role manager object.
    *
-   * @return OgRoleManager
+   * @return \Drupal\og\OgRoleManagerInterface
    *   The initialized OG role manager.
    */
   protected function getOgRoleManager() {

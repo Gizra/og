@@ -60,7 +60,7 @@ class PermissionEvent extends Event implements PermissionEventInterface {
    *   An array of group content bundle IDs, keyed by group content entity type
    *   ID.
    */
-  public function __construct($group_entity_type_id, $group_bundle_id, $group_content_bundle_ids) {
+  public function __construct($group_entity_type_id, $group_bundle_id, array $group_content_bundle_ids) {
     $this->groupEntityTypeId = $group_entity_type_id;
     $this->groupBundleId = $group_bundle_id;
     $this->groupContentBundleIds = $group_content_bundle_ids;

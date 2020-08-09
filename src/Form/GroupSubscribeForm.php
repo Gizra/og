@@ -2,10 +2,13 @@
 
 namespace Drupal\og\Form;
 
+use Drupal\Component\Datetime\TimeInterface;
 use Drupal\Core\Entity\ContentEntityForm;
+use Drupal\Core\Entity\EntityRepositoryInterface;
+use Drupal\Core\Entity\EntityTypeBundleInfoInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Url;
-use Drupal\og\OgAccess;
+use Drupal\og\OgAccessInterface;
 use Drupal\og\OgMembershipInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
@@ -23,14 +26,30 @@ class GroupSubscribeForm extends ContentEntityForm {
   /**
    * OG access service.
    *
-   * @var \Drupal\og\OgAccess
+   * @var \Drupal\og\OgAccessInterface
    */
   protected $ogAccess;
 
   /**
-   * Constructs a SubscriptionController object.
+   * Constructs a GroupSubscribeForm.
+   *
+   * @param \Drupal\og\OgAccessInterface $og_access
+   *   The OG access service.
+   * @param \Drupal\Core\Entity\EntityRepositoryInterface $entity_repository
+   *   The entity repository service.
+   * @param \Drupal\Core\Entity\EntityTypeBundleInfoInterface $entity_type_bundle_info
+   *   The entity type bundle service.
+   * @param \Drupal\Component\Datetime\TimeInterface $time
+   *   The time service.
+   *
+   * @todo Set the `EntityRepositoryInterface` type hint on the second argument
+   *   once Drupal 8.6.0 is released. It is currently omitted to preserve
+   *   backwards compatibility with Drupal 8.5.x and earlier.
+   *
+   * @see https://github.com/Gizra/og/issues/397
    */
-  public function __construct(OgAccess $og_access) {
+  public function __construct(OgAccessInterface $og_access, EntityRepositoryInterface $entity_repository, EntityTypeBundleInfoInterface $entity_type_bundle_info = NULL, TimeInterface $time = NULL) {
+    parent::__construct($entity_repository, $entity_type_bundle_info, $time);
     $this->ogAccess = $og_access;
   }
 
@@ -39,7 +58,10 @@ class GroupSubscribeForm extends ContentEntityForm {
    */
   public static function create(ContainerInterface $container) {
     return new static(
-      $container->get('og.access')
+      $container->get('og.access'),
+      $container->get('entity.repository'),
+      $container->get('entity_type.bundle.info'),
+      $container->get('datetime.time')
     );
   }
 
@@ -57,7 +79,7 @@ class GroupSubscribeForm extends ContentEntityForm {
    *   The confirmation question.
    */
   public function getQuestion() {
-    /** @var OgMembershipInterface $membership */
+    /** @var \Drupal\og\OgMembershipInterface $membership */
     $membership = $this->entity;
     /** @var EntityInterface $group */
     $group = $membership->getGroup();
@@ -104,7 +126,7 @@ class GroupSubscribeForm extends ContentEntityForm {
   public function buildForm(array $form, FormStateInterface $form_state) {
     $state = $this->isStateActive() ? OgMembershipInterface::STATE_ACTIVE : OgMembershipInterface::STATE_PENDING;
 
-    /** @var OgMembershipInterface $membership */
+    /** @var \Drupal\og\OgMembershipInterface $membership */
     $membership = $this->entity;
     $membership->setState($state);
 
@@ -167,12 +189,12 @@ class GroupSubscribeForm extends ContentEntityForm {
    *   True if the state is active.
    */
   public function isStateActive() {
-    /** @var OgMembershipInterface $membership */
+    /** @var \Drupal\og\OgMembershipInterface $membership */
     $membership = $this->getEntity();
 
     /** @var EntityInterface $group */
     $group = $membership->getGroup();
-    $user = $membership->getUser();
+    $user = $membership->getOwner();
 
     $skip_approval = $this->ogAccess->userAccess($group, 'subscribe without approval', $user)->isAllowed();
 
@@ -195,14 +217,14 @@ class GroupSubscribeForm extends ContentEntityForm {
    */
   public function submitForm(array &$form, FormStateInterface $form_state) {
     parent::submitForm($form, $form_state);
-    /** @var OgMembershipInterface $membership */
+    /** @var \Drupal\og\OgMembershipInterface $membership */
     $membership = $this->getEntity();
 
     /** @var EntityInterface $group */
     $group = $membership->getGroup();
 
-    $message = $membership->isActive() ? $this->t('Your are now subscribed to the group.') : $this->t('Your subscription request was sent.');
-    drupal_set_message($message);
+    $message = $membership->isActive() ? $this->t('You are now subscribed to the group.') : $this->t('Your subscription request has been sent.');
+    $this->messenger()->addMessage($message);
 
     // User doesn't have access to the group entity, so redirect to front page,
     // otherwise back to the group entity.

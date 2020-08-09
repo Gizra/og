@@ -5,7 +5,7 @@ namespace Drupal\Tests\og\Kernel\EntityReference\Views;
 use Drupal\entity_test\Entity\EntityTest;
 use Drupal\entity_test\Entity\EntityTestMul;
 use Drupal\og\Og;
-use Drupal\og\OgGroupAudienceHelper;
+use Drupal\og\OgGroupAudienceHelperInterface;
 use Drupal\Tests\views\Kernel\ViewsKernelTestBase;
 use Drupal\views\Tests\ViewTestData;
 use Drupal\views\Views;
@@ -55,7 +55,7 @@ class OgStandardReferenceRelationshipTest extends ViewsKernelTestBase {
   /**
    * {@inheritdoc}
    */
-  protected function setUp($import_test_views = TRUE) {
+  protected function setUp($import_test_views = TRUE): void {
     parent::setUp();
 
     $this->installEntitySchema('user');
@@ -63,10 +63,10 @@ class OgStandardReferenceRelationshipTest extends ViewsKernelTestBase {
     $this->installEntitySchema('entity_test_mul');
 
     // Create reference from entity_test to entity_test_mul.
-    Og::createField(OgGroupAudienceHelper::DEFAULT_FIELD, 'entity_test', 'entity_test', ['field_name' => 'field_test_data', 'field_storage_config' => ['settings' => ['target_type' => 'entity_test_mul']]]);
+    Og::createField(OgGroupAudienceHelperInterface::DEFAULT_FIELD, 'entity_test', 'entity_test', ['field_name' => 'field_test_data', 'field_storage_config' => ['settings' => ['target_type' => 'entity_test_mul']]]);
 
     // Create reference from entity_test_mul to entity_test.
-    Og::createField(OgGroupAudienceHelper::DEFAULT_FIELD, 'entity_test_mul', 'entity_test_mul', ['field_name' => 'field_data_test', 'field_storage_config' => ['settings' => ['target_type' => 'entity_test']]]);
+    Og::createField(OgGroupAudienceHelperInterface::DEFAULT_FIELD, 'entity_test_mul', 'entity_test_mul', ['field_name' => 'field_data_test', 'field_storage_config' => ['settings' => ['target_type' => 'entity_test']]]);
 
     ViewTestData::createTestViews(get_class($this), ['og_standard_reference_test_views']);
   }

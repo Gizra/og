@@ -29,3 +29,17 @@ og.unsubscribe:
     parameters:
       group:
         type: entity:{entity_type_id}
+
+og.add_multiple_roles_confirm:
+  path: '/group/roles/add'
+  defaults:
+    _form: '\Drupal\og\Form\OgAddMultipleRolesForm'
+  requirements:
+    _custom_access: '\Drupal\og\Form\OgAddMultipleRolesForm::access'
+
+og.remove_multiple_roles_confirm:
+  path: '/group/roles/remove'
+  defaults:
+    _form: '\Drupal\og\Form\OgRemoveMultipleRolesForm'
+  requirements:
+    _custom_access: '\Drupal\og\Form\OgRemoveMultipleRolesForm::access'

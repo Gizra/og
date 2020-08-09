@@ -2,13 +2,12 @@
 
 namespace Drupal\Tests\og\Kernel\Entity;
 
-use Drupal\Component\Utility\Unicode;
 use Drupal\KernelTests\KernelTestBase;
 use Drupal\entity_test\Entity\EntityTest;
 use Drupal\node\Entity\Node;
 use Drupal\node\Entity\NodeType;
 use Drupal\og\Og;
-use Drupal\og\OgGroupAudienceHelper;
+use Drupal\og\OgGroupAudienceHelperInterface;
 use Drupal\user\Entity\User;
 
 /**
@@ -48,7 +47,7 @@ class GetGroupContentTest extends KernelTestBase {
   /**
    * {@inheritdoc}
    */
-  protected function setUp() {
+  protected function setUp(): void {
     parent::setUp();
 
     $this->installConfig(['og']);
@@ -74,7 +73,7 @@ class GetGroupContentTest extends KernelTestBase {
     $groups = [];
 
     // Create two groups of different entity types.
-    $bundle = Unicode::strtolower($this->randomMachineName());
+    $bundle = mb_strtolower($this->randomMachineName());
     NodeType::create([
       'name' => $this->randomString(),
       'type' => $bundle,
@@ -90,7 +89,7 @@ class GetGroupContentTest extends KernelTestBase {
 
     // The Entity Test entity doesn't have 'real' bundles, so we don't need to
     // create one, we can just add the group to the fake bundle.
-    $bundle = Unicode::strtolower($this->randomMachineName());
+    $bundle = mb_strtolower($this->randomMachineName());
     Og::groupTypeManager()->addGroup('entity_test', $bundle);
 
     $groups['entity_test'] = EntityTest::create([
@@ -107,7 +106,7 @@ class GetGroupContentTest extends KernelTestBase {
       foreach (['node', 'entity_test'] as $target_group_type) {
         // Create the group content bundle if it's a node. Entity Test doesn't
         // have real bundles.
-        $bundle = Unicode::strtolower($this->randomMachineName());
+        $bundle = mb_strtolower($this->randomMachineName());
         if ($entity_type === 'node') {
           NodeType::create([
             'type' => $bundle,
@@ -126,13 +125,14 @@ class GetGroupContentTest extends KernelTestBase {
           ],
           'field_config' => [
             'settings' => [
+              'handler' => 'default',
               'handler_settings' => [
                 'target_bundles' => [$groups[$target_group_type]->bundle() => $groups[$target_group_type]->bundle()],
               ],
             ],
           ],
         ];
-        Og::createField(OgGroupAudienceHelper::DEFAULT_FIELD, $entity_type, $bundle, $settings);
+        Og::createField(OgGroupAudienceHelperInterface::DEFAULT_FIELD, $entity_type, $bundle, $settings);
 
         // Create the group content entity.
         $label_field = $entity_type === 'node' ? 'title' : 'name';
@@ -174,7 +174,7 @@ class GetGroupContentTest extends KernelTestBase {
     $groups = [];
 
     // Create two groups.
-    $bundle = Unicode::strtolower($this->randomMachineName());
+    $bundle = mb_strtolower($this->randomMachineName());
     NodeType::create([
       'name' => $this->randomString(),
       'type' => $bundle,
@@ -191,7 +191,7 @@ class GetGroupContentTest extends KernelTestBase {
     }
 
     // Create a group content type.
-    $bundle = Unicode::strtolower($this->randomMachineName());
+    $bundle = mb_strtolower($this->randomMachineName());
 
     $settings = [
       'field_storage_config' => [
@@ -200,13 +200,13 @@ class GetGroupContentTest extends KernelTestBase {
         ],
       ],
     ];
-    Og::createField(OgGroupAudienceHelper::DEFAULT_FIELD, 'entity_test', $bundle, $settings);
+    Og::createField(OgGroupAudienceHelperInterface::DEFAULT_FIELD, 'entity_test', $bundle, $settings);
 
     // Create a group content entity that references both groups.
     $group_content = $this->entityTypeManager->getStorage('entity_test')->create([
       'name' => $this->randomString(),
       'type' => $bundle,
-      OgGroupAudienceHelper::DEFAULT_FIELD => [
+      OgGroupAudienceHelperInterface::DEFAULT_FIELD => [
         ['target_id' => $groups[0]->id()],
         ['target_id' => $groups[1]->id()],
       ],
@@ -232,7 +232,7 @@ class GetGroupContentTest extends KernelTestBase {
     $groups = [];
 
     // Create two groups of different entity types.
-    $bundle = Unicode::strtolower($this->randomMachineName());
+    $bundle = mb_strtolower($this->randomMachineName());
     NodeType::create([
       'name' => $this->randomString(),
       'type' => $bundle,
@@ -248,7 +248,7 @@ class GetGroupContentTest extends KernelTestBase {
 
     // The Entity Test entity doesn't have 'real' bundles, so we don't need to
     // create one, we can just add the group to the fake bundle.
-    $bundle = Unicode::strtolower($this->randomMachineName());
+    $bundle = mb_strtolower($this->randomMachineName());
     Og::groupTypeManager()->addGroup('entity_test', $bundle);
 
     $groups['entity_test'] = EntityTest::create([
@@ -260,7 +260,7 @@ class GetGroupContentTest extends KernelTestBase {
 
     // Create a group content type with two group audience fields, one for each
     // group.
-    $bundle = Unicode::strtolower($this->randomMachineName());
+    $bundle = mb_strtolower($this->randomMachineName());
     foreach (['entity_test', 'node'] as $target_type) {
       $settings = [
         'field_name' => 'group_audience_' . $target_type,
@@ -270,7 +270,7 @@ class GetGroupContentTest extends KernelTestBase {
           ],
         ],
       ];
-      Og::createField(OgGroupAudienceHelper::DEFAULT_FIELD, 'entity_test', $bundle, $settings);
+      Og::createField(OgGroupAudienceHelperInterface::DEFAULT_FIELD, 'entity_test', $bundle, $settings);
     }
 
     // Create a group content entity that references both groups.

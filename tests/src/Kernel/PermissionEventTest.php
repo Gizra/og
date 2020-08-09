@@ -2,13 +2,14 @@
 
 namespace Drupal\Tests\og\Kernel;
 
-use Drupal\Component\Utility\SafeMarkup;
+use Drupal\Component\Render\FormattableMarkup;
 use Drupal\KernelTests\KernelTestBase;
 use Drupal\node\Entity\NodeType;
 use Drupal\og\Event\PermissionEvent;
 use Drupal\og\Event\PermissionEventInterface;
 use Drupal\og\GroupContentOperationPermission;
 use Drupal\og\GroupPermission;
+use Drupal\og\OgAccess;
 use Drupal\og\OgRoleInterface;
 use Drupal\og\PermissionInterface;
 
@@ -47,7 +48,7 @@ class PermissionEventTest extends KernelTestBase {
   /**
    * {@inheritdoc}
    */
-  public function setUp() {
+  protected function setUp(): void {
     parent::setUp();
 
     $this->eventDispatcher = $this->container->get('event_dispatcher');
@@ -89,7 +90,7 @@ class PermissionEventTest extends KernelTestBase {
    */
   public function testPermissionEventIntegration(array $group_content_bundle_ids, array $expected_permissions, array $expected_full_permissions) {
     // Retrieve the permissions from the listeners.
-    /** @var PermissionEvent $permission_event */
+    /** @var \Drupal\og\Event\PermissionEvent $permission_event */
     $event = new PermissionEvent($this->randomMachineName(), $this->randomMachineName(), $group_content_bundle_ids);
     $permission_event = $this->eventDispatcher->dispatch(PermissionEventInterface::EVENT_NAME, $event);
     $actual_permissions = array_keys($permission_event->getPermissions());
@@ -128,14 +129,14 @@ class PermissionEventTest extends KernelTestBase {
     // Test permissions that should be available for both test groups.
     $default_permissions = [
       'add user',
-      'administer group',
+      OgAccess::ADMINISTER_GROUP_PERMISSION,
+      OgAccess::DELETE_GROUP_PERMISSION,
+      OgAccess::UPDATE_GROUP_PERMISSION,
       'approve and deny subscription',
       'manage members',
-      'manage permissions',
-      'manage roles',
+      'administer permissions',
       'subscribe without approval',
       'subscribe',
-      'update group',
     ];
     // Test permissions that should only be available for the test group that
     // has group content.
@@ -149,7 +150,7 @@ class PermissionEventTest extends KernelTestBase {
     // A full permission that should be available in both test groups. This is
     // used to test that all properties are correctly applied.
     $group_level_permission = new GroupPermission([
-      'name' => 'administer group',
+      'name' => OgAccess::ADMINISTER_GROUP_PERMISSION,
       'title' => $this->t('Administer group'),
       'description' => $this->t('Manage group members and content in the group.'),
       'default roles' => [OgRoleInterface::ADMINISTRATOR],
@@ -170,7 +171,7 @@ class PermissionEventTest extends KernelTestBase {
       // Test retrieving permissions for a group that has no group content types
       // associated with it.
       [
-    [],
+        [],
         // It should only return the default permissions.
         $default_permissions,
         // The list of permissions should only contain the group level
@@ -183,9 +184,9 @@ class PermissionEventTest extends KernelTestBase {
       // Test retrieving permissions for a group that has a group content type
       // associated with it.
       [
-    [
-      'node' => ['test_group_content'],
-    ],
+        [
+          'node' => ['test_group_content'],
+        ],
         // It should return the default permissions as well as the permissions
         // to create, delete and update group content.
         array_merge($default_permissions, $group_content_permissions),
@@ -208,8 +209,8 @@ class PermissionEventTest extends KernelTestBase {
    *
    * @see t()
    */
-  public function t($string, array $args = array(), array $options = array()) {
-    return SafeMarkup::format($string, $args);
+  public function t($string, array $args = [], array $options = []) {
+    return new FormattableMarkup($string, $args);
   }
 
   /**

@@ -2,6 +2,7 @@
 
 namespace Drupal\og\Event;
 
+use Drupal\og\OgAccess;
 use Symfony\Component\EventDispatcher\Event;
 
 /**
@@ -19,8 +20,15 @@ class OgAdminRoutesEvent extends Event implements OgAdminRoutesEventInterface {
   /**
    * {@inheritdoc}
    */
-  public function setRoutes(array $routes_info) {
+  public function setRoutesInfo(array $routes_info) {
     $this->routesInfo = $routes_info;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getRoutesInfo() {
+    return $this->routesInfo;
   }
 
   /**
@@ -38,7 +46,7 @@ class OgAdminRoutesEvent extends Event implements OgAdminRoutesEventInterface {
         'description' => '',
 
         'requirements' => [
-          '_og_user_access_group' => 'administer group',
+          '_og_user_access_group' => OgAccess::ADMINISTER_GROUP_PERMISSION,
         ],
 
         'options' => [

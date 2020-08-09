@@ -5,7 +5,7 @@ namespace Drupal\og\Plugin\OgFields;
 use Drupal\Core\Field\FieldStorageDefinitionInterface;
 use Drupal\og\OgFieldBase;
 use Drupal\og\OgFieldsInterface;
-use Drupal\og\OgGroupAudienceHelper;
+use Drupal\og\OgGroupAudienceHelperInterface;
 
 /**
  * Determine to which groups this group content is assigned to.
@@ -21,8 +21,8 @@ class AudienceField extends OgFieldBase implements OgFieldsInterface {
   /**
    * {@inheritdoc}
    */
-  public function getFieldStorageBaseDefinition(array $values = array()) {
-    if ($this->getEntityType() == 'user') {
+  public function getFieldStorageBaseDefinition(array $values = []) {
+    if ($this->getEntityType() === 'user') {
       throw new \LogicException('OG audience field cannot be added to the User entity type.');
     }
 
@@ -31,7 +31,7 @@ class AudienceField extends OgFieldBase implements OgFieldsInterface {
       'settings' => [
         'target_type' => $this->getEntityType(),
       ],
-      'type' => OgGroupAudienceHelper::GROUP_REFERENCE,
+      'type' => OgGroupAudienceHelperInterface::GROUP_REFERENCE,
     ];
 
     return parent::getFieldStorageBaseDefinition($values);
@@ -40,7 +40,7 @@ class AudienceField extends OgFieldBase implements OgFieldsInterface {
   /**
    * {@inheritdoc}
    */
-  public function getFieldBaseDefinition(array $values = array()) {
+  public function getFieldBaseDefinition(array $values = []) {
     $values += [
       'description' => $this->t('OG group audience reference field.'),
       'display_label' => TRUE,
@@ -52,7 +52,6 @@ class AudienceField extends OgFieldBase implements OgFieldsInterface {
     ];
 
     return parent::getFieldBaseDefinition($values);
-
   }
 
   /**
@@ -64,6 +63,7 @@ class AudienceField extends OgFieldBase implements OgFieldsInterface {
       'settings' => [
         'match_operator' => 'CONTAINS',
         'size' => 60,
+        'match_limit' => 10,
         'placeholder' => '',
       ],
     ];

@@ -2,7 +2,6 @@
 
 namespace Drupal\Tests\og\Functional;
 
-use Drupal\Component\Utility\Unicode;
 use Drupal\node\Entity\Node;
 use Drupal\node\Entity\NodeType;
 use Drupal\og\Og;
@@ -21,6 +20,11 @@ class GroupSubscribeFormatterTest extends BrowserTestBase {
    * {@inheritdoc}
    */
   public static $modules = ['node', 'og'];
+
+  /**
+   * {@inheritdoc}
+   */
+  protected $defaultTheme = 'stark';
 
   /**
    * Test entity group.
@@ -53,11 +57,11 @@ class GroupSubscribeFormatterTest extends BrowserTestBase {
   /**
    * {@inheritdoc}
    */
-  protected function setUp() {
+  protected function setUp(): void {
     parent::setUp();
 
     // Create bundle.
-    $this->groupBundle = Unicode::strtolower($this->randomMachineName());
+    $this->groupBundle = mb_strtolower($this->randomMachineName());
 
     // Create a node type.
     $node_type = NodeType::create(['type' => $this->groupBundle, 'name' => $this->groupBundle]);
@@ -105,7 +109,6 @@ class GroupSubscribeFormatterTest extends BrowserTestBase {
     $this->drupalLogin($this->user2);
     $this->drupalGet('node/' . $this->group->id());
     $this->clickLink('Subscribe to group');
-
   }
 
 }

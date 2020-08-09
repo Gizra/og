@@ -2,7 +2,7 @@ name: 'OG standard reference test views'
 type: module
 description: 'Provides default views for views OG standard reference tests.'
 package: Testing
-version: VERSION
 core: 8.x
+core_version_requirement: ^8 || ^9
 dependencies:
- - views
+ - drupal:views

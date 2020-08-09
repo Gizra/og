@@ -161,15 +161,17 @@ class Og {
    * @param \Drupal\Core\Session\AccountInterface $user
    *   The user to get groups for.
    * @param array $states
-   *   (optional) Array with the state to return. Defaults to active.
+   *   (optional) Array with the states to return. Defaults to only returning
+   *   active memberships. In order to retrieve all memberships regardless of
+   *   state, pass `OgMembershipInterface::ALL_STATES`.
    *
-   * @return \Drupal\og\Entity\OgMembership[]
+   * @return \Drupal\og\OgMembershipInterface[]
    *   An array of OgMembership entities, keyed by ID.
    */
   public static function getMemberships(AccountInterface $user, array $states = [OgMembershipInterface::STATE_ACTIVE]) {
     /** @var \Drupal\og\MembershipManagerInterface $membership_manager */
     $membership_manager = \Drupal::service('og.membership_manager');
-    return $membership_manager->getMemberships($user, $states);
+    return $membership_manager->getMemberships($user->id(), $states);
   }
 
   /**
@@ -180,16 +182,18 @@ class Og {
    * @param \Drupal\Core\Session\AccountInterface $user
    *   The user to get the membership for.
    * @param array $states
-   *   (optional) Array with the state to return. Defaults to active.
+   *   (optional) Array with the states to return. Defaults to only returning
+   *   active memberships. In order to retrieve all memberships regardless of
+   *   state, pass `OgMembershipInterface::ALL_STATES`.
    *
-   * @return \Drupal\og\Entity\OgMembership|null
+   * @return \Drupal\og\OgMembershipInterface|null
    *   The OgMembership entity. NULL will be returned if no membership is
    *   available that matches the passed in $states.
    */
   public static function getMembership(EntityInterface $group, AccountInterface $user, array $states = [OgMembershipInterface::STATE_ACTIVE]) {
     /** @var \Drupal\og\MembershipManagerInterface $membership_manager */
     $membership_manager = \Drupal::service('og.membership_manager');
-    return $membership_manager->getMembership($group, $user, $states);
+    return $membership_manager->getMembership($group, $user->id(), $states);
   }
 
   /**
@@ -200,7 +204,8 @@ class Og {
    * @param \Drupal\Core\Session\AccountInterface $user
    *   The user object.
    * @param string $membership_type
-   *   (optional) The membership type. Defaults to OG_MEMBERSHIP_TYPE_DEFAULT.
+   *   (optional) The membership type. Defaults to
+   *   \Drupal\og\OgMembershipInterface::TYPE_DEFAULT.
    *
    * @return \Drupal\og\Entity\OgMembership
    *   The unsaved membership object.
@@ -225,10 +230,10 @@ class Og {
    * @return bool
    *   TRUE if the user belongs to a group with a certain state.
    */
-  public static function isMember(EntityInterface $group, AccountInterface $user, $states = [OgMembershipInterface::STATE_ACTIVE]) {
+  public static function isMember(EntityInterface $group, AccountInterface $user, array $states = [OgMembershipInterface::STATE_ACTIVE]) {
     /** @var \Drupal\og\MembershipManagerInterface $membership_manager */
     $membership_manager = \Drupal::service('og.membership_manager');
-    return $membership_manager->isMember($group, $user, $states);
+    return $membership_manager->isMember($group, $user->id(), $states);
   }
 
   /**
@@ -283,8 +288,6 @@ class Og {
   /**
    * Check if the given entity type and bundle is a group content.
    *
-   * This is just a convenience wrapper around Og::getAllGroupAudienceFields().
-   *
    * @param string $entity_type_id
    *   The entity type.
    * @param string $bundle_id
@@ -294,7 +297,7 @@ class Og {
    *   True or false if the given entity is group content.
    */
   public static function isGroupContent($entity_type_id, $bundle_id) {
-    return (bool) OgGroupAudienceHelper::getAllGroupAudienceFields($entity_type_id, $bundle_id);
+    return \Drupal::service('og.group_type_manager')->isGroupContent($entity_type_id, $bundle_id);
   }
 
   /**
@@ -327,7 +330,7 @@ class Og {
   /**
    * Returns the group manager instance.
    *
-   * @return \Drupal\og\GroupTypeManager
+   * @return \Drupal\og\GroupTypeManagerInterface
    *   Returns the group manager.
    */
   public static function groupTypeManager() {
@@ -336,25 +339,12 @@ class Og {
   }
 
   /**
-   * Return the og permission handler instance.
-   *
-   * @return \Drupal\og\OgPermissionHandler
-   *   Returns the OG permissions handler.
-   */
-  public static function permissionHandler() {
-    return \Drupal::service('og.permissions');
-  }
-
-  /**
    * Invalidate cache.
-   *
-   * @param array $group_ids
-   *   Array with group IDs that their cache should be invalidated.
    */
-  public static function invalidateCache(array $group_ids = array()) {
+  public static function invalidateCache() {
     // @todo We should not be using drupal_static() review and remove.
     // Reset static cache.
-    $caches = array(
+    $caches = [
       'og_user_access',
       'og_user_access_alter',
       'og_role_permissions',
@@ -364,7 +354,7 @@ class Og {
       'og_get_membership',
       'og_get_field_og_membership_properties',
       'og_get_user_roles',
-    );
+    ];
 
     foreach ($caches as $cache) {
       drupal_static_reset($cache);
@@ -374,14 +364,13 @@ class Og {
     static::$cache = [];
 
     // Invalidate the entity property cache.
+    // @todo We should not clear the entity type and field definition caches.
+    // @see https://github.com/Gizra/og/issues/219
     \Drupal::entityTypeManager()->clearCachedDefinitions();
     \Drupal::service('entity_field.manager')->clearCachedFieldDefinitions();
 
-    // Invalidate the group membership manager.
-    \Drupal::service('og.membership_manager')->reset();
-
     // Let other OG modules know we invalidate cache.
-    \Drupal::moduleHandler()->invokeAll('og_invalidate_cache', $group_ids);
+    \Drupal::moduleHandler()->invokeAll('og_invalidate_cache');
   }
 
   /**
@@ -400,7 +389,9 @@ class Og {
   protected static function getFieldBaseDefinition($plugin_id) {
     /** @var OgFieldsPluginManager $plugin_manager */
     $plugin_manager = \Drupal::service('plugin.manager.og.fields');
-    if (!$field_config = $plugin_manager->getDefinition($plugin_id)) {
+
+    $field_config = $plugin_manager->getDefinition($plugin_id);
+    if (!$field_config) {
       throw new \Exception("The Organic Groups field with plugin ID $plugin_id is not a valid plugin.");
     }
 
@@ -421,23 +412,36 @@ class Og {
    * @throws \Exception
    *   Thrown when the passed in field definition is not of a group audience
    *   field.
+   *
+   * @deprecated in og:8.x-1.0-alpha4 and is removed from og:8.x-1.0-alpha5.
+   *   Use
+   *   \Drupal\Core\Entity\EntityReferenceSelection\SelectionPluginManager::getInstance()
+   *   Instead.
+   * @codingStandardsIgnoreStart
+   * @see https://github.com/Gizra/og/issues/580
+   * @codingStandardsIgnoreEnd
    */
   public static function getSelectionHandler(FieldDefinitionInterface $field_definition, array $options = []) {
-    if (!OgGroupAudienceHelper::isGroupAudienceField($field_definition)) {
+    // @codingStandardsIgnoreStart
+    @trigger_error('Og:getSelectionHandler() is deprecated in og:8.x-1.0-alpha4
+      and is removed from og:8.x-1.0-alpha5.
+      Use \Drupal\Core\Entity\EntityReferenceSelection\SelectionPluginManager::getInstance()
+      instead. See https://github.com/Gizra/og/issues/580', E_USER_DEPRECATED
+    );
+    // @codingStandardsIgnoreEnd
+    if (!\Drupal::service('og.group_audience_helper')->isGroupAudienceField($field_definition)) {
       $field_name = $field_definition->getName();
       throw new \Exception("The field $field_name is not an audience field.");
     }
 
-    $options = NestedArray::mergeDeep([
+    $default_options = [
       'target_type' => $field_definition->getFieldStorageDefinition()->getSetting('target_type'),
       'handler' => $field_definition->getSetting('handler'),
-      'handler_settings' => [
-        'field_mode' => 'default',
-      ],
-    ], $options);
+      'field_mode' => 'default',
+    ] + $field_definition->getSetting('handler_settings');
 
-    // Deep merge the handler settings.
-    $options['handler_settings'] = NestedArray::mergeDeep($field_definition->getSetting('handler_settings'), $options['handler_settings']);
+    // Override with passed $options.
+    $options = NestedArray::mergeDeep($default_options, $options);
 
     return \Drupal::service('plugin.manager.entity_reference_selection')->createInstance('og:default', $options);
   }

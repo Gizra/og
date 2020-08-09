@@ -10,12 +10,12 @@ use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Entity\FieldableEntityInterface;
 use Drupal\Core\Field\FieldDefinitionInterface;
 use Drupal\Core\Field\FieldStorageDefinitionInterface;
-use Drupal\og\OgGroupAudienceHelper;
+use Drupal\og\OgGroupAudienceHelperInterface;
 
 /**
  * OG access entity base class.
  */
-class OgAccessEntityTestBase extends OgAccessTestBase {
+abstract class OgAccessEntityTestBase extends OgAccessTestBase {
 
   /**
    * A test group content entity.
@@ -27,7 +27,7 @@ class OgAccessEntityTestBase extends OgAccessTestBase {
   /**
    * {@inheritdoc}
    */
-  public function setup() {
+  protected function setUp(): void {
     parent::setUp();
 
     // Mock a group content entity.
@@ -39,7 +39,7 @@ class OgAccessEntityTestBase extends OgAccessTestBase {
 
     $entity_type = $this->prophesize(EntityTypeInterface::class);
     $entity_type->getListCacheTags()->willReturn([]);
-    $entity_type->isSubclassOf(FieldableEntityInterface::class)->willReturn(TRUE);
+    $entity_type->entityClassImplements(FieldableEntityInterface::class)->willReturn(TRUE);
     $entity_type->id()->willReturn($entity_type_id);
 
     $this->groupContentEntity = $this->prophesize(ContentEntityInterface::class);
@@ -49,6 +49,11 @@ class OgAccessEntityTestBase extends OgAccessTestBase {
     $this->groupContentEntity->getEntityType()->willReturn($entity_type->reveal());
     $this->groupContentEntity->getEntityTypeId()->willReturn($entity_type_id);
     $this->addCache($this->groupContentEntity);
+
+    // If the group type manager is asked if the group content entity is group
+    // content, it is expected that this will return TRUE.
+    $this->groupTypeManager->isGroupContent($entity_type_id, $bundle)
+      ->willReturn(TRUE);
 
     // It is expected that a list of entity operation permissions is retrieved
     // from the permission manager so that the passed in permission can be
@@ -62,7 +67,7 @@ class OgAccessEntityTestBase extends OgAccessTestBase {
 
     // Mock retrieval of field definitions.
     $field_definition = $this->prophesize(FieldDefinitionInterface::class);
-    $field_definition->getType()->willReturn(OgGroupAudienceHelper::GROUP_REFERENCE);
+    $field_definition->getType()->willReturn(OgGroupAudienceHelperInterface::GROUP_REFERENCE);
     $field_definition->getFieldStorageDefinition()
       ->willReturn($this->prophesize(FieldStorageDefinitionInterface::class)->reveal());
     $field_definition->getSetting('handler_settings')->willReturn([]);

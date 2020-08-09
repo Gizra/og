@@ -2,14 +2,15 @@
 
 namespace Drupal\og\Routing;
 
-use Drupal\Core\Entity\EntityTypeManager;
+use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Routing\RouteProviderInterface;
 use Drupal\Core\Routing\RouteSubscriberBase;
 use Drupal\Core\Routing\RoutingEvents;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
 use Drupal\og\Event\OgAdminRoutesEvent;
 use Drupal\og\Event\OgAdminRoutesEventInterface;
-use Drupal\Component\EventDispatcher\ContainerAwareEventDispatcher;
+use Drupal\og\OgAccess;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\Routing\Route;
 use Symfony\Component\Routing\RouteCollection;
 
@@ -44,15 +45,15 @@ class RouteSubscriber extends RouteSubscriberBase {
   /**
    * Constructs a new RouteSubscriber object.
    *
-   * @param EntityTypeManager $entity_manager
+   * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entity_type_manager
    *   The entity type manager.
    * @param \Drupal\Core\Routing\RouteProviderInterface $route_provider
    *   The route provider service.
-   * @param \Drupal\Component\EventDispatcher\ContainerAwareEventDispatcher $event_dispatcher
+   * @param \Symfony\Component\EventDispatcher\EventDispatcherInterface $event_dispatcher
    *   The event dispatcher service.
    */
-  public function __construct(EntityTypeManager $entity_manager, RouteProviderInterface $route_provider, ContainerAwareEventDispatcher $event_dispatcher) {
-    $this->entityTypeManager = $entity_manager;
+  public function __construct(EntityTypeManagerInterface $entity_type_manager, RouteProviderInterface $route_provider, EventDispatcherInterface $event_dispatcher) {
+    $this->entityTypeManager = $entity_type_manager;
     $this->routeProvider = $route_provider;
     $this->eventDispatcher = $event_dispatcher;
   }
@@ -83,7 +84,7 @@ class RouteSubscriber extends RouteSubscriberBase {
           '_title' => 'Group management',
         ])
         ->addRequirements([
-          '_og_user_access_group' => 'administer group',
+          '_og_user_access_group' => OgAccess::ADMINISTER_GROUP_PERMISSION,
         ])
         ->setOption('parameters', [
           $entity_type_id => ['type' => 'entity:' . $entity_type_id],

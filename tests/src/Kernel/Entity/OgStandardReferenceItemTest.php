@@ -2,11 +2,10 @@
 
 namespace Drupal\Tests\og\Kernel\Entity;
 
-use Drupal\Component\Utility\Unicode;
 use Drupal\entity_test\Entity\EntityTest;
 use Drupal\KernelTests\KernelTestBase;
 use Drupal\og\Og;
-use Drupal\og\OgGroupAudienceHelper;
+use Drupal\og\OgGroupAudienceHelperInterface;
 
 /**
  * Tests OgStandardReferenceItem class.
@@ -21,14 +20,31 @@ class OgStandardReferenceItemTest extends KernelTestBase {
    */
   public static $modules = ['user', 'entity_test', 'field', 'og', 'system'];
 
+  /**
+   * A list of bundles.
+   *
+   * @var string[]
+   */
   protected $bundles;
+
+  /**
+   * The machine name for a field.
+   *
+   * @var string
+   */
   protected $fieldName;
+
+  /**
+   * A list of groups.
+   *
+   * @var \Drupal\entity_test\Entity\EntityTest[]
+   */
   protected $groups;
 
   /**
    * {@inheritdoc}
    */
-  protected function setUp() {
+  protected function setUp(): void {
     parent::setUp();
 
     // Add membership and config schema.
@@ -41,7 +57,7 @@ class OgStandardReferenceItemTest extends KernelTestBase {
     // Create several bundles.
     for ($i = 0; $i <= 2; $i++) {
       $bundle = EntityTest::create([
-        'type' => Unicode::strtolower($this->randomMachineName()),
+        'type' => mb_strtolower($this->randomMachineName()),
         'name' => $this->randomString(),
       ]);
 
@@ -57,7 +73,7 @@ class OgStandardReferenceItemTest extends KernelTestBase {
     }
     $this->fieldName = strtolower($this->randomMachineName());
 
-    Og::CreateField(OgGroupAudienceHelper::DEFAULT_FIELD, 'entity_test', $this->bundles[2], ['field_name' => $this->fieldName]);
+    Og::CreateField(OgGroupAudienceHelperInterface::DEFAULT_FIELD, 'entity_test', $this->bundles[2], ['field_name' => $this->fieldName]);
   }
 
   /**
@@ -65,7 +81,7 @@ class OgStandardReferenceItemTest extends KernelTestBase {
    */
   public function testStandardReference() {
     $groups_query = function ($gid) {
-      return $this->container->get('entity.query')->get('entity_test')
+      return $this->container->get('entity_type.manager')->getStorage('entity_test')->getQuery()
         ->condition($this->fieldName, $gid)
         ->execute();
     };
