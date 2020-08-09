@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types = 1);
+
 namespace Drupal\Tests\og\Kernel\Form;
 
 use Drupal\KernelTests\KernelTestBase;

@@ -437,14 +437,14 @@ class OgMembership extends ContentEntityBase implements OgMembershipInterface {
   public function preSave(EntityStorageInterface $storage) {
     // Check the value directly rather than using the entity, if there is one.
     // This will watch actual empty values and '0'.
-    if (!$this->get('uid')->target_id) {
+    if (!$uid = $this->get('uid')->target_id) {
       // Throw a generic logic exception as this will likely get caught in
       // \Drupal\Core\Entity\Sql\SqlContentEntityStorage::save and turned into
       // an EntityStorageException anyway.
       throw new \LogicException('OG membership can not be created for an empty or anonymous user.');
     }
 
-    if (!$this->get('entity_id')->value) {
+    if (!$entity_id = $this->get('entity_id')->value) {
       // Group was not set.
       throw new \LogicException('Membership cannot be set for an empty or an unsaved group.');
     }
@@ -480,8 +480,8 @@ class OgMembership extends ContentEntityBase implements OgMembershipInterface {
     // Check for an existing membership.
     $query = \Drupal::entityQuery('og_membership');
     $query
-      ->condition('uid', $this->get('uid')->target_id)
-      ->condition('entity_id', $this->get('entity_id')->value)
+      ->condition('uid', $uid)
+      ->condition('entity_id', $entity_id)
       ->condition('entity_type', $this->get('entity_type')->value);
 
     if (!$this->isNew()) {
@@ -495,7 +495,7 @@ class OgMembership extends ContentEntityBase implements OgMembershipInterface {
       ->execute();
 
     if ($count) {
-      throw new \LogicException(sprintf('An OG membership already exists for uid %s in group of entity-type %s and ID: %s', $this->get('uid')->target_id, $entity_type_id, $this->getGroup()->id()));
+      throw new \LogicException(sprintf('An OG membership already exists for user ID %d and group of entity type %s and ID %s', $uid, $entity_type_id, $group->id()));
     }
 
     parent::preSave($storage);
