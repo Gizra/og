@@ -23,9 +23,8 @@ interface DefaultRoleEventInterface extends \ArrayAccess, \IteratorAggregate {
    * @param string $name
    *   The name of the role to return.
    *
-   * @return \Drupal\og\Entity\OgRole
-   *   The OgRole entity. Note that we cannot specify OgRoleInterface here
-   *   because of limitations in interface inheritance in PHP 5.
+   * @return \Drupal\og\OgRoleInterface
+   *   The OgRole entity.
    *
    * @throws \InvalidArgumentException
    *   Thrown when the role with the given name does not exist.
