@@ -7,16 +7,16 @@ use Drupal\Core\Session\AccountInterface;
 use Symfony\Component\Routing\Route;
 
 /**
-* Access plugin that provides group-audience based access control.
-*
-* @ingroup views_access_plugins
-*
-* @ViewsAccess(
-*   id = "group_check",
-*   title = @Translation("Group Check"),
-*   help = @Translation("Access will be granted to users with memberships to the audience for this view. The audience will be determine by the route.")
-* )
-*/
+ * Access plugin that provides group-audience based access control.
+ *
+ * @ingroup views_access_plugins
+ *
+ * @ViewsAccess(
+ *   id = "group_check",
+ *   title = @Translation("Group Check"),
+ *   help = @Translation("Access will be granted to users with memberships to the audience for this view. The audience will be determine by the route.")
+ * )
+ */
 class GroupAudience extends AccessPluginBase {
 
   /**
