@@ -163,12 +163,14 @@ provide a quick way to get started with Organic groups.
 ## API
 
 ```php
-// Define the "Page" node type as group.
-\Drupal\og\Og::groupTypeManager()->addGroup('node', 'page');
+use Drupal\og\Og;
+use Drupal\og\OgGroupAudienceHelperInterface;
 
-// Add og audience field to "Article" node type, thus making is a group content.
-$field = \Drupal\og\OgGroupAudienceHelper::DEFAULT_FIELD, 'node', 'article');
-\Drupal\og\Og::createField($field);
+// Define the "Page" node type as a group.
+Og::groupTypeManager()->addGroup('node', 'page');
+
+// Add OG audience field to the "News" node type, thus making it group content.
+Og::createField(OgGroupAudienceHelperInterface::DEFAULT_FIELD, 'node', 'news');
 ```
 
 ## DRUPAL CONSOLE INTEGRATION

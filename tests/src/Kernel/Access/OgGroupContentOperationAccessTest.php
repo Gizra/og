@@ -83,7 +83,7 @@ class OgGroupContentOperationAccessTest extends KernelTestBase {
   /**
    * {@inheritdoc}
    */
-  protected function setUp() {
+  protected function setUp(): void {
     parent::setUp();
 
     $this->installConfig(['og']);
@@ -174,7 +174,7 @@ class OgGroupContentOperationAccessTest extends KernelTestBase {
     }
 
     // Create a 'blocked' user. This user is identical to the normal
-    // 'authenticated' member, except that she has the 'blocked' state.
+    // 'authenticated' member, except that they have the 'blocked' state.
     $this->users['blocked'] = User::create(['name' => $this->randomString()]);
     $this->users['blocked']->save();
     $this->createOgMembership($this->group, $this->users['blocked'], NULL, OgMembershipInterface::STATE_BLOCKED);
@@ -235,6 +235,7 @@ class OgGroupContentOperationAccessTest extends KernelTestBase {
               'comment_type' => $bundle_id,
               'entity_id' => $this->group->id(),
               'entity_type' => 'entity_test',
+              'field_name' => 'an_imaginary_field',
               OgGroupAudienceHelperInterface::DEFAULT_FIELD => [['target_id' => $this->group->id()]],
             ];
             break;
@@ -266,7 +267,7 @@ class OgGroupContentOperationAccessTest extends KernelTestBase {
           // group owner.
           $entity = $ownership === 'own' ? $this->groupContent[$group_content_bundle_id][$user_id] : $this->groupContent[$group_content_bundle_id]['group_owner'];
           $user = $this->users[$user_id];
-          $this->assertEquals($expected_access, $og_access->userAccessEntity($operation, $entity, $user)->isAllowed(), "Operation: $operation, ownership: $ownership, user: $user_id, bundle: $group_content_bundle_id");
+          $this->assertEquals($expected_access, $og_access->userAccessEntityOperation($operation, $entity, $user)->isAllowed(), "Operation: $operation, ownership: $ownership, user: $user_id, bundle: $group_content_bundle_id");
         }
       }
     }

@@ -11,7 +11,7 @@ mysql_to_ramdisk() {
   sudo service mysql start
 }
 
-TEST_DIRS=($MODULE_DIR/tests $MODULE_DIR/og_ui/tests)
+TEST_DIRS=($DRUPAL_DIR/modules/og/tests $DRUPAL_DIR/modules/og/og_ui/tests)
 
 case "$1" in
     PHP_CodeSniffer)
@@ -21,6 +21,9 @@ case "$1" in
         exit $?
         ;;
     *)
+        # Disable deprecations checking in Drupal 9.
+        if [[ $1 == 9* ]]; then export SYMFONY_DEPRECATIONS_HELPER=disabled; fi
+
         mysql_to_ramdisk
         ln -s $MODULE_DIR $DRUPAL_DIR/modules/og
         cd $DRUPAL_DIR

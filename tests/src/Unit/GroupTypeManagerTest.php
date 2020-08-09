@@ -2,13 +2,13 @@
 
 namespace Drupal\Tests\og\Unit;
 
+use Drupal\Core\Cache\CacheBackendInterface;
 use Drupal\Core\Config\Config;
 use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Entity\EntityStorageInterface;
 use Drupal\Core\Entity\EntityTypeBundleInfoInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Routing\RouteBuilderInterface;
-use Drupal\Core\State\StateInterface;
 use Drupal\og\Event\GroupCreationEvent;
 use Drupal\og\Event\GroupCreationEventInterface;
 use Drupal\og\GroupTypeManager;
@@ -87,11 +87,11 @@ class GroupTypeManagerTest extends UnitTestCase {
   protected $permissionEvent;
 
   /**
-   * The state prophecy used in the test.
+   * The cache prophecy used in the test.
    *
-   * @var \Drupal\Core\State\StateInterface|\Prophecy\Prophecy\ObjectProphecy
+   * @var \Drupal\Core\Cache\CacheBackendInterface|\Prophecy\Prophecy\ObjectProphecy
    */
-  protected $state;
+  protected $cache;
 
   /**
    * The OG permission manager prophecy used in the test.
@@ -124,7 +124,7 @@ class GroupTypeManagerTest extends UnitTestCase {
   /**
    * {@inheritdoc}
    */
-  public function setUp() {
+  protected function setUp(): void {
     $this->config = $this->prophesize(Config::class);
     $this->configFactory = $this->prophesize(ConfigFactoryInterface::class);
     $this->entityTypeBundleInfo = $this->prophesize(EntityTypeBundleInfoInterface::class);
@@ -135,7 +135,7 @@ class GroupTypeManagerTest extends UnitTestCase {
     $this->ogRoleManager = $this->prophesize(OgRoleManagerInterface::class);
     $this->permissionEvent = $this->prophesize(PermissionEventInterface::class);
     $this->permissionManager = $this->prophesize(PermissionManagerInterface::class);
-    $this->state = $this->prophesize(StateInterface::class);
+    $this->cache = $this->prophesize(CacheBackendInterface::class);
     $this->routeBuilder = $this->prophesize(RouteBuilderInterface::class);
     $this->groupAudienceHelper = $this->prophesize(OgGroupAudienceHelperInterface::class);
   }
@@ -221,7 +221,6 @@ class GroupTypeManagerTest extends UnitTestCase {
    * Tests adding an existing group.
    *
    * @covers ::addGroup
-   * @expectedException \InvalidArgumentException
    */
   public function testAddGroupExisting() {
     // It is expected that the group map will be retrieved from config.
@@ -237,6 +236,7 @@ class GroupTypeManagerTest extends UnitTestCase {
     $manager = $this->createGroupManager();
 
     // Add to existing.
+    $this->expectException(\InvalidArgumentException::class);
     $manager->addGroup('test_entity', 'c');
 
     $this->assertSame(['a', 'b', 'c'], $manager->getGroupBundleIdsByEntityType('test_entity'));
@@ -331,7 +331,7 @@ class GroupTypeManagerTest extends UnitTestCase {
       $this->entityTypeManager->reveal(),
       $this->entityTypeBundleInfo->reveal(),
       $this->eventDispatcher->reveal(),
-      $this->state->reveal(),
+      $this->cache->reveal(),
       $this->permissionManager->reveal(),
       $this->ogRoleManager->reveal(),
       $this->routeBuilder->reveal(),
