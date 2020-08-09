@@ -2,8 +2,6 @@
 
 namespace Drupal\Tests\og\Unit;
 
-use Drupal\og\OgAccess;
-
 /**
  * Tests access.
  *
@@ -59,7 +57,7 @@ class OgAccessTest extends OgAccessTestBase {
    * @dataProvider permissionsProvider
    */
   public function testUserAccessAdminPermission($operation) {
-    $this->user->hasPermission(OgAccess::ADMINISTER_GROUP_PERMISSION)->willReturn(TRUE);
+    $this->user->hasPermission('administer organic groups')->willReturn(TRUE);
     $user_access = $this->ogAccess->userAccess($this->group, $operation, $this->user->reveal());
     $this->assertTrue($user_access->isAllowed());
   }

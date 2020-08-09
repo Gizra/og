@@ -22,7 +22,7 @@ class AudienceField extends OgFieldBase implements OgFieldsInterface {
    * {@inheritdoc}
    */
   public function getFieldStorageBaseDefinition(array $values = []) {
-    if ($this->getEntityType() == 'user') {
+    if ($this->getEntityType() === 'user') {
       throw new \LogicException('OG audience field cannot be added to the User entity type.');
     }
 
@@ -63,6 +63,7 @@ class AudienceField extends OgFieldBase implements OgFieldsInterface {
       'settings' => [
         'match_operator' => 'CONTAINS',
         'size' => 60,
+        'match_limit' => 10,
         'placeholder' => '',
       ],
     ];

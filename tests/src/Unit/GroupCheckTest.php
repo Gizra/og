@@ -10,7 +10,7 @@ use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Routing\RouteMatchInterface;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\og\Access\GroupCheck;
-use Drupal\og\GroupTypeManager;
+use Drupal\og\GroupTypeManagerInterface;
 use Drupal\og\OgAccessInterface;
 use Drupal\Tests\UnitTestCase;
 use Symfony\Component\Routing\Route;
@@ -96,7 +96,7 @@ class GroupCheckTest extends UnitTestCase {
   /**
    * The group manager used in the test.
    *
-   * @var \Drupal\og\GroupTypeManager|\Prophecy\Prophecy\ObjectProphecy
+   * @var \Drupal\og\GroupTypeManagerInterface|\Prophecy\Prophecy\ObjectProphecy
    */
   protected $groupTypeManager;
 
@@ -117,7 +117,7 @@ class GroupCheckTest extends UnitTestCase {
   /**
    * {@inheritdoc}
    */
-  public function setUp() {
+  protected function setUp(): void {
     $this->entityTypeManager = $this->prophesize(EntityTypeManagerInterface::class);
     $this->entityType = $this->prophesize(EntityTypeInterface::class);
     $this->entityStorage = $this->prophesize(EntityStorageInterface::class);
@@ -128,7 +128,7 @@ class GroupCheckTest extends UnitTestCase {
     $this->entityTypeId = $this->randomMachineName();
     $this->bundle = $this->randomMachineName();
     $this->entityId = rand(10, 50);
-    $this->groupTypeManager = $this->prophesize(GroupTypeManager::class);
+    $this->groupTypeManager = $this->prophesize(GroupTypeManagerInterface::class);
     $this->user = $this->prophesize(AccountInterface::class);
     $this->group = $this->prophesize(EntityInterface::class);
     $this->accessResult = $this->prophesize(AccessResultInterface::class);
@@ -284,8 +284,6 @@ class GroupCheckTest extends UnitTestCase {
 
   /**
    * Tests fetching arguments from the route match without "getOption" defined.
-   *
-   * @expectedException BadMethodCallException
    */
   public function testNoArgumentsFromRouteMatch() {
     $this
@@ -300,6 +298,7 @@ class GroupCheckTest extends UnitTestCase {
 
     // Call the group check without the entity related arguments.
     $group_check = new GroupCheck($this->entityTypeManager->reveal(), $this->ogAccess->reveal());
+    $this->expectException(\BadMethodCallException::class);
     $group_check->access($this->user->reveal(), $this->route->reveal(), $this->routeMatch->reveal());
   }
 

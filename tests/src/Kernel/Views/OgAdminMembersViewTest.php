@@ -2,11 +2,10 @@
 
 namespace Drupal\Tests\og\Kernel\Views;
 
-use Drupal\Component\Utility\Unicode;
 use Drupal\node\Entity\Node;
 use Drupal\node\Entity\NodeType;
 use Drupal\og\Og;
-use Drupal\simpletest\UserCreationTrait;
+use Drupal\Tests\user\Traits\UserCreationTrait;
 use Drupal\Tests\views\Kernel\ViewsKernelTestBase;
 use Drupal\views\Views;
 
@@ -28,6 +27,7 @@ class OgAdminMembersViewTest extends ViewsKernelTestBase {
     'field',
     'node',
     'og',
+    'options',
     'views',
   ];
 
@@ -99,7 +99,7 @@ class OgAdminMembersViewTest extends ViewsKernelTestBase {
     $this->installEntitySchema('node');
 
     // Create a group entity type.
-    $group_bundle = Unicode::strtolower($this->randomMachineName());
+    $group_bundle = mb_strtolower($this->randomMachineName());
     NodeType::create([
       'type' => $group_bundle,
       'name' => $this->randomString(),

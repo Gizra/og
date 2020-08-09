@@ -1,9 +1,10 @@
 <?php
 
+declare(strict_types = 1);
+
 namespace Drupal\og;
 
 use Drupal\Core\Entity\ContentEntityInterface;
-use Drupal\Core\Entity\EntityInterface;
 use Drupal\user\EntityOwnerInterface;
 
 /**
@@ -39,6 +40,15 @@ interface OgMembershipInterface extends ContentEntityInterface, EntityOwnerInter
   const STATE_BLOCKED = 'blocked';
 
   /**
+   * An array containing all possible group membership states.
+   */
+  const ALL_STATES = [
+    self::STATE_ACTIVE,
+    self::STATE_PENDING,
+    self::STATE_BLOCKED,
+  ];
+
+  /**
    * The default group membership type that is the bundle of group membership.
    */
   const TYPE_DEFAULT = 'default';
@@ -49,12 +59,17 @@ interface OgMembershipInterface extends ContentEntityInterface, EntityOwnerInter
   const REQUEST_FIELD = 'og_membership_request';
 
   /**
+   * The prefix that is used to identify group membership list cache tags.
+   */
+  const GROUP_MEMBERSHIP_LIST_CACHE_TAG_PREFIX = 'og-group-membership-list';
+
+  /**
    * Gets the membership creation timestamp.
    *
    * @return int
    *   The membership creation timestamp.
    */
-  public function getCreatedTime();
+  public function getCreatedTime(): int;
 
   /**
    * Sets the membership creation timestamp.
@@ -65,27 +80,29 @@ interface OgMembershipInterface extends ContentEntityInterface, EntityOwnerInter
    * @return \Drupal\og\OgMembershipInterface
    *   The updated OG Membership object.
    */
-  public function setCreatedTime($timestamp);
+  public function setCreatedTime(int $timestamp): OgMembershipInterface;
 
   /**
    * Sets the group associated with the membership.
    *
-   * @param \Drupal\Core\Entity\EntityInterface $group
+   * @param \Drupal\Core\Entity\ContentEntityInterface $group
    *   The entity object.
    *
    * @return \Drupal\og\OgMembershipInterface
    *   The updated OG Membership object.
    */
-  public function setGroup(EntityInterface $group);
+  public function setGroup(ContentEntityInterface $group): OgMembershipInterface;
 
   /**
    * Gets the group associated with the membership.
    *
-   * @return \Drupal\Core\Entity\EntityInterface|null
-   *   The group object which is referenced by the membership, or NULL if no
-   *   group has been set yet.
+   * @return \Drupal\Core\Entity\ContentEntityInterface|null
+   *   The group object which is referenced by the membership, or NULL if the
+   *   group no longer exists in the entity storage. This can happen when the
+   *   cleanup of orphaned memberships is configured to be handled in a cron job
+   *   or batch process.
    */
-  public function getGroup();
+  public function getGroup(): ?ContentEntityInterface;
 
   /**
    * Gets the group entity type.
@@ -93,7 +110,15 @@ interface OgMembershipInterface extends ContentEntityInterface, EntityOwnerInter
    * @return string
    *   The entity type.
    */
-  public function getGroupEntityType();
+  public function getGroupEntityType(): string;
+
+  /**
+   * Gets the group entity bundle.
+   *
+   * @return string
+   *   The bundle.
+   */
+  public function getGroupBundle(): string;
 
   /**
    * Gets the group entity ID.
@@ -101,7 +126,7 @@ interface OgMembershipInterface extends ContentEntityInterface, EntityOwnerInter
    * @return string
    *   The entity identifier.
    */
-  public function getGroupId();
+  public function getGroupId(): string;
 
   /**
    * Sets the membership state.
@@ -115,7 +140,7 @@ interface OgMembershipInterface extends ContentEntityInterface, EntityOwnerInter
    * @return \Drupal\og\OgMembershipInterface
    *   The updated OG Membership object.
    */
-  public function setState($state);
+  public function setState(string $state): OgMembershipInterface;
 
   /**
    * Gets the membership state.
@@ -126,7 +151,7 @@ interface OgMembershipInterface extends ContentEntityInterface, EntityOwnerInter
    *   - OgMembershipInterface::STATE_PENDING
    *   - OgMembershipInterface::STATE_BLOCKED
    */
-  public function getState();
+  public function getState(): string;
 
   /**
    * Gets the membership type.
@@ -134,7 +159,7 @@ interface OgMembershipInterface extends ContentEntityInterface, EntityOwnerInter
    * @return string
    *   The bundle of the membership type.
    */
-  public function getType();
+  public function getType(): string;
 
   /**
    * Sets the group's roles for the current user group membership.
@@ -145,7 +170,7 @@ interface OgMembershipInterface extends ContentEntityInterface, EntityOwnerInter
    * @return \Drupal\og\OgMembershipInterface
    *   The updated OG Membership object.
    */
-  public function setRoles(array $roles = []);
+  public function setRoles(array $roles = []): OgMembershipInterface;
 
   /**
    * Adds a role to the user membership.
@@ -156,7 +181,7 @@ interface OgMembershipInterface extends ContentEntityInterface, EntityOwnerInter
    * @return \Drupal\og\OgMembershipInterface
    *   The updated OG Membership object.
    */
-  public function addRole(OgRoleInterface $role);
+  public function addRole(OgRoleInterface $role): OgMembershipInterface;
 
   /**
    * Revokes a role from the OG membership.
@@ -167,7 +192,7 @@ interface OgMembershipInterface extends ContentEntityInterface, EntityOwnerInter
    * @return \Drupal\og\OgMembershipInterface
    *   The updated OG Membership object.
    */
-  public function revokeRole(OgRoleInterface $role);
+  public function revokeRole(OgRoleInterface $role): OgMembershipInterface;
 
   /**
    * Revokes a role from the OG membership.
@@ -178,7 +203,7 @@ interface OgMembershipInterface extends ContentEntityInterface, EntityOwnerInter
    * @return \Drupal\og\OgMembershipInterface
    *   The updated OG Membership object.
    */
-  public function revokeRoleById($role_id);
+  public function revokeRoleById(string $role_id): OgMembershipInterface;
 
   /**
    * Gets all the referenced OG roles.
@@ -186,7 +211,7 @@ interface OgMembershipInterface extends ContentEntityInterface, EntityOwnerInter
    * @return \Drupal\og\Entity\OgRole[]
    *   List of OG roles the user own for the current membership instance.
    */
-  public function getRoles();
+  public function getRoles(): array;
 
   /**
    * Gets all the referenced OG role IDs.
@@ -194,7 +219,7 @@ interface OgMembershipInterface extends ContentEntityInterface, EntityOwnerInter
    * @return string[]
    *   List of OG role IDs that are granted in the membership.
    */
-  public function getRolesIds();
+  public function getRolesIds(): array;
 
   /**
    * Returns whether the given role is valid for this membership.
@@ -209,7 +234,7 @@ interface OgMembershipInterface extends ContentEntityInterface, EntityOwnerInter
    *   Thrown when the validity of the role cannot be established, for example
    *   because the group hasn't yet been set on the membership.
    */
-  public function isRoleValid(OgRoleInterface $role);
+  public function isRoleValid(OgRoleInterface $role): bool;
 
   /**
    * Checks if the membership has the role with the given ID.
@@ -220,7 +245,7 @@ interface OgMembershipInterface extends ContentEntityInterface, EntityOwnerInter
    * @return bool
    *   True if the membership has the role.
    */
-  public function hasRole($role_id);
+  public function hasRole(string $role_id): bool;
 
   /**
    * Checks if the user has a permission inside the group.
@@ -231,7 +256,7 @@ interface OgMembershipInterface extends ContentEntityInterface, EntityOwnerInter
    * @return bool
    *   TRUE if the user has permission.
    */
-  public function hasPermission($permission);
+  public function hasPermission(string $permission): bool;
 
   /**
    * Returns TRUE if the OG membership is active.
@@ -239,7 +264,7 @@ interface OgMembershipInterface extends ContentEntityInterface, EntityOwnerInter
    * @return bool
    *   TRUE if the OG membership is active, FALSE otherwise.
    */
-  public function isActive();
+  public function isActive(): bool;
 
   /**
    * Returns TRUE if the OG membership is pending.
@@ -247,7 +272,7 @@ interface OgMembershipInterface extends ContentEntityInterface, EntityOwnerInter
    * @return bool
    *   TRUE if the OG membership is pending, FALSE otherwise.
    */
-  public function isPending();
+  public function isPending(): bool;
 
   /**
    * Returns TRUE if the OG membership is blocked.
@@ -255,7 +280,7 @@ interface OgMembershipInterface extends ContentEntityInterface, EntityOwnerInter
    * @return bool
    *   TRUE if the OG membership is blocked, FALSE otherwise.
    */
-  public function isBlocked();
+  public function isBlocked(): bool;
 
   /**
    * Returns TRUE if the OG membership belongs to the group owner.
@@ -263,6 +288,6 @@ interface OgMembershipInterface extends ContentEntityInterface, EntityOwnerInter
    * @return bool
    *   TRUE if the OG membership belongs to the group owner, FALSE otherwise.
    */
-  public function isOwner();
+  public function isOwner(): bool;
 
 }

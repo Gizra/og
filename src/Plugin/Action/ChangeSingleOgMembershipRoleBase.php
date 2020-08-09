@@ -85,7 +85,7 @@ abstract class ChangeSingleOgMembershipRoleBase extends ConfigurableActionBase i
     reset($options);
     $form['role_name'] = [
       '#type' => 'radios',
-      '#title' => t('Role'),
+      '#title' => $this->t('Role'),
       '#options' => $options,
       '#default_value' => $this->configuration['role_name'],
       '#required' => TRUE,
