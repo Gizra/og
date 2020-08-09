@@ -13,6 +13,7 @@ use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Field\BaseFieldDefinition;
 use Drupal\Core\Session\AccountInterface;
+use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\og\Entity\OgRole;
 use Drupal\og\Og;
 use Drupal\og\OgGroupAudienceHelperInterface;
@@ -21,11 +22,6 @@ use Drupal\og\OgRoleInterface;
 use Drupal\system\Entity\Action;
 use Drupal\user\EntityOwnerInterface;
 use Drupal\user\UserInterface;
-
-/**
- * Group default roles and permissions field.
- */
-define('OG_DEFAULT_ACCESS_FIELD', 'og_roles_permissions');
 
 /**
  * Implements hook_entity_insert().
@@ -53,11 +49,7 @@ function og_entity_insert(EntityInterface $entity) {
 
   // Other modules that implement hook_entity_insert() might already have
   // created a membership ahead of us.
-  if (!Og::getMembership($entity, $entity->getOwner(), [
-    OgMembershipInterface::STATE_ACTIVE,
-    OgMembershipInterface::STATE_PENDING,
-    OgMembershipInterface::STATE_BLOCKED,
-  ])) {
+  if (!Og::getMembership($entity, $entity->getOwner(), OgMembershipInterface::ALL_STATES)) {
     $membership = Og::createMembership($entity, $entity->getOwner());
     $membership->save();
   }
@@ -76,8 +68,8 @@ function og_entity_update(EntityInterface $entity) {
  */
 function og_entity_predelete(EntityInterface $entity) {
   if (Og::isGroup($entity->getEntityTypeId(), $entity->bundle())) {
-    // Register orphaned group content for deletion, if this option has been
-    // enabled.
+    // Register orphaned group content and user memberships for deletion, if
+    // this option has been enabled.
     $config = \Drupal::config('og.settings');
     if ($config->get('delete_orphans')) {
       $plugin_id = $config->get('delete_orphans_plugin_id');
@@ -94,7 +86,7 @@ function og_entity_predelete(EntityInterface $entity) {
   if ($entity instanceof UserInterface) {
     /** @var \Drupal\og\MembershipManagerInterface $membership_manager */
     $membership_manager = \Drupal::service('og.membership_manager');
-    foreach ($membership_manager->getMemberships($entity, []) as $membership) {
+    foreach ($membership_manager->getMemberships($entity->id(), []) as $membership) {
       $membership->delete();
     }
   }
@@ -155,13 +147,14 @@ function og_entity_access(EntityInterface $entity, $operation, AccountInterface 
     return AccessResult::neutral();
   }
 
-  // If the user has permission to administer all groups, allow access.
-  if ($account->hasPermission('administer group')) {
+  // If the user has the global permission to administer all groups, allow
+  // access.
+  if ($account->hasPermission('administer organic groups')) {
     return AccessResult::allowed();
   }
 
   /** @var \Drupal\Core\Access\AccessResult $access */
-  $access = \Drupal::service('og.access')->userAccessEntity($operation, $entity, $account);
+  $access = \Drupal::service('og.access')->userAccessEntityOperation($operation, $entity, $account);
 
   if ($access->isAllowed()) {
     return $access;
@@ -188,7 +181,8 @@ function og_entity_create_access(AccountInterface $account, array $context, $bun
     return AccessResult::neutral();
   }
 
-  $access_result = AccessResult::allowedIfHasPermission($account, 'administer group');
+  // A user with the global permission to administer all groups has full access.
+  $access_result = AccessResult::allowedIfHasPermission($account, 'administer organic groups');
   if ($access_result->isAllowed()) {
     return $access_result;
   }
@@ -208,18 +202,23 @@ function og_entity_create_access(AccountInterface $account, array $context, $bun
   $required = FALSE;
 
   $field_definitions = \Drupal::service('entity_field.manager')->getFieldDefinitions($entity_type_id, $bundle);
-  foreach ($field_definitions as $field_name => $field_definition) {
+  foreach ($field_definitions as $field_definition) {
     /** @var \Drupal\Core\Field\FieldDefinitionInterface $field_definition */
     if (!\Drupal::service('og.group_audience_helper')->isGroupAudienceField($field_definition)) {
       continue;
     }
 
-    $handler = Og::getSelectionHandler($field_definition);
+    $options = [
+      'target_type' => $field_definition->getFieldStorageDefinition()->getSetting('target_type'),
+      'handler' => $field_definition->getSetting('handler'),
+      'field_mode' => 'admin',
+    ];
+    /** @var \Drupal\Core\Entity\EntityReferenceSelection\SelectionPluginManager $handler */
+    $handler = \Drupal::service('plugin.manager.entity_reference_selection');
 
-    if ($handler->getReferenceableEntities()) {
+    if ($handler->getInstance($options)) {
       return AccessResult::neutral();
     }
-
     // Allow users to create content outside of groups, if none of the
     // audience fields is required.
     $required = $field_definition->isRequired();
@@ -242,7 +241,7 @@ function og_entity_bundle_field_info(EntityTypeInterface $entity_type, $bundle, 
 
   $fields = [];
   $fields['og_group'] = BaseFieldDefinition::create('og_group')
-    ->setLabel(t('OG Group'))
+    ->setLabel(new TranslatableMarkup('OG Group'))
     ->setComputed(TRUE)
     ->setTranslatable(FALSE)
     ->setDefaultValue(TRUE)
@@ -308,6 +307,22 @@ function og_entity_type_alter(array &$entity_types) {
 }
 
 /**
+ * Implements hook_theme().
+ */
+function og_theme($existing, $type, $theme, $path) {
+  return [
+    'og_member_count' => [
+      'variables' => [
+        'count' => 0,
+        'membership_states' => [],
+        'group' => NULL,
+        'group_label' => NULL,
+      ],
+    ],
+  ];
+}
+
+/**
  * Invalidates group content cache tags for the groups this entity belongs to.
  *
  * @param \Drupal\Core\Entity\EntityInterface $entity
@@ -317,12 +332,10 @@ function og_entity_type_alter(array &$entity_types) {
 function og_invalidate_group_content_cache_tags(EntityInterface $entity) {
   // If group content is created or updated, invalidate the group content cache
   // tags for each of the groups this group content belongs to. This allows
-  // group listings to be cached effectively. Also invalidate the tags if the
-  // group itself changes. The cache tag format is
+  // group listings to be cached effectively. The cache tag format is
   // 'og-group-content:{group entity type}:{group entity id}'.
   $is_group_content = Og::isGroupContent($entity->getEntityTypeId(), $entity->bundle());
-  $group_is_updated = Og::isGroup($entity->getEntityTypeId(), $entity->bundle()) && !empty($entity->original);
-  if ($group_is_updated || $is_group_content) {
+  if ($is_group_content) {
     /** @var \Drupal\og\MembershipManagerInterface $membership_manager */
     $membership_manager = \Drupal::service('og.membership_manager');
     $tags = [];
@@ -333,10 +346,9 @@ function og_invalidate_group_content_cache_tags(EntityInterface $entity) {
     // the tags of the old group(s).
     /** @var \Drupal\Core\Entity\FieldableEntityInterface $entity */
     $original = !empty($entity->original) ? $entity->original : NULL;
-    if ($is_group_content && $original) {
+    if ($original) {
       /** @var \Drupal\og\OgGroupAudienceHelperInterface $group_audience_helper */
       $group_audience_helper = \Drupal::service('og.group_audience_helper');
-      $audience_has_changed = FALSE;
       /** @var \Drupal\Core\Entity\FieldableEntityInterface $original */
       foreach ($group_audience_helper->getAllGroupAudienceFields($entity->getEntityTypeId(), $entity->bundle()) as $field) {
         $field_name = $field->getName();
@@ -346,18 +358,11 @@ function og_invalidate_group_content_cache_tags(EntityInterface $entity) {
           foreach ($original_field_item_list->referencedEntities() as $old_group) {
             $tags = Cache::mergeTags($tags, $old_group->getCacheTagsToInvalidate());
           }
-          $audience_has_changed = TRUE;
         }
-      }
-      if ($audience_has_changed) {
-        // If at least a group has changed, we clear the static cache of the
-        // membership manager which stores such relations. This is important
-        // when the membership manager was used previously in the same request.
-        $membership_manager->reset();
       }
     }
 
-    foreach ($membership_manager->getGroups($entity) as $group_entity_type_id => $groups) {
+    foreach ($membership_manager->getGroups($entity) as $groups) {
       /** @var \Drupal\Core\Entity\ContentEntityInterface $group */
       foreach ($groups as $group) {
         $tags = Cache::mergeTags($tags, $group->getCacheTagsToInvalidate());
@@ -378,12 +383,17 @@ function og_og_role_insert(OgRoleInterface $role) {
     return;
   }
 
+  // Do not create config while config import is in progress.
+  if (\Drupal::isConfigSyncing()) {
+    return;
+  }
+
   $add_id = 'og_membership_add_single_role_action.' . $role->getName();
   if (!Action::load($add_id)) {
     $action = Action::create([
       'id' => $add_id,
       'type' => 'og_membership',
-      'label' => t('Add the @label role to the selected members', ['@label' => $role->getName()]),
+      'label' => new TranslatableMarkup('Add the @label role to the selected members', ['@label' => $role->getName()]),
       'configuration' => [
         'role_name' => $role->getName(),
       ],
@@ -396,7 +406,7 @@ function og_og_role_insert(OgRoleInterface $role) {
     $action = Action::create([
       'id' => $remove_id,
       'type' => 'og_membership',
-      'label' => t('Remove the @label role from the selected members', ['@label' => $role->getName()]),
+      'label' => new TranslatableMarkup('Remove the @label role from the selected members', ['@label' => $role->getName()]),
       'configuration' => [
         'role_name' => $role->getName(),
       ],

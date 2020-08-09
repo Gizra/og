@@ -22,6 +22,11 @@ class GroupSubscribeFormatterTest extends BrowserTestBase {
   public static $modules = ['node', 'og'];
 
   /**
+   * {@inheritdoc}
+   */
+  protected $defaultTheme = 'stark';
+
+  /**
    * Test entity group.
    *
    * @var \Drupal\node\NodeInterface
@@ -52,7 +57,7 @@ class GroupSubscribeFormatterTest extends BrowserTestBase {
   /**
    * {@inheritdoc}
    */
-  protected function setUp() {
+  protected function setUp(): void {
     parent::setUp();
 
     // Create bundle.

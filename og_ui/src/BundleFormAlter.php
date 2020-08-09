@@ -5,6 +5,7 @@ namespace Drupal\og_ui;
 use Drupal\Component\Utility\Unicode;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\field\Entity\FieldConfig;
 use Drupal\og\Og;
 use Drupal\og\OgGroupAudienceHelperInterface;
@@ -99,10 +100,10 @@ class BundleFormAlter {
 
     $form['og'] = [
       '#type' => 'details',
-      '#title' => t('Organic groups'),
+      '#title' => new TranslatableMarkup('Organic groups'),
       '#collapsible' => TRUE,
       '#group' => 'additional_settings',
-      '#description' => t('This bundle may serve as a group, may belong to a group, or may not participate in OG at all.'),
+      '#description' => new TranslatableMarkup('This bundle may serve as a group, may belong to a group, or may not participate in OG at all.'),
     ];
   }
 
@@ -111,16 +112,16 @@ class BundleFormAlter {
    */
   protected function addGroupType(array &$form, FormStateInterface $form_state) {
     if ($this->entity->isNew()) {
-      $description = t('Every entity in this bundle is a group which can contain entities and can have members.');
+      $description = new TranslatableMarkup('Every entity in this bundle is a group which can contain entities and can have members.');
     }
     else {
-      $description = t('Every "%bundle" is a group which can contain entities and can have members.', [
+      $description = new TranslatableMarkup('Every "%bundle" is a group which can contain entities and can have members.', [
         '%bundle' => Unicode::lcfirst($this->bundleLabel),
       ]);
     }
     $form['og']['og_is_group'] = [
       '#type' => 'checkbox',
-      '#title' => t('Group'),
+      '#title' => new TranslatableMarkup('Group'),
       '#default_value' => Og::isGroup($this->entityTypeId, $this->bundle),
       '#description' => $description,
     ];
@@ -147,9 +148,9 @@ class BundleFormAlter {
 
     $form['og']['og_group_content_bundle'] = [
       '#type' => 'checkbox',
-      '#title' => t('Group content'),
+      '#title' => new TranslatableMarkup('Group content'),
       '#default_value' => $this->bundle ? Og::isGroupContent($this->entityTypeId, $this->bundle) : FALSE,
-      '#description' => empty($target_bundles) ? t('There are no group bundles defined.') : '',
+      '#description' => empty($target_bundles) ? new TranslatableMarkup('There are no group bundles defined.') : '',
     ];
 
     if ($target_types) {
@@ -164,10 +165,10 @@ class BundleFormAlter {
 
       $form['og']['og_target_type'] = [
         '#type' => 'select',
-        '#title' => t('Target type'),
+        '#title' => new TranslatableMarkup('Target type'),
         '#options' => $target_types,
         '#default_value' => $target_type_default,
-        '#description' => t('The entity type that can be referenced through this field.'),
+        '#description' => new TranslatableMarkup('The entity type that can be referenced through this field.'),
         '#ajax' => [
           'callback' => [$this, 'ajaxCallback'],
           'wrapper' => 'og-settings-wrapper',
@@ -184,11 +185,11 @@ class BundleFormAlter {
         '#prefix' => '<div id="og-settings-wrapper">',
         '#suffix' => '</div>',
         '#type' => 'select',
-        '#title' => t('Target bundles'),
+        '#title' => new TranslatableMarkup('Target bundles'),
         '#options' => $target_bundles[$target_type_default],
         '#default_value' => !empty($handler_settings['target_bundles']) ? $handler_settings['target_bundles'] : NULL,
         '#multiple' => TRUE,
-        '#description' => t('The bundles of the entity type that can be referenced. Optional, leave empty for all bundles.'),
+        '#description' => new TranslatableMarkup('The bundles of the entity type that can be referenced. Optional, leave empty for all bundles.'),
         '#states' => [
           'visible' => [
             ':input[name="og_group_content_bundle"]' => ['checked' => TRUE],
