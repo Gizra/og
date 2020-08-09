@@ -70,7 +70,7 @@ class OgSelection extends DefaultSelection {
     $definition = \Drupal::entityTypeManager()->getDefinition($target_type);
 
     if ($bundle_key = $definition->getKey('bundle')) {
-      $bundles = Og::groupTypeManager()->getGroupsForEntityType($target_type);
+      $bundles = Og::groupTypeManager()->getGroupBundleIdsByEntityType($target_type);
 
       if (!$bundles) {
         // If there are no bundles defined, we can return early.
