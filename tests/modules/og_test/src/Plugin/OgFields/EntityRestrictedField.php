@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types = 1);
+
 namespace Drupal\og_test\Plugin\OgFields;
 
 use Drupal\og\OgFieldBase;

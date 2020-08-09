@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types = 1);
+
 namespace Drupal\og_ui\Controller;
 
 use Drupal\Core\Controller\ControllerBase;
