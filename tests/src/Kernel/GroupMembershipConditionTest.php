@@ -92,7 +92,7 @@ class GroupMembershipConditionTest extends KernelTestBase {
     $this->installEntitySchema('node');
     $this->installEntitySchema('user');
     $this->installEntitySchema('og_membership');
-    $this->installSchema('system', ['queue', 'sequences']);
+    $this->installSchema('system', ['sequences']);
 
     // Create a node group content type.
     NodeType::create([
