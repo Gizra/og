@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types = 1);
+
 namespace Drupal\Tests\og\Traits;
 
 use Drupal\Core\Entity\EntityInterface;
