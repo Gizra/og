@@ -397,7 +397,7 @@ function og_context_provider_weight($provider) {
  *   The entity type of the group. For example, "node" or "user".
  * @param $item
  *   Optional; A menu item that context should be extracted from. If empty
- *   defaults to the current menu item by using menu_get_item().
+ *   defaults to the untranslated menu item matching the current path.
  * @param bool $check_access
  *   Determines if access to the group should be done. Defaults to TRUE.
  *
@@ -412,7 +412,7 @@ function og_context_determine_context($group_type, $item = NULL, $check_access =
   }
 
   if (empty($item)) {
-    $item = menu_get_item();
+    $item = _og_context_menu_get_untranslated_item();
   }
 
   $providers = og_context_negotiation_info();
@@ -470,16 +470,11 @@ function og_context_handler_url() {
   if (!module_exists('entityreference_prepopulate')) {
     return;
   }
-  $item = menu_get_item();
-  if (strpos($item['path'], 'node/add/') !== 0) {
+  $item = _og_context_menu_get_untranslated_item();
+  if (strpos($item['path'], 'node/add/') !== 0 || !($node_type = arg(2))) {
     return;
   }
-  if (empty($item['map'][2])) {
-    // If we don't have this key in the array, it means the user doesn't have
-    // access to create this node.
-    return;
-  }
-  $node_type = str_replace('-', '_', $item['map'][2]);
+  $node_type = str_replace('-', '_', $node_type);
 
   if (!$fields = og_get_group_audience_fields('node', $node_type)) {
     return;
@@ -674,4 +669,33 @@ function _og_context_views_page_access($group_type, $perm, $group_id_arg = FALSE
     // Try to get context.
     return og_user_access($group_type, $group['gid'], $perm);
   }
+}
+
+/**
+ * Helper function to get the raw menu router for current path.
+ *
+ * This truncated version of menu_get_item() stops processing the matching
+ * router item prior to dynamic path translation and access control.
+ *
+ * @param string $path
+ *   Fully expanded drupal path, e.g. 'node/5'.
+ *
+ * @return array
+ *   The matching menu router item.
+ */
+function _og_context_menu_get_untranslated_item() {
+  $router_items = &drupal_static(__FUNCTION__);
+
+  $path = $_GET['q'];
+  if (!isset($router_items[$path])) {
+    $original_map = arg(NULL, $path);
+    $parts = array_slice($original_map, 0, MENU_MAX_PARTS);
+    $ancestors = menu_get_ancestors($parts);
+    $router_item = db_query_range('SELECT * FROM {menu_router} WHERE path IN (:ancestors) ORDER BY fit DESC', 0, 1, array(':ancestors' => $ancestors))->fetchAssoc();
+    if ($router_item) {
+      drupal_alter('menu_get_item', $router_item, $path, $original_map);
+    }
+    $router_items[$path] = $router_item;
+  }
+  return $router_items[$path];
 }
