@@ -62,9 +62,7 @@ class OgGroupContentOperationAccessTest extends KernelTestBase {
   /**
    * An array of test roles.
    *
-   * @var \Drupal\og\Entity\OgRole[]
-   *   Note that we're not using OgRoleInterface because of a class inheritance
-   *   limitation in PHP 5.
+   * @var \Drupal\og\OgRoleInterface[]
    */
   protected $roles;
 
