@@ -218,7 +218,7 @@ class GetSubGroupContentTest extends KernelTestBase {
     $entity->save();
     $groups[] = $entity;
     $expected_parent_count[$entity->id()] = 5;
-    foreach ($groups as $idx => $node) {
+    foreach ($groups as $node) {
       $parent_groups = Og::getParentGroups($node);
       $this->assertEquals($expected_parent_count[$node->id()], count($parent_groups));
     }
