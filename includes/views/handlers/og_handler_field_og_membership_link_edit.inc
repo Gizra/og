@@ -65,12 +65,6 @@ class og_handler_field_og_membership_link_edit extends views_handler_field_entit
     $text = !empty($this->options['text']) ? $this->options['text'] : t('edit');
     unset($this->options['alter']['fragment']);
 
-    if (!empty($this->options['destination'])) {
-      $this->options['alter']['query'] = drupal_get_destination();
-    }
-
-    $this->options['alter']['path'] = "group/" . $group_type . "/" . $gid  . "/admin/people/edit-membership/" . $og_membership->id;
-
-    return $text;
+    return l($text, "group/" . $group_type . "/" . $gid  . "/admin/people/edit-membership/" . $og_membership->id, array('query' => drupal_get_destination()));
   }
 }
