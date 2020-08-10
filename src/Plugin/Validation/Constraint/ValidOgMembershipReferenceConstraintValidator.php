@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types = 1);
+
 namespace Drupal\og\Plugin\Validation\Constraint;
 
 use Drupal\og\Og;
@@ -33,7 +35,7 @@ class ValidOgMembershipReferenceConstraintValidator extends ConstraintValidator 
     $params['%label'] = $entity->label();
 
     if (!Og::isGroup($entity->getEntityTypeId(), $entity->bundle())) {
-      $this->context->addViolation($constraint->NotValidGroup, $params);
+      $this->context->addViolation($constraint->notValidGroup, $params);
     }
   }
 

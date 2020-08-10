@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types = 1);
+
 namespace Drupal\Tests\og\Kernel\Action;
 
 use Drupal\Core\Access\AccessResultAllowed;
@@ -78,7 +80,7 @@ abstract class ActionTestBase extends KernelTestBase {
   /**
    * {@inheritdoc}
    */
-  public function setUp() {
+  protected function setUp(): void {
     parent::setUp();
 
     $this->installEntitySchema('og_membership');
@@ -114,7 +116,7 @@ abstract class ActionTestBase extends KernelTestBase {
 
     // Store a reference to the group owner membership that is automatically
     // created along with the group.
-    $this->memberships['group_owner'] = $this->membershipManager->getMembership($this->group, $this->users['group_owner']);
+    $this->memberships['group_owner'] = $this->membershipManager->getMembership($this->group, $this->users['group_owner']->id());
 
     // Store a reference to the administrator role for our group type.
     $this->roles['administrator'] = OgRole::getRole('node', $group_bundle, OgRoleInterface::ADMINISTRATOR);
@@ -143,7 +145,7 @@ abstract class ActionTestBase extends KernelTestBase {
     $this->users['authenticated'] = $this->createUser();
 
     // An administrator with the right to administer groups globally.
-    $this->users['administrator'] = $this->createUser(['administer group']);
+    $this->users['administrator'] = $this->createUser(['administer organic groups']);
 
     // A normal member of the test group.
     $this->users['member'] = $this->createUser();

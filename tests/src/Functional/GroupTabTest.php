@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types = 1);
+
 namespace Drupal\Tests\og\Functional;
 
 use Drupal\node\Entity\Node;
@@ -18,6 +20,11 @@ class GroupTabTest extends BrowserTestBase {
    * {@inheritdoc}
    */
   public static $modules = ['node', 'og'];
+
+  /**
+   * {@inheritdoc}
+   */
+  protected $defaultTheme = 'stark';
 
   /**
    * Test entity group.
@@ -50,7 +57,7 @@ class GroupTabTest extends BrowserTestBase {
   /**
    * {@inheritdoc}
    */
-  protected function setUp() {
+  protected function setUp(): void {
     parent::setUp();
 
     // Create bundles.
@@ -85,7 +92,7 @@ class GroupTabTest extends BrowserTestBase {
     ]);
     $this->nonGroup->save();
 
-    $this->user1 = $this->drupalCreateUser(['administer group']);
+    $this->user1 = $this->drupalCreateUser(['administer organic groups']);
   }
 
   /**
@@ -94,10 +101,10 @@ class GroupTabTest extends BrowserTestBase {
   public function testGroupTab() {
     $this->drupalLogin($this->user1);
     $this->drupalGet('group/node/' . $this->group->id() . '/admin');
-    $this->assertResponse(200);
+    $this->assertSession()->statusCodeEquals(200);
 
     $this->drupalGet('group/node/' . $this->nonGroup->id() . '/admin');
-    $this->assertResponse(403);
+    $this->assertSession()->statusCodeEquals(403);
   }
 
 }

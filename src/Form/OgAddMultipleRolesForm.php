@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types = 1);
+
 namespace Drupal\og\Form;
 
 use Drupal\Core\Form\FormStateInterface;
@@ -35,7 +37,7 @@ class OgAddMultipleRolesForm extends OgChangeMultipleRolesFormBase {
 
     $form['roles'] = [
       '#type' => 'select',
-      '#title' => t('Add roles'),
+      '#title' => $this->t('Add roles'),
       '#multiple' => TRUE,
       '#required' => TRUE,
       '#options' => $options,

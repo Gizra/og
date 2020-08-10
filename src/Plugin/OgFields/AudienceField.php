@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types = 1);
+
 namespace Drupal\og\Plugin\OgFields;
 
 use Drupal\Core\Field\FieldStorageDefinitionInterface;
@@ -63,6 +65,7 @@ class AudienceField extends OgFieldBase implements OgFieldsInterface {
       'settings' => [
         'match_operator' => 'CONTAINS',
         'size' => 60,
+        'match_limit' => 10,
         'placeholder' => '',
       ],
     ];

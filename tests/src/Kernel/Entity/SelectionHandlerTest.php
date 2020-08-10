@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types = 1);
+
 namespace Drupal\Tests\og\Kernel\Entity;
 
 use Drupal\Core\Session\AccountInterface;
@@ -20,7 +22,7 @@ class SelectionHandlerTest extends KernelTestBase {
   /**
    * The selection handler.
    *
-   * @var \Drupal\og\Plugin\EntityReferenceSelection\OgSelection
+   * @var \Drupal\Core\Entity\EntityReferenceSelection\SelectionInterface|false|object
    */
   protected $selectionHandler;
 
@@ -72,9 +74,16 @@ class SelectionHandlerTest extends KernelTestBase {
   protected $fieldDefinition;
 
   /**
+   * Selection plugin manager.
+   *
+   * @var \Drupal\Core\Entity\EntityReferenceSelection\SelectionPluginManager
+   */
+  protected $selectionPluginManager;
+
+  /**
    * {@inheritdoc}
    */
-  protected function setUp() {
+  protected function setUp(): void {
     parent::setUp();
 
     // Add membership and config schema.
@@ -87,6 +96,7 @@ class SelectionHandlerTest extends KernelTestBase {
     // Setting up variables.
     $this->groupBundle = mb_strtolower($this->randomMachineName());
     $this->groupContentBundle = mb_strtolower($this->randomMachineName());
+    $this->selectionPluginManager = $this->container->get('plugin.manager.entity_reference_selection');
 
     // Create a group.
     NodeType::create([
@@ -107,7 +117,13 @@ class SelectionHandlerTest extends KernelTestBase {
     $this->fieldDefinition = Og::createField(OgGroupAudienceHelperInterface::DEFAULT_FIELD, 'node', $this->groupContentBundle);
 
     // Get the storage of the field.
-    $this->selectionHandler = Og::getSelectionHandler($this->fieldDefinition, ['handler_settings' => ['field_mode' => 'default']]);
+    $options = [
+      'target_type' => $this->fieldDefinition->getFieldStorageDefinition()->getSetting('target_type'),
+      'handler' => $this->fieldDefinition->getSetting('handler'),
+      'field_mode' => 'admin',
+    ];
+    $this->selectionPluginManager->getInstance($options);
+    $this->selectionHandler = $this->selectionPluginManager->getSelectionHandler($this->fieldDefinition);
 
     // Create two users.
     $this->user1 = User::create(['name' => $this->randomString()]);
@@ -151,12 +167,16 @@ class SelectionHandlerTest extends KernelTestBase {
     $this->assertEquals($user2_groups, array_keys($groups[$this->groupBundle]));
 
     // Check the other groups.
-    $this->selectionHandler = Og::getSelectionHandler($this->fieldDefinition, ['handler_settings' => ['field_mode' => 'admin']]);
+    $options = [
+      'target_type' => $this->fieldDefinition->getFieldStorageDefinition()->getSetting('target_type'),
+      'handler' => $this->fieldDefinition->getSetting('handler'),
+      'field_mode' => 'admin',
+    ];
+    $this->selectionHandler = $this->selectionPluginManager->getInstance($options);
 
     $this->setCurrentAccount($this->user1);
     $groups = $this->selectionHandler->getReferenceableEntities();
     $this->assertEquals($user2_groups, array_keys($groups[$this->groupBundle]));
-
     $this->setCurrentAccount($this->user2);
     $groups = $this->selectionHandler->getReferenceableEntities();
     $this->assertEquals($user1_groups, array_keys($groups[$this->groupBundle]));

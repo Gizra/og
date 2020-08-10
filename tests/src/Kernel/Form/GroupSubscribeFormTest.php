@@ -1,10 +1,13 @@
 <?php
 
+declare(strict_types = 1);
+
 namespace Drupal\Tests\og\Kernel\Form;
 
 use Drupal\KernelTests\KernelTestBase;
 use Drupal\node\Entity\Node;
 use Drupal\node\Entity\NodeType;
+use Drupal\node\NodeInterface;
 use Drupal\og\Entity\OgMembership;
 use Drupal\og\Entity\OgRole;
 use Drupal\og\Og;
@@ -62,7 +65,7 @@ class GroupSubscribeFormTest extends KernelTestBase {
   /**
    * {@inheritdoc}
    */
-  protected function setUp() {
+  protected function setUp(): void {
     parent::setUp();
 
     $this->installConfig(['og']);
@@ -104,7 +107,7 @@ class GroupSubscribeFormTest extends KernelTestBase {
       'type' => $bundle_names[2],
       'title' => $this->randomString(),
       'uid' => $user->id(),
-      'status' => NODE_NOT_PUBLISHED,
+      'status' => NodeInterface::NOT_PUBLISHED,
     ]);
     $this->group3->save();
 
@@ -138,7 +141,7 @@ class GroupSubscribeFormTest extends KernelTestBase {
     $user = $this->createUser(['access content']);
 
     /** @var \Drupal\og\Form\GroupSubscribeForm $form */
-    $form = \Drupal::entityManager()->getFormObject('og_membership', 'subscribe');
+    $form = \Drupal::entityTypeManager()->getFormObject('og_membership', 'subscribe');
 
     // Pending membership.
     $membership_pending = OgMembership::create();

@@ -1,10 +1,13 @@
 <?php
 
+declare(strict_types = 1);
+
 namespace Drupal\Tests\og\Unit;
 
 use Drupal\og\Event\PermissionEvent;
 use Drupal\og\GroupContentOperationPermission;
 use Drupal\og\GroupPermission;
+use Drupal\og\OgAccess;
 use Drupal\og\OgRoleInterface;
 use Drupal\Tests\UnitTestCase;
 
@@ -162,13 +165,12 @@ class PermissionEventTest extends UnitTestCase {
    *
    * @covers ::setPermission
    *
-   * @expectedException \InvalidArgumentException
-   *
    * @dataProvider invalidPermissionsProvider
    */
   public function testSetInvalidPermission(array $permissions, $entity_type_id, $bundle_id, array $group_content_bundle_ids) {
     $event = new PermissionEvent($entity_type_id, $bundle_id, $group_content_bundle_ids);
     foreach ($permissions as $permission) {
+      $this->expectException(\InvalidArgumentException::class);
       $event->setPermission($permission);
     }
   }
@@ -438,13 +440,15 @@ class PermissionEventTest extends UnitTestCase {
    * @param mixed $permission
    *   A test value to set through ArrayAccess.
    *
-   * @expectedException \InvalidArgumentException
-   *
    * @dataProvider offsetSetInvalidPermissionProvider
    */
   public function testOffsetSetInvalidPermission($key, $permission) {
+    $this->expectException(\InvalidArgumentException::class);
+
+    // phpcs:disable DrupalPractice.CodeAnalysis.VariableAnalysis.UnusedVariable
     $event = new PermissionEvent($this->randomMachineName(), $this->randomMachineName(), []);
     $event[$key] = $permission;
+    // phpcs:enable DrupalPractice.CodeAnalysis.VariableAnalysis.UnusedVariable
   }
 
   /**
@@ -585,12 +589,11 @@ class PermissionEventTest extends UnitTestCase {
 
   /**
    * Tests creation of an invalid operation permission.
-   *
-   * @expectedException \InvalidArgumentException
    */
   public function testInvalidGroupContentOperationPermissionCreation() {
     // An exception should be thrown when a group content operation permission
     // is created with an invalid owner type.
+    $this->expectException(\InvalidArgumentException::class);
     new GroupContentOperationPermission([
       'name' => 'invalid permission',
       'title' => $this->t('This is an invalid permission.'),
@@ -675,8 +678,8 @@ class PermissionEventTest extends UnitTestCase {
       // A single permission with restricted access and a default role.
       [
         [
-          'administer group' => new GroupPermission([
-            'name' => 'administer group',
+          OgAccess::ADMINISTER_GROUP_PERMISSION => new GroupPermission([
+            'name' => OgAccess::ADMINISTER_GROUP_PERMISSION,
             'title' => $this->t('Administer group'),
             'description' => $this->t('Manage group members and content in the group.'),
             'default roles' => [OgRoleInterface::ADMINISTRATOR],

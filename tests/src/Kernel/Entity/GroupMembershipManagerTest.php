@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types = 1);
+
 namespace Drupal\Tests\og\Kernel\Entity;
 
 use Drupal\entity_test\Entity\EntityTestBundle;
@@ -77,7 +79,7 @@ class GroupMembershipManagerTest extends KernelTestBase {
   /**
    * {@inheritdoc}
    */
-  protected function setUp() {
+  protected function setUp(): void {
     parent::setUp();
 
     $this->installConfig(['og']);
@@ -305,7 +307,7 @@ class GroupMembershipManagerTest extends KernelTestBase {
         /** @var \Drupal\Core\Entity\EntityInterface $expected_group */
         $expected_group = $this->groups[$expected_type][$expected_key];
         /** @var \Drupal\Core\Entity\EntityInterface $group */
-        foreach ($result[$expected_type] as $key => $group) {
+        foreach ($result[$expected_type] as $group) {
           if ($group->getEntityTypeId() === $expected_group->getEntityTypeId() && $group->id() === $expected_group->id()) {
             // The expected result was found. Continue the test.
             continue 2;

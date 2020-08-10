@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types = 1);
+
 namespace Drupal\og\Plugin\Validation\Constraint;
 
 use Symfony\Component\Validator\Constraint;
@@ -21,6 +23,6 @@ class ValidOgMembershipReferenceConstraint extends Constraint {
    *
    * @var string
    */
-  public $NotValidGroup = 'The entity %label is not defined as a group.';
+  public $notValidGroup = 'The entity %label is not defined as a group.';
 
 }

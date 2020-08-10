@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types = 1);
+
 namespace Drupal\og\Plugin\OgFields;
 
 use Drupal\Core\Field\FieldStorageDefinitionInterface;
@@ -10,12 +12,17 @@ use Drupal\og\OgFieldsInterface;
  * Determine if group should use default roles and permissions.
  *
  * @OgFields(
- *  id = OG_DEFAULT_ACCESS_FIELD,
+ *  id = "og_access",
  *  type = "group",
  *  description = @Translation("Determine if group should use default roles and permissions.")
  * )
  */
 class AccessField extends OgFieldBase implements OgFieldsInterface {
+
+  /**
+   * The default OG access field name.
+   */
+  const DEFAULT_FIELD = 'og_access';
 
   /**
    * {@inheritdoc}

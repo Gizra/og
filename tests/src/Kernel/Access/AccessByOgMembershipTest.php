@@ -1,7 +1,10 @@
 <?php
 
+declare(strict_types = 1);
+
 namespace Drupal\Tests\og\Kernel\Access;
 
+use Drupal\Core\Entity\EntityStorageException;
 use Drupal\KernelTests\KernelTestBase;
 use Drupal\Tests\node\Traits\ContentTypeCreationTrait;
 use Drupal\Tests\og\Traits\OgMembershipCreationTrait;
@@ -64,7 +67,7 @@ class AccessByOgMembershipTest extends KernelTestBase {
   /**
    * {@inheritdoc}
    */
-  public function setUp() {
+  protected function setUp(): void {
     parent::setUp();
 
     $this->installConfig(['og']);
@@ -182,8 +185,6 @@ class AccessByOgMembershipTest extends KernelTestBase {
 
   /**
    * Tests exception is thrown when trying to save non-member role.
-   *
-   * @expectedException \Drupal\Core\Entity\EntityStorageException
    */
   public function testNonMemberRoleMembershipSave() {
     /** @var \Drupal\og\Entity\OgRole $role */
@@ -194,6 +195,7 @@ class AccessByOgMembershipTest extends KernelTestBase {
       ->save();
 
     $membership = OgMembership::create();
+    $this->expectException(EntityStorageException::class);
     $membership
       ->setOwner($this->users['non-member'])
       ->setGroup($this->group)

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types = 1);
+
 namespace Drupal\Tests\og\Kernel;
 
 use Drupal\KernelTests\KernelTestBase;
@@ -52,7 +54,7 @@ class GroupManagerSubscriptionTest extends KernelTestBase {
   /**
    * {@inheritdoc}
    */
-  protected function setUp() {
+  protected function setUp(): void {
     parent::setUp();
 
     $this->groupTypeManager = $this->container->get('og.group_type_manager');
@@ -108,7 +110,7 @@ class GroupManagerSubscriptionTest extends KernelTestBase {
 
     // Check that a membership has only been created if the group had an owner
     // set.
-    $membership = $this->membershipManager->getMembership($group, $this->owner);
+    $membership = $this->membershipManager->getMembership($group, $this->owner->id());
     $this->assertEquals($group_has_owner, !empty($membership));
 
     // Check if the membership has been overridden.

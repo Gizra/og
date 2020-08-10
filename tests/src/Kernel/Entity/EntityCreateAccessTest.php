@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types = 1);
+
 namespace Drupal\Tests\og\Kernel\Entity;
 
 use Drupal\KernelTests\KernelTestBase;
@@ -52,7 +54,7 @@ class EntityCreateAccessTest extends KernelTestBase {
   /**
    * {@inheritdoc}
    */
-  public function setUp() {
+  protected function setUp(): void {
     parent::setUp();
 
     $this->installConfig(['og']);
@@ -118,7 +120,7 @@ class EntityCreateAccessTest extends KernelTestBase {
     // Test that the user can access the entity create form when the permission
     // to create group content is granted. Note that node access control is
     // cached, so we need to reset it when we change permissions.
-    $this->container->get('entity.manager')->getAccessControlHandler('node')->resetCache();
+    $this->container->get('entity_type.manager')->getAccessControlHandler('node')->resetCache();
     $role->grantPermission('create post content')->trustData()->save();
     $result = $node_access_check->access(User::getAnonymousUser(), $this->groupContentType);
     $this->assertInstanceOf('\Drupal\Core\Access\AccessResultAllowed', $result);
