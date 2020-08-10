@@ -118,7 +118,6 @@ class Membership extends ArgumentDefaultPluginBase implements CacheableDependenc
    * {@inheritdoc}
    */
   public function getArgument() {
-    // Currently restricted to node entities.
     return implode(',', $this->getCurrentUserGroupIds());
   }
 
