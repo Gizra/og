@@ -23,7 +23,6 @@ class OgMembershipTest extends UnitTestCase {
    */
   protected $ogRole;
 
-
   /**
    * {@inheritdoc}
    */
