@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types = 1);
+
 namespace Drupal\Tests\og\Functional;
 
 use Behat\Mink\Exception\ResponseTextException;
