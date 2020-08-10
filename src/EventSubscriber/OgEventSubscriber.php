@@ -141,8 +141,8 @@ class OgEventSubscriber implements EventSubscriberInterface {
       ]),
       new GroupPermission([
         'name' => 'access content overview',
-        'title' => t('Access the Content overview page'),
-        'description' => t('User may see and administer content related to the group.'),
+        'title' => $this->t('Access the Content overview page'),
+        'description' => $this->t('User may see and administer content related to the group.'),
         'default roles' => [OgRoleInterface::ADMINISTRATOR],
       ]),
       new GroupPermission([
