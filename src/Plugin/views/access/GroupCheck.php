@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types = 1);
+
 namespace Drupal\og\Plugin\views\access;
 
 use Drupal\views\Plugin\views\access\AccessPluginBase;
