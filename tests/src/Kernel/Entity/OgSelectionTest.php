@@ -137,7 +137,7 @@ class OgSelectionTest extends KernelTestBase {
     $this->selectionHandler = $this->selectionPluginManager->getSelectionHandler($this->fieldDefinition);
 
     // @todo: remove deprecated call to Og::getSelectionHandler.
-//    $this->selectionHandler = Og::getSelectionHandler($this->fieldDefinition);
+    $this->selectionHandler = Og::getSelectionHandler($this->fieldDefinition);
 
     // Create users.
     $this->groupAdmin = User::create(['name' => $this->randomString()]);
