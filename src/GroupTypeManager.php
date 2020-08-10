@@ -199,8 +199,8 @@ class GroupTypeManager implements GroupTypeManagerInterface {
    * {@inheritdoc}
    */
   public function getAllGroupBundles($entity_type = NULL) {
-    // Todo - should be remove since this method don't do any thing.
-    return $this->getGroupMap();
+    $group_map = $this->getGroupMap();
+    return !empty($group_map[$entity_type]) ? $group_map[$entity_type] : $group_map;
   }
 
   /**
