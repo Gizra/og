@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types = 1);
+
 namespace Drupal\og_ui\Form;
 
 use Drupal\Component\Plugin\PluginManagerInterface;
@@ -145,7 +147,6 @@ class AdminSettingsForm extends ConfigFormBase {
     $this->config('og.settings')
       ->set('group_manager_full_access', $form_state->getValue('og_group_manager_full_access'))
       ->set('node_access_strict', $form_state->getValue('og_node_access_strict'))
-      ->set('use_queue', $form_state->getValue('og_use_queue'))
       ->set('delete_orphans', $form_state->getValue('og_delete_orphans'))
       ->set('delete_orphans_plugin_id', $form_state->getValue('og_delete_orphans_plugin_id'))
       ->save();

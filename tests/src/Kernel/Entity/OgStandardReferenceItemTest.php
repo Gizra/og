@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types = 1);
+
 namespace Drupal\Tests\og\Kernel\Entity;
 
 use Drupal\entity_test\Entity\EntityTest;
@@ -20,14 +22,31 @@ class OgStandardReferenceItemTest extends KernelTestBase {
    */
   public static $modules = ['user', 'entity_test', 'field', 'og', 'system'];
 
+  /**
+   * A list of bundles.
+   *
+   * @var string[]
+   */
   protected $bundles;
+
+  /**
+   * The machine name for a field.
+   *
+   * @var string
+   */
   protected $fieldName;
+
+  /**
+   * A list of groups.
+   *
+   * @var \Drupal\entity_test\Entity\EntityTest[]
+   */
   protected $groups;
 
   /**
    * {@inheritdoc}
    */
-  protected function setUp() {
+  protected function setUp(): void {
     parent::setUp();
 
     // Add membership and config schema.

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types = 1);
+
 namespace Drupal\Tests\og\Unit\Cache\Context;
 
 use Drupal\Core\Entity\EntityInterface;
@@ -32,7 +34,7 @@ abstract class OgContextCacheContextTestBase extends OgCacheContextTestBase {
   /**
    * {@inheritdoc}
    */
-  public function setUp() {
+  protected function setUp(): void {
     parent::setUp();
 
     $this->ogContext = $this->prophesize(OgContextInterface::class);

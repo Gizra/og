@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types = 1);
+
 namespace Drupal\Tests\og\Kernel;
 
 use Drupal\KernelTests\KernelTestBase;
@@ -52,7 +54,7 @@ class OgDeleteOrphansTest extends KernelTestBase {
   /**
    * {@inheritdoc}
    */
-  public function setUp() {
+  protected function setUp(): void {
     parent::setUp();
 
     // Add membership and config schema.
@@ -61,7 +63,7 @@ class OgDeleteOrphansTest extends KernelTestBase {
     $this->installEntitySchema('user');
     $this->installEntitySchema('node');
     $this->installSchema('node', 'node_access');
-    $this->installSchema('system', ['queue', 'sequences']);
+    $this->installSchema('system', ['sequences']);
 
     /** @var \Drupal\og\OgDeleteOrphansPluginManager $plugin_manager */
     $plugin_manager = \Drupal::service('plugin.manager.og.delete_orphans');

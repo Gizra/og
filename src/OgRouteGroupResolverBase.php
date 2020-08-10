@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types = 1);
+
 namespace Drupal\og;
 
 use Drupal\Core\Entity\ContentEntityInterface;
@@ -119,7 +121,7 @@ abstract class OgRouteGroupResolverBase extends OgGroupResolverBase implements C
       /** @var \Drupal\Core\Entity\EntityTypeInterface[] $entity_types */
       $entity_types = $this->entityTypeManager->getDefinitions();
       foreach ($entity_types as $entity_type_id => $entity_type) {
-        if ($entity_type->isSubclassOf(ContentEntityInterface::class)) {
+        if ($entity_type->entityClassImplements(ContentEntityInterface::class)) {
           $entity_paths = array_fill_keys($entity_type->getLinkTemplates(), $entity_type_id);
           $this->contentEntityPaths = array_merge($this->contentEntityPaths, $entity_paths);
         }

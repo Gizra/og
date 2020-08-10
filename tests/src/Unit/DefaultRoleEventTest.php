@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types = 1);
+
 namespace Drupal\Tests\og\Unit;
 
 use Drupal\Core\Entity\EntityStorageInterface;
@@ -34,7 +36,7 @@ class DefaultRoleEventTest extends UnitTestCase {
   /**
    * {@inheritdoc}
    */
-  public function setUp() {
+  protected function setUp(): void {
     parent::setUp();
 
     $entity_type_manager = $this->prophesize(EntityTypeManagerInterface::class);
@@ -325,7 +327,7 @@ class DefaultRoleEventTest extends UnitTestCase {
     $this->expectOgRoleCreation($invalid_roles);
 
     try {
-      foreach ($invalid_roles as $name => $invalid_role) {
+      foreach ($invalid_roles as $invalid_role) {
         $this->defaultRoleEvent->addRole($invalid_role);
       }
       $this->fail('An invalid role cannot be added.');
@@ -346,11 +348,11 @@ class DefaultRoleEventTest extends UnitTestCase {
    * @covers ::addRoles
    *
    * @dataProvider invalidDefaultRoleProvider
-   * @expectedException \InvalidArgumentException
    */
   public function testAddInvalidRoles(array $invalid_roles) {
     $this->expectOgRoleCreation($invalid_roles);
 
+    $this->expectException(\InvalidArgumentException::class);
     $this->defaultRoleEvent->addRoles($invalid_roles);
     $this->fail('An array of invalid roles cannot be added.');
   }
@@ -364,12 +366,12 @@ class DefaultRoleEventTest extends UnitTestCase {
    * @covers ::setRole
    *
    * @dataProvider invalidDefaultRoleProvider
-   * @expectedException \InvalidArgumentException
    */
   public function testSetInvalidRole(array $invalid_roles) {
     $this->expectOgRoleCreation($invalid_roles);
 
-    foreach ($invalid_roles as $name => $invalid_role) {
+    $this->expectException(\InvalidArgumentException::class);
+    foreach ($invalid_roles as $invalid_role) {
       $this->defaultRoleEvent->setRole($invalid_role);
     }
   }
@@ -383,11 +385,11 @@ class DefaultRoleEventTest extends UnitTestCase {
    * @covers ::setRoles
    *
    * @dataProvider invalidDefaultRoleProvider
-   * @expectedException \InvalidArgumentException
    */
   public function testSetInvalidRoles(array $invalid_roles) {
     $this->expectOgRoleCreation($invalid_roles);
 
+    $this->expectException(\InvalidArgumentException::class);
     $this->defaultRoleEvent->setRoles($invalid_roles);
   }
 
@@ -400,12 +402,12 @@ class DefaultRoleEventTest extends UnitTestCase {
    * @covers ::offsetSet
    *
    * @dataProvider invalidDefaultRoleProvider
-   * @expectedException \InvalidArgumentException
    */
   public function testInvalidOffsetSet(array $invalid_roles) {
     $this->expectOgRoleCreation($invalid_roles);
 
     foreach ($invalid_roles as $name => $invalid_role) {
+      $this->expectException(\InvalidArgumentException::class);
       $this->defaultRoleEvent[$name] = $invalid_role;
     }
   }

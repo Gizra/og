@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types = 1);
+
 namespace Drupal\Tests\og\Unit;
 
 use Drupal\Core\Entity\EntityStorageInterface;
@@ -78,7 +80,7 @@ class OgRoleManagerTest extends UnitTestCase {
   /**
    * {@inheritdoc}
    */
-  public function setUp() {
+  protected function setUp(): void {
     parent::setUp();
 
     $this->entityTypeId = $this->randomMachineName();
@@ -222,7 +224,7 @@ class OgRoleManagerTest extends UnitTestCase {
   /**
    * Return a new OG role manager object.
    *
-   * @return \Drupal\og\Entity\OgRoleManager
+   * @return \Drupal\og\OgRoleManagerInterface
    *   The initialized OG role manager.
    */
   protected function getOgRoleManager() {

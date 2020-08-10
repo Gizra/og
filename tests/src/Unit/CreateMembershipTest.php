@@ -1,9 +1,12 @@
 <?php
 
+declare(strict_types = 1);
+
 namespace Drupal\Tests\og\Unit;
 
+use Drupal\Core\Cache\MemoryCache\MemoryCacheInterface;
 use Drupal\Core\DependencyInjection\ContainerBuilder;
-use Drupal\Core\Entity\EntityInterface;
+use Drupal\Core\Entity\ContentEntityInterface;
 use Drupal\Core\Entity\EntityStorageInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Entity\EntityTypeRepositoryInterface;
@@ -42,6 +45,13 @@ class CreateMembershipTest extends UnitTestCase {
    * @var \Drupal\og\OgGroupAudienceHelperInterface|\Prophecy\Prophecy\ObjectProphecy
    */
   protected $groupAudienceHelper;
+
+  /**
+   * The mocked memory cache backend.
+   *
+   * @var \Drupal\Core\Cache\MemoryCache\MemoryCacheInterface|\Prophecy\Prophecy\ObjectProphecy
+   */
+  protected $staticCache;
 
   /**
    * The entity storage prophecy used in the test.
@@ -88,7 +98,7 @@ class CreateMembershipTest extends UnitTestCase {
   /**
    * {@inheritdoc}
    */
-  public function setUp() {
+  protected function setUp(): void {
     parent::setUp();
 
     $this->entityTypeId = $this->randomMachineName();
@@ -98,6 +108,7 @@ class CreateMembershipTest extends UnitTestCase {
     $this->entityTypeManager = $this->prophesize(EntityTypeManagerInterface::class);
     $this->entityTypeRepository = $this->prophesize(EntityTypeRepositoryInterface::class);
     $this->groupAudienceHelper = $this->prophesize(OgGroupAudienceHelperInterface::class);
+    $this->staticCache = $this->prophesize(MemoryCacheInterface::class);
 
     $this->entityTypeManager->getStorage('og_membership')
       ->willReturn($this->entityStorage->reveal());
@@ -114,7 +125,7 @@ class CreateMembershipTest extends UnitTestCase {
       ->willReturn($membership_entity->reveal());
 
     // Create a mocked test group.
-    $this->group = $this->prophesize(EntityInterface::class);
+    $this->group = $this->prophesize(ContentEntityInterface::class);
 
     // Create a mocked test user.
     $this->user = $this->prophesize(UserInterface::class);
@@ -139,7 +150,7 @@ class CreateMembershipTest extends UnitTestCase {
    * @covers ::createMembership
    */
   public function testNewGroup() {
-    $membership_manager = new MembershipManager($this->entityTypeManager->reveal(), $this->groupAudienceHelper->reveal());
+    $membership_manager = new MembershipManager($this->entityTypeManager->reveal(), $this->groupAudienceHelper->reveal(), $this->staticCache->reveal());
     $membership = $membership_manager->createMembership($this->group->reveal(), $this->user->reveal());
     $this->assertInstanceOf(OgMembershipInterface::class, $membership);
   }

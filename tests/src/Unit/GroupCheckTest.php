@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types = 1);
+
 namespace Drupal\Tests\og\Unit;
 
 use Drupal\Core\Access\AccessResultInterface;
@@ -117,7 +119,7 @@ class GroupCheckTest extends UnitTestCase {
   /**
    * {@inheritdoc}
    */
-  public function setUp() {
+  protected function setUp(): void {
     $this->entityTypeManager = $this->prophesize(EntityTypeManagerInterface::class);
     $this->entityType = $this->prophesize(EntityTypeInterface::class);
     $this->entityStorage = $this->prophesize(EntityStorageInterface::class);
@@ -284,8 +286,6 @@ class GroupCheckTest extends UnitTestCase {
 
   /**
    * Tests fetching arguments from the route match without "getOption" defined.
-   *
-   * @expectedException BadMethodCallException
    */
   public function testNoArgumentsFromRouteMatch() {
     $this
@@ -300,6 +300,7 @@ class GroupCheckTest extends UnitTestCase {
 
     // Call the group check without the entity related arguments.
     $group_check = new GroupCheck($this->entityTypeManager->reveal(), $this->ogAccess->reveal());
+    $this->expectException(\BadMethodCallException::class);
     $group_check->access($this->user->reveal(), $this->route->reveal(), $this->routeMatch->reveal());
   }
 

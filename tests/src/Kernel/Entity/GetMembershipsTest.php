@@ -1,8 +1,11 @@
 <?php
 
+declare(strict_types = 1);
+
 namespace Drupal\Tests\og\Kernel\Entity;
 
 use Drupal\KernelTests\KernelTestBase;
+use Drupal\Tests\og\Traits\OgMembershipCreationTrait;
 use Drupal\node\Entity\Node;
 use Drupal\node\Entity\NodeType;
 use Drupal\og\Og;
@@ -16,6 +19,8 @@ use Drupal\user\Entity\User;
  * @coversDefaultClass \Drupal\og\Og
  */
 class GetMembershipsTest extends KernelTestBase {
+
+  use OgMembershipCreationTrait;
 
   /**
    * {@inheritdoc}
@@ -53,7 +58,7 @@ class GetMembershipsTest extends KernelTestBase {
   /**
    * {@inheritdoc}
    */
-  protected function setUp() {
+  protected function setUp(): void {
     parent::setUp();
 
     $this->installConfig(['og']);
@@ -87,7 +92,7 @@ class GetMembershipsTest extends KernelTestBase {
       $this->groups[] = $group;
     }
 
-    // Create test users with different membership statuses in the two groups.
+    // Create test users with different membership states in the two groups.
     $matrix = [
       // A user which is an active member of the first group.
       [OgMembershipInterface::STATE_ACTIVE, NULL],
@@ -106,17 +111,14 @@ class GetMembershipsTest extends KernelTestBase {
       [NULL, NULL],
     ];
 
-    foreach ($matrix as $user_key => $statuses) {
+    foreach ($matrix as $user_key => $states) {
       $user = User::create(['name' => $this->randomString()]);
       $user->save();
       $this->users[$user_key] = $user;
-      foreach ($statuses as $group_key => $status) {
+      foreach ($states as $group_key => $state) {
         $group = $this->groups[$group_key];
-        if ($status) {
-          $membership = Og::createMembership($group, $user);
-          $membership
-            ->setState($status)
-            ->save();
+        if ($state) {
+          $this->createOgMembership($group, $user, NULL, $state);
         }
       }
     }

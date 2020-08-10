@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types = 1);
+
 namespace Drupal\og\Plugin\Action;
 
 use Drupal\og\Entity\OgMembership;
@@ -26,7 +28,7 @@ class AddSingleOgMembershipRole extends ChangeSingleOgMembershipRoleBase {
     $role_name = $this->configuration['role_name'];
     $role_id = implode('-', [
       $membership->getGroupEntityType(),
-      $membership->getGroup()->bundle(),
+      $membership->getGroupBundle(),
       $role_name,
     ]);
     // Only add the role if it is valid and doesn't exist yet.

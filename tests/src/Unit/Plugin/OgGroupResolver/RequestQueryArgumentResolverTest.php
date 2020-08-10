@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types = 1);
+
 namespace Drupal\Tests\og\Unit\Plugin\OgGroupResolver;
 
 use Drupal\Core\Entity\EntityStorageInterface;
@@ -37,7 +39,7 @@ class RequestQueryArgumentResolverTest extends OgGroupResolverTestBase {
   /**
    * {@inheritdoc}
    */
-  public function setUp() {
+  protected function setUp(): void {
     parent::setUp();
 
     // Instantiate mocks of the classes that the plugins rely on.

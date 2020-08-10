@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types = 1);
+
 namespace Drupal\og;
 
 /**
@@ -45,16 +47,7 @@ interface GroupTypeManagerInterface {
    * @return \Drupal\Core\Entity\EntityInterface[]
    *   Array of groups, or an empty array if none found
    */
-  public function getGroupsForEntityType($entity_type_id);
-
-  /**
-   * Get all group bundles keyed by entity type.
-   *
-   * @return array
-   *   An associative array, keyed by entity type, each value an indexed array
-   *   of bundle IDs.
-   */
-  public function getAllGroupBundles($entity_type = NULL);
+  public function getGroupBundleIdsByEntityType($entity_type_id);
 
   /**
    * Returns a list of all group content bundles IDs keyed by entity type.
@@ -63,7 +56,7 @@ interface GroupTypeManagerInterface {
    * information about the relations between groups and group content bundles
    * then use getGroupRelationMap() instead.
    *
-   * @return array
+   * @return string[][]
    *   An associative array of group content bundle IDs, keyed by entity type
    *   ID.
    *
@@ -81,7 +74,7 @@ interface GroupTypeManagerInterface {
    * @param string $entity_type_id
    *   Entity type ID to filter the bundles by.
    *
-   * @return array
+   * @return string[]
    *   An array of group content bundle IDs.
    *
    * @throws \InvalidArgumentException
@@ -102,7 +95,7 @@ interface GroupTypeManagerInterface {
    *   The bundle ID of the group content type for which to return associated
    *   group bundle IDs.
    *
-   * @return array
+   * @return string[][]
    *   An array of group bundle IDs, keyed by group entity type ID.
    */
   public function getGroupBundleIdsByGroupContentBundle($group_content_entity_type_id, $group_content_bundle_id);
@@ -117,7 +110,7 @@ interface GroupTypeManagerInterface {
    *   The bundle ID of the group type for which to return associated group
    *   content bundle IDs.
    *
-   * @return array
+   * @return string[][]
    *   An array of group content bundle IDs, keyed by group content entity type
    *   ID.
    */
@@ -164,7 +157,7 @@ interface GroupTypeManagerInterface {
   /**
    * Returns the group map.
    *
-   * @return array
+   * @return string[][]
    *   The group map.
    */
   public function getGroupMap();

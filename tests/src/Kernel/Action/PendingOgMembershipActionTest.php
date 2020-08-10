@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types = 1);
+
 namespace Drupal\Tests\og\Kernel\Action;
 
 use Drupal\og\OgMembershipInterface;
@@ -29,8 +31,7 @@ class PendingOgMembershipActionTest extends ActionTestBase {
   public function testExecute($membership = NULL) {
     $membership = $this->memberships[$membership];
     /** @var \Drupal\og\Plugin\Action\AddSingleOgMembershipRole $plugin */
-    $configuration = !empty($default_role_name) ? ['role_name' => $default_role_name] : [];
-    $plugin = $this->getPlugin($configuration);
+    $plugin = $this->getPlugin();
     $plugin->execute($membership);
 
     $this->assertEquals(OgMembershipInterface::STATE_PENDING, $membership->getState());

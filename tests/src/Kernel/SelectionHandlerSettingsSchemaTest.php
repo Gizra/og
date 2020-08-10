@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types = 1);
+
 namespace Drupal\Tests\og\Kernel;
 
 use Drupal\KernelTests\KernelTestBase;
@@ -39,6 +41,12 @@ class SelectionHandlerSettingsSchemaTest extends KernelTestBase {
     $node_type->og_target_type = 'node';
     $node_type->og_target_bundles = [$bundle];
     $node_type->save();
+
+    // This test leverages the ConfigSchemaChecker that is included in the core
+    // test runner to validate that the schema is correct. However PHPUnit will
+    // mark this test as risky if we do not do any assertions. Work around this
+    // by including a fake assertion.
+    $this->assertTrue(TRUE);
   }
 
 }

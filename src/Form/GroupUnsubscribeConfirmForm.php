@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types = 1);
+
 namespace Drupal\og\Form;
 
 use Drupal\Core\Entity\ContentEntityDeleteForm;
@@ -62,7 +64,7 @@ class GroupUnsubscribeConfirmForm extends ContentEntityDeleteForm {
     $form_state->setRedirectUrl($redirect);
 
     $membership->delete();
-    drupal_set_message($this->t('You have unsubscribed from the group.'));
+    $this->messenger()->addMessage($this->t('You have unsubscribed from the group.'));
   }
 
 }

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types = 1);
+
 namespace Drupal\og\Plugin\Action;
 
 use Drupal\og\Entity\OgMembership;
@@ -25,7 +27,7 @@ class RemoveSingleOgMembershipRole extends ChangeSingleOgMembershipRoleBase {
     $role_name = $this->configuration['role_name'];
     $role_id = implode('-', [
       $membership->getGroupEntityType(),
-      $membership->getGroup()->bundle(),
+      $membership->getGroupBundle(),
       $role_name,
     ]);
     // Skip removing the role from the membership if it doesn't have it.

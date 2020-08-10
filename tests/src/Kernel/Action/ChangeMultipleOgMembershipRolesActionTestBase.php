@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types = 1);
+
 namespace Drupal\Tests\og\Kernel\Action;
 
 /**
@@ -24,7 +26,7 @@ class ChangeMultipleOgMembershipRolesActionTestBase extends ChangeOgMembershipAc
   /**
    * {@inheritdoc}
    */
-  public function setUp() {
+  protected function setUp(): void {
     parent::setUp();
 
     $this->installSchema('system', ['key_value_expire']);
@@ -59,8 +61,7 @@ class ChangeMultipleOgMembershipRolesActionTestBase extends ChangeOgMembershipAc
     }, ARRAY_FILTER_USE_KEY);
 
     /** @var \Drupal\og\Plugin\Action\AddMultipleOgMembershipRoles $plugin */
-    $configuration = !empty($default_role_name) ? ['role_name' => $default_role_name] : [];
-    $plugin = $this->getPlugin($configuration);
+    $plugin = $this->getPlugin();
     $plugin->executeMultiple($memberships);
 
     // The plugin's only responsibility is to store the memberships in temporary
@@ -75,8 +76,19 @@ class ChangeMultipleOgMembershipRolesActionTestBase extends ChangeOgMembershipAc
   public function executeMultipleProvider() {
     // Test a few combinations of different memberships.
     return [
-      [['pending', 'member']],
-      [['blocked', 'member', 'group_moderator']],
+      [
+        [
+          'pending',
+          'member',
+        ],
+      ],
+      [
+        [
+          'blocked',
+          'member',
+          'group_moderator',
+        ],
+      ],
       [
         [
           'blocked',
@@ -107,8 +119,7 @@ class ChangeMultipleOgMembershipRolesActionTestBase extends ChangeOgMembershipAc
     $this->setCurrentUser($this->testUser);
 
     /** @var \Drupal\og\Plugin\Action\AddMultipleOgMembershipRoles $plugin */
-    $configuration = !empty($default_role_name) ? ['role_name' => $default_role_name] : [];
-    $plugin = $this->getPlugin($configuration);
+    $plugin = $this->getPlugin();
     $plugin->execute($this->memberships[$membership]);
 
     // The plugin's only responsibility is to store the memberships in temporary

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types = 1);
+
 namespace Drupal\Tests\og\Functional;
 
 use Drupal\node\Entity\Node;
@@ -20,6 +22,11 @@ class GroupSubscribeFormatterTest extends BrowserTestBase {
    * {@inheritdoc}
    */
   public static $modules = ['node', 'og'];
+
+  /**
+   * {@inheritdoc}
+   */
+  protected $defaultTheme = 'stark';
 
   /**
    * Test entity group.
@@ -52,7 +59,7 @@ class GroupSubscribeFormatterTest extends BrowserTestBase {
   /**
    * {@inheritdoc}
    */
-  protected function setUp() {
+  protected function setUp(): void {
     parent::setUp();
 
     // Create bundle.

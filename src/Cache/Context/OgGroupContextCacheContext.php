@@ -1,9 +1,12 @@
 <?php
 
+declare(strict_types = 1);
+
 namespace Drupal\og\Cache\Context;
 
 use Drupal\Core\Cache\CacheableMetadata;
 use Drupal\Core\Cache\Context\CacheContextInterface;
+use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\og\OgContextInterface;
 
 /**
@@ -43,7 +46,7 @@ class OgGroupContextCacheContext implements CacheContextInterface {
    * {@inheritdoc}
    */
   public static function getLabel() {
-    return t('OG active group');
+    return new TranslatableMarkup('OG active group');
   }
 
   /**

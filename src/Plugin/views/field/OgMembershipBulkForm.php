@@ -1,10 +1,12 @@
 <?php
 
+declare(strict_types = 1);
+
 namespace Drupal\og\Plugin\views\field;
 
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\og\OgMembershipInterface;
-use Drupal\system\Plugin\views\field\BulkForm;
+use Drupal\views\Plugin\views\field\BulkForm;
 
 /**
  * Defines a user operations bulk form element.
