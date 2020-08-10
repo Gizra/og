@@ -83,7 +83,6 @@ class OgAdminContentController extends ControllerBase {
           $results[$entity_type_id] = array_unique(array_merge($results[$entity_type_id], $result));
         }
       }
-
     }
 
     $build = [];
