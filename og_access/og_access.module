@@ -9,6 +9,8 @@
  * @TODO move grants/access to service
  */
 
+declare(strict_types = 1);
+
 use Drupal\Core\Config\Entity\ConfigEntityBundleBase;
 use Drupal\Core\Entity\BundleEntityFormBase;
 use Drupal\Core\Entity\EntityInterface;
