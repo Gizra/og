@@ -5,6 +5,8 @@
  * Integration with the Views module.
  */
 
+declare(strict_types = 1);
+
 use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\field\FieldStorageConfigInterface;
 
