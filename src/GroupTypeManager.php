@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types = 1);
+
 namespace Drupal\og;
 
 use Drupal\Core\Config\ConfigFactoryInterface;
@@ -193,14 +195,6 @@ class GroupTypeManager implements GroupTypeManagerInterface {
   public function getGroupBundleIdsByEntityType($entity_type_id) {
     $group_map = $this->getGroupMap();
     return isset($group_map[$entity_type_id]) ? $group_map[$entity_type_id] : [];
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function getAllGroupBundles($entity_type = NULL) {
-    $group_map = $this->getGroupMap();
-    return !empty($group_map[$entity_type]) ? $group_map[$entity_type] : $group_map;
   }
 
   /**
