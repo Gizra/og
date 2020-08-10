@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types = 1);
+
 namespace Drupal\Tests\og\Kernel\Action;
 
 use Drupal\og\OgMembershipInterface;
@@ -30,8 +32,7 @@ class DeleteOgMembershipActionTest extends ChangeOgMembershipActionTestBase {
     $membership = $this->memberships[$membership];
     $member = $membership->getOwner();
     /** @var \Drupal\og\Plugin\Action\AddSingleOgMembershipRole $plugin */
-    $configuration = !empty($default_role_name) ? ['role_name' => $default_role_name] : [];
-    $plugin = $this->getPlugin($configuration);
+    $plugin = $this->getPlugin();
     $plugin->execute($membership);
 
     $this->assertFalse($this->membershipManager->isMember($this->group, $member->id(), [

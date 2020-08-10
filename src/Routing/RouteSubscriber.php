@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types = 1);
+
 namespace Drupal\og\Routing;
 
 use Drupal\Core\Entity\EntityTypeManagerInterface;
@@ -9,6 +11,7 @@ use Drupal\Core\Routing\RoutingEvents;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
 use Drupal\og\Event\OgAdminRoutesEvent;
 use Drupal\og\Event\OgAdminRoutesEventInterface;
+use Drupal\og\OgAccess;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\Routing\Route;
 use Symfony\Component\Routing\RouteCollection;
@@ -83,7 +86,7 @@ class RouteSubscriber extends RouteSubscriberBase {
           '_title' => 'Group management',
         ])
         ->addRequirements([
-          '_og_user_access_group' => 'administer group',
+          '_og_user_access_group' => OgAccess::ADMINISTER_GROUP_PERMISSION,
         ])
         ->setOption('parameters', [
           $entity_type_id => ['type' => 'entity:' . $entity_type_id],

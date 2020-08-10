@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types = 1);
+
 namespace Drupal\og\Plugin\EntityReferenceSelection;
 
 use Drupal\Core\Entity\Plugin\EntityReferenceSelection\DefaultSelection;
@@ -70,7 +72,7 @@ class OgSelection extends DefaultSelection {
     $definition = \Drupal::entityTypeManager()->getDefinition($target_type);
 
     if ($bundle_key = $definition->getKey('bundle')) {
-      $bundles = Og::groupTypeManager()->getAllGroupBundles($target_type);
+      $bundles = Og::groupTypeManager()->getGroupBundleIdsByEntityType($target_type);
 
       if (!$bundles) {
         // If there are no bundles defined, we can return early.

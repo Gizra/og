@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types = 1);
+
 namespace Drupal\og\Form;
 
 use Drupal\Core\Entity\ContentEntityDeleteForm;

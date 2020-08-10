@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types = 1);
+
 namespace Drupal\Tests\og\Unit\Cache\Context;
 
 use Drupal\Core\Session\AccountInterface;
@@ -39,7 +41,7 @@ class OgMembershipStateCacheContextTest extends OgContextCacheContextTestBase {
   /**
    * {@inheritdoc}
    */
-  public function setUp() {
+  protected function setUp(): void {
     parent::setUp();
 
     $this->user = $this->prophesize(AccountInterface::class);

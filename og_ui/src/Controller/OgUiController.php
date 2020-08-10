@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types = 1);
+
 namespace Drupal\og_ui\Controller;
 
 use Drupal\Core\Controller\ControllerBase;
@@ -72,12 +74,12 @@ class OgUiController extends ControllerBase {
    *   The overview as a render array.
    */
   public function rolesPermissionsOverviewPage($type) {
-    $action = $type === 'roles' ? t('Edit roles') : t('Edit permissions');
-    $header = [t('Group type'), t('Operations')];
+    $action = $type === 'roles' ? $this->t('Edit roles') : $this->t('Edit permissions');
+    $header = [$this->t('Group type'), $this->t('Operations')];
     $rows = [];
     $build = [];
 
-    foreach ($this->groupTypeManager->getAllGroupBundles() as $entity_type => $bundles) {
+    foreach ($this->groupTypeManager->getGroupMap() as $entity_type => $bundles) {
       $definition = $this->entityTypeManager->getDefinition($entity_type);
       $bundle_info = $this->entityTypeBundleInfo->getBundleInfo($entity_type);
       foreach ($bundles as $bundle) {

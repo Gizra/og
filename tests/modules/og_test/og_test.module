@@ -5,6 +5,8 @@
  * Main functions and hook implementations of the OG Test module.
  */
 
+declare(strict_types = 1);
+
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\og\Entity\OgRole;
 use Drupal\og\Og;

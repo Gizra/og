@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types = 1);
+
 namespace Drupal\Tests\og\Unit;
 
 use Drupal\Core\Cache\Context\CacheContextsManager;
@@ -13,7 +15,6 @@ use Drupal\Core\Extension\ModuleHandlerInterface;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\Core\Session\AccountProxyInterface;
 use Drupal\og\MembershipManagerInterface;
-use Drupal\og\OgGroupAudienceHelperInterface;
 use Drupal\og\OgMembershipInterface;
 use Drupal\Tests\UnitTestCase;
 use Drupal\og\GroupTypeManagerInterface;
@@ -99,13 +100,6 @@ class OgAccessTestBase extends UnitTestCase {
   protected $membershipManager;
 
   /**
-   * The OG group audience helper.
-   *
-   * @var \Drupal\og\OgGroupAudienceHelperInterface
-   */
-  protected $groupAudienceHelper;
-
-  /**
    * The entity type manager service.
    *
    * @var \Drupal\Core\Entity\EntityTypeManagerInterface|\Prophecy\Prophecy\ObjectProphecy
@@ -129,7 +123,7 @@ class OgAccessTestBase extends UnitTestCase {
   /**
    * {@inheritdoc}
    */
-  public function setUp() {
+  protected function setUp(): void {
     $this->groupId = $this->randomMachineName();
     $this->entityTypeId = $this->randomMachineName();
     $this->bundle = $this->randomMachineName();
@@ -168,7 +162,7 @@ class OgAccessTestBase extends UnitTestCase {
     $this->user = $this->prophesize(AccountInterface::class);
     $this->user->isAuthenticated()->willReturn(TRUE);
     $this->user->id()->willReturn($user_id);
-    $this->user->hasPermission(OgAccess::ADMINISTER_GROUP_PERMISSION)->willReturn(FALSE);
+    $this->user->hasPermission('administer organic groups')->willReturn(FALSE);
 
     $this->group = $this->groupEntity()->reveal();
 
@@ -177,8 +171,6 @@ class OgAccessTestBase extends UnitTestCase {
     $this->membershipManager->getMembership($this->group, $user_id, [OgMembershipInterface::STATE_ACTIVE])->willReturn($this->membership->reveal());
     $this->membershipManager->getGroupCount(Argument::any())->willReturn(1);
     $this->membership->getRoles()->willReturn([$this->ogRole->reveal()]);
-
-    $this->groupAudienceHelper = $this->prophesize(OgGroupAudienceHelperInterface::class);
 
     // @todo: Move to test.
     $this->ogRole->isAdmin()->willReturn(FALSE);
@@ -196,8 +188,7 @@ class OgAccessTestBase extends UnitTestCase {
       $module_handler->reveal(),
       $this->groupTypeManager->reveal(),
       $this->permissionManager->reveal(),
-      $this->membershipManager->reveal(),
-      $this->groupAudienceHelper->reveal()
+      $this->membershipManager->reveal()
     );
 
     $container = new ContainerBuilder();
@@ -207,7 +198,6 @@ class OgAccessTestBase extends UnitTestCase {
     $container->set('module_handler', $this->prophesize(ModuleHandlerInterface::class)->reveal());
     $container->set('og.group_type_manager', $this->groupTypeManager->reveal());
     $container->set('og.membership_manager', $this->membershipManager->reveal());
-    $container->set('og.group_audience_helper', $this->groupAudienceHelper->reveal());
 
     // This is for caching purposes only.
     $container->set('current_user', $this->user->reveal());
@@ -253,7 +243,7 @@ class OgAccessTestBase extends UnitTestCase {
   }
 
   /**
-   * Provides permissions to use in access tests.
+   * Provides group level permissions to use in access tests.
    *
    * @return array
    *   An array of test permissions.
@@ -264,8 +254,8 @@ class OgAccessTestBase extends UnitTestCase {
       // can be an arbitrary string; except for
       // OgAccessTest::testUserAccessAdminPermission test which checks for
       // "administer group" permission.
-      ['update group'],
-      ['administer group'],
+      [OgAccess::UPDATE_GROUP_PERMISSION],
+      [OgAccess::ADMINISTER_GROUP_PERMISSION],
     ];
   }
 

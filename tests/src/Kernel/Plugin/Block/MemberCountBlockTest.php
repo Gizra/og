@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types = 1);
+
 namespace Drupal\Tests\og\Kernel\Plugin\Block;
 
 use Drupal\Core\Cache\Cache;
@@ -110,7 +112,7 @@ class MemberCountBlockTest extends KernelTestBase {
   /**
    * {@inheritdoc}
    */
-  protected function setUp() {
+  protected function setUp(): void {
     parent::setUp();
 
     $this->installEntitySchema('entity_test');
@@ -273,7 +275,8 @@ class MemberCountBlockTest extends KernelTestBase {
    */
   protected function assertMemberCount($group_key, $expected_count) {
     $expected_string = (string) $this->formatPlural($expected_count, '@label has 1 member.', '@label has @count members', ['@label' => $this->groups[$group_key]->label()]);
-    $this->assertContains($expected_string, (string) $this->renderBlock($group_key));
+    // @todo Use assertStringContainsString() once we are on PHPUnit 9.
+    $this->assertTrue(strpos((string) $this->renderBlock($group_key), $expected_string) !== FALSE);
   }
 
   /**

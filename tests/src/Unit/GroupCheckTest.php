@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types = 1);
+
 namespace Drupal\Tests\og\Unit;
 
 use Drupal\Core\Access\AccessResultInterface;
@@ -117,7 +119,7 @@ class GroupCheckTest extends UnitTestCase {
   /**
    * {@inheritdoc}
    */
-  public function setUp() {
+  protected function setUp(): void {
     $this->entityTypeManager = $this->prophesize(EntityTypeManagerInterface::class);
     $this->entityType = $this->prophesize(EntityTypeInterface::class);
     $this->entityStorage = $this->prophesize(EntityStorageInterface::class);

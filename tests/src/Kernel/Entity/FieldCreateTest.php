@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types = 1);
+
 namespace Drupal\Tests\og\Kernel\Entity;
 
 use Drupal\field\Entity\FieldConfig;
@@ -7,6 +9,7 @@ use Drupal\node\Entity\NodeType;
 use Drupal\KernelTests\KernelTestBase;
 use Drupal\og\Og;
 use Drupal\og\OgGroupAudienceHelperInterface;
+use Drupal\og\Plugin\OgFields\AccessField;
 
 /**
  * Testing field definition overrides.
@@ -39,7 +42,7 @@ class FieldCreateTest extends KernelTestBase {
   /**
    * {@inheritdoc}
    */
-  protected function setUp() {
+  protected function setUp(): void {
     parent::setUp();
 
     // Add membership and config schema.
@@ -67,7 +70,7 @@ class FieldCreateTest extends KernelTestBase {
     // Simple create, for all the fields defined by OG core.
     $field_names = [
       OgGroupAudienceHelperInterface::DEFAULT_FIELD,
-      OG_DEFAULT_ACCESS_FIELD,
+      AccessField::DEFAULT_FIELD,
     ];
 
     foreach ($field_names as $field_name) {
