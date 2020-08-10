@@ -48,7 +48,7 @@ function og_test_entity_insert(EntityInterface $entity) {
 /**
  * Implements hook_og_user_access_entity_operation_alter().
  */
-function og_test_og_user_access_entity_operation_alter(AccessResultInterface $access_result, CacheableMetadata $cacheable_metadata, $context): void {
+function og_test_og_user_access_entity_operation_alter(AccessResultInterface &$access_result, CacheableMetadata $cacheable_metadata, $context): void {
   if (\Drupal::state()->get('og_test_group_content_entity_operation_access_alter', FALSE)) {
     // Moderators should have access to edit and delete all comments in all
     // groups.
