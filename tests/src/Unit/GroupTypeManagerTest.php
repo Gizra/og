@@ -155,21 +155,6 @@ class GroupTypeManagerTest extends UnitTestCase {
   }
 
   /**
-   * Tests getting all the group bundles.
-   *
-   * @covers ::getAllGroupBundles
-   */
-  public function testGetAllGroupBundles() {
-    // It is expected that the group map will be retrieved from config.
-    $groups = ['test_entity' => ['a', 'b']];
-    $this->expectGroupMapRetrieval($groups);
-
-    $manager = $this->createGroupManager();
-
-    $this->assertSame($groups, $manager->getAllGroupBundles());
-  }
-
-  /**
    * Tests checking if an entity is a group.
    *
    * @covers ::isGroup
