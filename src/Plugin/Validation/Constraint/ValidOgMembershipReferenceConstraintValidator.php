@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types = 1);
+
 namespace Drupal\og\Plugin\Validation\Constraint;
 
 use Drupal\og\Og;
