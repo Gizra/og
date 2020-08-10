@@ -222,7 +222,7 @@ class OgSelection extends DefaultSelection {
     $bundles_info = $this->entityTypeBundleInfo->getBundleInfo($entity_type_id);
 
     if ($entity_type->hasKey('bundle')) {
-      $bundles = Og::groupTypeManager()->getGroupBundlesByEntityType($entity_type_id);
+      $bundles = Og::groupTypeManager()->getGroupBundleIdsByEntityType($entity_type_id);
       foreach ($bundles as $bundle) {
         $bundle_options[$bundle] = $bundles_info[$bundle]['label'];
       }

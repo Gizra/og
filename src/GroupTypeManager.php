@@ -204,20 +204,6 @@ class GroupTypeManager implements GroupTypeManagerInterface {
   }
 
   /**
-   * Get group bundles of an entity type.
-   *
-   * @param string $entity_type_id
-   *   The entity type ID.
-   *
-   * @return array
-   *   An associative array of bundle IDs, or an empty array if none found.
-   */
-  public function getGroupBundlesByEntityType($entity_type_id) {
-    $group_map = $this->getGroupMap();
-    return isset($group_map[$entity_type_id]) ? $group_map[$entity_type_id] : [];
-  }
-
-  /**
    * {@inheritdoc}
    */
   public function getAllGroupContentBundleIds() {
