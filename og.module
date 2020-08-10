@@ -5,6 +5,8 @@
  * Enable users to create and manage groups with roles and permissions.
  */
 
+declare(strict_types = 1);
+
 use Drupal\Core\Access\AccessResult;
 use Drupal\Core\Cache\Cache;
 use Drupal\Core\Config\Entity\ConfigEntityBundleBase;
@@ -383,8 +385,8 @@ function og_og_role_insert(OgRoleInterface $role) {
     return;
   }
 
-  // Do not create config while config import is in progress.
-  if (\Drupal::isConfigSyncing()) {
+  // Skip creation of action plugins while config import is in progress.
+  if ($role->isSyncing()) {
     return;
   }
 

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types = 1);
+
 namespace Drupal\og\Access;
 
 use Drupal\Core\Access\AccessResult;
