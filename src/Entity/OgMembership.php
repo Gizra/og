@@ -12,6 +12,7 @@ use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Field\BaseFieldDefinition;
 use Drupal\Core\Field\FieldStorageDefinitionInterface;
 use Drupal\Core\Language\LanguageInterface;
+use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\user\UserInterface;
 use Drupal\og\Og;
 use Drupal\og\OgMembershipInterface;
@@ -370,46 +371,46 @@ class OgMembership extends ContentEntityBase implements OgMembershipInterface {
     $fields = [];
 
     $fields['id'] = BaseFieldDefinition::create('integer')
-      ->setLabel(t('ID'))
+      ->setLabel(new TranslatableMarkup('ID'))
       ->setDescription(t("The group membership's unique ID."))
       ->setReadOnly(TRUE)
       ->setSetting('unsigned', TRUE);
 
     $fields['uuid'] = BaseFieldDefinition::create('uuid')
-      ->setLabel(t('UUID'))
-      ->setDescription(t('The membership UUID.'))
+      ->setLabel(new TranslatableMarkup('UUID'))
+      ->setDescription(new TranslatableMarkup('The membership UUID.'))
       ->setReadOnly(TRUE);
 
     $fields['type'] = BaseFieldDefinition::create('entity_reference')
-      ->setLabel(t('Type'))
-      ->setDescription(t('The bundle of the membership'))
+      ->setLabel(new TranslatableMarkup('Type'))
+      ->setDescription(new TranslatableMarkup('The bundle of the membership'))
       ->setSetting('target_type', 'og_membership_type');
 
     $fields['uid'] = BaseFieldDefinition::create('entity_reference')
-      ->setLabel(t('Member User ID'))
-      ->setDescription(t('The user ID of the member.'))
+      ->setLabel(new TranslatableMarkup('Member User ID'))
+      ->setDescription(new TranslatableMarkup('The user ID of the member.'))
       ->setSetting('target_type', 'user');
 
     $fields['entity_type'] = BaseFieldDefinition::create('string')
-      ->setLabel(t('Group entity type'))
-      ->setDescription(t('The entity type of the group.'));
+      ->setLabel(new TranslatableMarkup('Group entity type'))
+      ->setDescription(new TranslatableMarkup('The entity type of the group.'));
 
     $fields['entity_bundle'] = BaseFieldDefinition::create('string')
-      ->setLabel(t('Group bundle ID'))
-      ->setDescription(t('The bundle ID of the group.'));
+      ->setLabel(new TranslatableMarkup('Group bundle ID'))
+      ->setDescription(new TranslatableMarkup('The bundle ID of the group.'));
 
     $fields['entity_id'] = BaseFieldDefinition::create('string')
-      ->setLabel(t('Group entity ID'))
-      ->setDescription(t('The entity ID of the group.'));
+      ->setLabel(new TranslatableMarkup('Group entity ID'))
+      ->setDescription(new TranslatableMarkup('The entity ID of the group.'));
 
     $fields['state'] = BaseFieldDefinition::create('string')
-      ->setLabel(t('State'))
-      ->setDescription(t('The user membership state: active, pending, or blocked.'))
+      ->setLabel(new TranslatableMarkup('State'))
+      ->setDescription(new TranslatableMarkup('The user membership state: active, pending, or blocked.'))
       ->setDefaultValue(OgMembershipInterface::STATE_ACTIVE);
 
     $fields['roles'] = BaseFieldDefinition::create('entity_reference')
-      ->setLabel(t('Roles'))
-      ->setDescription(t('The OG roles related to an OG membership entity.'))
+      ->setLabel(new TranslatableMarkup('Roles'))
+      ->setDescription(new TranslatableMarkup('The OG roles related to an OG membership entity.'))
       ->setCardinality(FieldStorageDefinitionInterface::CARDINALITY_UNLIMITED)
       ->setDisplayOptions('view', [
         'label' => 'hidden',
@@ -419,12 +420,12 @@ class OgMembership extends ContentEntityBase implements OgMembershipInterface {
       ->setSetting('target_type', 'og_role');
 
     $fields['created'] = BaseFieldDefinition::create('created')
-      ->setLabel(t('Create'))
-      ->setDescription(t('The Unix timestamp when the membership was created.'));
+      ->setLabel(new TranslatableMarkup('Create'))
+      ->setDescription(new TranslatableMarkup('The Unix timestamp when the membership was created.'));
 
     $fields['language'] = BaseFieldDefinition::create('language')
-      ->setLabel(t('Language'))
-      ->setDescription(t('The {languages}.language of this membership.'));
+      ->setLabel(new TranslatableMarkup('Language'))
+      ->setDescription(new TranslatableMarkup('The {languages}.language of this membership.'));
 
     return $fields;
   }
@@ -435,14 +436,14 @@ class OgMembership extends ContentEntityBase implements OgMembershipInterface {
   public function preSave(EntityStorageInterface $storage) {
     // Check the value directly rather than using the entity, if there is one.
     // This will watch actual empty values and '0'.
-    if (!$this->get('uid')->target_id) {
+    if (!$uid = $this->get('uid')->target_id) {
       // Throw a generic logic exception as this will likely get caught in
       // \Drupal\Core\Entity\Sql\SqlContentEntityStorage::save and turned into
       // an EntityStorageException anyway.
       throw new \LogicException('OG membership can not be created for an empty or anonymous user.');
     }
 
-    if (!$this->get('entity_id')->value) {
+    if (!$entity_id = $this->get('entity_id')->value) {
       // Group was not set.
       throw new \LogicException('Membership cannot be set for an empty or an unsaved group.');
     }
@@ -478,8 +479,8 @@ class OgMembership extends ContentEntityBase implements OgMembershipInterface {
     // Check for an existing membership.
     $query = \Drupal::entityQuery('og_membership');
     $query
-      ->condition('uid', $this->get('uid')->target_id)
-      ->condition('entity_id', $this->get('entity_id')->value)
+      ->condition('uid', $uid)
+      ->condition('entity_id', $entity_id)
       ->condition('entity_type', $this->get('entity_type')->value);
 
     if (!$this->isNew()) {
@@ -493,7 +494,7 @@ class OgMembership extends ContentEntityBase implements OgMembershipInterface {
       ->execute();
 
     if ($count) {
-      throw new \LogicException(sprintf('An OG membership already exists for uid %s in group of entity-type %s and ID: %s', $this->get('uid')->target_id, $entity_type_id, $this->getGroup()->id()));
+      throw new \LogicException(sprintf('An OG membership already exists for user ID %d and group of entity type %s and ID %s', $uid, $entity_type_id, $group->id()));
     }
 
     parent::preSave($storage);
@@ -507,7 +508,6 @@ class OgMembership extends ContentEntityBase implements OgMembershipInterface {
 
     // Reset internal cache.
     Og::reset();
-    \Drupal::service('og.access')->reset();
 
     return $result;
   }

@@ -1,8 +1,8 @@
 <?php
 
-namespace Drupal\Tests\og\Unit;
+declare(strict_types = 1);
 
-use Drupal\og\OgAccess;
+namespace Drupal\Tests\og\Unit;
 
 /**
  * OG Access entity tests.
@@ -13,33 +13,33 @@ use Drupal\og\OgAccess;
 class OgAccessEntityTest extends OgAccessEntityTestBase {
 
   /**
-   * Tests access to an entity by different operations.
+   * Tests access to an entity by different permissions.
    *
    * @coversDefaultmethod ::userAccessEntity
    * @dataProvider permissionsProvider
    */
-  public function testAccessByOperation($operation) {
+  public function testAccessByPermission($permission) {
     $this->membershipManager->getGroups($this->groupContentEntity->reveal())->willReturn([$this->entityTypeId => [$this->group]]);
 
-    $user_access = $this->ogAccess->userAccessEntity($operation, $this->groupContentEntity->reveal(), $this->user->reveal());
+    $user_access = $this->ogAccess->userAccessEntity($permission, $this->groupContentEntity->reveal(), $this->user->reveal());
 
     // We populate the allowed permissions cache in
     // OgAccessEntityTestBase::setup().
-    $condition = $operation == 'update group' ? $user_access->isAllowed() : $user_access->isForbidden();
+    $condition = $permission == 'update group' ? $user_access->isAllowed() : $user_access->isForbidden();
     $this->assertTrue($condition);
   }
 
   /**
-   * Tests access to an entity by different operations, by an admin member.
+   * Tests access to an entity by different permissions, by an admin member.
    *
    * @coversDefaultmethod ::userAccessEntity
    * @dataProvider permissionsProvider
    */
-  public function testAccessByOperationAdmin($operation) {
+  public function testAccessByPermissionAdmin($permission) {
     $this->membershipManager->getGroups($this->groupContentEntity->reveal())->willReturn([$this->entityTypeId => [$this->group]]);
 
-    $this->user->hasPermission(OgAccess::ADMINISTER_GROUP_PERMISSION)->willReturn(TRUE);
-    $user_entity_access = $this->ogAccess->userAccessEntity($operation, $this->groupContentEntity->reveal(), $this->user->reveal());
+    $this->user->hasPermission('administer organic groups')->willReturn(TRUE);
+    $user_entity_access = $this->ogAccess->userAccessEntity($permission, $this->groupContentEntity->reveal(), $this->user->reveal());
     $this->assertTrue($user_entity_access->isAllowed());
   }
 

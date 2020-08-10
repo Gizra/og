@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types = 1);
+
 namespace Drupal\Tests\og\Unit;
 
 use Drupal\Core\Cache\MemoryCache\MemoryCacheInterface;
@@ -96,7 +98,7 @@ class CreateMembershipTest extends UnitTestCase {
   /**
    * {@inheritdoc}
    */
-  public function setUp() {
+  protected function setUp(): void {
     parent::setUp();
 
     $this->entityTypeId = $this->randomMachineName();

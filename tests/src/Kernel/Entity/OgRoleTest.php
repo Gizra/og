@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types = 1);
+
 namespace Drupal\Tests\og\Kernel\Entity;
 
 use Drupal\Core\Config\ConfigValueException;
@@ -7,6 +9,7 @@ use Drupal\Core\Entity\EntityStorageException;
 use Drupal\KernelTests\KernelTestBase;
 use Drupal\og\Entity\OgRole;
 use Drupal\og\Exception\OgRoleException;
+use Drupal\og\OgAccess;
 use Drupal\system\Entity\Action;
 
 /**
@@ -59,7 +62,7 @@ class OgRoleTest extends KernelTestBase {
   /**
    * {@inheritdoc}
    */
-  protected function setUp() {
+  protected function setUp(): void {
     parent::setUp();
 
     // Installing needed schema.
@@ -92,7 +95,7 @@ class OgRoleTest extends KernelTestBase {
     $og_role
       ->setName('content_editor')
       ->setLabel('Content editor')
-      ->grantPermission('administer group');
+      ->grantPermission(OgAccess::ADMINISTER_GROUP_PERMISSION);
 
     try {
       $og_role->save();
@@ -113,7 +116,7 @@ class OgRoleTest extends KernelTestBase {
     $this->assertEquals($og_role->id(), $saved_role->id());
 
     // Checking creation of the role.
-    $this->assertEquals($og_role->getPermissions(), ['administer group']);
+    $this->assertEquals($og_role->getPermissions(), [OgAccess::ADMINISTER_GROUP_PERMISSION]);
 
     // Check if the role is correctly recognized as a non-default role.
     $this->assertFalse($og_role->isRequired());
@@ -139,7 +142,7 @@ class OgRoleTest extends KernelTestBase {
         ->setLabel('Content editor')
         ->setGroupType('node')
         ->setGroupBundle('group')
-        ->grantPermission('administer group')
+        ->grantPermission(OgAccess::ADMINISTER_GROUP_PERMISSION)
         ->save();
 
       $this->fail('OG role with the same ID can be saved.');

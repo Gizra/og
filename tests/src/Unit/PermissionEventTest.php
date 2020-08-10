@@ -1,10 +1,13 @@
 <?php
 
+declare(strict_types = 1);
+
 namespace Drupal\Tests\og\Unit;
 
 use Drupal\og\Event\PermissionEvent;
 use Drupal\og\GroupContentOperationPermission;
 use Drupal\og\GroupPermission;
+use Drupal\og\OgAccess;
 use Drupal\og\OgRoleInterface;
 use Drupal\Tests\UnitTestCase;
 
@@ -675,8 +678,8 @@ class PermissionEventTest extends UnitTestCase {
       // A single permission with restricted access and a default role.
       [
         [
-          'administer group' => new GroupPermission([
-            'name' => 'administer group',
+          OgAccess::ADMINISTER_GROUP_PERMISSION => new GroupPermission([
+            'name' => OgAccess::ADMINISTER_GROUP_PERMISSION,
             'title' => $this->t('Administer group'),
             'description' => $this->t('Manage group members and content in the group.'),
             'default roles' => [OgRoleInterface::ADMINISTRATOR],

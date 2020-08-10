@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types = 1);
+
 namespace Drupal\Tests\og\Kernel;
 
 use Drupal\entity_test\Entity\EntityTest;
@@ -50,7 +52,7 @@ class GroupTypeConditionTest extends KernelTestBase {
   /**
    * {@inheritdoc}
    */
-  protected function setUp() {
+  protected function setUp(): void {
     parent::setUp();
 
     $this->conditionManager = $this->container->get('plugin.manager.condition');

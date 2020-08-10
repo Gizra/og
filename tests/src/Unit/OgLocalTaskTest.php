@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types = 1);
+
 namespace Drupal\Tests\og\Unit;
 
 use Drupal\Core\DependencyInjection\ContainerBuilder;
@@ -43,7 +45,7 @@ class OgLocalTaskTest extends UnitTestCase {
   /**
    * {@inheritdoc}
    */
-  public function setUp() {
+  protected function setUp(): void {
     $this->groupTypeManager = $this->prophesize(GroupTypeManagerInterface::class);
     $this->routeProvider = $this->prophesize(RouteProvider::class);
     $this->route = $this->prophesize(Route::class);

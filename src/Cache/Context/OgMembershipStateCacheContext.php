@@ -1,10 +1,13 @@
 <?php
 
+declare(strict_types = 1);
+
 namespace Drupal\og\Cache\Context;
 
 use Drupal\Core\Cache\CacheableMetadata;
 use Drupal\Core\Cache\Context\CacheContextInterface;
 use Drupal\Core\Session\AccountInterface;
+use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\og\MembershipManagerInterface;
 use Drupal\og\OgContextInterface;
 use Drupal\og\OgMembershipInterface;
@@ -62,7 +65,7 @@ class OgMembershipStateCacheContext implements CacheContextInterface {
    * {@inheritdoc}
    */
   public static function getLabel() {
-    return t('OG membership state');
+    return new TranslatableMarkup('OG membership state');
   }
 
   /**

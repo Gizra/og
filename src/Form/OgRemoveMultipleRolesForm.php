@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types = 1);
+
 namespace Drupal\og\Form;
 
 use Drupal\Core\Form\FormStateInterface;
@@ -34,7 +36,7 @@ class OgRemoveMultipleRolesForm extends OgChangeMultipleRolesFormBase {
 
     $form['roles'] = [
       '#type' => 'select',
-      '#title' => t('Remove roles'),
+      '#title' => $this->t('Remove roles'),
       '#multiple' => TRUE,
       '#required' => TRUE,
       '#options' => $options,

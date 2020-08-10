@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types = 1);
+
 namespace Drupal\Tests\og\Kernel\Action;
 
 /**
@@ -24,7 +26,7 @@ class ChangeMultipleOgMembershipRolesActionTestBase extends ChangeOgMembershipAc
   /**
    * {@inheritdoc}
    */
-  public function setUp() {
+  protected function setUp(): void {
     parent::setUp();
 
     $this->installSchema('system', ['key_value_expire']);

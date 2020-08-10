@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types = 1);
+
 namespace Drupal\Tests\og\Unit;
 
 use Drupal\Component\EventDispatcher\ContainerAwareEventDispatcher;
@@ -103,7 +105,7 @@ class OgAdminRoutesControllerTest extends UnitTestCase {
   /**
    * {@inheritdoc}
    */
-  public function setUp() {
+  protected function setUp(): void {
 
     $this->accessManager = $this->prophesize(AccessManagerInterface::class);
     $this->routeMatch = $this->prophesize(RouteMatchInterface::class);

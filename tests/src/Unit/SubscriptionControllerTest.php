@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types = 1);
+
 namespace Drupal\Tests\og\Unit;
 
 use Drupal\Core\DependencyInjection\ContainerBuilder;
@@ -98,7 +100,7 @@ class SubscriptionControllerTest extends UnitTestCase {
   /**
    * {@inheritdoc}
    */
-  public function setUp() {
+  protected function setUp(): void {
     $this->entityFormBuilder = $this->prophesize(EntityFormBuilderInterface::class);
     $this->group = $this->prophesize(ContentEntityInterface::class);
     $this->membershipManager = $this->prophesize(MembershipManagerInterface::class);
