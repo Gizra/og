@@ -91,7 +91,7 @@ class GroupType extends ConditionPluginBase implements ContainerFactoryPluginInt
    */
   public function buildConfigurationForm(array $form, FormStateInterface $form_state) {
     $options = [];
-    $group_types = $this->groupTypeManager->getAllGroupBundles();
+    $group_types = $this->groupTypeManager->getGroupMap();
 
     // If no groups have been created yet, show only the error message and hide
     // the other elements.
