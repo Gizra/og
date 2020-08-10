@@ -57,47 +57,5 @@ function hook_og_user_access_alter(array &$permissions, CacheableMetadata $cache
 }
 
 /**
- * Allows to alter access to entity operations performed on group content.
- *
- * @param \Drupal\Core\Access\AccessResultInterface $access_result
- *   The access result being altered.
- * @param \Drupal\Core\Cache\CacheableMetadata $cacheable_metadata
- *   The cache metadata.
- * @param array $context
- *   An associative array containing contextual information, with keys:
- *   - 'operation': The entity operation being performed on the group content.
- *   - 'group': The group entity to which the group content belongs.
- *   - 'group_content': The group content entity upon which the operation is
- *      performed.
- *   - 'user': The user account for which access is being determined.
- */
-function hook_og_user_access_entity_operation_alter(AccessResultInterface $access_result, CacheableMetadata $cacheable_metadata, array $context): void {
-  // This example implements a use case where a custom module allows site
-  // builders to toggle a configuration setting that will allow users with the
-  // site wide 'edit and delete comments in all groups' permission to edit and
-  // delete all comments in all groups, even if they are not a group member.
-  /** @var \Drupal\Core\Session\AccountProxyInterface $user */
-  $user = $context['user'];
-  $group_content = $context['group_content'];
-
-  // Retrieve the module configuration.
-  $config = \Drupal::config('mymodule.settings');
-
-  // If comment moderation is allowed and the user has the permission, grant
-  // access to the 'update' and 'delete' operations on comment entities.
-  $is_comment = $group_content->getEntityTypeId() === 'comment';
-  $user_can_moderate_comments = $user->hasPermission('edit and delete comments in all groups');
-  $comment_moderation_is_enabled = $config->get('comment_moderation_enabled');
-
-  if ($is_comment && $user_can_moderate_comments && $comment_moderation_is_enabled) {
-    $access_result = AccessResult::allowed();
-  }
-
-  // Since our access result depends on our custom module configuration, we need
-  // to add it to the cache metadata.
-  $cacheable_metadata->addCacheableDependency($config);
-}
-
-/**
  * @} End of "addtogroup hooks".
  */
