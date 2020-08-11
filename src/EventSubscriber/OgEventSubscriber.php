@@ -385,6 +385,7 @@ class OgEventSubscriber implements EventSubscriberInterface {
    * Checks if a user has access to perform a group content entity operation.
    *
    * @param \Drupal\og\Event\GroupContentEntityOperationAccessEventInterface $event
+   *   The event fired when a group content entity operation is performed.
    */
   public function checkGroupContentEntityOperationAccess(GroupContentEntityOperationAccessEventInterface $event): void {
     $group_content_entity = $event->getGroupContent();

@@ -7,8 +7,6 @@
 
 declare(strict_types = 1);
 
-use Drupal\Core\Access\AccessResult;
-use Drupal\Core\Access\AccessResultInterface;
 use Drupal\Core\Cache\CacheableMetadata;
 use Drupal\Core\Entity\EntityPublishedInterface;
 use Drupal\og\OgAccess;

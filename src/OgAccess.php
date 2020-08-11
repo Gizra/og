@@ -336,8 +336,6 @@ class OgAccess implements OgAccessInterface {
    * {@inheritdoc}
    */
   public function userAccessGroupContentEntityOperation(string $operation, EntityInterface $group_entity, EntityInterface $group_content_entity, AccountInterface $user = NULL): AccessResultInterface {
-    $access_result = AccessResult::neutral();
-
     // Default to the current user.
     $user = $user ?: $this->accountProxy->getAccount();
 

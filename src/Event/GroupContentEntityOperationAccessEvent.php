@@ -24,7 +24,7 @@ class GroupContentEntityOperationAccessEvent extends AccessEventBase implements 
    *
    * @var \Drupal\Core\Entity\ContentEntityInterface
    */
-  protected $group_content;
+  protected $groupContent;
 
   /**
    * Constructs a GroupContentEntityOperationAccessEvent.
@@ -41,7 +41,7 @@ class GroupContentEntityOperationAccessEvent extends AccessEventBase implements 
   public function __construct(string $operation, ContentEntityInterface $group, ContentEntityInterface $groupContent, AccountInterface $user) {
     parent::__construct($group, $user);
     $this->operation = $operation;
-    $this->group_content = $groupContent;
+    $this->groupContent = $groupContent;
   }
 
   /**
@@ -55,7 +55,7 @@ class GroupContentEntityOperationAccessEvent extends AccessEventBase implements 
    * {@inheritdoc}
    */
   public function getGroupContent(): ContentEntityInterface {
-    return $this->group_content;
+    return $this->groupContent;
   }
 
 }
