@@ -7,6 +7,7 @@
 
 declare(strict_types = 1);
 
+use Drupal\Core\Access\AccessResult;
 use Drupal\Core\Access\AccessResultInterface;
 use Drupal\Core\Cache\CacheableMetadata;
 use Drupal\Core\Entity\EntityPublishedInterface;
@@ -23,14 +24,14 @@ use Drupal\og\OgAccess;
  * @param array $permissions
  *   The list of group level permissions, passed by reference.
  * @param \Drupal\Core\Cache\CacheableMetadata $cacheable_metadata
- *   The cache metadata, passed by reference.
+ *   The cache metadata.
  * @param array $context
  *   An associative array containing contextual information, with keys:
  *   - 'permission': The group level permission being checked, as a string.
  *   - 'group': The group entity on which the permission applies.
  *   - 'user': The user account for which access is being determined.
  */
-function hook_og_user_access_alter(array &$permissions, CacheableMetadata &$cacheable_metadata, array $context): void {
+function hook_og_user_access_alter(array &$permissions, CacheableMetadata $cacheable_metadata, array $context): void {
   // This example implements a use case where a custom module allows site
   // builders to toggle a configuration setting that will prevent groups to be
   // deleted if they are published.
@@ -38,7 +39,7 @@ function hook_og_user_access_alter(array &$permissions, CacheableMetadata &$cach
   $config = \Drupal::config('mymodule.settings');
 
   // Check if the site is configured to allow deletion of published groups.
-  $published_groups_can_be_deleted = \Drupal::config('mymodule')->get('delete_published_groups');
+  $published_groups_can_be_deleted = $config->get('delete_published_groups');
 
   // If deletion is not allowed and the group is published, revoke the
   // permission.
@@ -61,7 +62,7 @@ function hook_og_user_access_alter(array &$permissions, CacheableMetadata &$cach
  * @param \Drupal\Core\Access\AccessResultInterface $access_result
  *   The access result being altered.
  * @param \Drupal\Core\Cache\CacheableMetadata $cacheable_metadata
- *   The cache metadata, passed by reference.
+ *   The cache metadata.
  * @param array $context
  *   An associative array containing contextual information, with keys:
  *   - 'operation': The entity operation being performed on the group content.
@@ -70,7 +71,7 @@ function hook_og_user_access_alter(array &$permissions, CacheableMetadata &$cach
  *      performed.
  *   - 'user': The user account for which access is being determined.
  */
-function hook_og_user_access_entity_operation_alter(AccessResultInterface &$access_result, CacheableMetadata &$cacheable_metadata, array $context): void {
+function hook_og_user_access_entity_operation_alter(AccessResultInterface $access_result, CacheableMetadata $cacheable_metadata, array $context): void {
   // This example implements a use case where a custom module allows site
   // builders to toggle a configuration setting that will allow users with the
   // site wide 'edit and delete comments in all groups' permission to edit and
@@ -86,10 +87,10 @@ function hook_og_user_access_entity_operation_alter(AccessResultInterface &$acce
   // access to the 'update' and 'delete' operations on comment entities.
   $is_comment = $group_content->getEntityTypeId() === 'comment';
   $user_can_moderate_comments = $user->hasPermission('edit and delete comments in all groups');
-  $comment_moderation_is_enabled = \Drupal::config('mymodule')->get('comment_moderation_enabled');
+  $comment_moderation_is_enabled = $config->get('comment_moderation_enabled');
 
   if ($is_comment && $user_can_moderate_comments && $comment_moderation_is_enabled) {
-    $access_result = new AccessResultAllowed();
+    $access_result = AccessResult::allowed();
   }
 
   // Since our access result depends on our custom module configuration, we need
