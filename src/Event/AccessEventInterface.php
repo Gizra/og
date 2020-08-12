@@ -38,6 +38,14 @@ interface AccessEventInterface extends RefinableCacheableDependencyInterface {
   public function denyAccess(): AccessResultInterface;
 
   /**
+   * Merges the given access result with the existing access result.
+   *
+   * @return \Drupal\Core\Access\AccessResultInterface
+   *   The updated access result.
+   */
+  public function mergeAccessResult(AccessResultInterface $access_result): AccessResultInterface;
+
+  /**
    * Returns the group that provides the context for the access check.
    *
    * @return \Drupal\Core\Entity\ContentEntityInterface

@@ -73,6 +73,14 @@ class AccessEventBase extends Event implements AccessEventInterface {
   /**
    * {@inheritdoc}
    */
+  public function mergeAccessResult(AccessResultInterface $access_result): AccessResultInterface {
+    $this->access = $this->access->orIf($access_result);
+    return $this->access;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   public function getGroup(): ContentEntityInterface {
     return $this->group;
   }
