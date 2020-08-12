@@ -57,15 +57,17 @@ class AccessEventBase extends Event implements AccessEventInterface {
   /**
    * {@inheritdoc}
    */
-  public function grantAccess(): void {
+  public function grantAccess(): AccessResultInterface {
     $this->access = $this->access->orIf(AccessResult::allowed());
+    return $this->access;
   }
 
   /**
    * {@inheritdoc}
    */
-  public function denyAccess(): void {
+  public function denyAccess(): AccessResultInterface {
     $this->access = $this->access->orIf(AccessResult::forbidden());
+    return $this->access;
   }
 
   /**
