@@ -123,7 +123,7 @@ $permission = new \Drupal\og\GroupContentOperationPermission([
 ```
 
 These permissions are defined in the same way as the group level permissions, in
-an event listener for the `og.permissions` event. Here are some example how OG
+an event listener for the `og.permissions` event. Here are some examples how OG
 sets these permissions:
 
 - `OgEventSubscriber::getDefaultEntityOperationPermissions()`: creates a generic
@@ -132,3 +132,49 @@ sets these permissions:
 - `OgEventSubscriber::provideDefaultNodePermissions()`: an example of how the
   generic permissions can be overridden. This ensures that the same permission
   names are used for the Node entity type as used by core.
+
+
+Granting permissions to users
+-----------------------------
+
+Similar to Drupal core, permissions are not directly assigned to users in OG,
+but they are assigned to roles, and a user can have one or more roles in a
+group.
+
+The role data is stored in a config entity type named `OgRole`, and whenever a
+new group type is created, a number of roles will automatically be created:
+
+- `member` and `non-member`: these two roles are required for every group, they
+  indicate whether or not a user is a member.
+- `administrator`: this role is not strictly required but is created by default
+  by OG because it is considered to be generally useful for most groups.
+- Developers can choose to provide additional default roles by listening to the
+  `og.default_role` event.
+
+Whenever a default role is created, it will automatically inherit the
+permissions that are assigned to the role in their permission declaration (see
+the `default role` property above which takes an array of roles to which these
+permissions should be applied).
+
+To manually assign a permission to a role for a certain group, it can be done as
+follows:
+
+```php
+$admin_role = OgRole::loadByGroupAndName($this->group, OgRoleInterface::ADMINISTRATOR);
+$admin_role->grantPermission('my permission')->save();
+````
+
+Similarly, an existing permission can be removed from a role by calling
+`$admin_role->revokePermission('my permission')` and saving the role entity.
+
+For more information on how `OgRole` objects are handled, check the following
+methods:
+- `\Drupal\og\GroupTypeManager::addGroup()`: this code is responsible for
+  creating a new group type and will create the roles as part of it.
+- `\Drupal\og\OgRoleManager::getDefaultRoles()`: creates the default roles and
+  fires the event listener that modules can hook into the provide additional
+  default roles.
+- `\Drupal\og\EventSubscriber\OgEventSubscriber::provideDefaultRoles()`: OG's
+  own implementation of the event listener, which provides the `administrator`
+  role.
+
