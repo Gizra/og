@@ -277,8 +277,8 @@ class OgAccess implements OgAccessInterface {
 
         // An entity can be a group and group content in the same time. If the
         // group returns a neutral result the user still might have access to
-        // the permission in group content context. So if we get a neutral result
-        // we will continue with the group content access check below.
+        // the permission in group content context. So if we get a neutral
+        // result we will continue with the group content access check below.
         $result = $this->userAccess($entity, $permission, $user);
         if (!$result->isNeutral()) {
           return $result;
