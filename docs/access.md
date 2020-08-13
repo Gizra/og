@@ -2,16 +2,17 @@ Access control for groups and group content
 ===========================================
 
 Controlling access to groups and group content is one of the most important
-aspects of building a group based project. Group based access is more complex
-than the standard role and permission based access system built into Drupal core
-so Organic Groups has extended the core functionality to make it more flexible
-and, indeed, _organic_ for developers to design their access control systems.
+aspects of building a group based project. Having separate access rules for
+different groups and the content in them is more complex than the standard role
+and permission based access system built into Drupal core so Organic Groups has
+extended the core functionality to make it more flexible and, indeed, _organic_
+for developers to design their access control systems.
 
 Group level permissions
 -----------------------
 
-The first line of defense is the group level access control provided by OG.
-Group level permissions apply to the group as a whole, and OG defines a number
+The first line of defense is group level access control.
+Group level permissions apply to the group as a whole. OG ships with a number
 of permissions that control basic group and membership management tasks such as:
 - Administration permissions such as `update group`, `delete group`, `manage
   members` and `approve and deny subscription`.
@@ -21,7 +22,7 @@ of permissions that control basic group and membership management tasks such as:
 Developers can define their own group level permissions by implementing an event
 listener that subscribes to the `og.permission` event and instantiating
 `GroupPermission` objects with the properties of the permission.
- 
+
 As an example let's define a permission that would allow an administrator to
 make a group private or public - this could be used in a project that has
 private groups that would only accept new members that are invited by existing
@@ -57,7 +58,7 @@ class OgEventSubscriber implements EventSubscriberInterface {
         // The human readable permission title, to show to site builders in the UI.
         'title' => $this->t('Set group privacy'),
         // An optional description providing extra information.
-        'description' => $this->t('Users can only join a private group when invited.'),
+        'description' => $this->t('Users can only join a private group when invited by an existing member.'),
         // The roles to which this permission applies by default when a new
         // group is created.
         'default roles' => [OgRoleInterface::ADMINISTRATOR],
@@ -70,7 +71,7 @@ class OgEventSubscriber implements EventSubscriberInterface {
 
 }
 ```
-  
+
 The list of group level permissions that are provided out of the box by Organic
 Groups can be found in
 `\Drupal\og\EventSubscriber\OgEventSubscriber::provideDefaultOgPermissions()`.
@@ -86,7 +87,7 @@ within the group.
 
 In Drupal core the entity CRUD operations are defined as simple strings (e.g.
 an for an 'article' node type we would have the permission `delete own article
-content`). 
+content`).
 
 OG not only supports nodes but all kinds of entities, and the simple string
 based permissions from Drupal core have proved to be difficult to use for
@@ -97,10 +98,10 @@ have the permission to edit their own content, but not the content of other
 members.
 
 The permission system from Drupal core does not lend itself well to these use
-cases since they are simple unstructured strings and we cannot reliably derive
-the entity type and operation from them. For example the permission `delete own
-article content` gives a user the permission to delete nodes of type 'article'
-which were created by themselves. This permission contains the words 'delete'
+cases since we cannot reliably derive the entity type and operation from these
+simple string based permissions. For example the permission `delete own article
+content` gives a user the permission to delete nodes of type 'article' which
+were created by themselves. This permission string contains the words 'delete'
 and 'own' so it would be possible to come up with an algorithm that infers the
 operation and the scope, but the bundle and entity type can not be derived
 easily. In fact the entity type 'node' doesn't even appear in the string!
@@ -130,8 +131,9 @@ sets these permissions:
   set of permissions for every group content type. These can be overridden by
   custom modules if needed.
 - `OgEventSubscriber::provideDefaultNodePermissions()`: an example of how the
-  generic permissions can be overridden. This ensures that the same permission
-  names are used for the Node entity type as used by core.
+  generic permissions can be overridden. This ensures that we can use the same
+  permission names for the Node entity type in our group content as the ones
+  used by core.
 
 
 Granting permissions to users
@@ -362,4 +364,4 @@ In most cases this can be solved by only granting access to a permission when
 required, and remaining neutral if not. Alternatively check access to
 individual groups using `OgAccess::userAccessGroupContentEntityOperation()` -
 this will only return access denied for the specific group where access has been
-forbidden, while still allowing access for all others. 
+forbidden, while still allowing access for all others.
