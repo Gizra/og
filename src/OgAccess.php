@@ -13,8 +13,10 @@ use Drupal\Core\Extension\ModuleHandlerInterface;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\Core\Session\AccountProxyInterface;
 use Drupal\og\Entity\OgRole;
+use Drupal\og\Event\GroupContentEntityOperationAccessEvent;
 use Drupal\user\EntityOwnerInterface;
 use Drupal\user\UserInterface;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
 /**
  * The service that determines if users have access to groups and group content.
@@ -90,6 +92,13 @@ class OgAccess implements OgAccessInterface {
   protected $membershipManager;
 
   /**
+   * The event dispatcher.
+   *
+   * @var \Symfony\Component\EventDispatcher\EventDispatcherInterface
+   */
+  protected $dispatcher;
+
+  /**
    * Constructs the OgAccess service.
    *
    * @param \Drupal\Core\Config\ConfigFactoryInterface $config_factory
@@ -104,14 +113,17 @@ class OgAccess implements OgAccessInterface {
    *   The permission manager.
    * @param \Drupal\og\MembershipManagerInterface $membership_manager
    *   The group membership manager.
+   * @param \Symfony\Component\EventDispatcher\EventDispatcherInterface $dispatcher
+   *   The event dispatcher.
    */
-  public function __construct(ConfigFactoryInterface $config_factory, AccountProxyInterface $account_proxy, ModuleHandlerInterface $module_handler, GroupTypeManagerInterface $group_manager, PermissionManagerInterface $permission_manager, MembershipManagerInterface $membership_manager) {
+  public function __construct(ConfigFactoryInterface $config_factory, AccountProxyInterface $account_proxy, ModuleHandlerInterface $module_handler, GroupTypeManagerInterface $group_manager, PermissionManagerInterface $permission_manager, MembershipManagerInterface $membership_manager, EventDispatcherInterface $dispatcher) {
     $this->configFactory = $config_factory;
     $this->accountProxy = $account_proxy;
     $this->moduleHandler = $module_handler;
     $this->groupTypeManager = $group_manager;
     $this->permissionManager = $permission_manager;
     $this->membershipManager = $membership_manager;
+    $this->dispatcher = $dispatcher;
   }
 
   /**
@@ -327,46 +339,19 @@ class OgAccess implements OgAccessInterface {
     // Default to the current user.
     $user = $user ?: $this->accountProxy->getAccount();
 
-    // Check if the user owns the entity which is being operated on.
-    $is_owner = $group_content_entity instanceof EntityOwnerInterface && $group_content_entity->getOwnerId() == $user->id();
-
-    // Retrieve the group content entity operation permissions.
-    $group_entity_type_id = $group_entity->getEntityTypeId();
-    $group_bundle_id = $group_entity->bundle();
-    $group_content_bundle_ids = [$group_content_entity->getEntityTypeId() => [$group_content_entity->bundle()]];
-
-    $permissions = $this->permissionManager->getDefaultEntityOperationPermissions($group_entity_type_id, $group_bundle_id, $group_content_bundle_ids);
-
-    // Filter the permissions by operation and ownership.
-    // If the user does not own the group content, only the non-owner permission
-    // is relevant (for example 'edit any article node'). However when the user
-    // _is_ the owner, then both permissions are relevant: an owner will have
-    // access if they either have the 'edit any article node' or the 'edit own
-    // article node' permission.
-    $ownerships = $is_owner ? [FALSE, TRUE] : [FALSE];
-    $permissions = array_filter($permissions, function (GroupContentOperationPermission $permission) use ($operation, $ownerships) {
-      return $permission->getOperation() === $operation && in_array($permission->getOwner(), $ownerships);
-    });
-
-    if ($permissions) {
-      foreach ($permissions as $permission) {
-        $user_access = $this->userAccess($group_entity, $permission->getName(), $user);
-        if ($user_access->isAllowed()) {
-          return $user_access;
-        }
-      }
-    }
+    $event = new GroupContentEntityOperationAccessEvent($operation, $group_entity, $group_content_entity, $user);
 
     // @todo This doesn't really vary by user but by the user's roles inside of
     //   the group. We should create a cache context for OgRole entities.
     // @see https://github.com/amitaibu/og/issues/219
-    $cacheable_metadata = new CacheableMetadata();
-    $cacheable_metadata->addCacheableDependency($group_content_entity);
+    $event->addCacheableDependency($group_content_entity);
     if ($user->id() == $this->accountProxy->id()) {
-      $cacheable_metadata->addCacheContexts(['user']);
+      $event->addCacheContexts(['user']);
     }
 
-    return AccessResult::neutral()->addCacheableDependency($cacheable_metadata);
+    $this->dispatcher->dispatch(GroupContentEntityOperationAccessEvent::EVENT_NAME, $event);
+
+    return $event->getAccessResult();
   }
 
   /**

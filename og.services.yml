@@ -21,7 +21,7 @@ services:
       - { name: 'cache.context'}
   og.access:
     class: Drupal\og\OgAccess
-    arguments: ['@config.factory', '@current_user', '@module_handler', '@og.group_type_manager', '@og.permission_manager', '@og.membership_manager']
+    arguments: ['@config.factory', '@current_user', '@module_handler', '@og.group_type_manager', '@og.permission_manager', '@og.membership_manager', '@event_dispatcher']
   og.context:
     class: Drupal\og\ContextProvider\OgContext
     arguments: ['@plugin.manager.og.group_resolver', '@config.factory']
@@ -29,7 +29,7 @@ services:
       - { name: 'context_provider' }
   og.event_subscriber:
     class: Drupal\og\EventSubscriber\OgEventSubscriber
-    arguments: ['@og.permission_manager', '@entity_type.manager', '@entity_type.bundle.info']
+    arguments: ['@og.permission_manager', '@entity_type.manager', '@entity_type.bundle.info', '@og.access']
     tags:
       - { name: 'event_subscriber' }
   og.group_audience_helper:
