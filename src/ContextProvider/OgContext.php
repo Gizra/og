@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types = 1);
+
 namespace Drupal\og\ContextProvider;
 
 use Drupal\Component\Plugin\PluginManagerInterface;

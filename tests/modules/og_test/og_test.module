@@ -5,6 +5,11 @@
  * Main functions and hook implementations of the OG Test module.
  */
 
+declare(strict_types = 1);
+
+use Drupal\Core\Access\AccessResultAllowed;
+use Drupal\Core\Access\AccessResultInterface;
+use Drupal\Core\Cache\CacheableMetadata;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\og\Entity\OgRole;
 use Drupal\og\Og;
@@ -37,5 +42,25 @@ function og_test_entity_insert(EntityInterface $entity) {
     $membership = Og::createMembership($entity, $entity->getOwner());
     $membership->addRole(OgRole::loadByGroupAndName($entity, 'moderator'));
     $membership->save();
+  }
+}
+
+/**
+ * Implements hook_og_user_access_entity_operation_alter().
+ */
+function og_test_og_user_access_entity_operation_alter(AccessResultInterface &$access_result, CacheableMetadata $cacheable_metadata, $context): void {
+  if (\Drupal::state()->get('og_test_group_content_entity_operation_access_alter', FALSE)) {
+    // Moderators should have access to edit and delete all comments in all
+    // groups.
+    /** @var \Drupal\Core\Session\AccountProxyInterface $user */
+    $user = $context['user'];
+    $group_content = $context['group_content'];
+
+    $is_comment = $group_content->getEntityTypeId() === 'comment';
+    $user_can_moderate_comments = $user->hasPermission('edit and delete comments in all groups');
+
+    if ($is_comment && $user_can_moderate_comments) {
+      $access_result = new AccessResultAllowed();
+    }
   }
 }

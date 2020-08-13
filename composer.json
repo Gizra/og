@@ -2,7 +2,7 @@
     "name": "drupal/og",
     "description": "API to allow associating content with groups.",
     "type": "drupal-module",
-    "license": "GPL-2.0+",
+    "license": "GPL-2.0-or-later",
     "homepage": "https://drupal.org/project/og",
     "support": {
         "issues": "https://drupal.org/project/issues/og",
@@ -16,7 +16,8 @@
     },
     "require-dev": {
         "drupal/coder": "^8.2",
-        "phpunit/phpunit": "^7 || ^8"
+        "phpunit/phpunit": "^7 || ^8",
+        "slevomat/coding-standard": "~6.0"
     },
     "minimum-stability": "RC"
 }

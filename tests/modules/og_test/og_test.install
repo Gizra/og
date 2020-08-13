@@ -1,0 +1,15 @@
+<?php
+
+/**
+ * @file
+ * Install, update and uninstall functions for the og_test module.
+ */
+
+declare(strict_types = 1);
+
+/**
+ * Implements hook_uninstall().
+ */
+function og_test_uninstall(): void {
+  \Drupal::state()->delete('og_test_group_content_entity_operation_access_alter');
+}

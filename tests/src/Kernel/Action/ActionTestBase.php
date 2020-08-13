@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types = 1);
+
 namespace Drupal\Tests\og\Kernel\Action;
 
 use Drupal\Core\Access\AccessResultAllowed;
