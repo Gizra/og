@@ -23,6 +23,7 @@ use Drupal\og\PermissionManager;
 use Drupal\user\EntityOwnerInterface;
 use Drupal\user\RoleInterface;
 use Prophecy\Argument;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
 /**
  * Base class for tests of the OgAccess class.
@@ -180,6 +181,7 @@ class OgAccessTestBase extends UnitTestCase {
     $account_proxy = $this->prophesize(AccountProxyInterface::class);
     $module_handler = $this->prophesize(ModuleHandlerInterface::class);
     $this->permissionManager = $this->prophesize(PermissionManager::class);
+    $dispatcher = $this->prophesize(EventDispatcherInterface::class);
 
     // Instantiate the system under test.
     $this->ogAccess = new OgAccess(
@@ -188,7 +190,8 @@ class OgAccessTestBase extends UnitTestCase {
       $module_handler->reveal(),
       $this->groupTypeManager->reveal(),
       $this->permissionManager->reveal(),
-      $this->membershipManager->reveal()
+      $this->membershipManager->reveal(),
+      $dispatcher->reveal()
     );
 
     $container = new ContainerBuilder();
