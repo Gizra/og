@@ -245,7 +245,121 @@ is not applicable.
 Checking if a user can perform an entity operation on group content
 -------------------------------------------------------------------
 
+OG extends the entity access control system from Drupal core so checking access
+on an entity operation is as simple as this:
+
+```php
+// Check if the given user can edit the entity, which is a group content entity.
+$access_result = $group_content_entity->access('update', $user);
+```
+
+Behind the scenes, OG implements `hook_access()` and delegates the access check
+to the `OgAccess` service, so within the context of group content this is
+equivalent to calling the following:
+
+```php
+/** @var \Drupal\og\OgAccessInterface $og_access */
+$og_access = \Drupal::service('og.access');
+$access_result = $og_access->userAccessEntityOperation('update', $group_content_entity, $user);
+```
+
+There is also a faster way to get the same result, in case you know beforehand
+to which group the group content entity belongs. The following example is more
+efficient since it doesn't need to do an expensive discovery of the groups to
+which the entity belongs:
+
+```php
+// In case we know the group entity we can use the faster method:
+$group_entity = \Drupal::entityTypeManager()->getStorage('my_group_type')->load($some_id);
+
+/** @var \Drupal\og\OgAccessInterface $og_access */
+$og_access = \Drupal::service('og.access');
+$access_result = $og_access->userAccessGroupContentEntityOperation('update', $group_entity, $group_content_entity, $user);
+```
+
 
 Altering permissions
 --------------------
 
+There are many use cases where permissions should be altered under some
+circumstances to fulfill business requirements. OG offers ways for modules to
+hook into the permission system and alter the access result.
+
+Modules can implement `hook_og_user_access_alter()` to alter group level
+permissions. Here is an example that implements a use case where groups can only
+be deleted if they are unpublished. This functionality can be toggled off by
+site administrators in the site configuration, so the example also demonstrates
+how to alter the cacheability metadata to include the config setting. The access
+result is different if this option is turned on or off, so this needs to be
+included in the cache metadata.
+
+```php
+function mymodule_og_user_access_alter(array &$permissions, CacheableMetadata $cacheable_metadata, array $context): void {
+  // Retrieve the module configuration.
+  $config = \Drupal::config('mymodule.settings');
+
+  // Check if the site is configured to allow deletion of published groups.
+  $published_groups_can_be_deleted = $config->get('delete_published_groups');
+
+  // If deletion is not allowed and the group is published, revoke the
+  // permission.
+  $group = $context['group'];
+  if ($group instanceof EntityPublishedInterface && !$group->isPublished() && !$published_groups_can_be_deleted) {
+    $key = array_search(OgAccess::DELETE_GROUP_PERMISSION, $permissions);
+    if ($key !== FALSE) {
+      unset($permissions[$key]);
+    }
+  }
+
+  // Since our access result depends on our custom module configuration, we need
+  // to add it to the cache metadata.
+  $cacheable_metadata->addCacheableDependency($config);
+}
+```
+
+In addition to altering group level permissions, OG also allows to alter access
+to group content entity operations, this time using an event listener.
+
+```php
+<?php
+
+namespace Drupal\my_module\EventSubscriber;
+
+use Drupal\og\Event\GroupContentEntityOperationAccessEventInterface;
+use Symfony\Component\EventDispatcher\EventSubscriberInterface;
+
+class MyModuleEventSubscriber implements EventSubscriberInterface {
+
+  public static function getSubscribedEvents() {
+    return [
+      GroupContentEntityOperationAccessEventInterface::EVENT_NAME => [['moderatorsCanManageComments']],
+    ];
+  }
+
+  public function moderatorsCanManageComments(GroupContentEntityOperationAccessEventInterface $event): void {
+    $is_comment = $event->getGroupContent()->getEntityTypeId() === 'comment';
+    $user_can_moderate_comments = $event->getUser()->hasPermission('edit and delete comments in all groups');
+
+    if ($is_comment && $user_can_moderate_comments) {
+      $event->grantAccess();
+    }
+  }
+
+}
+```
+
+Please note that this follows the same principles of the Drupal core entity
+access handlers. Access will be granted only if at least one of the subscribers
+or other properties grants access (like having the `administer organic groups`
+permission). If any event listener __denies__ access, then this will be
+considered as a hard deny, and cannot be overruled. This might have some
+unexpected consequences; for example if group content is published in multiple
+groups, and a user has access to a permission in all groups, except one in which
+access is forbidden, then `OgAccess::userAccessEntityOperation()` will return
+access denied.
+
+In most cases this can be solved by only granting access to a permission when
+required, and remaining neutral if not. Alternatively check access to
+individual groups using `OgAccess::userAccessGroupContentEntityOperation()` -
+this will only return access denied for the specific group where access has been
+forbidden, while still allowing access for all others. 
