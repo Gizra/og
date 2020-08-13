@@ -160,6 +160,8 @@ To manually assign a permission to a role for a certain group, it can be done as
 follows:
 
 ```php
+// OgRole::loadByGroupAndName() is the easiest way to load a specific role for
+// a given group.
 $admin_role = OgRole::loadByGroupAndName($this->group, OgRoleInterface::ADMINISTRATOR);
 $admin_role->grantPermission('my permission')->save();
 ````
@@ -177,4 +179,73 @@ methods:
 - `\Drupal\og\EventSubscriber\OgEventSubscriber::provideDefaultRoles()`: OG's
   own implementation of the event listener, which provides the `administrator`
   role.
+
+
+Checking if a user has a certain permission in a group
+------------------------------------------------------
+
+It would be natural to think that checking a permission would be a simple matter
+of loading the `OgRole` entity and calling `$role->hasPermission()` on it, but
+this is not sufficient. There are a number of additional things to consider:
+
+- The super user (user ID 1) has full permissions.
+- OG has a configuration option to allow full access to group owners.
+- Users that have the global permission `administer organic groups` have all
+  permissions in all groups.
+- The role can have the `is_admin` flag set which will grant all permissions.
+- Modules can alter permissions depending on their own requirements.
+
+Organic Groups provides a service that will perform these checks. To determine
+whether the currently logged in user has for example the `manage members`
+permission on a given group entity:
+
+```php
+// Load some custom group.
+$group = \Drupal::entityTypeManager()->getStorage('my_group_type')->load($some_id);
+
+/** @var \Drupal\og\OgAccessInterface $og_access */
+$og_access = \Drupal::service('og.access');
+$access_result = $og_access->userAccess($group, 'manage members');
+
+// An access result object is returned including full cacheability metadata. In
+// order to get the access as a simple boolean value, call `::isAllowed()`.
+if ($access_result->isAllowed()) {
+  // The user has permission.
+}
+```
+
+For projects that have a large number of group types and group content types
+there is also a convenient method `::userAccessEntity()` to discover if a user
+has a group level permission on any given entity, being a group, group content,
+or even something that is not related to any group:
+
+```php
+// Load some entity, which might be a group, group content, or something not
+// related to any group.
+$entity = \Drupal::entityTypeManager()->getStorage('my_entity_type')->load($some_id);
+
+/** @var \Drupal\og\OgAccessInterface $og_access */
+$og_access = \Drupal::service('og.access');
+$access_result = $og_access->userAccessEntity('manage members', $entity);
+
+// An access result object is returned including full cacheability metadata. In
+// order to get the access as a simple boolean value, call `::isAllowed()`.
+if ($access_result->isAllowed()) {
+  // The user has permission.
+}
+```
+
+The above example will do a discovery to find out if the passed in entity is a
+group or group content, and will loop over all associated groups to determine
+access. While this is very convenient this also comes with a performance impact,
+so it is recommended to use it only in cases where the faster `::userAccess()`
+is not applicable.
+
+
+Checking if a user can perform an entity operation on group content
+-------------------------------------------------------------------
+
+
+Altering permissions
+--------------------
 
