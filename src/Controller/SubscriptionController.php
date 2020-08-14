@@ -86,7 +86,7 @@ class SubscriptionController extends ControllerBase {
       throw new AccessDeniedHttpException();
     }
 
-    $user = $this->currentUser();
+    $user = $this->entityTypeManager()->getStorage('user')->load($this->currentUser()->id());
 
     if ($user->isAnonymous()) {
       // Anonymous user can't request membership.
