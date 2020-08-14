@@ -137,7 +137,7 @@ class SubscriptionController extends ControllerBase {
     }
 
     $subscribe = $this->ogAccess->userAccess($group, 'subscribe');
-    $subscribeWithoutApproval = $this->ogAccess->userAccess($group, 'subscribe without approval');
+    $subscribe_without_approval = $this->ogAccess->userAccess($group, 'subscribe without approval');
     if ($subscribe->isForbidden() && $subscribeWithoutApproval->isForbidden()) {
       throw new AccessDeniedHttpException();
     }
