@@ -3586,7 +3586,7 @@ function og_get_groups_by_user($account = NULL, $group_type = NULL) {
   }
 
   // Get all active OG membership that belong to the user.
-  $wrapper = entity_metadata_wrapper('user', $account->uid);
+  $wrapper = entity_metadata_wrapper('user', $account);
   $og_memberships = $wrapper->{'og_membership__' . OG_STATE_ACTIVE}->value();
   if (!$og_memberships) {
     return $gids;
