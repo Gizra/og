@@ -296,7 +296,7 @@ function og_ui_edit_membership($form, &$form_state, $group_type, $gid, $og_membe
   $form['og_user']['name'] = array(
     '#type' => 'markup',
     '#title' => t('User name'),
-    '#markup' => $account->name,
+    '#markup' => theme('username', array('account' => $account)),
   );
   $form['og_user']['state'] = array(
     '#type' => 'select',
@@ -400,7 +400,7 @@ function og_ui_delete_membership($form, &$form_state, $group_type, $gid, $og_mem
   return confirm_form($form,
     t('Remove membership in group @group', array('@group' => $label)),
     'group/' . $group_type . '/' . $gid . '/admin/people',
-    t('Are you sure you would like to remove the membership for the user @user?', array('@user' => $account->name)),
+    t('Are you sure you would like to remove the membership for the user !user?', array('!user' => theme('username', array('account' => $account)))),
     t('Remove'),
     t('Cancel')
   );
