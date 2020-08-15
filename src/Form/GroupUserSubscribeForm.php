@@ -64,7 +64,7 @@ class GroupUserSubscribeForm extends ContentEntityForm {
     }
     $form['roles'] = [
       '#type' => 'select',
-      '#title' => t('Roles'),
+      '#title' => $this->t('Roles'),
       '#multiple' => TRUE,
       '#options' => $options,
     ];
