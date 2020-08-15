@@ -20,7 +20,7 @@ of permissions that control basic group and membership management tasks such as:
   which can be granted to non-members.
 
 Developers can define their own group level permissions by implementing an event
-listener that subscribes to the `og.permission` event and instantiating
+listener that subscribes to the `PermissionEventInterface::EVENT_NAME` event and instantiating
 `GroupPermission` objects with the properties of the permission.
 
 As an example let's define a permission that would allow an administrator to
@@ -85,7 +85,7 @@ operations on group content entities. Depending on the group requirements the
 creation, updating and deletion of group content is restricted to certain roles
 within the group.
 
-In Drupal core the entity CRUD operations are defined as simple strings (e.g.
+Drupal core defines the entity CRUD operations as simple strings (e.g.
 an for an 'article' node type we would have the permission `delete own article
 content`).
 
@@ -97,7 +97,7 @@ group content, regardless of entity type. Also a normal member of a group might
 have the permission to edit their own content, but not the content of other
 members.
 
-The permission system from Drupal core does not lend itself well to these use
+Drupal core's permission system doesn't lend itself well to these use
 cases since we cannot reliably derive the entity type and operation from these
 simple string based permissions. For example the permission `delete own article
 content` gives a user the permission to delete nodes of type 'article' which
@@ -106,7 +106,7 @@ and 'own' so it would be possible to come up with an algorithm that infers the
 operation and the scope, but the bundle and entity type can not be derived
 easily. In fact the entity type 'node' doesn't even appear in the string!
 
-In OG this is solved by defining group content entity operation (CRUD)
+OG solves this by defining group content entity operation (CRUD)
 permissions using a structured object: `GroupContentOperationPermission`. The
 above permission would be defined as follows, which encodes all the data we need
 to determine the entity type, bundle, operation, ownership (whether or not a
@@ -129,7 +129,7 @@ sets these permissions:
 
 - `OgEventSubscriber::getDefaultEntityOperationPermissions()`: creates a generic
   set of permissions for every group content type. These can be overridden by
-  custom modules if needed.
+  custom modules as shown below.
 - `OgEventSubscriber::provideDefaultNodePermissions()`: an example of how the
   generic permissions can be overridden. This ensures that we can use the same
   permission names for the Node entity type in our group content as the ones
@@ -144,7 +144,7 @@ but they are assigned to roles, and a user can have one or more roles in a
 group.
 
 The role data is stored in a config entity type named `OgRole`, and whenever a
-new group type is created, a number of roles will automatically be created:
+new group type is created, the following roles will automatically be created:
 
 - `member` and `non-member`: these two roles are required for every group, they
   indicate whether or not a user is a member.
@@ -155,7 +155,7 @@ new group type is created, a number of roles will automatically be created:
 
 Whenever a default role is created, it will automatically inherit the
 permissions that are assigned to the role in their permission declaration (see
-the `default role` property above which takes an array of roles to which these
+the `default roles` property above which takes an array of roles to which these
 permissions should be applied).
 
 To manually assign a permission to a role for a certain group, it can be done as
@@ -169,7 +169,7 @@ $admin_role->grantPermission('my permission')->save();
 ````
 
 Similarly, an existing permission can be removed from a role by calling
-`$admin_role->revokePermission('my permission')` and saving the role entity.
+`$admin_role->revokePermission('my permission')` and saving the `OgRole` entity.
 
 For more information on how `OgRole` objects are handled, check the following
 methods:
@@ -179,7 +179,7 @@ methods:
   fires the event listener that modules can hook into the provide additional
   default roles.
 - `\Drupal\og\EventSubscriber\OgEventSubscriber::provideDefaultRoles()`: OG's
-  own implementation of the event listener, which provides the `administrator`
+  own implementation of the event listener, which provides the default `administrator`
   role.
 
 
@@ -209,7 +209,7 @@ $group = \Drupal::entityTypeManager()->getStorage('my_group_type')->load($some_i
 $og_access = \Drupal::service('og.access');
 $access_result = $og_access->userAccess($group, 'manage members');
 
-// An access result object is returned including full cacheability metadata. In
+// An AccessResult object is returned including full cacheability metadata. In
 // order to get the access as a simple boolean value, call `::isAllowed()`.
 if ($access_result->isAllowed()) {
   // The user has permission.
@@ -230,14 +230,14 @@ $entity = \Drupal::entityTypeManager()->getStorage('my_entity_type')->load($some
 $og_access = \Drupal::service('og.access');
 $access_result = $og_access->userAccessEntity('manage members', $entity);
 
-// An access result object is returned including full cacheability metadata. In
+// An AccessResult object is returned including full cacheability metadata. In
 // order to get the access as a simple boolean value, call `::isAllowed()`.
 if ($access_result->isAllowed()) {
   // The user has permission.
 }
 ```
 
-The above example will do a discovery to find out if the passed in entity is a
+**Caution**: The above example will do a discovery to find out if the passed in entity is a
 group or group content, and will loop over all associated groups to determine
 access. While this is very convenient this also comes with a performance impact,
 so it is recommended to use it only in cases where the faster `::userAccess()`
@@ -247,7 +247,7 @@ is not applicable.
 Checking if a user can perform an entity operation on group content
 -------------------------------------------------------------------
 
-OG extends the entity access control system from Drupal core so checking access
+OG extends Drupal core's entity access control system so checking access
 on an entity operation is as simple as this:
 
 ```php
@@ -287,6 +287,9 @@ There are many use cases where permissions should be altered under some
 circumstances to fulfill business requirements. OG offers ways for modules to
 hook into the permission system and alter the access result.
 
+
+### Alter group permissions
+
 Modules can implement `hook_og_user_access_alter()` to alter group level
 permissions. Here is an example that implements a use case where groups can only
 be deleted if they are unpublished. This functionality can be toggled off by
@@ -318,6 +321,9 @@ function mymodule_og_user_access_alter(array &$permissions, CacheableMetadata $c
   $cacheable_metadata->addCacheableDependency($config);
 }
 ```
+
+
+### Alter group content permissions
 
 In addition to altering group level permissions, OG also allows to alter access
 to group content entity operations, this time using an event listener.
