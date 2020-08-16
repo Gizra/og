@@ -88,6 +88,8 @@ class AccessEventBase extends Event implements AccessEventInterface {
   public function getAccessResult(): AccessResultInterface {
     $access = $this->access;
 
+    // Enrich the access result object with our cacheability metadata in case it
+    // supports it.
     if ($access instanceof RefinableCacheableDependencyInterface) {
       $access->addCacheableDependency($this);
     }
