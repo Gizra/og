@@ -136,7 +136,9 @@ class SubscriptionController extends ControllerBase {
       return new RedirectResponse($group->toUrl()->setAbsolute(TRUE)->toString());
     }
 
-    if (!$this->ogAccess->userAccess($group, 'subscribe', $user) && !$this->ogAccess->userAccess($group, 'subscribe without approval', $user)) {
+    $subscribe = $this->ogAccess->userAccess($group, 'subscribe');
+    $subscribe_without_approval = $this->ogAccess->userAccess($group, 'subscribe without approval');
+    if (!$subscribe->isAllowed() && !$subscribe_without_approval->isAllowed()) {
       throw new AccessDeniedHttpException();
     }
 
