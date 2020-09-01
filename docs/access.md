@@ -4,16 +4,16 @@ Access control for groups and group content
 Controlling access to groups and group content is one of the most important
 aspects of building a group based project. Having separate access rules for
 different groups and the content in them is more complex than the standard role
-and permission based access system built into Drupal core so Organic Groups has
-extended the core functionality to make it more flexible and, indeed, _organic_
-for developers to design their access control systems.
+and permission based access system built into Drupal core so Organic Groups (OG)
+has extended the core functionality to make it more flexible and, indeed,
+_organic_ for developers to design their access control systems.
 
 Group level permissions
 -----------------------
 
 The first line of defense is group level access control. Group level permissions
-apply to the group as a whole. Organic Groups ships with a number of
-permissions that control basic group and membership management tasks such as:
+apply to the group as a whole. OG ships with a number of permissions that
+control basic group and membership management tasks such as:
 - Administration permissions such as `update group`, `delete group`, `manage
   members` and `approve and deny subscription`.
 - Membership permissions such as `subscribe` and `subscribe without approval`
@@ -72,8 +72,8 @@ class OgEventSubscriber implements EventSubscriberInterface {
 }
 ```
 
-The list of group level permissions that are provided out of the box by Organic
-Groups can be found in
+The list of group level permissions that are provided out of the box by OG can
+be found in
 `\Drupal\og\EventSubscriber\OgEventSubscriber::provideDefaultOgPermissions()`.
 
 
@@ -88,8 +88,8 @@ within the group.
 Drupal core defines the entity CRUD operations as simple strings (e.g. for an
 'article' node type we would have the permission `delete own article content`).
 
-Organic Groups not only supports nodes but all kinds of entities, and the simple
-string based permissions from Drupal core have proved to be difficult to use for
+OG not only supports nodes but all kinds of entities, and the simple string
+based permissions from Drupal core have proved to be difficult to use for
 operations that need to be applicable across multiple entity types. Some typical
 use cases are that a group administrator should be able to edit and delete all
 group content, regardless of entity type. Also a normal member of a group might
@@ -105,11 +105,11 @@ and 'own' so it would be possible to come up with an algorithm that infers the
 operation and the scope, but the bundle and entity type can not be derived
 easily. In fact the entity type 'node' doesn't even appear in the string!
 
-Organic Groups solves this by defining group content entity operation (CRUD)
-permissions using a structured object: `GroupContentOperationPermission`. The
-above permission would be defined as follows, which encodes all the data we need
-to determine the entity type, bundle, operation, ownership (whether or not a
-user is performing the operation on their own entity), etc:
+OG solves this by defining group content entity operation (CRUD) permissions
+using a structured object: `GroupContentOperationPermission`. The above
+permission would be defined as follows, which encodes all the data we need to
+determine the entity type, bundle, operation, ownership (whether or not a user
+is performing the operation on their own entity), etc:
 
 ```php
 $permission = new \Drupal\og\GroupContentOperationPermission([
@@ -124,7 +124,7 @@ $permission = new \Drupal\og\GroupContentOperationPermission([
 
 These permissions are defined in the same way as the group level permissions, in
 an event listener for the `og.permissions` event. Here are some examples how
-Organic Groups sets these permissions:
+OG sets these permissions:
 
 - `OgEventSubscriber::getDefaultEntityOperationPermissions()`: creates a generic
   set of permissions for every group content type. These can be overridden by
@@ -139,8 +139,8 @@ Granting permissions to users
 -----------------------------
 
 Similar to Drupal core, permissions are not directly assigned to users in
-Organic Groups, but they are assigned to roles, and a user can have one or more
-roles in a group.
+OG, but they are assigned to roles, and a user can have one or more roles in a
+group.
 
 The role data is stored in a config entity type named `OgRole`, and whenever a
 new group type is created, the following roles will automatically be created:
@@ -148,8 +148,7 @@ new group type is created, the following roles will automatically be created:
 - `member` and `non-member`: these two roles are required for every group, they
   indicate whether or not a user is a member.
 - `administrator`: this role is not strictly required but is created by default
-  by Organic Groups because it is considered to be generally useful for most
-  groups.
+  by OG because it is considered to be generally useful for most groups.
 - Developers can choose to provide additional default roles by listening to the
   `og.default_role` event.
 
@@ -178,8 +177,8 @@ methods:
 - `\Drupal\og\OgRoleManager::getDefaultRoles()`: creates the default roles and
   fires the event listener that modules can hook into the provide additional
   default roles.
-- `\Drupal\og\EventSubscriber\OgEventSubscriber::provideDefaultRoles()`: Organic
-  Groups' own implementation of the event listener, which provides the default
+- `\Drupal\og\EventSubscriber\OgEventSubscriber::provideDefaultRoles()`: OG's
+  own implementation of the event listener, which provides the default
   `administrator` role.
 
 
@@ -191,16 +190,15 @@ of loading the `OgRole` entity and calling `$role->hasPermission()` on it, but
 this is not sufficient. There are a number of additional things to consider:
 
 - The super user (user ID 1) has full permissions.
-- Organic Groups has a configuration option to allow full access to group
-  owners.
+- OG has a configuration option to allow full access to group owners.
 - Users that have the global permission `administer organic groups` have all
   permissions in all groups.
 - The role can have the `is_admin` flag set which will grant all permissions.
 - Modules can alter permissions depending on their own requirements.
 
-Organic Groups provides a service that will perform these checks. To determine
-whether the currently logged in user has for example the `manage members`
-permission on a given group entity:
+OG provides a service that will perform these checks. To determine whether the
+currently logged in user has for example the `manage members` permission on a
+given group entity:
 
 ```php
 // Load some custom group.
@@ -248,17 +246,17 @@ faster `::userAccess()` is not applicable.
 Checking if a user can perform an entity operation on group content
 -------------------------------------------------------------------
 
-Organic Groups extends Drupal core's entity access control system so checking
-access on an entity operation is as simple as this:
+OG extends Drupal core's entity access control system so checking access on an
+entity operation is as simple as this:
 
 ```php
 // Check if the given user can edit the entity, which is a group content entity.
 $access_result = $group_content_entity->access('update', $user);
 ```
 
-Behind the scenes, Organic Groups implements `hook_access()` and delegates the
-access check to the `OgAccess` service, so within the context of group content
-this is equivalent to calling the following:
+Behind the scenes, OG implements `hook_access()` and delegates the access check
+to the `OgAccess` service, so within the context of group content this is
+equivalent to calling the following:
 
 ```php
 /** @var \Drupal\og\OgAccessInterface $og_access */
@@ -285,8 +283,8 @@ Altering permissions
 --------------------
 
 There are many use cases where permissions should be altered under some
-circumstances to fulfill business requirements. Organic Groups offers ways for
-modules to hook into the permission system and alter the access result.
+circumstances to fulfill business requirements. OG offers ways for modules to
+hook into the permission system and alter the access result.
 
 
 ### Alter group permissions
@@ -326,9 +324,8 @@ function mymodule_og_user_access_alter(array &$permissions, CacheableMetadata $c
 
 ### Alter group content permissions
 
-In addition to altering group level permissions, Organic Groups also allows to
-alter access to group content entity operations, this time using an event
-listener.
+In addition to altering group level permissions, OG also allows to alter access
+to group content entity operations, this time using an event listener.
 
 ```php
 <?php
