@@ -173,6 +173,10 @@ Og::groupTypeManager()->addGroup('node', 'page');
 Og::createField(OgGroupAudienceHelperInterface::DEFAULT_FIELD, 'node', 'news');
 ```
 
+## Access control
+
+See [Access control for groups and group content](docs/access.md).
+
 ## DRUPAL CONSOLE INTEGRATION
 The Drupal 8 branch integrates with Drupal Console to do actions which used by
 developers only. The supported actions are:
