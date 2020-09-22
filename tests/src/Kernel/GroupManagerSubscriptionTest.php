@@ -118,6 +118,26 @@ class GroupManagerSubscriptionTest extends KernelTestBase {
   }
 
   /**
+   * Tests 'Automatically add creators to the group' admin settings.
+   *
+   * @dataProvider autoAddOwnersSettingProvider
+   */
+  public function testAutoAddOwnersSetting($auto_add_owners) {
+    $config = $this->container->get('config.factory')->getEditable('og.settings');
+    $config->set('auto_add_owners', $auto_add_owners);
+    $config->save();
+    $group = Node::create([
+      'title' => 'membership is not overridden',
+      'type' => 'group',
+      'uid' => $this->owner->id(),
+    ]);
+    $group->save();
+    $membership = $this->membershipManager->getMembership($group, $this->owner->id());
+    // Membership should be created only when auto_add_owners is enabled.
+    $this->assertEquals($auto_add_owners, !empty($membership));
+  }
+
+  /**
    * Checks if the membership is overridden by a custom hook implementation.
    *
    * @param \Drupal\og\OgMembershipInterface $membership
@@ -172,6 +192,25 @@ class GroupManagerSubscriptionTest extends KernelTestBase {
       [
         TRUE,
         TRUE,
+      ],
+    ];
+  }
+
+  /**
+   * Data provider for ::testAutoAddOwnersSetting().
+   *
+   * @return array[]
+   *   Array of data with values for the 'auto_add_owners' config key.
+   */
+  public static function autoAddOwnersSettingProvider() {
+    return [
+      [
+        // Auto Add owners.
+        TRUE,
+      ],
+      [
+        // Don't auto add owners.
+        FALSE,
       ],
     ];
   }
