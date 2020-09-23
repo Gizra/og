@@ -95,11 +95,11 @@ function og_update_8002() {
 }
 
 /**
- * Add auto_add_owners configuration to og.settings config entity.
+ * Add auto_add_group_owner_membership configuration to og.settings config.
  */
 function og_update_8003(&$sandbox) {
   $config = \Drupal::configFactory()->getEditable('og.settings');
   // This setting defaults to TRUE for backwards compatibility.
-  $config->set('auto_add_owners', TRUE);
+  $config->set('auto_add_group_owner_membership', TRUE);
   $config->save(TRUE);
 }

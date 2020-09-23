@@ -122,9 +122,9 @@ class GroupManagerSubscriptionTest extends KernelTestBase {
    *
    * @dataProvider autoAddOwnersSettingProvider
    */
-  public function testAutoAddOwnersSetting($auto_add_owners) {
+  public function testAutoAddOwnersSetting($auto_add_group_owner_membership) {
     $config = $this->container->get('config.factory')->getEditable('og.settings');
-    $config->set('auto_add_owners', $auto_add_owners);
+    $config->set('auto_add_group_owner_membership', $auto_add_group_owner_membership);
     $config->save();
     $group = Node::create([
       'title' => 'membership is not overridden',
@@ -133,8 +133,8 @@ class GroupManagerSubscriptionTest extends KernelTestBase {
     ]);
     $group->save();
     $membership = $this->membershipManager->getMembership($group, $this->owner->id());
-    // Membership should be created only when auto_add_owners is enabled.
-    $this->assertEquals($auto_add_owners, !empty($membership));
+    // Membership should be created only when auto_add_group_owner_membership is enabled.
+    $this->assertEquals($auto_add_group_owner_membership, !empty($membership));
   }
 
   /**
@@ -200,7 +200,8 @@ class GroupManagerSubscriptionTest extends KernelTestBase {
    * Data provider for ::testAutoAddOwnersSetting().
    *
    * @return array[]
-   *   Array of data with values for the 'auto_add_owners' config key.
+   *   Array of data with values for the 'auto_add_group_owner_membership'
+   *   config key.
    */
   public static function autoAddOwnersSettingProvider() {
     return [

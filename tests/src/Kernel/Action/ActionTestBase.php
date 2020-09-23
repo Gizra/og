@@ -109,9 +109,9 @@ abstract class ActionTestBase extends KernelTestBase {
     // Set OG to automatically create memberships for group owners. This is done
     // because we're not installing OG config in this Kernel test.
     $config = $this->container->get('config.factory')->getEditable('og.settings');
-    $config->set('auto_add_owners', TRUE);
+    $config->set('auto_add_group_owner_membership', TRUE);
     $config->save(TRUE);
-    $this->assertTrue($config->get('auto_add_owners'));
+    $this->assertTrue($config->get('auto_add_group_owner_membership'));
 
     // Create a test group.
     $this->group = Node::create([
