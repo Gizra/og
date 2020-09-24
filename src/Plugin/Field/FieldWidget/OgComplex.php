@@ -110,7 +110,10 @@ class OgComplex extends EntityReferenceAutocompleteWidget {
       // table.
       if ($is_multiple) {
         $element = [
-          '#title' => $this->t('@title (value @number)', ['@title' => $title, '@number' => $delta + 1]),
+          '#title' => $this->t('@title (value @number)', [
+            '@title' => $title,
+            '@number' => $delta + 1,
+          ]),
           '#title_display' => 'invisible',
           '#description' => '',
         ];

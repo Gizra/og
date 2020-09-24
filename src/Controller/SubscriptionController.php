@@ -100,7 +100,10 @@ class SubscriptionController extends ControllerBase {
       }
       else {
         $user_register_url = Url::fromRoute('user.register', [], $destination)->toString();
-        $params = [':register' => $user_register_url, ':login' => $user_login_url];
+        $params = [
+          ':register' => $user_register_url,
+          ':login' => $user_login_url,
+        ];
         $this->messenger->addMessage($this->t('In order to join any group, you must <a href=":login">login</a> or <a href=":register">register</a> a new account. After you have successfully done so, you will need to request membership again.', $params));
       }
 
