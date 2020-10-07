@@ -25,8 +25,12 @@ interface OgAccessInterface {
    * - The user has a role in the group that specifically grants the permission.
    * - The user is not a member of the group, and the permission has been
    *   granted to non-members.
+   * - The access result can be altered (granted or denied) by implementing
+   *   hook_og_user_access().
    *
-   * The access result can be altered by implementing hook_og_user_access().
+   * For access to be granted, at least one of the above checks should grant
+   * access, and none of the checks should deny access. A neutral result is
+   * returned only if all checks are neutral.
    *
    * All access checks in OG should go through this function. This way we
    * guarantee consistent behavior, and ensure that the superuser and group
@@ -38,7 +42,7 @@ interface OgAccessInterface {
    *   The name of the OG permission being checked. This includes both group
    *   level permissions such as 'subscribe without approval' and group content
    *   entity operation permissions such as 'edit own article content'.
-   * @param \Drupal\Core\Session\AccountInterface $user
+   * @param \Drupal\Core\Session\AccountInterface|null $user
    *   (optional) The user to check. Defaults to the current user.
    * @param bool $skip_alter
    *   (optional) If TRUE then user access will not be sent to other modules
@@ -61,6 +65,13 @@ interface OgAccessInterface {
    * will return a positive result if the user has the requested permission in
    * either the entity itself or its parent group(s).
    *
+   * For access to be granted, at least one of the groups with which the entity
+   * is associated should allow access, and none of the associated groups should
+   * deny access. Access is denied if one or more groups deny access, regardless
+   * of how many groups grant access. A neutral result is returned if the passed
+   * in entity is not associated with any groups, or if all the associated
+   * groups return a neutral result.
+   *
    * In case you know the specific group you want to check access for then it is
    * recommended to use the faster ::userAccess().
    *
@@ -70,7 +81,7 @@ interface OgAccessInterface {
    *   entity operation permissions such as 'edit own article content'.
    * @param \Drupal\Core\Entity\EntityInterface $entity
    *   The entity object. This can be either a group or group content entity.
-   * @param \Drupal\Core\Session\AccountInterface $user
+   * @param \Drupal\Core\Session\AccountInterface|null $user
    *   (optional) The user object. If empty the current user will be used.
    *
    * @return \Drupal\Core\Access\AccessResultInterface
@@ -87,10 +98,19 @@ interface OgAccessInterface {
    * can be performed. It works both with groups and group content entities. It
    * will iterate over all groups that are associated with the entity and check
    * if the user is allowed to perform the entity operation on the group content
-   * entity according to their role within each group. If a passed in entity is
-   * both a group and group content, it will return a positive result if the
-   * user has permission to perform the operation in either the entity itself or
-   * one of its parent group(s).
+   * entity according to their role within each group.
+   *
+   * For access to be granted, at least one of the groups with which the entity
+   * is associated should allow access, and none of the associated groups should
+   * deny access. Access is denied if one or more groups deny access, regardless
+   * of how many groups grant access. A neutral result is returned if the passed
+   * in entity is not associated with any groups, or if all the associated
+   * groups return a neutral result.
+   *
+   * If a passed in entity is both a group and group content, it will first
+   * check if the user has permission to perform the operation on the entity
+   * itself. Only if this returns a neutral result the access check will be
+   * performed on its parent group(s).
    *
    * In case you know the specific group you want to check access for then it is
    * recommended to use the faster ::userAccessGroupContentEntityOperation().
@@ -99,7 +119,7 @@ interface OgAccessInterface {
    *   The entity operation, such as "create", "update" or "delete".
    * @param \Drupal\Core\Entity\EntityInterface $entity
    *   The entity object. This can be either a group or group content entity.
-   * @param \Drupal\Core\Session\AccountInterface $user
+   * @param \Drupal\Core\Session\AccountInterface|null $user
    *   (optional) The user object. If empty the current user will be used.
    *
    * @return \Drupal\Core\Access\AccessResultInterface
@@ -114,7 +134,17 @@ interface OgAccessInterface {
    *
    * This checks if the user has permission to perform the requested operation
    * on the given group content entity according to the user's membership status
-   * in the given group.
+   * in the given group. It also passes through ::userAccess() to check for any'
+   * of the special cases, such as being the root user, having global permission
+   * to administer all groups, etc.
+   *
+   * The access result can be altered by implementing an event listener for
+   * GroupContentEntityOperationAccessEventInterface::EVENT_NAME.
+   *
+   * For access to be granted, at least one of the above checks should grant
+   * access, and none of the event listeners should deny access. A neutral
+   * result is returned only if all checks are neutral or if the passed in
+   * entity is not group content.
    *
    * @param string $operation
    *   The entity operation, such as "create", "update" or "delete".
@@ -123,7 +153,7 @@ interface OgAccessInterface {
    * @param \Drupal\Core\Entity\EntityInterface $group_content_entity
    *   The group content entity for which access to the entity operation is
    *   requested.
-   * @param \Drupal\Core\Session\AccountInterface $user
+   * @param \Drupal\Core\Session\AccountInterface|null $user
    *   Optional user for which to check access. If omitted, the currently logged
    *   in user will be used.
    *
