@@ -25,7 +25,7 @@ class OgAccessEntityTest extends OgAccessEntityTestBase {
 
     // We populate the allowed permissions cache in
     // OgAccessEntityTestBase::setup().
-    $condition = $permission == 'update group' ? $user_access->isAllowed() : $user_access->isForbidden();
+    $condition = $permission == 'update group' ? $user_access->isAllowed() : $user_access->isNeutral();
     $this->assertTrue($condition);
   }
 
