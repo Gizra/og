@@ -19,8 +19,11 @@ interface AccessEventInterface extends RefinableCacheableDependencyInterface {
    *
    * Calling this method will cause access to be granted for the action that is
    * being checked, unless another event listener denies access.
+   *
+   * @return \Drupal\Core\Access\AccessResultInterface
+   *   The updated access result.
    */
-  public function grantAccess(): void;
+  public function grantAccess(): AccessResultInterface;
 
   /**
    * Declare that access is being denied.
@@ -28,8 +31,19 @@ interface AccessEventInterface extends RefinableCacheableDependencyInterface {
    * Calling this method will cause access to be denied for the action that is
    * being checked. This takes precedence over any other event listeners that
    * might grant access.
+   *
+   * @return \Drupal\Core\Access\AccessResultInterface
+   *   The updated access result.
    */
-  public function denyAccess(): void;
+  public function denyAccess(): AccessResultInterface;
+
+  /**
+   * Merges the given access result with the existing access result.
+   *
+   * @return \Drupal\Core\Access\AccessResultInterface
+   *   The updated access result.
+   */
+  public function mergeAccessResult(AccessResultInterface $access_result): AccessResultInterface;
 
   /**
    * Returns the group that provides the context for the access check.
