@@ -5,8 +5,6 @@ dependencies:
     - og
     - options
     - user
-_core:
-  default_config_hash: RnChWtrF4u0Q13iQMFypL0Uz6IsB4NY6ZTk_LorSbJg
 id: og_members_overview
 label: 'Members overview'
 module: views
@@ -430,7 +428,20 @@ display:
       sorts: {  }
       header: {  }
       footer: {  }
-      empty: {  }
+      empty:
+        area:
+          id: area
+          table: views
+          field: area
+          relationship: none
+          group_type: group
+          admin_label: 'No results text'
+          empty: true
+          tokenize: false
+          content:
+            value: 'No members in the group yet.'
+            format: basic_html
+          plugin_id: text
       relationships:
         uid:
           id: uid
@@ -534,4 +545,5 @@ display:
         - 'languages:language_interface'
         - url
         - url.query_args
+        - user.permissions
       tags: {  }
