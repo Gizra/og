@@ -429,19 +429,17 @@ display:
       header: {  }
       footer: {  }
       empty:
-        area:
-          id: area
+        area_text_custom:
+          id: area_text_custom
           table: views
-          field: area
+          field: area_text_custom
           relationship: none
           group_type: group
           admin_label: 'No results text'
           empty: true
           tokenize: false
-          content:
-            value: 'No members in the group yet.'
-            format: basic_html
-          plugin_id: text
+          content: 'No members in the group yet.'
+          plugin_id: text_custom
       relationships:
         uid:
           id: uid
