@@ -131,7 +131,7 @@ function og_update_8004(&$sandbox) {
     'tokenize' => FALSE,
     'content' => [
       'value' => 'No members in the group yet.',
-      'format' => 'basic_html',
+      'format' => filter_default_format(),
     ],
     'plugin_id' => 'text',
   ];
