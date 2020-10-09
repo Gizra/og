@@ -104,38 +104,3 @@ function og_update_8003(&$sandbox) {
   $config->set('auto_add_group_owner_membership', TRUE);
   $config->save(TRUE);
 }
-
-/**
- * Add "No members in the group yet" empty result text to members overview view.
- */
-function og_update_8004(&$sandbox) {
-  if (!\Drupal::service('module_handler')->moduleExists('views')) {
-    // Views is not enabled in this site. Nothing to do.
-    \Drupal::logger('og')->info('The views module is not enabled. Update 8004 was skipped.');
-    return;
-  }
-  $view = Views::getView('og_members_overview');
-  if (empty($view)) {
-    \Drupal::logger('og')->warning('The view og_members_overview does not exist. Update 8004 was skipped.');
-    return;
-  }
-  // Update the view empty text.
-  $item = [
-    'id' => 'area',
-    'table' => 'views',
-    'field' => 'area',
-    'relationship' => 'none',
-    'group_type' => 'group',
-    'admin_label' => 'No results text',
-    'empty' => TRUE,
-    'tokenize' => FALSE,
-    'content' => [
-      'value' => 'No members in the group yet.',
-      'format' => filter_default_format(),
-    ],
-    'plugin_id' => 'text',
-  ];
-  $view->setHandler('default', 'empty', 'area', $item);
-  $view->save();
-  \Drupal::logger('og')->warning('The view og_members_overview has been updated.');
-}
