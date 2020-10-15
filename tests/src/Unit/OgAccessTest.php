@@ -35,7 +35,7 @@ class OgAccessTest extends OgAccessTestBase {
 
     // We populate the allowed permissions cache in
     // OgAccessTestBase::setup().
-    $condition = $operation == 'update group' ? $user_access->isAllowed() : $user_access->isForbidden();
+    $condition = $operation == 'update group' ? $user_access->isAllowed() : $user_access->isNeutral();
 
     $this->assertTrue($condition);
   }
