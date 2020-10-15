@@ -4,11 +4,11 @@ declare(strict_types = 1);
 
 namespace Drupal\og;
 
+use Drupal\Core\Cache\CacheBackendInterface;
 use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Entity\EntityTypeBundleInfoInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Routing\RouteBuilderInterface;
-use Drupal\Core\Cache\CacheBackendInterface;
 use Drupal\og\Event\GroupCreationEvent;
 use Drupal\og\Event\GroupCreationEventInterface;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;

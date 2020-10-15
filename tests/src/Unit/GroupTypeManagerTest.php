@@ -11,6 +11,7 @@ use Drupal\Core\Entity\EntityStorageInterface;
 use Drupal\Core\Entity\EntityTypeBundleInfoInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Routing\RouteBuilderInterface;
+use Drupal\Tests\UnitTestCase;
 use Drupal\og\Event\GroupCreationEvent;
 use Drupal\og\Event\GroupCreationEventInterface;
 use Drupal\og\GroupTypeManager;
@@ -18,7 +19,6 @@ use Drupal\og\GroupTypeManagerInterface;
 use Drupal\og\OgGroupAudienceHelperInterface;
 use Drupal\og\PermissionManagerInterface;
 use Drupal\og\OgRoleManagerInterface;
-use Drupal\Tests\UnitTestCase;
 use Drupal\og\Entity\OgRole;
 use Drupal\og\Event\PermissionEventInterface;
 use Prophecy\Argument;
@@ -226,7 +226,10 @@ class GroupTypeManagerTest extends UnitTestCase {
     $this->expectException(\InvalidArgumentException::class);
     $manager->addGroup('test_entity', 'c');
 
-    $this->assertSame(['a', 'b', 'c'], $manager->getGroupBundleIdsByEntityType('test_entity'));
+    $this->assertSame(
+      ['a', 'b', 'c'],
+      $manager->getGroupBundleIdsByEntityType('test_entity')
+    );
     $this->assertTrue($manager->isGroup('test_entity', 'c'));
   }
 

@@ -4,9 +4,9 @@ declare(strict_types = 1);
 
 namespace Drupal\Tests\og\Unit;
 
+use Drupal\Tests\UnitTestCase;
 use Drupal\og\GroupPermission;
 use Drupal\og\OgRoleInterface;
-use Drupal\Tests\UnitTestCase;
 
 /**
  * Group permissions tests.

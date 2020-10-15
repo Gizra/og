@@ -291,7 +291,7 @@ class OgComplex extends EntityReferenceAutocompleteWidget {
    * @return array
    *   A single entity reference input.
    */
-  public function otherGroupsSingle($delta, EntityInterface $entity = NULL, $weight_delta = 10) {
+  public function otherGroupsSingle(int $delta, ?EntityInterface $entity = NULL, $weight_delta = 10) {
     $selection_settings = [
       'other_groups' => TRUE,
       'field_mode' => 'admin',

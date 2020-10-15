@@ -463,7 +463,7 @@ class MembershipManager implements MembershipManagerInterface {
    * @return array
    *   The prepared array.
    */
-  protected function prepareConditionArray(array $value, array $default = NULL) {
+  protected function prepareConditionArray(array $value, ?array $default = NULL) {
     // Fall back to the default value if the passed in value is empty and a
     // default value is given.
     if (empty($value) && $default !== NULL) {

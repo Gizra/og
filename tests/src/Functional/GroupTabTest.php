@@ -4,10 +4,10 @@ declare(strict_types = 1);
 
 namespace Drupal\Tests\og\Functional;
 
+use Drupal\Tests\BrowserTestBase;
 use Drupal\node\Entity\Node;
 use Drupal\node\Entity\NodeType;
 use Drupal\og\Og;
-use Drupal\Tests\BrowserTestBase;
 
 /**
  * Tests the "Group" tab.

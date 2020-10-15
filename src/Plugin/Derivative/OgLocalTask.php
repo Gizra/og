@@ -77,6 +77,10 @@ class OgLocalTask extends DeriverBase implements ContainerDeriverInterface {
       ];
     }
 
+    // @todo Coder throws a false positive for this line. Remove this once the
+    //   issue is fixed in the Coder project.
+    // @see https://www.drupal.org/project/coder/issues/3065679
+    // @codingStandardsIgnoreLine
     foreach ($derivatives as &$entry) {
       $entry += $base_plugin_definition;
     }
