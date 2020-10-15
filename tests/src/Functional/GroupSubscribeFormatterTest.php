@@ -66,7 +66,10 @@ class GroupSubscribeFormatterTest extends BrowserTestBase {
     $this->groupBundle = mb_strtolower($this->randomMachineName());
 
     // Create a node type.
-    $node_type = NodeType::create(['type' => $this->groupBundle, 'name' => $this->groupBundle]);
+    $node_type = NodeType::create([
+      'type' => $this->groupBundle,
+      'name' => $this->groupBundle,
+    ]);
     $node_type->save();
 
     // Define the bundles as groups.

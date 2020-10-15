@@ -65,10 +65,16 @@ class GroupTabTest extends BrowserTestBase {
     $this->bundle2 = mb_strtolower($this->randomMachineName());
 
     // Create node types.
-    $node_type1 = NodeType::create(['type' => $this->bundle1, 'name' => $this->bundle1]);
+    $node_type1 = NodeType::create([
+      'type' => $this->bundle1,
+      'name' => $this->bundle1,
+    ]);
     $node_type1->save();
 
-    $node_type2 = NodeType::create(['type' => $this->bundle2, 'name' => $this->bundle2]);
+    $node_type2 = NodeType::create([
+      'type' => $this->bundle2,
+      'name' => $this->bundle2,
+    ]);
     $node_type2->save();
 
     // Define the first bundle as group.
