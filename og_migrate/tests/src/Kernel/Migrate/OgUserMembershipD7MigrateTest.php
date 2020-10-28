@@ -77,6 +77,7 @@ class OgUserMembershipD7MigrateTest extends MigrateDrupal7TestBase {
       'd7_taxonomy_term:vocabfixed',
       'd7_taxonomy_term:vocabtranslate',
       'd7_taxonomy_term:vocablocalized',
+      'd7_taxonomy_term:vocablocalized2',
       'd7_taxonomy_term:test_vocabulary',
       'd7_taxonomy_term:tags',
       'd7_taxonomy_term:sujet_de_discussion',
