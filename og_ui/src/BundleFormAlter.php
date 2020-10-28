@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types = 1);
+
 namespace Drupal\og_ui;
 
 use Drupal\Component\Utility\Unicode;
@@ -138,7 +140,7 @@ class BundleFormAlter {
     // Compile a list of group entity types and bundles.
     $target_types = [];
     $target_bundles = [];
-    foreach (Og::groupTypeManager()->getAllGroupBundles() as $entity_type => $bundles) {
+    foreach (Og::groupTypeManager()->getGroupMap() as $entity_type => $bundles) {
       $target_types[$entity_type] = \Drupal::entityTypeManager()->getDefinition($entity_type)->getLabel();
       $bundle_info = \Drupal::service('entity_type.bundle.info')->getBundleInfo($entity_type);
       foreach ($bundles as $bundle) {

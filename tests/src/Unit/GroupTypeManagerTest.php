@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types = 1);
+
 namespace Drupal\Tests\og\Unit;
 
 use Drupal\Core\Cache\CacheBackendInterface;
@@ -150,21 +152,6 @@ class GroupTypeManagerTest extends UnitTestCase {
     // called.
     $group_manager = $this->createGroupManager();
     $this->assertInstanceOf(GroupTypeManagerInterface::class, $group_manager);
-  }
-
-  /**
-   * Tests getting all the group bundles.
-   *
-   * @covers ::getAllGroupBundles
-   */
-  public function testGetAllGroupBundles() {
-    // It is expected that the group map will be retrieved from config.
-    $groups = ['test_entity' => ['a', 'b']];
-    $this->expectGroupMapRetrieval($groups);
-
-    $manager = $this->createGroupManager();
-
-    $this->assertSame($groups, $manager->getAllGroupBundles());
   }
 
   /**

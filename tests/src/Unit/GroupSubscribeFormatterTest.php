@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types = 1);
+
 namespace Drupal\Tests\og\Unit;
 
 use Drupal\Core\Access\AccessResultInterface;
@@ -308,7 +310,7 @@ class GroupSubscribeFormatterTest extends UnitTestCase {
     $this->accessResult->isAllowed()->willReturn(FALSE);
 
     $elements = $this->getElements();
-    $this->assertTrue(strpos($elements[0]['#value'], 'This is a closed group.') === 0);
+    $this->assertStringStartsWith('This is a closed group.', $elements[0]['#value']->render());
   }
 
   /**

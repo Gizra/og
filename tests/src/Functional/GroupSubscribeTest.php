@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types = 1);
+
 namespace Drupal\Tests\og\Functional;
 
 use Drupal\node\Entity\Node;
@@ -61,6 +63,13 @@ class GroupSubscribeTest extends BrowserTestBase {
   protected $group4;
 
   /**
+   * Test entity group.
+   *
+   * @var \Drupal\node\NodeInterface
+   */
+  protected $group5;
+
+  /**
    * A group bundle name.
    *
    * @var string
@@ -73,6 +82,13 @@ class GroupSubscribeTest extends BrowserTestBase {
    * @var string
    */
   protected $groupBundle2;
+
+  /**
+   * A group bundle name.
+   *
+   * @var string
+   */
+  protected $groupBundle3;
 
   /**
    * A membership type bundle name.
@@ -106,6 +122,8 @@ class GroupSubscribeTest extends BrowserTestBase {
     NodeType::create(['type' => $this->groupBundle1])->save();
     $this->groupBundle2 = mb_strtolower($this->randomMachineName());
     NodeType::create(['type' => $this->groupBundle2])->save();
+    $this->groupBundle3 = mb_strtolower($this->randomMachineName());
+    NodeType::create(['type' => $this->groupBundle3])->save();
     $this->nonGroupBundle = mb_strtolower($this->randomMachineName());
     NodeType::create(['type' => $this->nonGroupBundle])->save();
     $this->membershipTypeBundle = mb_strtolower($this->randomMachineName());
@@ -114,11 +132,13 @@ class GroupSubscribeTest extends BrowserTestBase {
     // Define the entities as groups.
     Og::groupTypeManager()->addGroup('node', $this->groupBundle1);
     Og::groupTypeManager()->addGroup('node', $this->groupBundle2);
+    Og::groupTypeManager()->addGroup('node', $this->groupBundle3);
 
     // Create node author user.
     $user = $this->createUser();
 
-    // Create groups.
+    // Create test groups. The first group has the 'subscribe without approval'
+    // permission.
     $this->group1 = Node::create([
       'type' => $this->groupBundle1,
       'title' => $this->randomString(),
@@ -126,6 +146,8 @@ class GroupSubscribeTest extends BrowserTestBase {
     ]);
     $this->group1->save();
 
+    // A group which is using default permissions; it grants the 'subscribe'
+    // permission to non-members.
     $this->group2 = Node::create([
       'type' => $this->groupBundle2,
       'title' => $this->randomString(),
@@ -133,7 +155,7 @@ class GroupSubscribeTest extends BrowserTestBase {
     ]);
     $this->group2->save();
 
-    // Create an unpublished node.
+    // An unpublished group.
     $this->group3 = Node::create([
       'type' => $this->groupBundle1,
       'title' => $this->randomString(),
@@ -150,10 +172,24 @@ class GroupSubscribeTest extends BrowserTestBase {
     ]);
     $this->group4->save();
 
-    $role = OgRole::getRole('node', $this->groupBundle1, OgRoleInterface::ANONYMOUS);
+    // A group which is closed for subscription. It grants neither 'subscribe'
+    // nor 'subscribe without approval'.
+    $this->group5 = Node::create([
+      'type' => $this->groupBundle3,
+      'title' => $this->randomString(),
+      'uid' => $user->id(),
+    ]);
+    $this->group5->save();
 
-    $role
+    // Grant the permission to 'subscribe without approval' to the first group
+    // type.
+    OgRole::getRole('node', $this->groupBundle1, OgRoleInterface::ANONYMOUS)
       ->grantPermission('subscribe without approval')
+      ->save();
+
+    // Revoke the permission to subscribe from the third group type.
+    OgRole::getRole('node', $this->groupBundle3, OgRoleInterface::ANONYMOUS)
+      ->revokePermission('subscribe')
       ->save();
 
     // Create a new membership type.
@@ -220,6 +256,13 @@ class GroupSubscribeTest extends BrowserTestBase {
         'entity' => $this->group4,
         'code' => 403,
       ],
+
+      // A group which doesn't allow new subscriptions.
+      [
+        'entity' => $this->group5,
+        'code' => 403,
+      ],
+
       // A non existing entity type.
       [
         'entity_type_id' => mb_strtolower($this->randomMachineName()),
