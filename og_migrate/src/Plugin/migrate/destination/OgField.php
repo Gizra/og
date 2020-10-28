@@ -27,8 +27,6 @@ class OgField extends DestinationBase {
         $row->getDestinationProperty('plugin_id'),
         $row->getDestinationProperty('entity_type'),
         $row->getDestinationProperty('entity_bundle')
-        // @todo worth it to migrate field settings?
-        // $row->getDestinationProperty('settings')
       );
     }
     catch (\Exception $e) {

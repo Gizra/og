@@ -19,8 +19,12 @@ process:
   entity_type: entity_type
   entity_bundle: bundle
   settings:
-    plugin: skip_on_empty
-    method: process
+    -
+      plugin: skip_on_empty
+      method: process
+    -
+      plugin: log
+      source: 'og field instance settings are not migrated'
 destination:
   plugin: og_field
 migration_dependencies:
