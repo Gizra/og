@@ -5,4 +5,4 @@ package: Organic Groups (Experimental)
 core_version_requirement: ^8.8 || ^9
 dependencies:
   - drupal:migrate
-  - drupal:og
+  - og:og
