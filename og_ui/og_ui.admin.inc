@@ -68,7 +68,7 @@ function og_ui_admin_settings($form_state) {
   $form['og_features_ignore_og_fields'] = array(
     '#type' => 'checkbox',
     '#title' => t('Prevent "Features" export piping'),
-    '#description' => t('When exporting using Features module a content-type, this will prevent from OG related fields to be exported.'),
+    '#description' => t('When exporting a content-type using the Features module, this prevents OG related fields from being exported.'),
     '#default_value' => variable_get('og_features_ignore_og_fields', FALSE),
     '#access' => module_exists('features'),
   );
