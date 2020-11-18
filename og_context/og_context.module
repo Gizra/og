@@ -424,7 +424,7 @@ function og_context_determine_context($group_type, $item = NULL, $check_access =
     $invoke = FALSE;
     if (!empty($provider['menu path'])) {
       foreach ($provider['menu path'] as $path) {
-        if (strpos($item['path'], $path) === 0) {
+        if ($item && strpos($item['path'], $path) === 0) {
           $invoke = TRUE;
           // Path matches, so we can break.
           break;
