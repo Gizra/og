@@ -471,7 +471,7 @@ function og_context_handler_url() {
     return;
   }
   $item = menu_get_item();
-  if (strpos($item['path'], 'node/add/') !== 0) {
+  if (!$item || strpos($item['path'], 'node/add/') !== 0) {
     return;
   }
   if (empty($item['map'][2])) {
@@ -595,6 +595,12 @@ function og_context_handler_user_edit() {
  */
 function og_context_handler_comment() {
   $item = menu_get_item();
+
+  // User has no access to the menu item.
+  if (!$item) {
+    return;
+  }
+
   // Check if we are in comment/reply/%nid. No need to load the comment.
   if (isset($item['original_map'][2]) && is_numeric($item['original_map'][2])) {
     $node = node_load($item['original_map'][2]);
