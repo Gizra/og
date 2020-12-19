@@ -71,7 +71,8 @@ before_script:
 
   # Update PHPUnit.
   - test ${TEST_SUITE} == "PHP_CodeSniffer" || travis_retry composer update phpunit/phpunit symfony/phpunit-bridge phpspec/prophecy symfony/yaml --with-dependencies --working-dir=$DRUPAL_DIR
-
+  - test ${TEST_SUITE} == "PHP_CodeSniffer" || travis_retry composer drupal-phpunit-upgrade
+  
   # Start a web server on port 8888 in the background.
   - test ${TEST_SUITE} == "PHP_CodeSniffer" || nohup php -S localhost:8888 --docroot $DRUPAL_DIR > /dev/null 2>&1 &
 
