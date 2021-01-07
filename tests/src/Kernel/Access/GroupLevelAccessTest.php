@@ -146,15 +146,15 @@ class GroupLevelAccessTest extends KernelTestBase {
     $this->assertTrue($this->ogAccess->userAccess($this->group, 'some_perm', $users['has_permission_in_both_groups'])->isAllowed());
     // This user should not have access to 'some_perm_2' as that was only
     // assigned to group 2.
-    $this->assertTrue($this->ogAccess->userAccess($this->group, 'some_perm_2', $users['has_permission_in_both_groups'])->isForbidden());
+    $this->assertTrue($this->ogAccess->userAccess($this->group, 'some_perm_2', $users['has_permission_in_both_groups'])->isNeutral());
     // Check the permission of group 1 again.
     $this->assertTrue($this->ogAccess->userAccess($this->group, 'some_perm', $users['has_permission_in_both_groups'])->isAllowed());
 
     // A member user without the correct role.
-    $this->assertTrue($this->ogAccess->userAccess($this->group, 'some_perm', $users['has_no_permission'])->isForbidden());
+    $this->assertTrue($this->ogAccess->userAccess($this->group, 'some_perm', $users['has_no_permission'])->isNeutral());
 
     // A non-member user.
-    $this->assertTrue($this->ogAccess->userAccess($this->group, 'some_perm', $this->nonMemberUser)->isForbidden());
+    $this->assertTrue($this->ogAccess->userAccess($this->group, 'some_perm', $this->nonMemberUser)->isNeutral());
 
     // Grant the arbitrary permission to non-members and check that our
     // non-member now has the permission.
