@@ -268,7 +268,7 @@ class GroupTypeManager implements GroupTypeManagerInterface {
 
     $groups = $editable->get('groups');
     $groups[$entity_type_id][] = $bundle_id;
-    // @todo, just key by bundle ID instead?
+    // @todo Key by bundle ID instead?
     $groups[$entity_type_id] = array_unique($groups[$entity_type_id]);
 
     $editable->set('groups', $groups);

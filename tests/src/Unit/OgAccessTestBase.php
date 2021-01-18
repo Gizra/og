@@ -173,7 +173,7 @@ class OgAccessTestBase extends UnitTestCase {
     $this->membershipManager->getGroupCount(Argument::any())->willReturn(1);
     $this->membership->getRoles()->willReturn([$this->ogRole->reveal()]);
 
-    // @todo: Move to test.
+    // @todo Move to test.
     $this->ogRole->isAdmin()->willReturn(FALSE);
     $this->ogRole->getPermissions()->willReturn(['update group']);
 
