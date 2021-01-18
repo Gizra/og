@@ -234,7 +234,10 @@ class GroupMembershipManagerTest extends KernelTestBase {
   public function testStaticCache() {
     $bundle_rev = mb_strtolower($this->randomMachineName());
     $bundle_with_bundle = mb_strtolower($this->randomMachineName());
-    EntityTestBundle::create(['id' => $bundle_with_bundle, 'label' => $bundle_with_bundle])->save();
+    EntityTestBundle::create([
+      'id' => $bundle_with_bundle,
+      'label' => $bundle_with_bundle,
+    ])->save();
     $field_settings = [
       'field_name' => 'group_audience_node',
       'field_storage_config' => [

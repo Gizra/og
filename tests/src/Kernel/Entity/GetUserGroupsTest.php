@@ -209,7 +209,10 @@ class GetUserGroupsTest extends KernelTestBase {
 
     $this->assertFalse(Og::isMember($this->group1, $this->user3, [OgMembershipInterface::STATE_PENDING]));
     $this->assertFalse(Og::isMember($this->group1, $this->user3, [OgMembershipInterface::STATE_BLOCKED]));
-    $this->assertFalse(Og::isMember($this->group1, $this->user3, [OgMembershipInterface::STATE_PENDING, OgMembershipInterface::STATE_BLOCKED]));
+    $this->assertFalse(Og::isMember($this->group1, $this->user3, [
+      OgMembershipInterface::STATE_PENDING,
+      OgMembershipInterface::STATE_BLOCKED,
+    ]));
     $this->assertFalse(Og::isMemberPending($this->group1, $this->user3));
     $this->assertFalse(Og::isMemberBlocked($this->group1, $this->user3));
 
@@ -220,7 +223,10 @@ class GetUserGroupsTest extends KernelTestBase {
 
     $this->assertTrue(Og::isMember($this->group1, $this->user3, [OgMembershipInterface::STATE_PENDING]));
     $this->assertTrue(Og::isMemberPending($this->group1, $this->user3));
-    $this->assertTrue(Og::isMember($this->group1, $this->user3, [OgMembershipInterface::STATE_PENDING, OgMembershipInterface::STATE_BLOCKED]));
+    $this->assertTrue(Og::isMember($this->group1, $this->user3, [
+      OgMembershipInterface::STATE_PENDING,
+      OgMembershipInterface::STATE_BLOCKED,
+    ]));
 
     $this->assertFalse(Og::isMember($this->group1, $this->user3));
     $this->assertFalse(Og::isMember($this->group1, $this->user3, [OgMembershipInterface::STATE_BLOCKED]));
@@ -233,7 +239,10 @@ class GetUserGroupsTest extends KernelTestBase {
 
     $this->assertTrue(Og::isMember($this->group1, $this->user3, [OgMembershipInterface::STATE_BLOCKED]));
     $this->assertTrue(Og::isMemberBlocked($this->group1, $this->user3));
-    $this->assertTrue(Og::isMember($this->group1, $this->user3, [OgMembershipInterface::STATE_PENDING, OgMembershipInterface::STATE_BLOCKED]));
+    $this->assertTrue(Og::isMember($this->group1, $this->user3, [
+      OgMembershipInterface::STATE_PENDING,
+      OgMembershipInterface::STATE_BLOCKED,
+    ]));
 
     $this->assertFalse(Og::isMember($this->group1, $this->user3));
     $this->assertFalse(Og::isMember($this->group1, $this->user3, [OgMembershipInterface::STATE_PENDING]));
@@ -283,11 +292,17 @@ class GetUserGroupsTest extends KernelTestBase {
     $this->assertCount(2, $groups['entity_test']);
 
     // Request any of multiple roles.
-    $groups = $this->membershipManager->getUserGroupsByRoleIds($this->user3->id(), [$member_role->id(), $extra_role_1->id()], OgMembershipInterface::ALL_STATES, FALSE);
+    $groups = $this->membershipManager->getUserGroupsByRoleIds($this->user3->id(), [
+      $member_role->id(),
+      $extra_role_1->id(),
+    ], OgMembershipInterface::ALL_STATES, FALSE);
     $this->assertCount(2, $groups['entity_test']);
 
     // Request all of multiple roles.
-    $groups = $this->membershipManager->getUserGroupsByRoleIds($this->user3->id(), [$member_role->id(), $extra_role_1->id()], OgMembershipInterface::ALL_STATES, TRUE);
+    $groups = $this->membershipManager->getUserGroupsByRoleIds($this->user3->id(), [
+      $member_role->id(),
+      $extra_role_1->id(),
+    ], OgMembershipInterface::ALL_STATES, TRUE);
     $this->assertCount(1, $groups['entity_test']);
     $actual = reset($groups['entity_test']);
     $this->assertEquals($this->group2->id(), $actual->id());
