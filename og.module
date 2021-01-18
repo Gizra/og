@@ -2584,7 +2584,8 @@ function og_get_all_group_content_bundle() {
  * @param $entity_type
  *   The entity type.
  * @param $entity
- *   The entity object. If empty the current user will be used.
+ *   (optional) The entity object or entity ID. If empty, and $entity_type is
+ *   "user", the current user will be used.
  * @param $states
  *   (optional) Array with the membership states to check against. If omitted
  *   then only active (OG_STATE_ACTIVE) memberships will be checked.
@@ -2781,21 +2782,19 @@ function og_get_user_roles($group_type, $gid, $uid = NULL, $include = TRUE, $che
     $uid = $user->uid;
   }
 
-  $account = user_load($uid);
-
   $identifier = implode(':', array($group_type, $gid, $uid, $include));
   if (isset($roles[$identifier])) {
     return $roles[$identifier];
   }
 
-  $is_blocked = og_is_member($group_type, $gid, 'user', $account, array(OG_STATE_BLOCKED));
+  $is_blocked = og_is_member($group_type, $gid, 'user', $uid, array(OG_STATE_BLOCKED));
 
   if ($check_active && $is_blocked) {
     $roles[$identifier] = array();
     return $roles[$identifier];
   }
 
-  $is_member = og_is_member($group_type, $gid, 'user', $account);
+  $is_member = og_is_member($group_type, $gid, 'user', $uid);
 
 
   $rids = array();
