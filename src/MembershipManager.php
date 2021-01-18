@@ -380,7 +380,8 @@ class MembershipManager implements MembershipManagerInterface {
     }
 
     /** @var \Drupal\field\FieldStorageConfigInterface[] $fields */
-    $fields = array_filter(FieldStorageConfig::loadMultiple($query->execute()), function (FieldStorageConfigInterface $field) use ($entity) {
+    $storage = $this->entityTypeManager->getStorage('field_storage_config');
+    $fields = array_filter($storage->loadMultiple($query->execute()), function (FieldStorageConfigInterface $field) use ($entity) {
       $type_matches = $field->getSetting('target_type') === $entity->getEntityTypeId();
       // If the list of target bundles is empty, it targets all bundles.
       $bundle_matches = empty($field->getSetting('target_bundles')) || in_array($entity->bundle(), $field->getSetting('target_bundles'));
