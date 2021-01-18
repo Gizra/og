@@ -82,6 +82,7 @@ class OgLocalTask extends DeriverBase implements ContainerDeriverInterface {
     // @see https://www.drupal.org/project/coder/issues/3065679
     // @codingStandardsIgnoreLine
     foreach ($derivatives as &$entry) {
+      // @codingStandardsIgnoreLine
       $entry += $base_plugin_definition;
     }
 
