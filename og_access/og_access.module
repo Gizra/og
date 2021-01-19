@@ -4,9 +4,9 @@
  * @file
  * Enable access control for private and public groups and group content.
  *
- * @TODO handle visibility change
- * @TODO set group content visibility default to that of the group
- * @TODO move grants/access to service
+ * @todo Handle visibility change.
+ * @todo Set group content visibility default to that of the group.
+ * @todo Move grants/access to service.
  */
 
 declare(strict_types = 1);
@@ -209,7 +209,7 @@ function og_access_entity_type_save(EntityInterface $entity) {
 function og_access_module_implements_alter(&$implementations, $hook) {
   if ($hook === 'form_alter') {
     // Move our form alter after the og_ui one.
-    // @TODO remove once og_ui and og are merged.
+    // @todo Remove once og_ui and og are merged.
     $group = $implementations['og_access'];
     unset($implementations['og_access']);
     $implementations['og_access'] = $group;
