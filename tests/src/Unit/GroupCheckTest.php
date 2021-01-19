@@ -11,10 +11,10 @@ use Drupal\Core\Entity\EntityStorageInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Routing\RouteMatchInterface;
 use Drupal\Core\Session\AccountInterface;
+use Drupal\Tests\UnitTestCase;
 use Drupal\og\Access\GroupCheck;
 use Drupal\og\GroupTypeManagerInterface;
 use Drupal\og\OgAccessInterface;
-use Drupal\Tests\UnitTestCase;
 use Symfony\Component\Routing\Route;
 
 /**
