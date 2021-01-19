@@ -90,7 +90,7 @@ class GroupSubscribeForm extends ContentEntityForm {
 
     $message = $this->isStateActive()
       ? $this->t('Are you sure you want to join the group %label?', ['%label' => $label])
-      : $this->t('Are you sure you want to request subscription the group %label?', ['%label' => $label]);
+      : $this->t('Are you sure you want to request a subscription to the group %label?', ['%label' => $label]);
 
     return $message;
   }
