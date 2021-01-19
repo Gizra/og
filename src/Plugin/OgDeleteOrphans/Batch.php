@@ -58,7 +58,10 @@ class Batch extends OgDeleteOrphansBase {
     $batch = [];
     $steps = \Drupal::queue('og_orphaned_group_content')->numberOfItems();
     for ($i = 0; $i < $steps; $i++) {
-      $batch['operations'][] = ['\Drupal\og\Plugin\OgDeleteOrphans\Batch::step', []];
+      $batch['operations'][] = [
+        '\Drupal\og\Plugin\OgDeleteOrphans\Batch::step',
+        [],
+      ];
     }
     batch_set($batch);
   }

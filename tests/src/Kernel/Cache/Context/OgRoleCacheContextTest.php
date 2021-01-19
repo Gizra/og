@@ -208,10 +208,13 @@ class OgRoleCacheContextTest extends KernelTestBase {
   /**
    * Returns the instantiated cache context service which is being tested.
    *
+   * @param \Drupal\Core\Session\AccountInterface|null $user
+   *   The user account for which to return the cache context service.
+   *
    * @return \Drupal\Core\Cache\Context\CacheContextInterface
    *   The instantiated cache context service.
    */
-  protected function getCacheContext(AccountInterface $user = NULL): CacheContextInterface {
+  protected function getCacheContext(?AccountInterface $user = NULL): CacheContextInterface {
     return new OgRoleCacheContext($user, $this->entityTypeManager, $this->membershipManager, $this->database, $this->privateKey);
   }
 

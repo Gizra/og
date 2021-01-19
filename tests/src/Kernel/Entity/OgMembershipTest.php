@@ -5,9 +5,9 @@ declare(strict_types = 1);
 namespace Drupal\Tests\og\Kernel\Entity;
 
 use Drupal\Core\Entity\EntityStorageException;
+use Drupal\KernelTests\KernelTestBase;
 use Drupal\entity_test\Entity\EntityTest;
 use Drupal\entity_test\Entity\EntityTestMul;
-use Drupal\KernelTests\KernelTestBase;
 use Drupal\node\Entity\Node;
 use Drupal\node\Entity\NodeType;
 use Drupal\og\Entity\OgMembership;

@@ -6,10 +6,10 @@ namespace Drupal\Tests\og\Unit;
 
 use Drupal\Core\Entity\EntityStorageInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
+use Drupal\Tests\UnitTestCase;
 use Drupal\og\Entity\OgRole;
 use Drupal\og\Event\DefaultRoleEvent;
 use Drupal\og\OgRoleInterface;
-use Drupal\Tests\UnitTestCase;
 
 /**
  * Tests default role events.
