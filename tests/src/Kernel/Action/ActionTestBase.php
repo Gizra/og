@@ -162,11 +162,17 @@ abstract class ActionTestBase extends KernelTestBase {
     // A group administrator. This is a special case since this role is
     // considered to have all permissions.
     $this->users['group_administrator'] = $this->createUser();
-    $this->memberships['group_administrator'] = $this->createOgMembership($this->group, $this->users['group_administrator'], [OgRoleInterface::AUTHENTICATED, OgRoleInterface::ADMINISTRATOR]);
+    $this->memberships['group_administrator'] = $this->createOgMembership($this->group, $this->users['group_administrator'], [
+      OgRoleInterface::AUTHENTICATED,
+      OgRoleInterface::ADMINISTRATOR,
+    ]);
 
     // A group moderator that has the right to administer group members.
     $this->users['group_moderator'] = $this->createUser();
-    $this->memberships['group_moderator'] = $this->createOgMembership($this->group, $this->users['group_moderator'], [OgRoleInterface::AUTHENTICATED, 'moderator']);
+    $this->memberships['group_moderator'] = $this->createOgMembership($this->group, $this->users['group_moderator'], [
+      OgRoleInterface::AUTHENTICATED,
+      'moderator',
+    ]);
   }
 
   /**

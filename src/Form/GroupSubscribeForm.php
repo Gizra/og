@@ -39,9 +39,9 @@ class GroupSubscribeForm extends ContentEntityForm {
    *   The OG access service.
    * @param \Drupal\Core\Entity\EntityRepositoryInterface $entity_repository
    *   The entity repository service.
-   * @param \Drupal\Core\Entity\EntityTypeBundleInfoInterface $entity_type_bundle_info
+   * @param \Drupal\Core\Entity\EntityTypeBundleInfoInterface|null $entity_type_bundle_info
    *   The entity type bundle service.
-   * @param \Drupal\Component\Datetime\TimeInterface $time
+   * @param \Drupal\Component\Datetime\TimeInterface|null $time
    *   The time service.
    *
    * @todo Set the `EntityRepositoryInterface` type hint on the second argument
@@ -50,7 +50,7 @@ class GroupSubscribeForm extends ContentEntityForm {
    *
    * @see https://github.com/Gizra/og/issues/397
    */
-  public function __construct(OgAccessInterface $og_access, EntityRepositoryInterface $entity_repository, EntityTypeBundleInfoInterface $entity_type_bundle_info = NULL, TimeInterface $time = NULL) {
+  public function __construct(OgAccessInterface $og_access, EntityRepositoryInterface $entity_repository, ?EntityTypeBundleInfoInterface $entity_type_bundle_info = NULL, ?TimeInterface $time = NULL) {
     parent::__construct($entity_repository, $entity_type_bundle_info, $time);
     $this->ogAccess = $og_access;
   }

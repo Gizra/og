@@ -10,7 +10,6 @@ use Drupal\Core\Entity\EntityTypeBundleInfoInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
-use Drupal\field\Entity\FieldStorageConfig;
 use Drupal\field\FieldStorageConfigInterface;
 use Drupal\og\GroupTypeManagerInterface;
 use Drupal\og\OgContextInterface;
@@ -219,7 +218,10 @@ class RecentGroupContentBlock extends BlockBase implements ContainerFactoryPlugi
   public function getCacheContexts() {
     // The block varies by user because of the access check on the query that
     // retrieves the group content.
-    return Cache::mergeContexts(parent::getCacheContexts(), ['user', 'og_group_context']);
+    return Cache::mergeContexts(parent::getCacheContexts(), [
+      'user',
+      'og_group_context',
+    ]);
   }
 
   /**
@@ -236,14 +238,13 @@ class RecentGroupContentBlock extends BlockBase implements ContainerFactoryPlugi
     $definition = $this->entityTypeManager->getDefinition($entity_type);
 
     // Retrieve the fields which reference our entity type and bundle.
-    $query = $this->entityTypeManager
-      ->getStorage('field_storage_config')
-      ->getQuery()
+    $field_storage_config_storage = $this->entityTypeManager->getStorage('field_storage_config');
+    $query = $field_storage_config_storage->getQuery()
       ->condition('type', OgGroupAudienceHelperInterface::GROUP_REFERENCE)
       ->condition('entity_type', $entity_type);
 
     /** @var \Drupal\field\FieldStorageConfigInterface[] $fields */
-    $fields = array_filter(FieldStorageConfig::loadMultiple($query->execute()), function (FieldStorageConfigInterface $field) use ($group) {
+    $fields = array_filter($field_storage_config_storage->loadMultiple($query->execute()), function (FieldStorageConfigInterface $field) use ($group) {
       $type_matches = $field->getSetting('target_type') === $group->getEntityTypeId();
       // If the list of target bundles is empty, it targets all bundles.
       $bundle_matches = empty($field->getSetting('target_bundles')) || in_array($group->bundle(), $field->getSetting('target_bundles'));

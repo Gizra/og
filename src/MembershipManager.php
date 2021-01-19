@@ -10,7 +10,6 @@ use Drupal\Core\Cache\CacheBackendInterface;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Session\AccountInterface;
-use Drupal\field\Entity\FieldStorageConfig;
 use Drupal\field\FieldStorageConfigInterface;
 use Drupal\og\Entity\OgMembership;
 use Drupal\user\UserInterface;
@@ -380,7 +379,8 @@ class MembershipManager implements MembershipManagerInterface {
     }
 
     /** @var \Drupal\field\FieldStorageConfigInterface[] $fields */
-    $fields = array_filter(FieldStorageConfig::loadMultiple($query->execute()), function (FieldStorageConfigInterface $field) use ($entity) {
+    $storage = $this->entityTypeManager->getStorage('field_storage_config');
+    $fields = array_filter($storage->loadMultiple($query->execute()), function (FieldStorageConfigInterface $field) use ($entity) {
       $type_matches = $field->getSetting('target_type') === $entity->getEntityTypeId();
       // If the list of target bundles is empty, it targets all bundles.
       $bundle_matches = empty($field->getSetting('target_bundles')) || in_array($entity->bundle(), $field->getSetting('target_bundles'));
@@ -463,7 +463,7 @@ class MembershipManager implements MembershipManagerInterface {
    * @return array
    *   The prepared array.
    */
-  protected function prepareConditionArray(array $value, array $default = NULL) {
+  protected function prepareConditionArray(array $value, ?array $default = NULL) {
     // Fall back to the default value if the passed in value is empty and a
     // default value is given.
     if (empty($value) && $default !== NULL) {

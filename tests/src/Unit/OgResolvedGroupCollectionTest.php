@@ -5,8 +5,8 @@ declare(strict_types = 1);
 namespace Drupal\Tests\og\Unit;
 
 use Drupal\Core\Entity\ContentEntityInterface;
-use Drupal\og\OgResolvedGroupCollection;
 use Drupal\Tests\UnitTestCase;
+use Drupal\og\OgResolvedGroupCollection;
 
 /**
  * Tests the collecting of resolved groups to pass as a route context.
@@ -30,7 +30,8 @@ class OgResolvedGroupCollectionTest extends UnitTestCase {
     parent::setUp();
 
     // Mock some test groups.
-    foreach (['node', 'entity_test', 'taxonomy_term', 'block_content'] as $entity_type) {
+    $entity_types = ['node', 'entity_test', 'taxonomy_term', 'block_content'];
+    foreach ($entity_types as $entity_type) {
       for ($i = 0; $i < 2; $i++) {
         $entity_id = "$entity_type-$i";
         /** @var \Drupal\Core\Entity\ContentEntityInterface|\Prophecy\Prophecy\ObjectProphecy $entity */
@@ -77,7 +78,10 @@ class OgResolvedGroupCollectionTest extends UnitTestCase {
 
       // The cache contexts should now be associated with the group.
       $info = $collection->getGroupInfo()[$key];
-      $this->assertEquals(['route', 'url'], array_values($info['cache_contexts']));
+      $this->assertEquals(
+        ['route', 'url'],
+        array_values($info['cache_contexts'])
+      );
 
       // There should now be two votes, and both should have been cast with the
       // default vote weight.
@@ -92,7 +96,10 @@ class OgResolvedGroupCollectionTest extends UnitTestCase {
 
       // The additional cache context should now be associated with the group.
       $info = $collection->getGroupInfo()[$key];
-      $this->assertEquals(['route', 'url', 'user'], array_values($info['cache_contexts']));
+      $this->assertEquals(
+        ['route', 'url', 'user'],
+        array_values($info['cache_contexts'])
+      );
 
       // There should now be three votes, the last of which having the custom
       // vote weight.
@@ -105,7 +112,10 @@ class OgResolvedGroupCollectionTest extends UnitTestCase {
       // should not cause the cache context to be listed twice.
       $collection->addGroup($group, ['url', 'user']);
       $info = $collection->getGroupInfo()[$key];
-      $this->assertEquals(['route', 'url', 'user'], array_values($info['cache_contexts']));
+      $this->assertEquals(
+        ['route', 'url', 'user'],
+        array_values($info['cache_contexts'])
+      );
     }
   }
 
