@@ -133,7 +133,8 @@ class GroupManagerSubscriptionTest extends KernelTestBase {
     ]);
     $group->save();
     $membership = $this->membershipManager->getMembership($group, $this->owner->id());
-    // Membership should be created only when auto_add_group_owner_membership is enabled.
+    // Membership should be created only when auto_add_group_owner_membership is
+    // enabled.
     $this->assertEquals($auto_add_group_owner_membership, !empty($membership));
   }
 
