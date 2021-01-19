@@ -306,7 +306,7 @@ class MembershipManager implements MembershipManagerInterface {
 
       // Compile a list of group target IDs.
       $target_ids = array_filter(array_map(function ($value) {
-        return isset($value['target_id']) ? $value['target_id'] : NULL;
+        return $value['target_id'] ?? NULL;
       }, $entity->get($field->getName())->getValue()));
 
       if (empty($target_ids)) {
