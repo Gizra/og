@@ -14,15 +14,16 @@ use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Extension\ModuleHandlerInterface;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\Core\Session\AccountProxyInterface;
-use Drupal\og\MembershipManagerInterface;
-use Drupal\og\OgMembershipInterface;
 use Drupal\Tests\UnitTestCase;
 use Drupal\og\GroupTypeManagerInterface;
+use Drupal\og\MembershipManagerInterface;
 use Drupal\og\OgAccess;
+use Drupal\og\OgMembershipInterface;
 use Drupal\og\PermissionManager;
 use Drupal\user\EntityOwnerInterface;
 use Drupal\user\RoleInterface;
 use Prophecy\Argument;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
 /**
  * Base class for tests of the OgAccess class.
@@ -172,7 +173,7 @@ class OgAccessTestBase extends UnitTestCase {
     $this->membershipManager->getGroupCount(Argument::any())->willReturn(1);
     $this->membership->getRoles()->willReturn([$this->ogRole->reveal()]);
 
-    // @todo: Move to test.
+    // @todo Move to test.
     $this->ogRole->isAdmin()->willReturn(FALSE);
     $this->ogRole->getPermissions()->willReturn(['update group']);
 
@@ -180,6 +181,7 @@ class OgAccessTestBase extends UnitTestCase {
     $account_proxy = $this->prophesize(AccountProxyInterface::class);
     $module_handler = $this->prophesize(ModuleHandlerInterface::class);
     $this->permissionManager = $this->prophesize(PermissionManager::class);
+    $dispatcher = $this->prophesize(EventDispatcherInterface::class);
 
     // Instantiate the system under test.
     $this->ogAccess = new OgAccess(
@@ -188,7 +190,8 @@ class OgAccessTestBase extends UnitTestCase {
       $module_handler->reveal(),
       $this->groupTypeManager->reveal(),
       $this->permissionManager->reveal(),
-      $this->membershipManager->reveal()
+      $this->membershipManager->reveal(),
+      $dispatcher->reveal()
     );
 
     $container = new ContainerBuilder();
