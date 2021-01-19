@@ -4,11 +4,11 @@ declare(strict_types = 1);
 
 namespace Drupal\og;
 
+use Drupal\Core\Cache\CacheBackendInterface;
 use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Entity\EntityTypeBundleInfoInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Routing\RouteBuilderInterface;
-use Drupal\Core\Cache\CacheBackendInterface;
 use Drupal\og\Event\GroupCreationEvent;
 use Drupal\og\Event\GroupCreationEventInterface;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
@@ -268,7 +268,7 @@ class GroupTypeManager implements GroupTypeManagerInterface {
 
     $groups = $editable->get('groups');
     $groups[$entity_type_id][] = $bundle_id;
-    // @todo, just key by bundle ID instead?
+    // @todo Key by bundle ID instead?
     $groups[$entity_type_id] = array_unique($groups[$entity_type_id]);
 
     $editable->set('groups', $groups);

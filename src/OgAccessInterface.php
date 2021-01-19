@@ -53,7 +53,7 @@ interface OgAccessInterface {
    * @return \Drupal\Core\Access\AccessResultInterface
    *   An access result object.
    */
-  public function userAccess(EntityInterface $group, string $permission, AccountInterface $user = NULL, bool $skip_alter = FALSE): AccessResultInterface;
+  public function userAccess(EntityInterface $group, string $permission, ?AccountInterface $user = NULL, bool $skip_alter = FALSE): AccessResultInterface;
 
   /**
    * Determines whether a user has a group permission in a given entity.
@@ -89,7 +89,7 @@ interface OgAccessInterface {
    *
    * @see \Drupal\og\userAccess();
    */
-  public function userAccessEntity(string $permission, EntityInterface $entity, AccountInterface $user = NULL): AccessResultInterface;
+  public function userAccessEntity(string $permission, EntityInterface $entity, ?AccountInterface $user = NULL): AccessResultInterface;
 
   /**
    * Checks whether a user can perform an operation on a given entity.
@@ -127,7 +127,7 @@ interface OgAccessInterface {
    *
    * @see \Drupal\og\userAccessGroupContentEntityOperation();
    */
-  public function userAccessEntityOperation(string $operation, EntityInterface $entity, AccountInterface $user = NULL): AccessResultInterface;
+  public function userAccessEntityOperation(string $operation, EntityInterface $entity, ?AccountInterface $user = NULL): AccessResultInterface;
 
   /**
    * Checks access for entity operations on group content in a specific group.
@@ -160,7 +160,7 @@ interface OgAccessInterface {
    * @return \Drupal\Core\Access\AccessResultInterface
    *   The access result object.
    */
-  public function userAccessGroupContentEntityOperation(string $operation, EntityInterface $group_entity, EntityInterface $group_content_entity, AccountInterface $user = NULL): AccessResultInterface;
+  public function userAccessGroupContentEntityOperation(string $operation, EntityInterface $group_entity, EntityInterface $group_content_entity, ?AccountInterface $user = NULL): AccessResultInterface;
 
   /**
    * Resets the static cache.
