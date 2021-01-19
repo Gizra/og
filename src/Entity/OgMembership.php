@@ -75,6 +75,7 @@ use Drupal\user\UserInterface;
  *     "views_data" = "Drupal\og\OgMembershipViewsData",
  *     "form" = {
  *       "subscribe" = "Drupal\og\Form\GroupSubscribeForm",
+ *       "user-subscribe" = "Drupal\og\Form\GroupUserSubscribeForm",
  *       "unsubscribe" = "Drupal\og\Form\GroupUnsubscribeConfirmForm",
  *     },
  *   }
