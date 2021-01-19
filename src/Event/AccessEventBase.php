@@ -57,15 +57,25 @@ class AccessEventBase extends Event implements AccessEventInterface {
   /**
    * {@inheritdoc}
    */
-  public function grantAccess(): void {
+  public function grantAccess(): AccessResultInterface {
     $this->access = $this->access->orIf(AccessResult::allowed());
+    return $this->access;
   }
 
   /**
    * {@inheritdoc}
    */
-  public function denyAccess(): void {
+  public function denyAccess(): AccessResultInterface {
     $this->access = $this->access->orIf(AccessResult::forbidden());
+    return $this->access;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function mergeAccessResult(AccessResultInterface $access_result): AccessResultInterface {
+    $this->access = $this->access->orIf($access_result);
+    return $this->access;
   }
 
   /**
@@ -88,6 +98,8 @@ class AccessEventBase extends Event implements AccessEventInterface {
   public function getAccessResult(): AccessResultInterface {
     $access = $this->access;
 
+    // Enrich the access result object with our cacheability metadata in case it
+    // supports it.
     if ($access instanceof RefinableCacheableDependencyInterface) {
       $access->addCacheableDependency($this);
     }
