@@ -11,7 +11,7 @@ use Drupal\og\OgMembershipInterface;
 use Drupal\views\Views;
 
 /**
- * OgAdminMembersController class.
+ * Displays the members administration page.
  */
 class OgAdminMembersController extends ControllerBase {
 

@@ -25,16 +25,16 @@ trait OgMembershipCreationTrait {
    *   The group for which to create the membership.
    * @param \Drupal\Core\Session\AccountInterface $user
    *   The user for which to create the membership.
-   * @param array $role_names
+   * @param array|null $role_names
    *   Optional array of role names to assign to the membership. Defaults to the
    *   'member' role.
-   * @param string $state
+   * @param string|null $state
    *   Optional membership state. Can be one of the following constants:
    *   - OgMembershipInterface::STATE_ACTIVE
    *   - OgMembershipInterface::STATE_PENDING
    *   - OgMembershipInterface::STATE_BLOCKED
    *   Defaults to OgMembershipInterface::STATE_ACTIVE.
-   * @param string $membership_type
+   * @param string|null $membership_type
    *   The membership type. Defaults to 'default'.
    *
    * @return \Drupal\og\OgMembershipInterface
@@ -43,7 +43,7 @@ trait OgMembershipCreationTrait {
    * @throws \Drupal\Core\Entity\EntityStorageException
    *   Thrown when the membership cannot be created.
    */
-  protected function createOgMembership(EntityInterface $group, AccountInterface $user, array $role_names = NULL, $state = NULL, $membership_type = NULL) {
+  protected function createOgMembership(EntityInterface $group, AccountInterface $user, ?array $role_names = NULL, ?string $state = NULL, ?string $membership_type = NULL) {
     // Provide default values.
     $role_names = $role_names ?: [OgRoleInterface::AUTHENTICATED];
     $state = $state ?: OgMembershipInterface::STATE_ACTIVE;
