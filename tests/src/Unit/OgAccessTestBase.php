@@ -14,11 +14,11 @@ use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Extension\ModuleHandlerInterface;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\Core\Session\AccountProxyInterface;
-use Drupal\og\MembershipManagerInterface;
-use Drupal\og\OgMembershipInterface;
 use Drupal\Tests\UnitTestCase;
 use Drupal\og\GroupTypeManagerInterface;
+use Drupal\og\MembershipManagerInterface;
 use Drupal\og\OgAccess;
+use Drupal\og\OgMembershipInterface;
 use Drupal\og\PermissionManager;
 use Drupal\user\EntityOwnerInterface;
 use Drupal\user\RoleInterface;
@@ -173,7 +173,7 @@ class OgAccessTestBase extends UnitTestCase {
     $this->membershipManager->getGroupCount(Argument::any())->willReturn(1);
     $this->membership->getRoles()->willReturn([$this->ogRole->reveal()]);
 
-    // @todo: Move to test.
+    // @todo Move to test.
     $this->ogRole->isAdmin()->willReturn(FALSE);
     $this->ogRole->getPermissions()->willReturn(['update group']);
 

@@ -20,7 +20,7 @@ class RemoveSingleOgMembershipRole extends ChangeSingleOgMembershipRoleBase {
   /**
    * {@inheritdoc}
    */
-  public function execute(OgMembership $membership = NULL) {
+  public function execute(?OgMembership $membership = NULL) {
     if (!$membership) {
       return;
     }
