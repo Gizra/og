@@ -4,8 +4,8 @@ declare(strict_types = 1);
 
 namespace Drupal\Tests\og\Unit;
 
-use Drupal\og\Entity\OgRole;
 use Drupal\Tests\UnitTestCase;
+use Drupal\og\Entity\OgRole;
 
 /**
  * Unit tests for the OgRole config entity.

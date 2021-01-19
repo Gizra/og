@@ -164,7 +164,7 @@ interface OgMembershipInterface extends ContentEntityInterface, EntityOwnerInter
   /**
    * Sets the group's roles for the current user group membership.
    *
-   * @param \Drupal\og\Entity\OgRole[] $roles
+   * @param \Drupal\og\OgRoleInterface[] $roles
    *   The array of OG roles to set.
    *
    * @return \Drupal\og\OgMembershipInterface
@@ -208,7 +208,7 @@ interface OgMembershipInterface extends ContentEntityInterface, EntityOwnerInter
   /**
    * Gets all the referenced OG roles.
    *
-   * @return \Drupal\og\Entity\OgRole[]
+   * @return \Drupal\og\OgRoleInterface[]
    *   List of OG roles the user own for the current membership instance.
    */
   public function getRoles(): array;

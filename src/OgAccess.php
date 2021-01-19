@@ -129,7 +129,7 @@ class OgAccess implements OgAccessInterface {
   /**
    * {@inheritdoc}
    */
-  public function userAccess(EntityInterface $group, string $permission, AccountInterface $user = NULL, bool $skip_alter = FALSE): AccessResultInterface {
+  public function userAccess(EntityInterface $group, string $permission, ?AccountInterface $user = NULL, bool $skip_alter = FALSE): AccessResultInterface {
     $group_type_id = $group->getEntityTypeId();
     $bundle = $group->bundle();
     // As Og::isGroup depends on this config, we retrieve it here and set it as
@@ -217,13 +217,13 @@ class OgAccess implements OgAccessInterface {
       return AccessResult::allowed()->addCacheableDependency($cacheable_metadata);
     }
 
-    return AccessResult::forbidden()->addCacheableDependency($cacheable_metadata);
+    return AccessResult::neutral()->addCacheableDependency($cacheable_metadata);
   }
 
   /**
    * {@inheritdoc}
    */
-  public function userAccessEntity(string $permission, EntityInterface $entity, AccountInterface $user = NULL): AccessResultInterface {
+  public function userAccessEntity(string $permission, EntityInterface $entity, ?AccountInterface $user = NULL): AccessResultInterface {
     $result = AccessResult::neutral();
 
     $entity_type = $entity->getEntityType();
@@ -231,53 +231,38 @@ class OgAccess implements OgAccessInterface {
     $bundle = $entity->bundle();
 
     if ($this->groupTypeManager->isGroup($entity_type_id, $bundle)) {
-      $user_access = $this->userAccess($entity, $permission, $user);
-      if ($user_access->isAllowed()) {
-        return $user_access;
-      }
-      else {
-        // An entity can be a group and group content in the same time. The
-        // group didn't allow access, but the user still might have access to
-        // the permission in group content context. So instead of returning a
-        // deny here, we set the result, that might change if an access is
-        // found.
-        $result = AccessResult::forbidden()->inheritCacheability($user_access);
+      // An entity can be a group and group content in the same time. If the
+      // group returns a neutral result the user still might have access to
+      // the permission in group content context. So if we get a neutral result
+      // we will continue with the group content access check below.
+      $result = $this->userAccess($entity, $permission, $user);
+      if (!$result->isNeutral()) {
+        return $result;
       }
     }
 
     if ($this->groupTypeManager->isGroupContent($entity_type_id, $bundle)) {
-      $cache_tags = $entity_type->getListCacheTags();
+      $result->addCacheTags($entity_type->getListCacheTags());
 
       // The entity might be a user or a non-user entity.
       $groups = $entity instanceof UserInterface ? $this->membershipManager->getUserGroups($entity->id()) : $this->membershipManager->getGroups($entity);
 
       if ($groups) {
-        $forbidden = AccessResult::forbidden()->addCacheTags($cache_tags);
         foreach ($groups as $entity_groups) {
           foreach ($entity_groups as $group) {
-            $user_access = $this->userAccess($group, $permission, $user);
-            if ($user_access->isAllowed()) {
-              return $user_access->addCacheTags($cache_tags);
-            }
-
-            $forbidden->inheritCacheability($user_access);
+            $result = $result->orIf($this->userAccess($group, $permission, $user));
           }
         }
-        return $forbidden;
       }
-
-      $result->addCacheTags($cache_tags);
     }
 
-    // Either the user didn't have permission, or the entity might be orphaned
-    // group content.
     return $result;
   }
 
   /**
    * {@inheritdoc}
    */
-  public function userAccessEntityOperation(string $operation, EntityInterface $entity, AccountInterface $user = NULL): AccessResultInterface {
+  public function userAccessEntityOperation(string $operation, EntityInterface $entity, ?AccountInterface $user = NULL): AccessResultInterface {
     $result = AccessResult::neutral();
 
     $entity_type = $entity->getEntityType();
@@ -290,52 +275,39 @@ class OgAccess implements OgAccessInterface {
       if (array_key_exists($operation, self::OPERATION_GROUP_PERMISSION_MAPPING)) {
         $permission = self::OPERATION_GROUP_PERMISSION_MAPPING[$operation];
 
-        $user_access = $this->userAccess($entity, $permission, $user);
-        if ($user_access->isAllowed()) {
-          return $user_access;
-        }
-        else {
-          // An entity can be a group and group content in the same time. The
-          // group permission check didn't allow access, but the user still
-          // might have access to perform the operation in group content
-          // context. So instead of returning a deny here, we set the result,
-          // that might change if an access is found.
-          $result = AccessResult::forbidden()->inheritCacheability($user_access);
+        // An entity can be a group and group content in the same time. If the
+        // group returns a neutral result the user still might have access to
+        // the permission in group content context. So if we get a neutral
+        // result we will continue with the group content access check below.
+        $result = $this->userAccess($entity, $permission, $user);
+        if (!$result->isNeutral()) {
+          return $result;
         }
       }
     }
 
     if ($this->groupTypeManager->isGroupContent($entity_type_id, $bundle)) {
-      $cache_tags = $entity_type->getListCacheTags();
+      $result->addCacheTags($entity_type->getListCacheTags());
 
       // The entity might be a user or a non-user entity.
       $groups = $entity instanceof UserInterface ? $this->membershipManager->getUserGroups($entity->id()) : $this->membershipManager->getGroups($entity);
 
       if ($groups) {
-        $forbidden = AccessResult::forbidden()->addCacheTags($cache_tags);
         foreach ($groups as $entity_groups) {
           foreach ($entity_groups as $group) {
-            $operation_access = $this->userAccessGroupContentEntityOperation($operation, $group, $entity, $user);
-            if ($operation_access->isAllowed()) {
-              return $operation_access->addCacheTags($cache_tags);
-            }
+            $result = $result->orIf($this->userAccessGroupContentEntityOperation($operation, $group, $entity, $user));
           }
         }
-        return $forbidden;
       }
-
-      $result->addCacheTags($cache_tags);
     }
 
-    // Either the user didn't have permission, or the entity might be orphaned
-    // group content.
     return $result;
   }
 
   /**
    * {@inheritdoc}
    */
-  public function userAccessGroupContentEntityOperation(string $operation, EntityInterface $group_entity, EntityInterface $group_content_entity, AccountInterface $user = NULL): AccessResultInterface {
+  public function userAccessGroupContentEntityOperation(string $operation, EntityInterface $group_entity, EntityInterface $group_content_entity, ?AccountInterface $user = NULL): AccessResultInterface {
     // Default to the current user.
     $user = $user ?: $this->accountProxy->getAccount();
 

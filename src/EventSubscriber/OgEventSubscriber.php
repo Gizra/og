@@ -426,16 +426,7 @@ class OgEventSubscriber implements EventSubscriberInterface {
 
     if ($permissions) {
       foreach ($permissions as $permission) {
-        // This currently does not handle access in the same way as Drupal core
-        // does - if any of the permissions grant access we will grant access.
-        // Once OgAccess::userAccess() is refactored to return a neutral result
-        // in case no access is determined we can just apply the result
-        // directly.
-        $access_result = $this->ogAccess->userAccess($group_entity, $permission->getName(), $user);
-        if ($access_result->isAllowed()) {
-          $event->grantAccess();
-          break;
-        }
+        $event->mergeAccessResult($this->ogAccess->userAccess($group_entity, $permission->getName(), $user));
       }
     }
   }

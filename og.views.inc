@@ -59,7 +59,9 @@ function og_field_views_data(FieldStorageConfigInterface $field_storage) {
           'title' => new TranslatableMarkup('@label referenced from @field_name', $args),
           'label' => new TranslatableMarkup('@field_name: @label', $args),
           'group' => $entity_type->getLabel(),
-          'help' => new TranslatableMarkup('Appears in: @bundles.', ['@bundles' => implode(', ', $field_storage->getBundles())]),
+          'help' => new TranslatableMarkup('Appears in: @bundles.', [
+            '@bundles' => implode(', ', $field_storage->getBundles()),
+          ]),
           'id' => 'standard',
           'base' => $target_base_table,
           'entity type' => $target_entity_type_id,
