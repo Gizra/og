@@ -120,7 +120,7 @@ class OgRoleListBuilder extends DraggableListBuilder {
   public function getDefaultOperations(EntityInterface $role) {
     $operations = parent::getDefaultOperations($role);
 
-    // @TODO if ($entity->hasLinkTemplate('edit-permissions-form')).
+    // @todo If ($entity->hasLinkTemplate('edit-permissions-form')).
     $operations['permissions'] = [
       'title' => $this->t('Edit permissions'),
       'weight' => 20,
