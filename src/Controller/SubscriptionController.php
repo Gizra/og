@@ -9,6 +9,7 @@ use Drupal\Core\Entity\ContentEntityInterface;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Messenger\MessengerInterface;
 use Drupal\Core\Url;
+use Drupal\og\Og;
 use Drupal\og\OgAccessInterface;
 use Drupal\og\OgMembershipInterface;
 use Drupal\og\OgMembershipTypeInterface;
@@ -17,7 +18,6 @@ use Drupal\user\UserInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
-use Drupal\og\Og;
 
 /**
  * Controller for OG subscription routes.
@@ -100,7 +100,10 @@ class SubscriptionController extends ControllerBase {
       }
       else {
         $user_register_url = Url::fromRoute('user.register', [], $destination)->toString();
-        $params = [':register' => $user_register_url, ':login' => $user_login_url];
+        $params = [
+          ':register' => $user_register_url,
+          ':login' => $user_login_url,
+        ];
         $this->messenger->addMessage($this->t('In order to join any group, you must <a href=":login">login</a> or <a href=":register">register</a> a new account. After you have successfully done so, you will need to request membership again.', $params));
       }
 
