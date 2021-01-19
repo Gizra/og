@@ -207,7 +207,7 @@ class GroupManagerSubscriptionTest extends KernelTestBase {
   public static function autoAddOwnersSettingProvider() {
     return [
       [
-        // Auto Add owners.
+        // Auto add owners.
         TRUE,
       ],
       [
