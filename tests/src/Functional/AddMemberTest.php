@@ -73,7 +73,10 @@ class AddMemberTest extends BrowserTestBase {
     parent::setUp();
     // Create bundle.
     $this->groupBundle = mb_strtolower($this->randomMachineName());
-    $bundle = NodeType::create(['type' => $this->groupBundle, 'name' => $this->groupBundle]);
+    $bundle = NodeType::create([
+      'type' => $this->groupBundle,
+      'name' => $this->groupBundle,
+    ]);
     $bundle->save();
 
     // Define the bundles as groups.
