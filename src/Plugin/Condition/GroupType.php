@@ -139,7 +139,10 @@ class GroupType extends ConditionPluginBase implements ContainerFactoryPluginInt
       $group_types = $this->configuration['group_types'];
       $last_group = array_pop($group_types);
       $group_types = implode(', ', $group_types);
-      return $this->t('The group type is @group_types or @last_group', ['@group_types' => $group_types, '@last_group' => $last_group]);
+      return $this->t('The group type is @group_types or @last_group', [
+        '@group_types' => $group_types,
+        '@last_group' => $last_group,
+      ]);
     }
     $group_type = reset($this->configuration['group_types']);
     return $this->t('The group type is @group_type', ['@group_type' => $group_type]);

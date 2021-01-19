@@ -5,12 +5,12 @@ declare(strict_types = 1);
 namespace Drupal\Tests\og\Kernel\Entity;
 
 use Drupal\KernelTests\KernelTestBase;
+use Drupal\Tests\node\Traits\ContentTypeCreationTrait;
+use Drupal\Tests\node\Traits\NodeCreationTrait;
 use Drupal\node\Entity\Node;
 use Drupal\node\Entity\NodeType;
 use Drupal\og\Og;
 use Drupal\og\OgGroupAudienceHelperInterface;
-use Drupal\Tests\node\Traits\ContentTypeCreationTrait;
-use Drupal\Tests\node\Traits\NodeCreationTrait;
 use Drupal\user\Entity\Role;
 use Drupal\user\Entity\User;
 
@@ -106,8 +106,10 @@ class EntityCreateAccessTest extends KernelTestBase {
 
     // Grant the anonymous user permission to view published content.
     /** @var \Drupal\user\Entity\Role $role */
-    $role = Role::create(['id' => Role::ANONYMOUS_ID, 'label' => 'anonymous user'])
-      ->grantPermission('access content');
+    $role = Role::create([
+      'id' => Role::ANONYMOUS_ID,
+      'label' => 'anonymous user',
+    ])->grantPermission('access content');
     $role->save();
 
     // Verify that the user does not have access to the entity create form of
