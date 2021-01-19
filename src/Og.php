@@ -80,7 +80,7 @@ class Og {
       $field_definition = FieldConfig::create($field_config);
       $field_definition->save();
 
-      // @todo: Verify this is still needed here.
+      // @todo Verify this is still needed here.
       static::invalidateCache();
     }
 

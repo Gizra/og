@@ -56,7 +56,7 @@ abstract class ChangeOgMembershipStateBase extends ActionBase implements Contain
   /**
    * {@inheritdoc}
    */
-  public function execute(OgMembership $membership = NULL) {
+  public function execute(?OgMembership $membership = NULL) {
     if (!$membership) {
       return;
     }
@@ -66,7 +66,7 @@ abstract class ChangeOgMembershipStateBase extends ActionBase implements Contain
   /**
    * {@inheritdoc}
    */
-  public function access($object, AccountInterface $account = NULL, $return_as_object = FALSE) {
+  public function access($object, ?AccountInterface $account = NULL, $return_as_object = FALSE) {
     /** @var \Drupal\og\Entity\OgMembership $object */
     // Deny access if the membership is not in the required state.
     $original_state = $this->getOriginalState();

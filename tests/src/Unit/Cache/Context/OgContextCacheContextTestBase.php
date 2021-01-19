@@ -98,11 +98,11 @@ abstract class OgContextCacheContextTestBase extends OgCacheContextTestBase {
   /**
    * Sets an expectation that OgContext will return the given group.
    *
-   * @param \Drupal\Core\Entity\EntityInterface $group
+   * @param \Drupal\Core\Entity\EntityInterface|null $group
    *   The group to return, or NULL if no group is expected to be returned by
    *   OgContext.
    */
-  protected function expectGroupContext(EntityInterface $group = NULL) {
+  protected function expectGroupContext(?EntityInterface $group = NULL) {
     $this->ogContext->getGroup()->willReturn($group);
   }
 
