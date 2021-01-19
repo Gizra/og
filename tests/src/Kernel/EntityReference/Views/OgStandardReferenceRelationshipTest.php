@@ -65,10 +65,26 @@ class OgStandardReferenceRelationshipTest extends ViewsKernelTestBase {
     $this->installEntitySchema('entity_test_mul');
 
     // Create reference from entity_test to entity_test_mul.
-    Og::createField(OgGroupAudienceHelperInterface::DEFAULT_FIELD, 'entity_test', 'entity_test', ['field_name' => 'field_test_data', 'field_storage_config' => ['settings' => ['target_type' => 'entity_test_mul']]]);
+    $settings = [
+      'field_name' => 'field_test_data',
+      'field_storage_config' => [
+        'settings' => [
+          'target_type' => 'entity_test_mul',
+        ],
+      ],
+    ];
+    Og::createField(OgGroupAudienceHelperInterface::DEFAULT_FIELD, 'entity_test', 'entity_test', $settings);
 
     // Create reference from entity_test_mul to entity_test.
-    Og::createField(OgGroupAudienceHelperInterface::DEFAULT_FIELD, 'entity_test_mul', 'entity_test_mul', ['field_name' => 'field_data_test', 'field_storage_config' => ['settings' => ['target_type' => 'entity_test']]]);
+    $settings = [
+      'field_name' => 'field_data_test',
+      'field_storage_config' => [
+        'settings' => [
+          'target_type' => 'entity_test',
+        ],
+      ],
+    ];
+    Og::createField(OgGroupAudienceHelperInterface::DEFAULT_FIELD, 'entity_test_mul', 'entity_test_mul', $settings);
 
     ViewTestData::createTestViews(get_class($this), ['og_standard_reference_test_views']);
   }
