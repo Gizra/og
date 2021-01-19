@@ -60,7 +60,7 @@ class AudienceField extends OgFieldBase implements OgFieldsInterface {
    * {@inheritdoc}
    */
   public function getFormDisplayDefinition(array $values = []) {
-    // @todo: isn't it taken from the definition in OgStandardReferenceItem?
+    // @todo Isn't it taken from the definition in OgStandardReferenceItem?
     $values += [
       'type' => 'options_select',
     ];

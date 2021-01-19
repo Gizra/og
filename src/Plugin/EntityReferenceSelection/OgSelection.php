@@ -159,7 +159,7 @@ class OgSelection extends DefaultSelection {
     $identifier_key = $definition->getKey('id');
 
     if ($this->currentUser->isAnonymous()) {
-      // @todo: Check if anonymous users should have access to any referenced
+      // @todo Check if anonymous users should have access to any referenced
       // groups? What about groups that allow anonymous posts?
       return $query->condition($identifier_key, -1);
     }

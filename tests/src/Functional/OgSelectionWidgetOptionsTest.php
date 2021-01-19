@@ -163,7 +163,7 @@ class OgSelectionWidgetOptionsTest extends BrowserTestBase {
     $this->drupalGet('node/add/group_content');
     // The user can't post group content site wide so the audience is required
     // field.
-    // todo Is that correct?
+    // @todo Is that correct?
     // $this->assertSession()->optionExists('Groups audience', '_none');.
     $this->assertSession()->optionExists('Groups audience', $this->group1->label());
     $this->assertSession()->optionNotExists('Groups audience', $this->group2->label());

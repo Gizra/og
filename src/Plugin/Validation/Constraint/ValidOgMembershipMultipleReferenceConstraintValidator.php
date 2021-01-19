@@ -58,7 +58,7 @@ class ValidOgMembershipMultipleReferenceConstraintValidator extends ConstraintVa
    * {@inheritdoc}
    */
   public function validate($entity, Constraint $constraint) {
-    /* @var \Drupal\Core\Entity\ContentEntityBase $entity */
+    /** @var \Drupal\Core\Entity\ContentEntityBase $entity */
     if (!Og::isGroupContent($entity->getEntityTypeId(), $entity->bundle())) {
       return;
     }
