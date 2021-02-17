@@ -333,7 +333,7 @@ function og_ui_edit_membership($form, &$form_state, $group_type, $gid, $og_membe
   if (!isset($group->uid) || $group->uid != $account->uid) {
     $form['actions']['delete'] = array(
       '#type' => 'markup',
-      '#markup' => l(t('Remove'), 'group/node/' . $gid . '/admin/people/delete-membership/' . $og_membership->id),
+      '#markup' => l(t('Remove'), 'group/' . $group_type . '/' . $gid . '/admin/people/delete-membership/' . $og_membership->id),
     );
   }
 
