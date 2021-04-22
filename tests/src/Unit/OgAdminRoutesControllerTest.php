@@ -10,10 +10,10 @@ use Drupal\Core\DependencyInjection\ContainerBuilder;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Routing\RouteMatchInterface;
 use Drupal\Core\Url;
+use Drupal\Tests\UnitTestCase;
 use Drupal\og\Controller\OgAdminRoutesController;
 use Drupal\og\Event\OgAdminRoutesEvent;
 use Drupal\og\Event\OgAdminRoutesEventInterface;
-use Drupal\Tests\UnitTestCase;
 use Prophecy\Argument;
 use Symfony\Component\Routing\Route;
 
@@ -206,7 +206,7 @@ class OgAdminRoutesControllerTest extends UnitTestCase {
    * Return the render array from calling the "overview" method.
    *
    * @param bool $allow_access
-   *   Indicate of access to the routes should be given.
+   *   Indicate if access to the routes should be given.
    *
    * @return array
    *   The render array.

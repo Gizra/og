@@ -129,7 +129,7 @@ class OgAccess implements OgAccessInterface {
   /**
    * {@inheritdoc}
    */
-  public function userAccess(EntityInterface $group, string $permission, AccountInterface $user = NULL, bool $skip_alter = FALSE): AccessResultInterface {
+  public function userAccess(EntityInterface $group, string $permission, ?AccountInterface $user = NULL, bool $skip_alter = FALSE): AccessResultInterface {
     $group_type_id = $group->getEntityTypeId();
     $bundle = $group->bundle();
     // As Og::isGroup depends on this config, we retrieve it here and set it as
@@ -223,7 +223,7 @@ class OgAccess implements OgAccessInterface {
   /**
    * {@inheritdoc}
    */
-  public function userAccessEntity(string $permission, EntityInterface $entity, AccountInterface $user = NULL): AccessResultInterface {
+  public function userAccessEntity(string $permission, EntityInterface $entity, ?AccountInterface $user = NULL): AccessResultInterface {
     $result = AccessResult::neutral();
 
     $entity_type = $entity->getEntityType();
@@ -262,7 +262,7 @@ class OgAccess implements OgAccessInterface {
   /**
    * {@inheritdoc}
    */
-  public function userAccessEntityOperation(string $operation, EntityInterface $entity, AccountInterface $user = NULL): AccessResultInterface {
+  public function userAccessEntityOperation(string $operation, EntityInterface $entity, ?AccountInterface $user = NULL): AccessResultInterface {
     $result = AccessResult::neutral();
 
     $entity_type = $entity->getEntityType();
@@ -307,7 +307,7 @@ class OgAccess implements OgAccessInterface {
   /**
    * {@inheritdoc}
    */
-  public function userAccessGroupContentEntityOperation(string $operation, EntityInterface $group_entity, EntityInterface $group_content_entity, AccountInterface $user = NULL): AccessResultInterface {
+  public function userAccessGroupContentEntityOperation(string $operation, EntityInterface $group_entity, EntityInterface $group_content_entity, ?AccountInterface $user = NULL): AccessResultInterface {
     // Default to the current user.
     $user = $user ?: $this->accountProxy->getAccount();
 

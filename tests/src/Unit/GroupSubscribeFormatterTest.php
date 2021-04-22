@@ -14,12 +14,12 @@ use Drupal\Core\Field\FieldDefinitionInterface;
 use Drupal\Core\Field\FieldItemListInterface;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\Core\Session\AccountProxyInterface;
+use Drupal\Tests\UnitTestCase;
 use Drupal\og\GroupTypeManagerInterface;
 use Drupal\og\MembershipManagerInterface;
 use Drupal\og\OgAccessInterface;
 use Drupal\og\OgMembershipInterface;
 use Drupal\og\Plugin\Field\FieldFormatter\GroupSubscribeFormatter;
-use Drupal\Tests\UnitTestCase;
 use Drupal\user\EntityOwnerInterface;
 
 /**
@@ -341,7 +341,10 @@ class GroupSubscribeFormatterTest extends UnitTestCase {
 
     $this
       ->membershipManager
-      ->isMember($this->group->reveal(), $this->user->reveal()->id(), [OgMembershipInterface::STATE_ACTIVE, OgMembershipInterface::STATE_PENDING])
+      ->isMember($this->group->reveal(), $this->user->reveal()->id(), [
+        OgMembershipInterface::STATE_ACTIVE,
+        OgMembershipInterface::STATE_PENDING,
+      ])
       ->willReturn(TRUE);
 
     $elements = $this->getElements();
