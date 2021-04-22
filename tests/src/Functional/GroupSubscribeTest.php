@@ -270,7 +270,7 @@ class GroupSubscribeTest extends BrowserTestBase {
         // @todo This currently returns a 500 error due to a bug in core. Change
         //   this to a 403 or 404 when the bug is fixed.
         // @see https://www.drupal.org/node/2786897
-        'code' => 500,
+        'code' => version_compare(\Drupal::VERSION, '9.1.4', '>=') ? 404 : 500,
       ],
 
       // A non existing entity ID.
