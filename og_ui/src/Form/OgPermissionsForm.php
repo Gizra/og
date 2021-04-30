@@ -336,7 +336,7 @@ class OgPermissionsForm extends FormBase {
       $role->save();
     }
 
-    \Drupal::messenger()->addMessage($this->t('The changes have been saved.'));
+    $this->messenger()->addMessage($this->t('The changes have been saved.'));
   }
 
 }
