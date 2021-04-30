@@ -104,14 +104,14 @@ class OgRoleForm extends EntityForm {
 
     $edit_link = $this->entity->toLink($this->t('Edit'));
     if ($status == SAVED_UPDATED) {
-      \Drupal::messenger()->addMessage($this->t('OG role %label has been updated.', ['%label' => $og_role->label()]));
+      $this->messenger()->addMessage($this->t('OG role %label has been updated.', ['%label' => $og_role->label()]));
       $this->logger('user')->notice('OG role %label has been updated.', [
         '%label' => $og_role->label(),
         'link' => $edit_link,
       ]);
     }
     else {
-      \Drupal::messenger()->addMessage($this->t('OG role %label has been added.', ['%label' => $og_role->label()]));
+      $this->messenger()->addMessage($this->t('OG role %label has been added.', ['%label' => $og_role->label()]));
       $this->logger('user')->notice('OG role %label has been added.', [
         '%label' => $og_role->label(),
         'link' => $edit_link,
