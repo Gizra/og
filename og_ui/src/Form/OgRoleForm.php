@@ -102,7 +102,7 @@ class OgRoleForm extends EntityForm {
     $og_role->set('name', trim($og_role->get('name')));
     $status = $og_role->save();
 
-    $edit_link = $this->entity->toLink($this->t('Edit'));
+    $edit_link = $this->entity->toLink($this->t('Edit'))->toString();
     if ($status == SAVED_UPDATED) {
       $this->messenger()->addMessage($this->t('OG role %label has been updated.', ['%label' => $og_role->label()]));
       $this->logger('user')->notice('OG role %label has been updated.', [
