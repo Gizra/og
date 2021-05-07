@@ -117,6 +117,14 @@ views.field.og_membership_bulk_form:
   type: views_field_bulk_form
   label: 'OG Membership bulk form'
 
+views.access.og_perm:
+  type: mapping
+  label: 'Permission'
+  mapping:
+    perm:
+      type: string
+      label: 'Permission'
+
 action.configuration.og_membership_add_multiple_roles_action:
   type: action_configuration_default
   label: 'Add roles to the selected membership(s)'
