@@ -14,7 +14,7 @@ use Drupal\Core\Session\AccountInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
- * Defines the OG membershipimplementation for entity access control handler.
+ * Defines the OG membership implementation for entity access control handler.
  */
 class OgMembershipAccessControlHandler extends EntityAccessControlHandler implements EntityHandlerInterface {
 
