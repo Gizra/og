@@ -4,6 +4,8 @@ declare(strict_types = 1);
 
 namespace Drupal\og\Plugin\Validation\Constraint;
 
+use Drupal\Core\DependencyInjection\ContainerInjectionInterface;
+use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Symfony\Component\Validator\Constraint;
 use Symfony\Component\Validator\ConstraintValidator;
 
@@ -17,7 +19,33 @@ use Symfony\Component\Validator\ConstraintValidator;
  * \Drupal\og\Plugin\EntityReferenceSelection\OgUserSelection, which already
  * checks an existing member cannot be added to the group again.
  */
-class UniqueOgMembershipConstraintValidator extends ConstraintValidator {
+class UniqueOgMembershipConstraintValidator extends ConstraintValidator implements ContainerInjectionInterface {
+
+  /**
+   * The entity type manager.
+   *
+   * @var \Drupal\Core\Entity\EntityTypeManagerInterface
+   */
+  protected $entityTypeManager;
+
+  /**
+   * Constructs a UniqueOgMembershipConstraintValidator object.
+   *
+   * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entity_type_manager
+   *   The entity type manager.
+   */
+  public function __construct(EntityTypeManagerInterface $entity_type_manager) {
+    $this->entityTypeManager = $entity_type_manager;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public static function create(ContainerInterface $container) {
+    return new static(
+      $container->get('entity_type.manager')
+    );
+  }
 
   /**
    * {@inheritdoc}
@@ -44,7 +72,7 @@ class UniqueOgMembershipConstraintValidator extends ConstraintValidator {
 
     $new_member_uid = $value[0]['target_id'];
 
-    $query = \Drupal::service('entity_type.manager')
+    $query = $this->entityTypeManager
       ->getStorage('og_membership')
       ->getQuery()
       ->condition('entity_type', $entity->getGroupEntityType())
@@ -53,7 +81,7 @@ class UniqueOgMembershipConstraintValidator extends ConstraintValidator {
     $membership_ids = $query->execute();
 
     if ($membership_ids) {
-      $user = \Drupal::service('entity_type.manager')->getStorage('user')->load($new_member_uid);
+      $user = $this->entityTypeManager->getStorage('user')->load($new_member_uid);
       $this->context->addViolation($constraint->notUniqueMembership, ['%user' => $user->getDisplayName()]);
       return;
     }
