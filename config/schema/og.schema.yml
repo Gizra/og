@@ -171,12 +171,3 @@ block.settings.og_member_count:
 field.widget.settings.og_autocomplete:
   type: field.widget.settings.entity_reference_autocomplete
   label: 'OG context based entity reference autocomplete with display format settings'
-  mapping:
-    # This already exists in field.widget.settings.entity_reference_autocomplete
-    # in Drupal 8.8.x and is added here just to ensure backwards compatibility
-    # with Drupal 8.7.x.
-    # @todo: Remove this entry in https://github.com/Gizra/og/issues/581
-    # @see https://github.com/Gizra/og/issues/581
-    match_limit:
-      type: integer
-      label: 'Maximum number of autocomplete suggestions.'
