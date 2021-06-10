@@ -20,6 +20,7 @@ use Drupal\og\Entity\OgRole;
 use Drupal\og\Og;
 use Drupal\og\OgGroupAudienceHelperInterface;
 use Drupal\og\OgMembershipInterface;
+use Drupal\og\OgMembershipTypeInterface;
 use Drupal\og\OgRoleInterface;
 use Drupal\system\Entity\Action;
 use Drupal\user\EntityOwnerInterface;
@@ -170,6 +171,47 @@ function og_entity_access(EntityInterface $entity, $operation, AccountInterface 
   }
 
   return AccessResult::forbidden();
+}
+
+/**
+ * Implements hook_ENTITY_TYPE_access().
+ */
+function og_og_membership_type_access(OgMembershipTypeInterface $entity, $operation, AccountInterface $account) {
+  // Do not allow deleting the default membership type.
+  if ($operation === 'delete' && $entity->id() === OgMembershipInterface::TYPE_DEFAULT) {
+    return AccessResult::forbidden();
+  }
+
+  // If the user has permission to administer all groups, allow access.
+  if ($account->hasPermission('administer group')) {
+    return AccessResult::allowed();
+  }
+
+  return AccessResult::forbidden();
+}
+
+/**
+ * Implements hook_ENTITY_TYPE_access().
+ */
+function og_og_membership_access(OgMembershipInterface $entity, $operation, AccountInterface $account) {
+  $group = $entity->getGroup();
+
+  // If there's a group owner, don't let them leave.
+  if (
+    $group instanceof EntityOwnerInterface
+    && $group->getOwnerId() === $entity->getOwnerId()
+    && $operation === 'delete'
+  ) {
+    return AccessResult::forbidden();
+  }
+
+  // Ensure that there's at least one member in the group.
+  if ($operation === 'delete' && \Drupal::service('og.membership_manager')->getGroupMembershipCount($group) === 1) {
+    return AccessResult::forbidden();
+  }
+
+  return \Drupal::service('og.access')
+    ->userAccess($entity->getGroup(), 'manage members');
 }
 
 /**

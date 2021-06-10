@@ -21,7 +21,7 @@ class GroupSubscribeFormatterTest extends BrowserTestBase {
   /**
    * {@inheritdoc}
    */
-  public static $modules = ['node', 'og'];
+  public static $modules = ['node', 'og', 'options'];
 
   /**
    * {@inheritdoc}

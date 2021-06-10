@@ -372,9 +372,21 @@ class OgEventSubscriber implements EventSubscriberInterface {
       'description' => 'Manage members',
       'path' => 'members',
       'requirements' => [
-        '_og_user_access_group' => OgAccess::ADMINISTER_GROUP_PERMISSION,
+        '_og_user_access_group' => implode('|', [
+          OgAccess::ADMINISTER_GROUP_PERMISSION,
+          'manage members',
+        ]),
         // Views module must be enabled.
         '_module_dependencies' => 'views',
+      ],
+    ];
+
+    $routes_info['add_membership_page'] = [
+      'controller' => '\Drupal\og\Controller\OgAdminMembersController::addPage',
+      'title' => 'Add a member',
+      'path' => 'members/add',
+      'requirements' => [
+        '_og_membership_add_access' => 'TRUE',
       ],
     ];
 
