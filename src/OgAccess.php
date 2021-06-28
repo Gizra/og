@@ -192,7 +192,9 @@ class OgAccess implements OgAccessInterface {
       // User is a non-member or has a pending membership.
       /** @var \Drupal\og\Entity\OgRole $role */
       $role = OgRole::loadByGroupAndName($group, OgRoleInterface::ANONYMOUS);
-      $permissions = $role->getPermissions();
+      if ($role) {
+        $permissions = $role->getPermissions();
+      }
     }
 
     $permissions = array_unique($permissions);

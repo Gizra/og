@@ -295,7 +295,20 @@ class OgMembership extends ContentEntityBase implements OgMembershipInterface {
       ];
     }
     $roles = array_merge($roles, $this->get('roles')->referencedEntities());
-    return $roles;
+    return array_filter($roles, [$this, 'isRoleInterface']);
+  }
+
+  /**
+   * Callback for array_filter().
+   *
+   * @param mixed $role
+   *   A role or entity ID or NULL.
+   *
+   * @return bool
+   *   TRUE if $role is an object of the expected interface.
+   */
+  protected function isRoleInterface($role) {
+    return $role instanceof OgRoleInterface;
   }
 
   /**
