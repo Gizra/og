@@ -85,9 +85,9 @@ use Drupal\user\UserInterface;
  *     },
  *   },
  *   links = {
+ *     "canonical" = "/group/{entity_type_id}/{group}/admin/members/{og_membership}/edit",
  *     "edit-form" = "/group/{entity_type_id}/{group}/admin/members/{og_membership}/edit",
  *     "delete-form" = "/group/{entity_type_id}/{group}/admin/members/{og_membership}/delete",
- *     "canonical" = "/group/{entity_type_id}/{group}/admin/members/{og_membership}/edit"
  *   },
  *   field_ui_base_route = "entity.og_membership_type.edit_form"
  * )

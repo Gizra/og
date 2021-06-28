@@ -9,6 +9,8 @@ use Drupal\Core\Entity\EntityAccessControlHandler;
 use Drupal\Core\Entity\EntityHandlerInterface;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Entity\EntityTypeInterface;
+use Drupal\Core\Field\FieldDefinitionInterface;
+use Drupal\Core\Field\FieldItemListInterface;
 use Drupal\Core\Language\LanguageInterface;
 use Drupal\Core\Session\AccountInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
@@ -34,8 +36,7 @@ class OgMembershipAccessControlHandler extends EntityAccessControlHandler implem
    *   The OG access service.
    */
   public function __construct(EntityTypeInterface $entity_type, OgAccessInterface $og_access) {
-    $this->entityTypeId = $entity_type->id();
-    $this->entityType = $entity_type;
+    parent::__construct($entity_type);
     $this->ogAccess = $og_access;
   }
 
@@ -152,6 +153,24 @@ class OgMembershipAccessControlHandler extends EntityAccessControlHandler implem
     }
 
     return AccessResult::neutral();
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  protected function checkFieldAccess($operation, FieldDefinitionInterface $field_definition, AccountInterface $account, FieldItemListInterface $items = NULL) {
+    /** @var \Drupal\og\OgMembershipInterface $membership */
+    $membership = $items ? $items->getEntity() : NULL;
+
+    $administrative_fields = ['uid', 'state', 'roles'];
+    if ($operation === 'edit' && in_array($field_definition->getName(), $administrative_fields, TRUE)) {
+      return AccessResult::allowedIfHasPermission($account, 'administer organic groups')->addCacheableDependency($membership);
+    }
+
+    if ($membership && $membership->isActive() && $field_definition->getName() === OgMembershipInterface::REQUEST_FIELD) {
+      return AccessResult::forbidden()->addCacheableDependency($membership);
+    }
+    return AccessResult::allowed()->addCacheableDependency($membership);
   }
 
 }
