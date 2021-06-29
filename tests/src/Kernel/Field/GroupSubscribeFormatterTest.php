@@ -21,11 +21,6 @@ use Drupal\og\OgRoleInterface;
 class GroupSubscribeFormatterTest extends EntityKernelTestBase {
 
   /**
-   * {@inheritdoc}
-   */
-  protected static $modules = ['node', 'field', 'og', 'options'];
-
-  /**
    * The owner of the group.
    *
    * @var \Drupal\user\Entity\User
@@ -50,6 +45,8 @@ class GroupSubscribeFormatterTest extends EntityKernelTestBase {
    * {@inheritdoc}
    */
   protected function setUp(): void {
+    // This variable goes from public to private in Drupal 8 to 9.
+    static::$modules = array_merge(static::$modules, ['node', 'field', 'og', 'options']);
     parent::setUp();
     $this->installEntitySchema('og_membership');
     // Create bundle.
