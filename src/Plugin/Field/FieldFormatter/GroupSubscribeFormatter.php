@@ -13,7 +13,6 @@ use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
 use Drupal\Core\Routing\RedirectDestinationTrait;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\Core\Url;
-use Drupal\og\Og;
 use Drupal\og\OgAccessInterface;
 use Drupal\og\OgMembershipInterface;
 use Drupal\user\EntityOwnerInterface;
@@ -115,8 +114,11 @@ class GroupSubscribeFormatter extends FormatterBase implements ContainerFactoryP
   public function viewElements(FieldItemListInterface $items, $langcode) {
     $elements = [];
 
-    // Cache by the OG membership state.
-    $elements['#cache']['contexts'] = ['og_membership_state'];
+    // Cache by the OG membership state. Anonymous users are handled below.
+    $elements['#cache']['contexts'] = [
+      'og_membership_state',
+      'user.roles:authenticated',
+    ];
     $cache_meta = CacheableMetadata::createFromRenderArray($elements);
 
     $group = $items->getEntity();
@@ -170,7 +172,6 @@ class GroupSubscribeFormatter extends FormatterBase implements ContainerFactoryP
     else {
       // If the user is authenticated, set up the subscribe link.
       if ($user->isAuthenticated()) {
-        $cache_meta->setCacheContexts(['user.roles:authenticated']);
         $parameters = [
           'entity_type_id' => $group->getEntityTypeId(),
           'group' => $group->id(),
