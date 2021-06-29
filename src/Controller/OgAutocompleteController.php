@@ -6,7 +6,6 @@ namespace Drupal\og\Controller;
 
 use Drupal\Component\Utility\Crypt;
 use Drupal\Component\Utility\Tags;
-use Drupal\Component\Utility\Unicode;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Controller\ControllerBase;
 use Drupal\Core\Entity\EntityAutocompleteMatcher;

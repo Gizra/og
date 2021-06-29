@@ -25,6 +25,11 @@ class GroupSubscribeFormatterTest extends EntityKernelTestBase {
    */
   protected static $modules = ['node', 'field', 'og', 'options'];
 
+  /**
+   * The owner of the group.
+   *
+   * @var \Drupal\user\Entity\User
+   */
   protected $user;
 
   /**
