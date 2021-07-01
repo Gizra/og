@@ -45,8 +45,9 @@ class GroupSubscribeFormatterTest extends EntityKernelTestBase {
    * {@inheritdoc}
    */
   protected function setUp(): void {
-    // This variable goes from public to private in Drupal 8 to 9.
-    static::$modules = array_merge(static::$modules, ['node', 'field', 'og', 'options']);
+    $mymodules = ['node', 'field', 'og', 'options'];
+    // This $modules property goes from public to private in Drupal 8 to 9.
+    static::$modules = array_merge(static::$modules, $mymodules);
     parent::setUp();
     $this->installEntitySchema('og_membership');
     // Create bundle.
