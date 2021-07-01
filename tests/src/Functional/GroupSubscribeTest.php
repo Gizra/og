@@ -281,7 +281,6 @@ class GroupSubscribeTest extends BrowserTestBase {
     ];
 
     foreach ($scenarios as $scenario) {
-      $this->drupalLogout();
       // Use a different user for each scenario so they have no existing
       // memberships.
       $new_user = $this->drupalCreateUser();
