@@ -59,7 +59,12 @@ class OgAdminMembersController extends ControllerBase {
     $group_type_id = $route_match->getRouteObject()->getOption('_og_entity_type_id');
     $group = $route_match->getParameter($group_type_id);
     $arguments = [$group->getEntityTypeId(), $group->id()];
-    return Views::getView('og_members_overview')->executeDisplay('default', $arguments);
+    $build = [];
+    $view = Views::getView('og_members_overview');
+    if ($view) {
+      $build = $view->executeDisplay('default', $arguments);
+    }
+    return $build;
   }
 
   /**
