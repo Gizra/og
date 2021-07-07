@@ -150,7 +150,7 @@ class GroupTabTest extends BrowserTestBase {
 
       // This page is rendered by a view. For nodes the path is
       // 'group/node/' . $this->group->id() . '/admin/members'.
-      $members_list_route_name =  $route_name . '.members';
+      $members_list_route_name = $route_name . '.members';
       $this->drupalGet(Url::fromRoute($members_list_route_name, $route_parameters));
       $this->assertSession()->statusCodeEquals($code);
 
