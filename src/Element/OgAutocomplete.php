@@ -5,9 +5,15 @@ declare(strict_types = 1);
 namespace Drupal\og\Element;
 
 use Drupal\Component\Utility\Crypt;
+use Drupal\Core\DependencyInjection\ContainerInjectionInterface;
 use Drupal\Core\Entity\Element\EntityAutocomplete;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\KeyValueStore\KeyValueStoreInterface;
+use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
+use Drupal\Core\PrivateKey;
+use Drupal\Core\Session\AccountProxyInterface;
 use Drupal\Core\Site\Settings;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Provides an entity autocomplete with OG group context.
@@ -41,7 +47,7 @@ class OgAutocomplete extends EntityAutocomplete {
     // in the route parameters.
     $selection_settings = isset($element['#selection_settings']) ? $element['#selection_settings'] : [];
     $data = serialize($selection_settings) . $element['#target_type'] . $element['#selection_handler'];
-    $selection_settings_key = Crypt::hmacBase64($data, Settings::getHashSalt());
+    $selection_settings_key = Crypt::hmacBase64($data,  \Drupal::service('private_key')->get() . Settings::getHashSalt());
 
     $key_value_storage = \Drupal::keyValue('entity_autocomplete');
     if (!$key_value_storage->has($selection_settings_key)) {

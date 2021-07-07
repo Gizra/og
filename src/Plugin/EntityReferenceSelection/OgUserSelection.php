@@ -107,7 +107,7 @@ class OgUserSelection extends DefaultSelection {
   /**
    * Get the selection handler of the field.
    *
-   * @return Drupal\Core\Entity\Plugin\EntityReferenceSelection\DefaultSelection
+   * @return \Drupal\Core\Entity\Plugin\EntityReferenceSelection\DefaultSelection
    *   Returns the selection handler.
    */
   public function getSelectionHandler() {
@@ -157,12 +157,12 @@ class OgUserSelection extends DefaultSelection {
       $group = is_callable([$entity, 'getGroup']) ? $entity->getGroup() : NULL;
     }
 
-    if (isset($this->configuration['handler_settings']['group'])) {
-      $group = $this->configuration['handler_settings']['group'];
+    if (isset($this->configuration['group'])) {
+      $group = $this->configuration['group'];
     }
 
-    if ($group === NULL) {
-      return $query;
+    if (!$group) {
+      return;
     }
 
     // Left join to the OG membership base table.

@@ -10,6 +10,7 @@ use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Controller\ControllerBase;
 use Drupal\Core\Entity\EntityAutocompleteMatcher;
 use Drupal\Core\KeyValueStore\KeyValueStoreInterface;
+use Drupal\Core\PrivateKey;
 use Drupal\Core\Site\Settings;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -28,6 +29,14 @@ class OgAutocompleteController extends ControllerBase {
    */
   protected $matcher;
 
+
+  /**
+   * The private key service.
+   *
+   * @var \Drupal\Core\PrivateKey
+   */
+  protected $privateKey;
+
   /**
    * The key value store.
    *
@@ -40,11 +49,14 @@ class OgAutocompleteController extends ControllerBase {
    *
    * @param \Drupal\Core\Entity\EntityAutocompleteMatcher $matcher
    *   The autocomplete matcher for entity references.
+   * @param \Drupal\Core\PrivateKey $privateKey
+   *   The private key service.
    * @param \Drupal\Core\KeyValueStore\KeyValueStoreInterface $key_value
    *   The key value factory.
    */
-  public function __construct(EntityAutocompleteMatcher $matcher, KeyValueStoreInterface $key_value) {
+  public function __construct(EntityAutocompleteMatcher $matcher, PrivateKey $privateKey, KeyValueStoreInterface $key_value) {
     $this->matcher = $matcher;
+    $this->privateKey = $privateKey;
     $this->keyValue = $key_value;
   }
 
@@ -54,6 +66,7 @@ class OgAutocompleteController extends ControllerBase {
   public static function create(ContainerInterface $container) {
     return new static(
       $container->get('entity.autocomplete_matcher'),
+      $container->get('private_key'),
       $container->get('keyvalue')->get('entity_autocomplete')
     );
   }
@@ -91,7 +104,8 @@ class OgAutocompleteController extends ControllerBase {
       // stored in the key/value store.
       $selection_settings = $this->keyValue->get($selection_settings_key, FALSE);
       if ($selection_settings !== FALSE) {
-        $selection_settings_hash = Crypt::hmacBase64(serialize($selection_settings) . $target_type . $selection_handler, Settings::getHashSalt());
+        $data = serialize($selection_settings) . $target_type . $selection_handler;
+        $selection_settings_hash = Crypt::hmacBase64($data, $this->privateKey->get() . Settings::getHashSalt());
         if ($selection_settings_hash !== $selection_settings_key) {
           // Disallow access when the selection settings hash does not match the
           // passed-in key.
