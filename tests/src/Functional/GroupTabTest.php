@@ -13,6 +13,7 @@ use Drupal\node\Entity\Node;
 use Drupal\node\Entity\NodeType;
 use Drupal\og\Og;
 use Drupal\Tests\og\Traits\OgMembershipCreationTrait;
+use Drupal\user\Entity\User;
 
 /**
  * Tests the "Group" tab.
@@ -170,6 +171,10 @@ class GroupTabTest extends BrowserTestBase {
    * Tests access to the group tab and pages.
    */
   public function testMembershipAdd() {
+    $loop = 0;
+    $random_name = $this->randomMachineName();
+    /** @var \Drupal\og\MembershipManager $membership_manager */
+    $membership_manager = $this->container->get('og.membership_manager');
     foreach ($this->membershipAddScenarios() as $scenario) {
       [$account] = $scenario;
       $this->drupalLogin($account);
@@ -195,7 +200,7 @@ class GroupTabTest extends BrowserTestBase {
         $path = $input->getAttribute('data-autocomplete-path');
         $this->assertNotEmpty($path);
         $value = $exiting_member->getDisplayName() . ' (' . $exiting_member->id() . ')';
-        $this->submitForm(['Username' =>  $value], 'Save');
+        $this->submitForm(['Username' => $value], 'Save');
         $this->assertSession()->pageTextMatches('/The user .+ is already a member in this group/');
         // Test entity query match.
         $entity_type_manger = $this->container->get('entity_type.manager');
@@ -207,12 +212,24 @@ class GroupTabTest extends BrowserTestBase {
         $this->assertCount(3, $found, print_r($found, TRUE));
         // Directly test autocomplete endpoint.
         $this->drupalGet($path, ['query' => ['q' => $match]]);
+        $header = $this->getSession()->getResponseHeader('content-type');
+        $this->assertSame('application/json', $header);
         $out = $this->getSession()->getPage()->getContent();
         $data = json_decode($out, TRUE);
         // Two of the three possible matches are already members.
         $this->assertCount(1, $data, $out);
         // Verify that we can add a new user after matching.
-        $new_user = $this->createUser();
+        $new_user = $this->createUser([], $random_name . $loop++);
+        $this->drupalGet($path, ['query' => ['q' => $new_user->getDisplayName()]]);
+        $header = $this->getSession()->getResponseHeader('content-type');
+        $this->assertSame('application/json', $header);
+        $out = $this->getSession()->getPage()->getContent();
+        $data = json_decode($out, TRUE);
+        $this->assertCount(1, $data, $out);
+        $this->drupalGet(Url::fromRoute('entity.og_membership.add_form', $add_form_parameters));
+        $this->submitForm(['Username' => $data[0]['value']], 'Save');
+        $this->assertSession()->pageTextMatches('/Added .+ to .+/');
+        $this->assertTrue($membership_manager->isMember($group, $new_user->id()));
       }
     }
   }
@@ -237,7 +254,9 @@ class GroupTabTest extends BrowserTestBase {
   public function testGroupTabAccess() {
     foreach ($this->groupTabScenarios() as $scenario) {
       [$account, $code] = $scenario;
-      $this->drupalLogin($account);
+      if (!$account->isAnonymous()) {
+        $this->drupalLogin($account);
+      }
       $group_data = [
         [$this->groupNode, $this->anotherNodeMembership],
         [$this->groupTestEntity, $this->anotherTestEntityMembership],
@@ -298,6 +317,7 @@ class GroupTabTest extends BrowserTestBase {
       [$this->groupAdminUser, 200],
       [$this->user1, 200],
       [$this->user2, 403],
+      [User::load(0), 403],
     ];
   }
 
