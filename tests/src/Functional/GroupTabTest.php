@@ -7,6 +7,7 @@ namespace Drupal\Tests\og\Functional;
 use Drupal\Core\Url;
 use Drupal\entity_test\Entity\EntityTest;
 use Drupal\og\OgMembershipInterface;
+use Drupal\og\OgRoleInterface;
 use Drupal\Tests\BrowserTestBase;
 use Drupal\node\Entity\Node;
 use Drupal\node\Entity\NodeType;
@@ -59,6 +60,13 @@ class GroupTabTest extends BrowserTestBase {
    * @var \Drupal\user\UserInterface
    */
   protected $authorUser;
+
+  /**
+   * The group administrator user.
+   *
+   * @var \Drupal\user\UserInterface
+   */
+  protected $groupAdminUser;
 
   /**
    * The node group membership for another user.
@@ -123,8 +131,9 @@ class GroupTabTest extends BrowserTestBase {
     // Define the entity_test entity as a group.
     Og::groupTypeManager()->addGroup('entity_test', 'entity_test');
 
-    // Create node author user.
-    $this->authorUser = $this->createUser([], 'author');
+    // Create node author user. The "z" prevents matching user 1 who gets
+    // the name "admin" in the test.
+    $this->authorUser = $this->createUser([], 'author-adminz');
 
     // Saving the group node creates a membership for the author.
     $this->groupNode = Node::create([
@@ -133,6 +142,8 @@ class GroupTabTest extends BrowserTestBase {
       'uid' => $this->authorUser->id(),
     ]);
     $this->groupNode->save();
+    $this->groupAdminUser = $this->createUser([], 'adminz-group');
+    $this->createOgMembership($this->groupNode, $this->groupAdminUser, [OgRoleInterface::ADMINISTRATOR]);
     $another_user = $this->createUser([], 'another');
     $this->anotherNodeMembership = $this->createOgMembership($this->groupNode, $another_user);
 
@@ -141,6 +152,7 @@ class GroupTabTest extends BrowserTestBase {
       'user_id' => $this->authorUser->id(),
     ]);
     $this->groupTestEntity->save();
+    $this->createOgMembership($this->groupTestEntity, $this->groupAdminUser, [OgRoleInterface::ADMINISTRATOR]);
     $this->anotherTestEntityMembership = $this->createOgMembership($this->groupTestEntity, $another_user);
 
     $this->nonGroup = Node::create([
@@ -150,8 +162,73 @@ class GroupTabTest extends BrowserTestBase {
     ]);
     $this->nonGroup->save();
 
-    $this->user1 = $this->drupalCreateUser(['administer organic groups'], 'group-admin');
+    $this->user1 = $this->drupalCreateUser(['administer organic groups'], 'adminz-all-groups');
     $this->user2 = $this->drupalCreateUser([], 'somebody');
+  }
+
+  /**
+   * Tests access to the group tab and pages.
+   */
+  public function testMembershipAdd() {
+    foreach ($this->membershipAddScenarios() as $scenario) {
+      [$account] = $scenario;
+      $this->drupalLogin($account);
+      $group_data = [
+        [$this->groupNode, $this->anotherNodeMembership],
+        [$this->groupTestEntity, $this->anotherTestEntityMembership],
+      ];
+
+      foreach ($group_data as $data) {
+        [$group, $membership] = $data;
+        /** @var \Drupal\og\OgMembershipInterface $membership */
+        $exiting_member = $membership->getOwner();
+        $entity_type_id = $group->getEntityTypeId();
+        $add_form_parameters = [
+          'group' => $group->id(),
+          'entity_type_id' => $entity_type_id,
+          'og_membership_type' => OgMembershipInterface::TYPE_DEFAULT,
+        ];
+        $this->drupalGet(Url::fromRoute('entity.og_membership.add_form', $add_form_parameters));
+        $this->assertSession()->statusCodeEquals(200);
+        $page = $this->getSession()->getPage();
+        $input = $page->findField('edit-uid-0-target-id');
+        $path = $input->getAttribute('data-autocomplete-path');
+        $this->assertNotEmpty($path);
+        $value = $exiting_member->getDisplayName() . ' (' . $exiting_member->id() . ')';
+        $this->submitForm(['Username' =>  $value], 'Save');
+        $this->assertSession()->pageTextMatches('/The user .+ is already a member in this group/');
+        // Test entity query match.
+        $entity_type_manger = $this->container->get('entity_type.manager');
+        $query = $entity_type_manger->getStorage('user')->getQuery();
+        $query->condition('uid', 0, '<>');
+        $match = 'adminz';
+        $query->condition('name', $match, 'CONTAINS');
+        $found = $query->execute();
+        $this->assertCount(3, $found, print_r($found, TRUE));
+        // Directly test autocomplete endpoint.
+        $this->drupalGet($path, ['query' => ['q' => $match]]);
+        $out = $this->getSession()->getPage()->getContent();
+        $data = json_decode($out, TRUE);
+        // Two of the three possible matches are already members.
+        $this->assertCount(1, $data, $out);
+        // Verify that we can add a new user after matching.
+        $new_user = $this->createUser();
+      }
+    }
+  }
+
+  /**
+   * Provide data for testMembershipAdd.
+   *
+   * @return array[]
+   *   Array of test scenarios.
+   */
+  protected function membershipAddScenarios(): array {
+    return [
+      [$this->authorUser],
+      [$this->groupAdminUser],
+      [$this->user1],
+    ];
   }
 
   /**
@@ -218,6 +295,7 @@ class GroupTabTest extends BrowserTestBase {
   protected function groupTabScenarios(): array {
     return [
       [$this->authorUser, 200],
+      [$this->groupAdminUser, 200],
       [$this->user1, 200],
       [$this->user2, 403],
     ];
