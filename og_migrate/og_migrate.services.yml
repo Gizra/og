@@ -1,0 +1,5 @@
+services:
+  og_migrate.subscriber:
+    class: Drupal\og_migrate\EventSubscriber\OgMigratePreSaveSubscriber
+    tags:
+      - {name: event_subscriber}

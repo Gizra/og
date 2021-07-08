@@ -1,0 +1,24 @@
+id: d6_og_group_type
+label: Og group types
+migration_tags:
+- Drupal 6
+source:
+  plugin: d6_og_group_type
+  constants:
+    entity_type: node
+process:
+  entity_type: constants/entity_type
+  bundle:
+    -
+      plugin: migration_lookup
+      migration: d6_node_type
+      source: type
+    -
+      plugin: skip_on_empty
+      method: row
+      message: 'Missing content type'
+destination:
+  plugin: og_group
+migration_dependencies:
+  required:
+    - d6_node_type

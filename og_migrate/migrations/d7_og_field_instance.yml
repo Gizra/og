@@ -1,0 +1,32 @@
+id: d7_og_field_instance
+label: Og entity reference fields
+migration_tags:
+  - Drupal 7
+source:
+  plugin: d7_og_field_instance
+process:
+  plugin_id:
+    -
+      plugin: static_map
+      source: field_name
+      map:
+        og_group_ref: og_audience
+        default: ''
+    -
+      plugin: skip_on_empty
+      method: row
+      message: 'Field is unused'
+  entity_type: entity_type
+  entity_bundle: bundle
+  settings:
+    -
+      plugin: skip_on_empty
+      method: process
+    -
+      plugin: log
+      source: 'og field instance settings are not migrated'
+destination:
+  plugin: og_field
+migration_dependencies:
+  required:
+    - d7_og_group
