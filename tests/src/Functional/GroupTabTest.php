@@ -173,6 +173,8 @@ class GroupTabTest extends BrowserTestBase {
   public function testMembershipAdd() {
     $loop = 0;
     $random_name = $this->randomMachineName();
+    /** @var \Drupal\Core\Entity\EntityTypeManagerInterface $entity_type_manger */
+    $entity_type_manger = $this->container->get('entity_type.manager');
     /** @var \Drupal\og\MembershipManager $membership_manager */
     $membership_manager = $this->container->get('og.membership_manager');
     foreach ($this->membershipAddScenarios() as $scenario) {
@@ -203,7 +205,6 @@ class GroupTabTest extends BrowserTestBase {
         $this->submitForm(['Username' => $value], 'Save');
         $this->assertSession()->pageTextMatches('/The user .+ is already a member in this group/');
         // Test entity query match.
-        $entity_type_manger = $this->container->get('entity_type.manager');
         $query = $entity_type_manger->getStorage('user')->getQuery();
         $query->condition('uid', 0, '<>');
         $match = 'adminz';
@@ -230,6 +231,19 @@ class GroupTabTest extends BrowserTestBase {
         $this->submitForm(['Username' => $data[0]['value']], 'Save');
         $this->assertSession()->pageTextMatches('/Added .+ to .+/');
         $this->assertTrue($membership_manager->isMember($group, $new_user->id()));
+        $new_membership = $membership_manager->getMembership($group, $new_user->id());
+        $this->drupalGet($new_membership->toUrl('edit-form'));
+        $this->submitForm(['state' => OgMembershipInterface::STATE_BLOCKED], 'Save');
+        $new_membership = $entity_type_manger
+          ->getStorage('og_membership')
+          ->loadUnchanged($new_membership->id());
+        $this->assertSame(OgMembershipInterface::STATE_BLOCKED, $new_membership->getState());
+        $this->drupalGet($new_membership->toUrl('delete-form'));
+        $this->submitForm([], 'Delete');
+        $new_membership = $entity_type_manger
+          ->getStorage('og_membership')
+          ->loadUnchanged($new_membership->id());
+        $this->assertNull($new_membership);
       }
     }
   }
