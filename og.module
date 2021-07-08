@@ -1431,6 +1431,11 @@ function og_query_og_membership_alter(QueryAlterableInterface $query) {
   $entity_type = is_array($entity_type) ? $entity_type[0] : $entity_type;
   $entity_info = entity_get_info($entity_type);
   $id = $entity_info['entity keys']['id'];
+  // Workaround to prevent PDOExceptions caused by non-existing
+  // 'vocabulary_machine_name' database column.
+  if ($entity_info['base table'] == 'taxonomy_term_data') {
+    $entity_info['entity keys']['bundle'] = 'vid';
+  }
 
   if ($base_table) {
     // If the table of the base entity does not exist (e.g. there is no
