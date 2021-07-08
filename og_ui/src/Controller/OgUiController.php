@@ -4,6 +4,7 @@ declare(strict_types = 1);
 
 namespace Drupal\og_ui\Controller;
 
+use Drupal\Component\Plugin\Exception\PluginNotFoundException;
 use Drupal\Core\Controller\ControllerBase;
 use Drupal\Core\Entity\EntityTypeBundleInfoInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
@@ -74,13 +75,27 @@ class OgUiController extends ControllerBase {
    *   The overview as a render array.
    */
   public function rolesPermissionsOverviewPage($type) {
+    $route = $type === 'roles' ? 'entity.og_role.collection' : 'og_ui.permissions_overview';
     $action = $type === 'roles' ? $this->t('Edit roles') : $this->t('Edit permissions');
     $header = [$this->t('Group type'), $this->t('Operations')];
     $rows = [];
     $build = [];
 
     foreach ($this->groupTypeManager->getGroupMap() as $entity_type => $bundles) {
-      $definition = $this->entityTypeManager->getDefinition($entity_type);
+      try {
+        $definition = $this->entityTypeManager->getDefinition($entity_type);
+      }
+      catch (PluginNotFoundException $e) {
+        // The entity type manager might throw this exception if the entity type
+        // is not defined. If this happens it means there is a discrepancy
+        // between the group types in config, and the modules that providing
+        // these entity types. This is not something we can rectify here but it
+        // does not block the rendering of the page. In the rare case that this
+        // occurs, let's log an error and exclude the entity type from the page.
+        $this->getLogger('og')->error('Error: the %entity_type entity type is not defined but is supposed to have group bundles.', ['%entity_type' => $entity_type]);
+        continue;
+      }
+
       $bundle_info = $this->entityTypeBundleInfo->getBundleInfo($entity_type);
       foreach ($bundles as $bundle) {
         $rows[] = [
@@ -88,16 +103,16 @@ class OgUiController extends ControllerBase {
             'data' => $definition->getLabel() . ' - ' . $bundle_info[$bundle]['label'],
           ],
           [
-            'data' => Link::createFromRoute($action, 'og_ui.' . $type . '_form', [
-              'entity_type' => $entity_type,
-              'bundle' => $bundle,
+            'data' => Link::createFromRoute($action, $route, [
+              'entity_type_id' => $entity_type,
+              'bundle_id' => $bundle,
             ]),
           ],
         ];
       }
     }
 
-    $build['roles_table'] = [
+    $build['roles_permissions_table'] = [
       '#theme' => 'table',
       '#header' => $header,
       '#rows' => $rows,
@@ -108,7 +123,7 @@ class OgUiController extends ControllerBase {
   }
 
   /**
-   * Title callback for rolesPermissionsOverviewPage.
+   * Title callback for rolesPermissionsOverviewPage().
    *
    * @param string $type
    *   The type of overview, either 'roles' or 'permissions'.
@@ -118,6 +133,27 @@ class OgUiController extends ControllerBase {
    */
   public function rolesPermissionsOverviewTitleCallback($type) {
     return $this->t('OG @type overview', ['@type' => $type]);
+  }
+
+  /**
+   * Title callback for the roles overview page.
+   *
+   * @param string $entity_type_id
+   *   The group entity type ID.
+   * @param string $bundle_id
+   *   The group bundle ID.
+   *
+   * @return \Drupal\Core\StringTranslation\TranslatableMarkup
+   *   The roles overview page title.
+   *
+   * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundException
+   *   Thrown when the entity type with the given ID is not defined.
+   */
+  public function rolesOverviewPageTitleCallback($entity_type_id, $bundle_id) {
+    return $this->t('OG @type - @bundle roles', [
+      '@type' => $this->entityTypeManager->getDefinition($entity_type_id)->getLabel(),
+      '@bundle' => $this->entityTypeBundleInfo->getBundleInfo($entity_type_id)[$bundle_id]['label'],
+    ]);
   }
 
 }

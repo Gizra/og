@@ -1,0 +1,5 @@
+entity.og_role.add_form:
+  route_name: entity.og_role.add_form
+  title: 'Add role'
+  appears_on:
+    - entity.og_role.collection
