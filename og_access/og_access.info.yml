@@ -1,0 +1,9 @@
+name: Organic Groups access control
+description: "Enable access control for private and public groups and group content."
+package: Organic Groups
+
+core_version_requirement: ^8 || ^9
+type: module
+
+dependencies:
+  - og:og
