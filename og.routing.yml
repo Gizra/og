@@ -47,8 +47,8 @@ og.entity_autocomplete:
   defaults:
     _controller: '\Drupal\og\Controller\OgAutocompleteController:handleAutocomplete'
   requirements:
-    # @todo: This requires an access check.
-    _access: 'TRUE'
+    # @todo: This may also require an access check.
+    _user_is_logged_in: 'TRUE'
   options:
     parameters:
       group:
@@ -71,6 +71,8 @@ entity.og_membership.add_form:
 # The canonical route is the same as the edit-form route because we need a
 # canonical route for various functionality to work properly, but a standard
 # entity view for OG memberships tends to feel quite stub-like.
+# @todo Implement a route provider for og_membership that subclasses
+# \Drupal\Core\Entity\Routing\DefaultHtmlRouteProvider::getRoutes().
 entity.og_membership.canonical:
   path: 'group/{entity_type_id}/{group}/admin/members/{og_membership}/edit'
   defaults:
