@@ -2671,6 +2671,21 @@ function og_role_permissions($roles = array()) {
 }
 
 /**
+ * Returns an array of all roles.
+ *
+ * @return array
+ *   An associative array with the role id as the key and the role name as
+ *   value.
+ */
+function og_get_all_roles() {
+  return db_select('og_role', 'ogr')
+    ->fields('ogr', array('rid', 'name'))
+    ->orderBy('rid', 'ASC')
+    ->execute()
+    ->fetchAllkeyed();
+}
+
+/**
  * Retrieve an array of roles matching specified conditions.
  *
  * @param $group_type
