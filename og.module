@@ -305,6 +305,7 @@ function og_entity_type_alter(array &$entity_types) {
   /** @var \Drupal\Core\Entity\EntityTypeInterface $entity_type */
   foreach ($entity_types as $entity_type_id => $entity_type) {
     $entity_type->setLinkTemplate('og-admin-routes', "/group/$entity_type_id/{{$entity_type_id}}/admin");
+    $entity_type->setLinkTemplate('og-content', "/group/$entity_type_id/{{$entity_type_id}}/admin/content");
   }
 }
 
