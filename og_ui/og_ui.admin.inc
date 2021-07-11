@@ -886,7 +886,7 @@ function theme_og_ui_admin_permissions($variables) {
   $form = $variables['form'];
   $role_names = $form['role_names']['#value'];
 
-  foreach (element_children($form['permission']) as $key) {
+  foreach (element_get_visible_children($form['permission']) as $key) {
     $row = array();
     // Module name.
     if (is_numeric($key)) {
@@ -899,7 +899,7 @@ function theme_og_ui_admin_permissions($variables) {
         'class' => array('permission'),
       );
 
-      foreach (element_children($form['checkboxes']) as $rid) {
+      foreach (element_get_visible_children($form['checkboxes']) as $rid) {
         $form['checkboxes'][$rid][$key]['#title'] = $role_names[$rid] . ': ' . $form['permission'][$key]['#markup'];
         $form['checkboxes'][$rid][$key]['#title_display'] = 'invisible';
         $row[] = array('data' => drupal_render($form['checkboxes'][$rid][$key]), 'class' => array('checkbox'));
@@ -908,7 +908,7 @@ function theme_og_ui_admin_permissions($variables) {
     $rows[] = $row;
   }
   $header[] = (t('Permission'));
-  foreach (element_children($form['role_names']) as $rid) {
+  foreach (element_get_visible_children($form['role_names']) as $rid) {
     $header[] = array('data' => drupal_render($form['role_names'][$rid]), 'class' => array('checkbox'));
   }
   $output = '';
