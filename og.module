@@ -863,7 +863,7 @@ function og_entity_insert($entity, $entity_type) {
     $name = 'og_group_manager_default_rids_' . $entity_type . '_' . $bundle;
     if ($rids = variable_get($name)) {
       foreach ($rids as $rid) {
-        og_role_grant($entity_type, $id, $entity->uid, $rid);
+        og_role_grant($entity_type, $id, $entity->uid, $rid, TRUE);
       }
     }
   }
@@ -3076,15 +3076,19 @@ function og_roles_override($group_type, $bundle, $gid) {
  *   The user ID.
  * @param $rid
  *   The role ID.
+ * @param $skipcheck
+ *   Set to true to skip checking if the role exists.
  */
-function og_role_grant($group_type, $gid, $uid, $rid) {
+function og_role_grant($group_type, $gid, $uid, $rid, $skipcheck = FALSE) {
   // Make sure the role is valid.
-  $group = entity_load_single($group_type, $gid);
-  list(,, $bundle) = entity_extract_ids($group_type, $group);
-  $og_roles = og_roles($group_type, $bundle, $gid, FALSE, FALSE);
-  if (empty($og_roles[$rid])) {
-    // Role isn't valid.
-    return;
+  if (!$skipcheck) {
+    $group = entity_load_single($group_type, $gid);
+    list(,, $bundle) = entity_extract_ids($group_type, $group);
+    $og_roles = og_roles($group_type, $bundle, $gid, FALSE, FALSE);
+    if (empty($og_roles[$rid])) {
+      // Role isn't valid.
+      return;
+    }
   }
 
   // Get the existing user roles.
