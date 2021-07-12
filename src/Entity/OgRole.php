@@ -6,7 +6,6 @@ namespace Drupal\og\Entity;
 
 use Drupal\Core\Config\ConfigValueException;
 use Drupal\Core\Entity\EntityInterface;
-use Drupal\Core\Entity\EntityStorageInterface;
 use Drupal\og\Exception\OgRoleException;
 use Drupal\og\OgRoleInterface;
 use Drupal\user\Entity\Role;
