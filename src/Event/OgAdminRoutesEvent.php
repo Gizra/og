@@ -50,7 +50,10 @@ class OgAdminRoutesEvent extends Event implements OgAdminRoutesEventInterface {
         'description' => '',
 
         'requirements' => [
-          '_og_user_access_group' => OgAccess::ADMINISTER_GROUP_PERMISSION,
+          '_og_user_access_group' => implode('|', [
+            OgAccess::ADMINISTER_GROUP_PERMISSION,
+            'manage members',
+          ]),
         ],
 
         'options' => [

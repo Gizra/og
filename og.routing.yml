@@ -123,7 +123,7 @@ entity.og_membership_type.edit_form:
   defaults:
     _entity_form: 'og_membership_type.edit'
   requirements:
-    _permission: 'administer organic groups'
+    _entity_access: 'og_membership_type.update'
 
 entity.og_membership_type.delete_form:
   path: '/admin/structure/membership-types/manage/{og_membership_type}/delete'
@@ -131,7 +131,7 @@ entity.og_membership_type.delete_form:
     _entity_form: 'og_membership_type.delete'
     _title: 'Delete'
   requirements:
-     _permission: 'og_membership_type.delete'
+    _entity_access: 'og_membership_type.delete'
 
 og_membership.type_add:
   path: '/admin/structure/membership-types/add'

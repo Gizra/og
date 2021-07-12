@@ -149,7 +149,7 @@ class OgEventSubscriber implements EventSubscriberInterface {
       new GroupPermission([
         'name' => 'manage members',
         'title' => $this->t('Manage members'),
-        'description' => $this->t('Users may remove group members and alter member status and roles.'),
+        'description' => $this->t('Users may add and remove group members, and alter member status and roles.'),
         'default roles' => [OgRoleInterface::ADMINISTRATOR],
         'restrict access' => TRUE,
       ]),

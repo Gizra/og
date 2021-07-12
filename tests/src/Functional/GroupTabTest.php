@@ -6,6 +6,7 @@ namespace Drupal\Tests\og\Functional;
 
 use Drupal\Core\Url;
 use Drupal\entity_test\Entity\EntityTest;
+use Drupal\og\Entity\OgRole;
 use Drupal\og\OgMembershipInterface;
 use Drupal\og\OgRoleInterface;
 use Drupal\Tests\BrowserTestBase;
@@ -70,6 +71,13 @@ class GroupTabTest extends BrowserTestBase {
   protected $groupAdminUser;
 
   /**
+   * A group user with 'manage members' permission.
+   *
+   * @var \Drupal\user\UserInterface
+   */
+  protected $groupManagerUser;
+
+  /**
    * The node group membership for another user.
    *
    * @var \Drupal\og\OgMembershipInterface
@@ -131,10 +139,26 @@ class GroupTabTest extends BrowserTestBase {
     Og::groupTypeManager()->addGroup('node', $this->bundle1);
     // Define the entity_test entity as a group.
     Og::groupTypeManager()->addGroup('entity_test', 'entity_test');
+    // Add a role with manager members permission for each group type.
+    $values = [
+      'name' => 'manager',
+      'label' => 'Member manager',
+      'permissions' => ['manage members'],
+    ];
+    $node_role = OgRole::create($values);
+    $node_role->setGroupType('node');
+    $node_role->setGroupBundle($this->bundle1);
+    $node_role->save();
+    $this->assertSame(['manage members'], $node_role->getPermissions());
+    $entity_test_role = OgRole::create($values);
+    $entity_test_role->setGroupType('entity_test');
+    $entity_test_role->setGroupBundle('entity_test');
+    $entity_test_role->save();
 
     // Create node author user. The "z" prevents matching user 1 who gets
     // the name "admin" in the test.
     $this->authorUser = $this->createUser([], 'author-adminz');
+    $this->groupManagerUser = $this->createUser([], 'group-members-manager');
 
     // Saving the group node creates a membership for the author.
     $this->groupNode = Node::create([
@@ -145,6 +169,7 @@ class GroupTabTest extends BrowserTestBase {
     $this->groupNode->save();
     $this->groupAdminUser = $this->createUser([], 'adminz-group');
     $this->createOgMembership($this->groupNode, $this->groupAdminUser, [OgRoleInterface::ADMINISTRATOR]);
+    $this->createOgMembership($this->groupNode, $this->groupManagerUser, [$node_role->getName()]);
     $another_user = $this->createUser([], 'another');
     $this->anotherNodeMembership = $this->createOgMembership($this->groupNode, $another_user);
 
@@ -154,6 +179,7 @@ class GroupTabTest extends BrowserTestBase {
     ]);
     $this->groupTestEntity->save();
     $this->createOgMembership($this->groupTestEntity, $this->groupAdminUser, [OgRoleInterface::ADMINISTRATOR]);
+    $this->createOgMembership($this->groupTestEntity, $this->groupManagerUser, [$entity_test_role->getName()]);
     $this->anotherTestEntityMembership = $this->createOgMembership($this->groupTestEntity, $another_user);
 
     $this->nonGroup = Node::create([
@@ -329,6 +355,7 @@ class GroupTabTest extends BrowserTestBase {
     return [
       [$this->authorUser, 200],
       [$this->groupAdminUser, 200],
+      [$this->groupManagerUser, 200],
       [$this->user1, 200],
       [$this->user2, 403],
       [User::load(0), 403],
