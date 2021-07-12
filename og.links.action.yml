@@ -1,0 +1,3 @@
+og.local_actions:
+  class: \Drupal\Core\Menu\LocalActionDefault
+  deriver: \Drupal\og\Plugin\Derivative\OgLocalAction

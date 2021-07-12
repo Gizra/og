@@ -128,6 +128,18 @@ class OgAdminRoutesControllerTest extends UnitTestCase {
         'title' => $this->randomMachineName(),
         'description' => $this->randomMachineName(),
       ],
+
+      $this->randomMachineName() => [
+        'title' => $this->randomMachineName(),
+        'description' => $this->randomMachineName(),
+        '_overview' => FALSE,
+      ],
+
+      $this->randomMachineName() => [
+        'title' => $this->randomMachineName(),
+        'description' => $this->randomMachineName(),
+        '_overview' => FALSE,
+      ],
     ];
 
     $this
@@ -200,6 +212,23 @@ class OgAdminRoutesControllerTest extends UnitTestCase {
       $this->assertEquals($this->routesInfo[$key]['description'], $value['description']);
     }
 
+  }
+
+  /**
+   * Tests overview with hidden routes.
+   *
+   * @covers ::overview
+   */
+  public function testHiddenOverviewRoutesAreFiltered() {
+    $result = $this->getRenderElementResult(TRUE);
+    // Filter all hidden routes.
+    $hidden_routes_info = array_filter($this->routesInfo, function ($route) {
+      return isset($route['_overview']) && $route['_overview'] === FALSE;
+    });
+    // Ensure the hidden routes are not returned in the rendered element result.
+    foreach ($hidden_routes_info as $key => $route_info) {
+      $this->assertFalse(array_key_exists($key, $result['og_admin_routes']['#content']), 'Hidden route is filtered.');
+    }
   }
 
   /**
