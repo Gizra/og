@@ -25,4 +25,11 @@ class ValidOgMembershipReferenceConstraint extends Constraint {
    */
   public $notValidGroup = 'The entity %label is not defined as a group.';
 
+  /**
+   * Not a valid group message.
+   *
+   * @var string
+   */
+  public $notAllowedToPostInGroup = 'You are not allowed to post content in the group %label.';
+
 }
