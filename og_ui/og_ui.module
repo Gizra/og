@@ -26,7 +26,8 @@ function og_ui_form_alter(array &$form, FormStateInterface $form_state, $form_id
   }
 
   $entity_type = $form_state->getFormObject()->getEntity();
-  if ($entity_type->getEntityTypeId() === 'og_membership_type') {
+  // To avoid insanity, a group membership cannot be a group or group content.
+  if ($entity_type->getEntityTypeId() === 'og_membership') {
     return;
   }
 
