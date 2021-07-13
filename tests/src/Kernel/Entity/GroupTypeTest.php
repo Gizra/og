@@ -44,7 +44,7 @@ class GroupTypeTest extends KernelTestBase {
     // be recognized as a group type.
     $editable = $this->config('og.settings');
     $groups = $editable->get('groups');
-    $groups['og_membership'][] = 'og_membership';
+    $groups['og_membership'][] = 'default';
     $editable->set('groups', $groups);
     $editable->save();
     // Create a content type.
@@ -60,7 +60,7 @@ class GroupTypeTest extends KernelTestBase {
     $this->assertTrue($this->groupTypeManager->isGroup('node', 'group'));
 
     // The membership entity should not be a group despite being in config.
-    $this->assertFalse($this->groupTypeManager->isGroup('og_membership', 'og_membership'));
+    $this->assertFalse($this->groupTypeManager->isGroup('og_membership', 'default'));
 
    // Verify that the config still contains og_membership.
     $editable = $this->config('og.settings');
@@ -74,7 +74,7 @@ class GroupTypeTest extends KernelTestBase {
 
     // Adding og_membership as a group type is not possible.
     $this->expectException(\InvalidArgumentException::class);
-    $this->groupTypeManager->addGroup('og_membership', 'og_membership');
+    $this->groupTypeManager->addGroup('og_membership', 'default');
   }
 
 }
