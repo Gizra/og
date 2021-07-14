@@ -28,6 +28,7 @@ class GroupManagerSubscriptionTest extends KernelTestBase {
     'og_test',
     'system',
     'user',
+    'options',
   ];
 
   /**

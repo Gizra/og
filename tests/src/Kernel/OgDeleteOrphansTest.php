@@ -28,6 +28,7 @@ class OgDeleteOrphansTest extends KernelTestBase {
     'entity_reference',
     'node',
     'og',
+    'options',
   ];
 
   /**

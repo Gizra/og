@@ -1,0 +1,5 @@
+entity.og_membership_type.collection:
+  title: 'Membership types'
+  parent: system.admin_structure
+  description: 'Create and manage fields, forms, and display settings for OG memberships.'
+  route_name: entity.og_membership_type.collection

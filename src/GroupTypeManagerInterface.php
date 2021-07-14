@@ -125,7 +125,7 @@ interface GroupTypeManagerInterface {
    *   The bundle ID of the bundle to declare as being a group.
    *
    * @throws \InvalidArgumentException
-   *   Thrown when the given bundle is already a group.
+   *   Thrown when the given bundle is already a group or is invalid.
    */
   public function addGroup($entity_type_id, $bundle_id);
 

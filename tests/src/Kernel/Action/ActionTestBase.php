@@ -33,7 +33,7 @@ abstract class ActionTestBase extends KernelTestBase {
   /**
    * {@inheritdoc}
    */
-  public static $modules = ['node', 'og', 'system', 'user'];
+  public static $modules = ['node', 'og', 'system', 'user', 'options'];
 
   /**
    * An array of test users.

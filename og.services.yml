@@ -4,6 +4,11 @@ services:
     arguments: ['@entity_type.manager', '@og.access']
     tags:
       - { name: access_check, applies_to: _og_user_access_group }
+  access_check.og.membership.add:
+    class: Drupal\og\Access\OgMembershipAddAccessCheck
+    arguments: ['@entity_type.manager', '@og.access']
+    tags:
+      - { name: access_check, applies_to: _og_membership_add_access }
   cache_context.og_group_context:
     class: 'Drupal\og\Cache\Context\OgGroupContextCacheContext'
     arguments: ['@og.context']

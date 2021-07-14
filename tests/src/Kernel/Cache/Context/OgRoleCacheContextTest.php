@@ -36,6 +36,7 @@ class OgRoleCacheContextTest extends KernelTestBase {
     'entity_test',
     'node',
     'og',
+    'options',
     'system',
     'user',
     'field',

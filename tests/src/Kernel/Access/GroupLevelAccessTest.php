@@ -31,6 +31,7 @@ class GroupLevelAccessTest extends KernelTestBase {
     'field',
     'og',
     'entity_test',
+    'options',
   ];
 
   /**

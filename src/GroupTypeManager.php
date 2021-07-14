@@ -186,6 +186,10 @@ class GroupTypeManager implements GroupTypeManagerInterface {
    * {@inheritdoc}
    */
   public function isGroupContent($entity_type_id, $bundle) {
+    // To avoid insanity, a group membership cannot be a group or group content.
+    if ($entity_type_id === 'og_membership') {
+      return FALSE;
+    }
     return $this->groupAudienceHelper->hasGroupAudienceField($entity_type_id, $bundle);
   }
 
@@ -260,6 +264,10 @@ class GroupTypeManager implements GroupTypeManagerInterface {
    * {@inheritdoc}
    */
   public function addGroup($entity_type_id, $bundle_id) {
+    // To avoid insanity, a group membership cannot be a group or group content.
+    if ($entity_type_id === 'og_membership') {
+      throw new \InvalidArgumentException("The '$entity_type_id' type cannot be a group.");
+    }
     // Throw an error if the entity type is already defined as a group.
     if ($this->isGroup($entity_type_id, $bundle_id)) {
       throw new \InvalidArgumentException("The '$entity_type_id' of type '$bundle_id' is already a group.");
@@ -364,6 +372,10 @@ class GroupTypeManager implements GroupTypeManagerInterface {
    */
   protected function refreshGroupMap() {
     $group_map = $this->configFactory->get(static::SETTINGS_CONFIG_KEY)->get(static::GROUPS_CONFIG_KEY);
+    // To avoid insanity, a group membership cannot be a group or group content.
+    if (is_array($group_map)) {
+      unset($group_map['og_membership']);
+    }
     $this->groupMap = !empty($group_map) ? $group_map : [];
   }
 

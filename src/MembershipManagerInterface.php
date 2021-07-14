@@ -131,6 +131,19 @@ interface MembershipManagerInterface {
   public function getMembership(EntityInterface $group, $user_id, array $states = [OgMembershipInterface::STATE_ACTIVE]);
 
   /**
+   * Returns the number of group memberships for a given group.
+   *
+   * @param \Drupal\Core\Entity\EntityInterface $group
+   *   The group to get the membership for.
+   * @param array $states
+   *   (optional) Array with the state to return. Defaults to active.
+   *
+   * @return int
+   *   The number of memberships for the group.
+   */
+  public function getGroupMembershipCount(EntityInterface $group, array $states = [OgMembershipInterface::STATE_ACTIVE]);
+
+  /**
    * Returns the membership IDs of the given group filtered by role names.
    *
    * @param \Drupal\Core\Entity\EntityInterface $group
