@@ -206,7 +206,7 @@ class OgAdminRoutesControllerTest extends UnitTestCase {
    * Return the render array from calling the "overview" method.
    *
    * @param bool $allow_access
-   *   Indicate of access to the routes should be given.
+   *   Indicate if access to the routes should be given.
    *
    * @return array
    *   The render array.
