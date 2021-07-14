@@ -39,6 +39,9 @@ og.settings:
       sequence:
         type: string
         label: 'OgGroupResolver plugin ID.'
+    auto_add_group_owner_membership:
+      type: boolean
+      label: 'Automatically add creators to the group'
 
 og.settings.group.*:
   type: sequence
