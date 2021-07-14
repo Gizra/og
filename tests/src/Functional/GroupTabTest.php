@@ -4,6 +4,7 @@ declare(strict_types = 1);
 
 namespace Drupal\Tests\og\Functional;
 
+use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Url;
 use Drupal\entity_test\Entity\EntityTest;
 use Drupal\og\Entity\OgRole;
@@ -215,18 +216,7 @@ class GroupTabTest extends BrowserTestBase {
         [$group, $membership] = $data;
         /** @var \Drupal\og\OgMembershipInterface $membership */
         $exiting_member = $membership->getOwner();
-        $entity_type_id = $group->getEntityTypeId();
-        $add_form_parameters = [
-          'group' => $group->id(),
-          'entity_type_id' => $entity_type_id,
-          'og_membership_type' => OgMembershipInterface::TYPE_DEFAULT,
-        ];
-        $this->drupalGet(Url::fromRoute('entity.og_membership.add_form', $add_form_parameters));
-        $this->assertSession()->statusCodeEquals(200);
-        $page = $this->getSession()->getPage();
-        $input = $page->findField('edit-uid-0-target-id');
-        $path = $input->getAttribute('data-autocomplete-path');
-        $this->assertNotEmpty($path);
+        $this->drupalGet($this->groupMemberAddFormUrl($group));
         $value = $exiting_member->getDisplayName() . ' (' . $exiting_member->id() . ')';
         $this->submitForm(['Username' => $value], 'Save');
         $this->assertSession()->pageTextMatches('/The user .+ is already a member in this group/');
@@ -237,24 +227,13 @@ class GroupTabTest extends BrowserTestBase {
         $query->condition('name', $match, 'CONTAINS');
         $found = $query->execute();
         $this->assertCount(3, $found, print_r($found, TRUE));
-        // Directly test autocomplete endpoint.
-        $this->drupalGet($path, ['query' => ['q' => $match]]);
-        $header = $this->getSession()->getResponseHeader('content-type');
-        $this->assertSame('application/json', $header);
-        $out = $this->getSession()->getPage()->getContent();
-        $data = json_decode($out, TRUE);
         // Two of the three possible matches are already members.
-        $this->assertCount(1, $data, $out);
+        $this->assertAutoCompleteMatches($group, $match, 1);
         // Verify that we can add a new user after matching.
         $new_user = $this->createUser([], $random_name . $loop++);
-        $this->drupalGet($path, ['query' => ['q' => $new_user->getDisplayName()]]);
-        $header = $this->getSession()->getResponseHeader('content-type');
-        $this->assertSame('application/json', $header);
-        $out = $this->getSession()->getPage()->getContent();
-        $data = json_decode($out, TRUE);
-        $this->assertCount(1, $data, $out);
-        $this->drupalGet(Url::fromRoute('entity.og_membership.add_form', $add_form_parameters));
-        $this->submitForm(['Username' => $data[0]['value']], 'Save');
+        $json_data = $this->assertAutoCompleteMatches($group, $new_user->getDisplayName(), 1);
+        $this->drupalGet($this->groupMemberAddFormUrl($group));
+        $this->submitForm(['Username' => $json_data[0]['value']], 'Save');
         $this->assertSession()->pageTextMatches('/Added .+ to .+/');
         $this->assertTrue($membership_manager->isMember($group, $new_user->id()));
         $new_membership = $membership_manager->getMembership($group, $new_user->id());
@@ -286,6 +265,110 @@ class GroupTabTest extends BrowserTestBase {
       [$this->groupAdminUser],
       [$this->user1],
     ];
+  }
+
+  /**
+   * Test adding a group-blocked user and a site-wide blocked user.
+   */
+  function testBlockedUserAdd() {
+    $this->drupalLogin($this->groupAdminUser);
+    $blocked_user = $this->drupalCreateUser([], 'bbblocked', FALSE, ['status' => 0]);
+    /** @var \Drupal\og\MembershipManager $membership_manager */
+    $membership_manager = $this->container->get('og.membership_manager');
+    $group_data = [
+      [$this->groupNode, $this->anotherNodeMembership],
+      [$this->groupTestEntity, $this->anotherTestEntityMembership],
+    ];
+
+    foreach ($group_data as $data) {
+      [$group, $membership] = $data;
+      /** @var \Drupal\og\OgMembershipInterface $membership */
+      $exiting_member = $membership->getOwner();
+      $membership->setState(OgMembershipInterface::STATE_BLOCKED);
+      $membership->save();
+      // Directly test autocomplete endpoint.
+      $this->assertAutoCompleteMatches($group, $exiting_member->getDisplayName(), 0);
+      $this->drupalGet($this->groupMemberAddFormUrl($group));
+      $value = $exiting_member->getDisplayName() . ' (' . $exiting_member->id() . ')';
+      $this->submitForm(['Username' => $value], 'Save');
+      $this->assertSession()->pageTextMatches('/The user .+ is already a member in this group/');
+      $this->drupalGet($this->groupMemberAddFormUrl($group));
+      // API validate too.
+      $new_membership = $membership_manager->createMembership($group, $exiting_member);
+      $errors = $new_membership->validate();
+      $this->assertTrue(count($errors) > 0);
+      // Directly test autocomplete endpoint.
+      $this->assertAutoCompleteMatches($group, 'bbbl', 0);
+      $this->drupalGet($this->groupMemberAddFormUrl($group));
+      $value = $blocked_user->getDisplayName() . ' (' . $blocked_user->id() . ')';
+      $this->submitForm(['Username' => $value], 'Save');
+      $this->assertSession()->pageTextMatches('/This entity .+ cannot be referenced/');
+      $this->assertFalse($membership_manager->isMember($group, $blocked_user->id(), []));
+      // API validate too.
+      $new_membership = $membership_manager->createMembership($group, $blocked_user);
+      $errors = $new_membership->validate();
+      $this->assertTrue(count($errors) > 0);
+    }
+
+    // A user with 'administer users' permission can add blocked users as group
+    // members.
+    $perms = ['administer users', 'administer organic groups'];
+    $admin_user = $this->drupalCreateUser($perms, 'super');
+    $this->drupalLogin($admin_user);
+    foreach ($group_data as $data) {
+      $group = $data[0];
+      // Blocked user is now found in autocomplete.
+      $json_data = $this->assertAutoCompleteMatches($group, 'bbbl', 1);
+      $this->drupalGet($this->groupMemberAddFormUrl($group));
+      $this->submitForm(['Username' => $json_data[0]['value']], 'Save');
+      $this->assertTrue($membership_manager->isMember($group, $blocked_user->id()));
+    }
+  }
+
+  /**
+   * Get the Url for the member add for for a group.
+   *
+   * @param \Drupal\Core\Entity\EntityInterface $group
+   *   The group.
+   *
+   * @return \Drupal\Core\Url
+   *   The Url object.
+   */
+  protected function groupMemberAddFormUrl(EntityInterface $group): Url {
+    $entity_type_id = $group->getEntityTypeId();
+    $add_form_parameters = [
+      'group' => $group->id(),
+      'entity_type_id' => $entity_type_id,
+      'og_membership_type' => OgMembershipInterface::TYPE_DEFAULT,
+    ];
+    return Url::fromRoute('entity.og_membership.add_form', $add_form_parameters);
+  }
+
+  /**
+   * Assert an expected number of matches looking to add a user to a group.
+   *
+   * @param \Drupal\Core\Entity\EntityInterface $group
+   *   The group.
+   * @param string $match
+   *   The search string.
+   * @param int $expected_count
+   *   The expected count of matches.
+   *
+   * @return array
+   *   The data decoded from JSON.
+   */
+  protected function assertAutoCompleteMatches(EntityInterface $group, string $match, int $expected_count): array {
+    $this->drupalGet($this->groupMemberAddFormUrl($group));
+    $page = $this->getSession()->getPage();
+    $input = $page->findField('edit-uid-0-target-id');
+    $path = $input->getAttribute('data-autocomplete-path');
+    $this->drupalGet($path, ['query' => ['q' => $match]]);
+    $header = $this->getSession()->getResponseHeader('content-type');
+    $this->assertSame('application/json', $header);
+    $out = $this->getSession()->getPage()->getContent();
+    $data = json_decode($out, TRUE);
+    $this->assertCount($expected_count, $data, $out);
+    return $data;
   }
 
   /**

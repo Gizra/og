@@ -307,7 +307,7 @@ class GroupSubscribeTest extends BrowserTestBase {
       $this->drupalGet($path);
       $this->assertSession()->statusCodeEquals($scenario['code']);
 
-      if ($scenario['code'] != 200) {
+      if ($scenario['code'] !== 200) {
         continue;
       }
 
