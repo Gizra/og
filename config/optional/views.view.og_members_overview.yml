@@ -5,6 +5,8 @@ dependencies:
     - og
     - options
     - user
+_core:
+  default_config_hash: RnChWtrF4u0Q13iQMFypL0Uz6IsB4NY6ZTk_LorSbJg
 id: og_members_overview
 label: 'Members overview'
 module: views
