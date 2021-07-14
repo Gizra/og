@@ -193,7 +193,7 @@ class MembershipManager implements MembershipManagerInterface {
 
     $query->count();
 
-    return $query->execute();
+    return (int) $query->execute();
   }
 
   /**

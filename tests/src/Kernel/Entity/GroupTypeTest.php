@@ -62,7 +62,7 @@ class GroupTypeTest extends KernelTestBase {
     // The membership entity should not be a group despite being in config.
     $this->assertFalse($this->groupTypeManager->isGroup('og_membership', 'default'));
 
-   // Verify that the config still contains og_membership.
+    // Verify that the config still contains og_membership.
     $editable = $this->config('og.settings');
     $groups = $editable->get('groups');
     $this->assertFalse(empty($groups['og_membership']));

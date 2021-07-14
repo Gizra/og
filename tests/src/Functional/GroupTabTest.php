@@ -270,7 +270,7 @@ class GroupTabTest extends BrowserTestBase {
   /**
    * Test adding a group-blocked user and a site-wide blocked user.
    */
-  function testBlockedUserAdd() {
+  public function testBlockedUserAdd() {
     $this->drupalLogin($this->groupAdminUser);
     $blocked_user = $this->drupalCreateUser([], 'bbblocked', FALSE, ['status' => 0]);
     /** @var \Drupal\og\MembershipManager $membership_manager */
