@@ -1,2 +1,8 @@
 og.og_admin_routes:
   deriver: \Drupal\og\Plugin\Derivative\OgLocalTask
+
+og.user_memberships:
+  title: 'My groups'
+  route_name: og.user_memberships
+  base_route: entity.user.canonical
+  weight: 5
