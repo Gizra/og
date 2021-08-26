@@ -109,7 +109,7 @@ entity.og_membership.delete_form:
   requirements:
     _entity_access: 'og_membership.delete'
 
-# OG Membership type entity routes
+# OG Membership type entity routes.
 entity.og_membership_type.collection:
   path: '/admin/structure/membership-types'
   defaults:
