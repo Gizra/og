@@ -29,7 +29,6 @@ class OgAutocompleteController extends ControllerBase {
    */
   protected $matcher;
 
-
   /**
    * The private key service.
    *
