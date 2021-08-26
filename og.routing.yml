@@ -54,7 +54,7 @@ og.entity_autocomplete:
       group:
         type: entity:{entity_type_id}
 
-# OG Membership entity routes
+# OG Membership entity routes.
 entity.og_membership.add_form:
   path: 'group/{entity_type_id}/{group}/admin/members/add/{og_membership_type}'
   defaults:
