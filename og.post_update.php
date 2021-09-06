@@ -15,11 +15,21 @@ use Drupal\og\OgMembershipInterface;
 function og_post_update_og_membership_state_field(&$sandbox) {
   // The 'state' base field of the 'og_membership' entity was changed from a
   // 'string' field to a 'list_string' type field. This implementation of
-  // hook_post_update_NAME() follows the guidance layed out in:
-  // https://www.drupal.org/docs/drupal-apis/update-api/updating-entities-and-fields-in-drupal-8#s-updating-a-base-field-type
+  // hook_post_update_NAME() follows the guidance in docs, linked below,
   // to update the field's storage and resolve the entity field definition
   // mismatch which would otherwise be reported in the drupal Status Report
   // page.
+  // @see https://www.drupal.org/docs/drupal-apis/update-api/updating-entities-and-fields-in-drupal-8#s-updating-a-base-field-type
+  /** @var \Drupal\Core\Entity\EntityDefinitionUpdateManagerInterface $definition_manager */
+  $definition_manager = \Drupal::service('entity.definition_update_manager');
+  if (!$definition_manager->needsUpdates()) {
+    // No updates necessary.
+    return t('No entity updates to run');
+  }
+  $change_list = $definition_manager->getChangeList();
+  if (empty($change_list['og_membership']['field_storage_definitions']['state'])) {
+    return t('No entity updates to run');
+  }
   $entity_type_manager = \Drupal::service('entity_type.manager');
   $bundle_of = 'og_membership';
 
@@ -31,7 +41,6 @@ function og_post_update_og_membership_state_field(&$sandbox) {
   // If there is no data table defined then use the base table.
   $table_name = $storage->getDataTable() ?: $storage->getBaseTable();
   $database = \Drupal::database();
-  $definition_manager = \Drupal::service('entity.definition_update_manager');
 
   // Store the existing values in a variable.
   $state_values = $database->select($table_name)
