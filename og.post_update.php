@@ -24,11 +24,11 @@ function og_post_update_og_membership_state_field(&$sandbox) {
   $definition_manager = \Drupal::service('entity.definition_update_manager');
   if (!$definition_manager->needsUpdates()) {
     // No updates necessary.
-    return t('No entity updates to run');
+    return t('No entity updates to run.');
   }
   $change_list = $definition_manager->getChangeList();
   if (empty($change_list['og_membership']['field_storage_definitions']['state'])) {
-    return t('No entity updates to run');
+    return t('State field on OG Membership entity is already up to date.');
   }
   $entity_type_manager = \Drupal::service('entity_type.manager');
   $bundle_of = 'og_membership';
@@ -87,4 +87,5 @@ function og_post_update_og_membership_state_field(&$sandbox) {
       ->condition($entity_id_key, $id)
       ->execute();
   }
+  return t('State field on OG Membership entity was updated.');
 }
