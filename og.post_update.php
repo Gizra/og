@@ -80,7 +80,7 @@ function og_post_update_og_membership_state_field(&$sandbox) {
   // Install the new definition.
   $definition_manager->installFieldStorageDefinition($field_key, $bundle_of, $bundle_of, $new_state_field);
 
-  // Restore the values back.
+  // Restore the values.
   foreach ($state_values as $id => $value) {
     $database->update($table_name)
       ->fields([$field_key => $value])
