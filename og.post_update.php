@@ -5,6 +5,8 @@
  * Post-update functions for the Organic groups module.
  */
 
+declare(strict_types = 1);
+
 use Drupal\Core\Field\BaseFieldDefinition;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\og\OgMembershipInterface;
