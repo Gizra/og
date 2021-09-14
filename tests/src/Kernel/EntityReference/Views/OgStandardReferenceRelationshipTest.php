@@ -45,6 +45,7 @@ class OgStandardReferenceRelationshipTest extends ViewsKernelTestBase {
     'views',
     'og_standard_reference_test_views',
     'og',
+    'options',
   ];
 
   /**
