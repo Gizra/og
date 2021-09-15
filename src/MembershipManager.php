@@ -181,6 +181,24 @@ class MembershipManager implements MembershipManagerInterface {
   /**
    * {@inheritdoc}
    */
+  public function getGroupMembershipCount(EntityInterface $group, array $states = [OgMembershipInterface::STATE_ACTIVE]) {
+    $query = $this->entityTypeManager
+      ->getStorage('og_membership')
+      ->getQuery()
+      ->condition('entity_id', $group->id());
+
+    if ($states) {
+      $query->condition('state', $states, 'IN');
+    }
+
+    $query->count();
+
+    return (int) $query->execute();
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   public function getGroupMembershipIdsByRoleNames(EntityInterface $group, array $role_names, array $states = [OgMembershipInterface::STATE_ACTIVE]) {
     if (empty($role_names)) {
       throw new \InvalidArgumentException('The array of role names should not be empty.');
@@ -304,9 +322,9 @@ class MembershipManager implements MembershipManagerInterface {
       }
 
       // Compile a list of group target IDs.
-      $target_ids = array_map(function ($value) {
-        return $value['target_id'];
-      }, $entity->get($field->getName())->getValue());
+      $target_ids = array_filter(array_map(function ($value) {
+        return $value['target_id'] ?? NULL;
+      }, $entity->get($field->getName())->getValue()));
 
       if (empty($target_ids)) {
         continue;

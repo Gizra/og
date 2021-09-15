@@ -10,6 +10,20 @@
         "slack": "https://drupal.slack.com/messages/CELR48EA0",
         "source": "https://git.drupalcode.org/project/og"
     },
+    "authors": [
+        {
+            "name": "amitaibu",
+            "homepage": "https://www.drupal.org/u/amitaibu"
+        },
+        {
+            "name": "mpp",
+            "homepage": "https://www.drupal.org/u/mpp"
+        },
+        {
+            "name": "pfrenssen",
+            "homepage": "https://www.drupal.org/u/pfrenssen"
+        }
+    ],
     "require": {
         "php": "^7.2",
         "drupal/core": "^8.8 || ^9.0"
