@@ -36,6 +36,7 @@ class SelectionHandlerTest extends KernelTestBase {
     'entity_reference',
     'node',
     'og',
+    'options',
   ];
 
   /**
