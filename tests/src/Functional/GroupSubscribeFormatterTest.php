@@ -21,7 +21,7 @@ class GroupSubscribeFormatterTest extends BrowserTestBase {
   /**
    * {@inheritdoc}
    */
-  public static $modules = ['node', 'og'];
+  public static $modules = ['node', 'og', 'options'];
 
   /**
    * {@inheritdoc}
@@ -78,7 +78,6 @@ class GroupSubscribeFormatterTest extends BrowserTestBase {
     // Create node author user.
     $user = $this->createUser();
 
-    // Create groups.
     $this->group = Node::create([
       'type' => $this->groupBundle,
       'title' => $this->randomString(),
@@ -100,20 +99,29 @@ class GroupSubscribeFormatterTest extends BrowserTestBase {
    * Tests the formatter changes by user and membership.
    */
   public function testFormatter() {
+    $this->drupalGet($this->group->toUrl());
+    $this->clickLink('Subscribe to group');
+    $this->assertSession()->addressEquals('user/login');
+
     $this->drupalLogin($this->user1);
 
     // Subscribe to group.
-    $this->drupalGet('node/' . $this->group->id());
+    $this->drupalGet($this->group->toUrl());
     $this->clickLink('Subscribe to group');
     $this->click('#edit-submit');
 
-    $this->drupalGet('node/' . $this->group->id());
+    $this->drupalGet($this->group->toUrl());
     $this->assertSession()->linkExists('Unsubscribe from group');
 
     // Validate another user sees the correct formatter link.
     $this->drupalLogin($this->user2);
-    $this->drupalGet('node/' . $this->group->id());
-    $this->clickLink('Subscribe to group');
+    $this->drupalGet($this->group->toUrl());
+    $this->assertSession()->linkExists('Subscribe to group');
+
+    // Anonymous user should still see original text.
+    $this->drupalLogout();
+    $this->drupalGet($this->group->toUrl());
+    $this->assertSession()->linkExists('Subscribe to group');
   }
 
 }
