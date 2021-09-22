@@ -59,7 +59,7 @@ class og_context_plugin_access_og_perm extends views_plugin_access {
         '#title' => t('Argument position for group ID'),
         '#default_value' => $this->options['group_id_arg'],
         '#options' => array(NULL => t('None')) + range(0, 9),
-        '#description' => t('Group ID argument position with arg() function. e.g. if your dynamic path is "node/%/group/%/overview" and you are using the second "%" for group IDs you have to choose "3" like "arg(3)".'),
+        '#description' => t('The position of the Group ID argument in the view\'s path. The position is 0-based. E.g. if your dynamic path is "node/%/group/%/overview" and you are using the second "%" for group IDs, you have to choose "3".'),
       );
     }
   }
@@ -98,6 +98,16 @@ class og_context_plugin_access_og_perm extends views_plugin_access {
    * Determine the access callback and arguments.
    */
   function get_access_callback() {
-    return array('_og_context_views_page_access', array($this->options['group_type'], $this->options['perm'], $this->options['group_id_arg']));
+    $current_display = $this->view->current_display;
+    if ($this->view->display[$current_display]->handler->has_path()) {
+      // The arg number needs to be int. That way it will be replaced with the
+      // group id in the path before _og_context_views_page_access is called.
+      $group_id_arg = (int)$this->options['group_id_arg'];
+    }
+    else {
+      $group_id_arg = FALSE;
+    }
+
+    return array('_og_context_views_page_access', array($this->options['group_type'], $this->options['perm'], $group_id_arg));
   }
 }
