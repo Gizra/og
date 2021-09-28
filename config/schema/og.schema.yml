@@ -154,3 +154,7 @@ block.settings.og_member_count:
     count_pending_users:
       type: boolean
       label: 'Count pending users'
+
+field.widget.settings.og_autocomplete:
+  type: field.widget.settings.entity_reference_autocomplete
+  label: 'OG context based entity reference autocomplete with display format settings'

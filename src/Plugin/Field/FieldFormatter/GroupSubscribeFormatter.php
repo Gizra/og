@@ -4,6 +4,7 @@ declare(strict_types = 1);
 
 namespace Drupal\og\Plugin\Field\FieldFormatter;
 
+use Drupal\Core\Cache\CacheableMetadata;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Field\FieldDefinitionInterface;
 use Drupal\Core\Field\FieldItemListInterface;
@@ -12,7 +13,6 @@ use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
 use Drupal\Core\Routing\RedirectDestinationTrait;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\Core\Url;
-use Drupal\og\Og;
 use Drupal\og\OgAccessInterface;
 use Drupal\og\OgMembershipInterface;
 use Drupal\user\EntityOwnerInterface;
@@ -87,7 +87,7 @@ class GroupSubscribeFormatter extends FormatterBase implements ContainerFactoryP
 
     $this->currentUser = $current_user;
     $this->ogAccess = $og_access;
-    $this->entityTypeManager = $entity_type_manager->getStorage('user');
+    $this->entityTypeManager = $entity_type_manager;
   }
 
   /**
@@ -114,14 +114,19 @@ class GroupSubscribeFormatter extends FormatterBase implements ContainerFactoryP
   public function viewElements(FieldItemListInterface $items, $langcode) {
     $elements = [];
 
-    // Cache by the OG membership state.
-    $elements['#cache']['contexts'] = ['og_membership_state'];
+    // Cache by the OG membership state. Anonymous users are handled below.
+    $elements['#cache']['contexts'] = [
+      'og_membership_state',
+      'user.roles:authenticated',
+    ];
+    $cache_meta = CacheableMetadata::createFromRenderArray($elements);
 
     $group = $items->getEntity();
     $entity_type_id = $group->getEntityTypeId();
+    $cache_meta->merge(CacheableMetadata::createFromObject($group));
+    $cache_meta->applyTo($elements);
 
-    // $user = User::load($this->currentUser->id());
-    $user = $this->entityTypeManager->load(($this->currentUser->id()));
+    $user = $this->entityTypeManager->getStorage('user')->load(($this->currentUser->id()));
     if (($group instanceof EntityOwnerInterface) && ($group->getOwnerId() == $user->id())) {
       // User is the group manager.
       $elements[0] = [
@@ -137,16 +142,26 @@ class GroupSubscribeFormatter extends FormatterBase implements ContainerFactoryP
       return $elements;
     }
 
-    if (Og::isMemberBlocked($group, $user)) {
-      // If user is blocked, they should not be able to apply for
-      // membership.
-      return $elements;
-    }
+    $storage = $this->entityTypeManager->getStorage('og_membership');
+    $props = [
+      'uid' => $user ? $user->id() : 0,
+      'entity_type' => $group->getEntityTypeId(),
+      'entity_bundle' => $group->bundle(),
+      'entity_id' => $group->id(),
+    ];
+    $memberships = $storage->loadByProperties($props);
+    /** @var \Drupal\og\OgMembershipInterface $membership */
+    $membership = reset($memberships);
 
-    if (Og::isMember($group, $user, [
-      OgMembershipInterface::STATE_ACTIVE,
-      OgMembershipInterface::STATE_PENDING,
-    ])) {
+    if ($membership) {
+      $cache_meta->merge(CacheableMetadata::createFromObject($membership));
+      $cache_meta->applyTo($elements);
+      if ($membership->isBlocked()) {
+        // If user is blocked, they should not be able to apply for
+        // membership.
+        return $elements;
+      }
+      // Member is pending or active.
       $link['title'] = $this->t('Unsubscribe from group');
       $link['url'] = Url::fromRoute('og.unsubscribe', [
         'entity_type_id' => $entity_type_id,
@@ -160,14 +175,17 @@ class GroupSubscribeFormatter extends FormatterBase implements ContainerFactoryP
         $parameters = [
           'entity_type_id' => $group->getEntityTypeId(),
           'group' => $group->id(),
+          'og_membership_type' => OgMembershipInterface::TYPE_DEFAULT,
         ];
 
         $url = Url::fromRoute('og.subscribe', $parameters);
       }
       else {
+        $cache_meta->setCacheContexts(['user.roles:anonymous']);
         // User is anonymous, link to user login and redirect back to here.
         $url = Url::fromRoute('user.login', [], ['query' => $this->getDestinationArray()]);
       }
+      $cache_meta->applyTo($elements);
 
       /** @var \Drupal\Core\Access\AccessResult $access */
       if (($access = $this->ogAccess->userAccess($group, 'subscribe without approval', $user)) && $access->isAllowed()) {

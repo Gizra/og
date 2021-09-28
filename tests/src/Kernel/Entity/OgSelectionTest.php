@@ -39,6 +39,7 @@ class OgSelectionTest extends KernelTestBase {
     'entity_reference',
     'node',
     'og',
+    'options',
   ];
 
   /**
