@@ -27,6 +27,7 @@ class OgSelectionConfigurationFormTest extends KernelTestBase {
     'field_ui',
     'entity_test',
     'og',
+    'options',
     'system',
     'user',
   ];
