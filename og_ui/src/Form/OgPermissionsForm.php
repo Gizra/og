@@ -316,7 +316,6 @@ class OgPermissionsForm extends FormBase {
    * {@inheritdoc}
    */
   public function submitForm(array &$form, FormStateInterface $form_state) {
-
     /** @var \Drupal\og\Entity\OgRole $roles */
     foreach ($this->roles as $rid => $role) {
       if (!$form_state->hasValue($rid)) {
