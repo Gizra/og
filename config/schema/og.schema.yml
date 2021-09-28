@@ -100,6 +100,10 @@ og.og_role.*:
       type: string
       label: 'Role type'
 
+field.widget.settings.og_complex:
+  type: field.widget.settings.entity_reference_autocomplete
+  label: 'OG Group Audience field widget'
+
 views.field.og_membership_bulk_form:
   type: views_field_bulk_form
   label: 'OG Membership bulk form'

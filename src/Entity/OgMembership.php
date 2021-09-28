@@ -543,8 +543,6 @@ class OgMembership extends ContentEntityBase implements OgMembershipInterface {
       }
     }
 
-    $uid = $this->get('uid')->target_id;
-
     // Check for an existing membership.
     $query = \Drupal::entityQuery('og_membership');
     $query

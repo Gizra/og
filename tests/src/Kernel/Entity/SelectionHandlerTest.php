@@ -8,10 +8,7 @@ use Drupal\Core\Session\AccountInterface;
 use Drupal\node\Entity\Node;
 use Drupal\node\Entity\NodeType;
 use Drupal\KernelTests\KernelTestBase;
-use Drupal\og\Entity\OgRole;
 use Drupal\og\Og;
-use Drupal\og\OgRoleInterface;
-use Drupal\user\Entity\Role;
 use Drupal\og\OgGroupAudienceHelperInterface;
 use Drupal\user\Entity\User;
 
@@ -20,7 +17,7 @@ use Drupal\user\Entity\User;
  *
  * @group og
  */
-class OgSelectionTest extends KernelTestBase {
+class SelectionHandlerTest extends KernelTestBase {
 
   /**
    * The selection handler.
@@ -43,25 +40,18 @@ class OgSelectionTest extends KernelTestBase {
   ];
 
   /**
-   * A site-wide group administrator.
+   * A user object.
    *
    * @var \Drupal\user\Entity\User
    */
-  protected $groupAdmin;
+  protected $user1;
 
   /**
-   * A group manager.
+   * A user object.
    *
    * @var \Drupal\user\Entity\User
    */
-  protected $groupManager;
-
-  /**
-   * A regular group member.
-   *
-   * @var \Drupal\user\Entity\User
-   */
-  protected $groupMember;
+  protected $user2;
 
   /**
    * The machine name of the group node type.
@@ -121,13 +111,12 @@ class OgSelectionTest extends KernelTestBase {
       'name' => $this->randomString(),
     ])->save();
 
-    // Define bundle as group.
+    // Define the group content as group.
     Og::groupTypeManager()->addGroup('node', $this->groupBundle);
 
     // Add og audience field to group content.
     $this->fieldDefinition = Og::createField(OgGroupAudienceHelperInterface::DEFAULT_FIELD, 'node', $this->groupContentBundle);
 
-    // The selection handler for the field.
     // Get the storage of the field.
     $options = [
       'target_type' => $this->fieldDefinition->getFieldStorageDefinition()->getSetting('target_type'),
@@ -137,32 +126,12 @@ class OgSelectionTest extends KernelTestBase {
     $this->selectionPluginManager->getInstance($options);
     $this->selectionHandler = $this->selectionPluginManager->getSelectionHandler($this->fieldDefinition);
 
-    // @todo Remove deprecated call to Og::getSelectionHandler.
-    $this->selectionHandler = Og::getSelectionHandler($this->fieldDefinition);
+    // Create two users.
+    $this->user1 = User::create(['name' => $this->randomString()]);
+    $this->user1->save();
 
-    // Create users.
-    $this->groupAdmin = User::create(['name' => $this->randomString()]);
-    $this->groupAdmin->save();
-
-    $this->groupManager = User::create(['name' => $this->randomString()]);
-    $this->groupManager->save();
-
-    $this->groupMember = User::create(['name' => $this->randomString()]);
-    $this->groupMember->save();
-
-    // Assign administer-group permission to admin.
-    $role = Role::create([
-      'id' => $this->randomMachineName(),
-      'label' => $this->randomMachineName(),
-    ]);
-
-    $role
-      ->grantPermission('administer organic groups')
-      ->save();
-
-    $this
-      ->groupAdmin
-      ->addRole($role->id());
+    $this->user2 = User::create(['name' => $this->randomString()]);
+    $this->user2->save();
   }
 
   /**
@@ -186,45 +155,32 @@ class OgSelectionTest extends KernelTestBase {
    * versa.
    */
   public function testSelectionHandlerResults() {
-    $user1_groups = $this->createGroups(5, $this->groupAdmin);
-    $user2_groups = $this->createGroups(5, $this->groupManager);
+    $user1_groups = $this->createGroups(2, $this->user1);
+    $user2_groups = $this->createGroups(2, $this->user2);
 
-    $all_groups_ids = array_merge($user1_groups, $user2_groups);
-
-    // Admin user can create content on all groups.
-    $this->setCurrentAccount($this->groupAdmin);
+    // Check that users get the groups they manage.
+    $this->setCurrentAccount($this->user1);
     $groups = $this->selectionHandler->getReferenceableEntities();
-    $this->assertEquals($all_groups_ids, array_keys($groups[$this->groupBundle]));
+    $this->assertEquals($user1_groups, array_keys($groups[$this->groupBundle]));
 
-    // Group manager can create content in their groups.
-    $this->setCurrentAccount($this->groupManager);
+    $this->setCurrentAccount($this->user2);
     $groups = $this->selectionHandler->getReferenceableEntities();
     $this->assertEquals($user2_groups, array_keys($groups[$this->groupBundle]));
 
-    // Non-group member.
-    $this->setCurrentAccount($this->groupMember);
+    // Check the other groups.
+    $options = [
+      'target_type' => $this->fieldDefinition->getFieldStorageDefinition()->getSetting('target_type'),
+      'handler' => $this->fieldDefinition->getSetting('handler'),
+      'field_mode' => 'admin',
+    ];
+    $this->selectionHandler = $this->selectionPluginManager->getInstance($options);
+
+    $this->setCurrentAccount($this->user1);
     $groups = $this->selectionHandler->getReferenceableEntities();
-    $this->assertTrue(empty($groups[$this->groupBundle]));
-
-    // Group member access to create content.
-    $group_id = $user1_groups[0];
-    $group = Node::load($group_id);
-    $membership = Og::createMembership($group, $this->groupMember);
-    $membership->save();
-
-    // Group member cannot create content in their groups when they don't have
-    // access to.
+    $this->assertEquals($user2_groups, array_keys($groups[$this->groupBundle]));
+    $this->setCurrentAccount($this->user2);
     $groups = $this->selectionHandler->getReferenceableEntities();
-    $this->assertTrue(empty($groups[$this->groupBundle]));
-
-    // Grant OG permission.
-    $og_role = OgRole::getRole('node', $this->groupBundle, OgRoleInterface::AUTHENTICATED);
-    $og_role
-      ->grantPermission("create {$this->groupContentBundle} content")
-      ->save();
-
-    $groups = $this->selectionHandler->getReferenceableEntities();
-    $this->assertEquals([$group_id], array_keys($groups[$this->groupBundle]));
+    $this->assertEquals($user1_groups, array_keys($groups[$this->groupBundle]));
   }
 
   /**
@@ -235,7 +191,7 @@ class OgSelectionTest extends KernelTestBase {
    * @param \Drupal\user\Entity\User $user
    *   The user object which owns the groups.
    *
-   * @return \Drupal\Core\Entity\ContentEntityBase[]
+   * @return ContentEntityBase[]
    *   An array of group entities.
    */
   protected function createGroups($amount, User $user) {

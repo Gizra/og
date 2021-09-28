@@ -60,9 +60,14 @@ class AudienceField extends OgFieldBase implements OgFieldsInterface {
    * {@inheritdoc}
    */
   public function getFormDisplayDefinition(array $values = []) {
-    // @todo Isn't it taken from the definition in OgStandardReferenceItem?
     $values += [
-      'type' => 'options_select',
+      'type' => 'og_complex',
+      'settings' => [
+        'match_operator' => 'CONTAINS',
+        'size' => 60,
+        'match_limit' => 10,
+        'placeholder' => '',
+      ],
     ];
 
     return $values;
