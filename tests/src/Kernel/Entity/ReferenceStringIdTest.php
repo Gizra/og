@@ -19,7 +19,14 @@ class ReferenceStringIdTest extends KernelTestBase {
   /**
    * {@inheritdoc}
    */
-  public static $modules = ['user', 'entity_test', 'field', 'og', 'system'];
+  public static $modules = [
+    'user',
+    'entity_test',
+    'field',
+    'og',
+    'options',
+    'system',
+  ];
 
   /**
    * Array of test bundles. The first is a group, the second group content.
