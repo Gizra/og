@@ -488,7 +488,7 @@ display:
           admin_label: 'No results text'
           empty: true
           tokenize: false
-          content: 'No members in the group yet.'
+          content: 'There are no members that belong to this group.'
           plugin_id: text_custom
       relationships:
         uid:
