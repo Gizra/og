@@ -66,7 +66,7 @@ function og_field_views_data(FieldStorageConfigInterface $field_storage) {
         ];
         // Render filters as select lists.
         foreach ($table_data as $table_field_name => $table_field_data) {
-          if (isset($table_field_data['filter']) && $table_field_name != 'delta') {
+          if (isset($table_field_data['filter']) && $table_field_name !== 'delta') {
             $data[$table_name][$table_field_name]['filter']['id'] = 'entity_reference';
           }
         }
