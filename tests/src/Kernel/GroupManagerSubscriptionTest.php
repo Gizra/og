@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types = 1);
+
 namespace Drupal\Tests\og\Kernel;
 
 use Drupal\KernelTests\KernelTestBase;
@@ -26,6 +28,7 @@ class GroupManagerSubscriptionTest extends KernelTestBase {
     'og_test',
     'system',
     'user',
+    'options',
   ];
 
   /**

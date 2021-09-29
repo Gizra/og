@@ -5,6 +5,8 @@
  * Enable users to create and manage groups with roles and permissions.
  */
 
+declare(strict_types = 1);
+
 use Drupal\Core\Access\AccessResult;
 use Drupal\Core\Cache\Cache;
 use Drupal\Core\Config\Entity\ConfigEntityBundleBase;
@@ -18,6 +20,7 @@ use Drupal\og\Entity\OgRole;
 use Drupal\og\Og;
 use Drupal\og\OgGroupAudienceHelperInterface;
 use Drupal\og\OgMembershipInterface;
+use Drupal\og\OgMembershipTypeInterface;
 use Drupal\og\OgRoleInterface;
 use Drupal\system\Entity\Action;
 use Drupal\user\EntityOwnerInterface;
@@ -120,7 +123,7 @@ function og_entity_delete(EntityInterface $entity) {
  */
 function og_entity_access(EntityInterface $entity, $operation, AccountInterface $account) {
   // Grant access to view roles, so that they can be shown in listings.
-  if ($entity instanceof OgRoleInterface && $operation == 'view') {
+  if ($entity instanceof OgRoleInterface && $operation === 'view') {
     return AccessResult::allowed();
   }
   // We only care about content entities that are groups or group content.
@@ -128,7 +131,7 @@ function og_entity_access(EntityInterface $entity, $operation, AccountInterface 
     return AccessResult::neutral();
   }
 
-  if ($operation == 'view') {
+  if ($operation === 'view') {
     return AccessResult::neutral();
   }
 
@@ -154,17 +157,34 @@ function og_entity_access(EntityInterface $entity, $operation, AccountInterface 
   }
 
   /** @var \Drupal\Core\Access\AccessResult $access */
-  $access = \Drupal::service('og.access')->userAccessEntity($operation, $entity, $account);
+  $access = \Drupal::service('og.access')->userAccessEntityOperation($operation, $entity, $account);
 
   if ($access->isAllowed()) {
     return $access;
   }
 
-  if ($entity_type_id == 'node') {
+  if ($entity_type_id === 'node') {
     $node_access_strict = \Drupal::config('og.settings')->get('node_access_strict');
 
     // Otherwise, ignore or deny based on whether strict node access is set.
     return AccessResult::forbiddenIf($node_access_strict);
+  }
+
+  return AccessResult::forbidden();
+}
+
+/**
+ * Implements hook_ENTITY_TYPE_access().
+ */
+function og_og_membership_type_access(OgMembershipTypeInterface $entity, $operation, AccountInterface $account) {
+  // Do not allow deleting the default membership type.
+  if ($operation === 'delete' && $entity->id() === OgMembershipInterface::TYPE_DEFAULT) {
+    return AccessResult::forbidden();
+  }
+
+  // If the user has permission to administer all groups, allow access.
+  if ($account->hasPermission('administer organic groups')) {
+    return AccessResult::allowed();
   }
 
   return AccessResult::forbidden();
@@ -188,7 +208,7 @@ function og_entity_create_access(AccountInterface $account, array $context, $bun
   }
 
   $node_access_strict = \Drupal::config('og.settings')->get('node_access_strict');
-  if ($entity_type_id == 'node' && !$node_access_strict && $account->hasPermission("create $bundle content")) {
+  if ($entity_type_id === 'node' && !$node_access_strict && $account->hasPermission("create $bundle content")) {
     // The user has the core permission and strict node access is not set.
     return AccessResult::neutral();
   }
@@ -383,8 +403,8 @@ function og_og_role_insert(OgRoleInterface $role) {
     return;
   }
 
-  // Do not create config while config import is in progress.
-  if (\Drupal::isConfigSyncing()) {
+  // Skip creation of action plugins while config import is in progress.
+  if ($role->isSyncing()) {
     return;
   }
 

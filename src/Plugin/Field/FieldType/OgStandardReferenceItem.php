@@ -1,11 +1,13 @@
 <?php
 
+declare(strict_types = 1);
+
 namespace Drupal\og\Plugin\Field\FieldType;
 
 use Drupal\Core\Field\Plugin\Field\FieldType\EntityReferenceItem;
 
 /**
- * Class OgStandardReferenceItem.
+ * Field item class for OG membership references.
  *
  * @FieldType(
  *   id = "og_standard_reference",

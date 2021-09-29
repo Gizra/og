@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types = 1);
+
 namespace Drupal\og\Plugin\Action;
 
 use Drupal\Core\Action\ConfigurableActionBase;
@@ -103,7 +105,7 @@ abstract class ChangeSingleOgMembershipRoleBase extends ConfigurableActionBase i
   /**
    * {@inheritdoc}
    */
-  public function access($object, AccountInterface $account = NULL, $return_as_object = FALSE) {
+  public function access($object, ?AccountInterface $account = NULL, $return_as_object = FALSE) {
     /** @var \Drupal\og\Entity\OgMembership $object */
     // Grant access if the user can manage members in this group.
     $access = $this->ogAccess->userAccess($object->getGroup(), 'manage members', $account);

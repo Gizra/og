@@ -1,13 +1,15 @@
 <?php
 
+declare(strict_types = 1);
+
 namespace Drupal\Tests\og_ui\Functional;
 
 use Drupal\Core\Form\FormState;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
+use Drupal\Tests\BrowserTestBase;
 use Drupal\node\Entity\NodeType;
 use Drupal\og\Og;
 use Drupal\og_ui\BundleFormAlter;
-use Drupal\Tests\BrowserTestBase;
 
 /**
  * Test making a bundle a group and a group content.
@@ -100,6 +102,15 @@ class BundleFormAlterTest extends BrowserTestBase {
     $this->drupalGet('admin/structure/types/manage/class');
     $this->submitForm($edit, new TranslatableMarkup('Save content type'));
     $this->assertTargetBundles(NULL, 'When the target bundle field is cleared from all values, it takes on the value NULL.');
+
+    // The altered fields should not appear on OG Membership types.
+    $some_admin = $this->drupalCreateUser([], 'some-admin', TRUE);
+    $this->drupalLogin($some_admin);
+    $this->drupalGet('admin/structure/membership-types/manage/default');
+    $this->assertSession()->statusCodeEquals(200);
+    $this->assertSession()->fieldExists('name');
+    $this->assertSession()->fieldNotExists('og_is_group');
+    $this->assertSession()->fieldNotExists('og_group_content_bundle');
   }
 
   /**

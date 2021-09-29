@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types = 1);
+
 namespace Drupal\og\Plugin\OgDeleteOrphans;
 
 use Drupal\Core\Form\FormStateInterface;
@@ -56,7 +58,10 @@ class Batch extends OgDeleteOrphansBase {
     $batch = [];
     $steps = \Drupal::queue('og_orphaned_group_content')->numberOfItems();
     for ($i = 0; $i < $steps; $i++) {
-      $batch['operations'][] = ['\Drupal\og\Plugin\OgDeleteOrphans\Batch::step', []];
+      $batch['operations'][] = [
+        '\Drupal\og\Plugin\OgDeleteOrphans\Batch::step',
+        [],
+      ];
     }
     batch_set($batch);
   }

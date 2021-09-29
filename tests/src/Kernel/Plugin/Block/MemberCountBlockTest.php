@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types = 1);
+
 namespace Drupal\Tests\og\Kernel\Plugin\Block;
 
 use Drupal\Core\Cache\Cache;
@@ -33,6 +35,7 @@ class MemberCountBlockTest extends KernelTestBase {
     'og',
     'system',
     'user',
+    'options',
   ];
 
   /**

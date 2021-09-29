@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types = 1);
+
 namespace Drupal\Tests\og\Unit;
 
 use Drupal\Core\Access\AccessResultInterface;
@@ -9,10 +11,10 @@ use Drupal\Core\Entity\EntityStorageInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Routing\RouteMatchInterface;
 use Drupal\Core\Session\AccountInterface;
+use Drupal\Tests\UnitTestCase;
 use Drupal\og\Access\GroupCheck;
 use Drupal\og\GroupTypeManagerInterface;
 use Drupal\og\OgAccessInterface;
-use Drupal\Tests\UnitTestCase;
 use Symfony\Component\Routing\Route;
 
 /**

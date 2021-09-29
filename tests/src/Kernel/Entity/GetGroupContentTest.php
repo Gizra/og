@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types = 1);
+
 namespace Drupal\Tests\og\Kernel\Entity;
 
 use Drupal\KernelTests\KernelTestBase;
@@ -26,6 +28,7 @@ class GetGroupContentTest extends KernelTestBase {
     'field',
     'node',
     'og',
+    'options',
     'system',
     'user',
   ];

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types = 1);
+
 namespace Drupal\Tests\og\Unit;
 
 use Drupal\Core\Cache\MemoryCache\MemoryCacheInterface;
@@ -8,10 +10,10 @@ use Drupal\Core\Entity\ContentEntityInterface;
 use Drupal\Core\Entity\EntityStorageInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Entity\EntityTypeRepositoryInterface;
+use Drupal\Tests\UnitTestCase;
 use Drupal\og\MembershipManager;
 use Drupal\og\OgGroupAudienceHelperInterface;
 use Drupal\og\OgMembershipInterface;
-use Drupal\Tests\UnitTestCase;
 use Drupal\user\UserInterface;
 use Prophecy\Argument;
 

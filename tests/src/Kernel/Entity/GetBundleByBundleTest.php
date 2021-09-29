@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types = 1);
+
 namespace Drupal\Tests\og\Kernel\Entity;
 
 use Drupal\KernelTests\KernelTestBase;
@@ -25,6 +27,7 @@ class GetBundleByBundleTest extends KernelTestBase {
     'field',
     'node',
     'og',
+    'options',
     'system',
     'user',
   ];
@@ -289,7 +292,10 @@ class GetBundleByBundleTest extends KernelTestBase {
           'node' => [
             'group_content_0' => [
               'node' => ['group_0' => 'group_0', 'group_1' => 'group_1'],
-              'block_content' => ['group_0' => 'group_0', 'group_1' => 'group_1'],
+              'block_content' => [
+                'group_0' => 'group_0',
+                'group_1' => 'group_1',
+              ],
             ],
           ],
         ],
@@ -509,7 +515,10 @@ class GetBundleByBundleTest extends KernelTestBase {
           'node' => [
             'group_content_0' => [
               'node' => ['group_0' => 'group_0'],
-              'block_content' => ['group_0' => 'group_0', 'group_1' => 'group_1'],
+              'block_content' => [
+                'group_0' => 'group_0',
+                'group_1' => 'group_1',
+              ],
             ],
             'group_content_1' => [
               'block_content' => ['group_1' => 'group_1'],
@@ -520,7 +529,10 @@ class GetBundleByBundleTest extends KernelTestBase {
               'node' => ['group_0' => 'group_0', 'group_1' => 'group_1'],
             ],
             'group_content_3' => [
-              'block_content' => ['group_0' => 'group_0', 'group_1' => 'group_1'],
+              'block_content' => [
+                'group_0' => 'group_0',
+                'group_1' => 'group_1',
+              ],
             ],
             'group_content_4' => [
               'node' => ['group_0' => 'group_0', 'group_1' => 'group_1'],

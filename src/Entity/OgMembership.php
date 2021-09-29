@@ -13,11 +13,11 @@ use Drupal\Core\Field\BaseFieldDefinition;
 use Drupal\Core\Field\FieldStorageDefinitionInterface;
 use Drupal\Core\Language\LanguageInterface;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
-use Drupal\user\UserInterface;
 use Drupal\og\Og;
 use Drupal\og\OgMembershipInterface;
 use Drupal\og\OgRoleInterface;
 use Drupal\user\EntityOwnerInterface;
+use Drupal\user\UserInterface;
 
 /**
  * The membership entity that connects a group and a user.
@@ -72,15 +72,37 @@ use Drupal\user\EntityOwnerInterface;
  *     "bundle" = "type",
  *   },
  *   handlers = {
+ *     "access" = "Drupal\og\OgMembershipAccessControlHandler",
  *     "views_data" = "Drupal\og\OgMembershipViewsData",
+ *     "list_builder" = "Drupal\Core\Entity\EntityListBuilder",
+ *     "view_builder" = "Drupal\Core\Entity\EntityViewBuilder",
  *     "form" = {
  *       "subscribe" = "Drupal\og\Form\GroupSubscribeForm",
  *       "unsubscribe" = "Drupal\og\Form\GroupUnsubscribeConfirmForm",
+ *       "add" = "Drupal\og\Form\OgMembershipForm",
+ *       "edit" = "Drupal\og\Form\OgMembershipForm",
+ *       "delete" = "Drupal\og\Form\OgMembershipDeleteForm",
  *     },
- *   }
+ *   },
+ *   links = {
+ *     "canonical" = "/group/{entity_type_id}/{group}/admin/members/{og_membership}/edit",
+ *     "edit-form" = "/group/{entity_type_id}/{group}/admin/members/{og_membership}/edit",
+ *     "delete-form" = "/group/{entity_type_id}/{group}/admin/members/{og_membership}/delete",
+ *   },
+ *   field_ui_base_route = "entity.og_membership_type.edit_form"
  * )
  */
 class OgMembership extends ContentEntityBase implements OgMembershipInterface {
+
+  /**
+   * {@inheritdoc}
+   */
+  protected function urlRouteParameters($rel): array {
+    $uri_route_parameters = parent::urlRouteParameters($rel);
+    $uri_route_parameters['entity_type_id'] = $this->getGroupEntityType();
+    $uri_route_parameters['group'] = $this->getGroupId();
+    return $uri_route_parameters;
+  }
 
   /**
    * {@inheritdoc}
@@ -273,7 +295,20 @@ class OgMembership extends ContentEntityBase implements OgMembershipInterface {
       ];
     }
     $roles = array_merge($roles, $this->get('roles')->referencedEntities());
-    return $roles;
+    return array_filter($roles, [$this, 'isRoleInterface']);
+  }
+
+  /**
+   * Callback for array_filter().
+   *
+   * @param mixed $role
+   *   A role or entity ID or NULL.
+   *
+   * @return bool
+   *   TRUE if $role is an object of the expected interface.
+   */
+  protected function isRoleInterface($role) {
+    return $role instanceof OgRoleInterface;
   }
 
   /**
@@ -387,9 +422,24 @@ class OgMembership extends ContentEntityBase implements OgMembershipInterface {
       ->setSetting('target_type', 'og_membership_type');
 
     $fields['uid'] = BaseFieldDefinition::create('entity_reference')
-      ->setLabel(new TranslatableMarkup('Member User ID'))
+      ->setLabel(new TranslatableMarkup('Username'))
       ->setDescription(new TranslatableMarkup('The user ID of the member.'))
-      ->setSetting('target_type', 'user');
+      ->setSetting('target_type', 'user')
+      ->setSetting('handler', 'og:user')
+      ->setConstraints(['UniqueOgMembership' => []])
+      ->setDisplayOptions('form', [
+        'type' => 'og_autocomplete',
+        'weight' => -1,
+        'settings' => [
+          'match_operator' => 'CONTAINS',
+          'size' => 60,
+          'match_limit' => 10,
+          'placeholder' => '',
+        ],
+      ])
+      ->setDisplayConfigurable('view', TRUE)
+      ->setDisplayConfigurable('form', TRUE)
+      ->setRequired(TRUE);
 
     $fields['entity_type'] = BaseFieldDefinition::create('string')
       ->setLabel(new TranslatableMarkup('Group entity type'))
@@ -403,21 +453,38 @@ class OgMembership extends ContentEntityBase implements OgMembershipInterface {
       ->setLabel(new TranslatableMarkup('Group entity ID'))
       ->setDescription(new TranslatableMarkup('The entity ID of the group.'));
 
-    $fields['state'] = BaseFieldDefinition::create('string')
+    $fields['state'] = BaseFieldDefinition::create('list_string')
       ->setLabel(new TranslatableMarkup('State'))
       ->setDescription(new TranslatableMarkup('The user membership state: active, pending, or blocked.'))
-      ->setDefaultValue(OgMembershipInterface::STATE_ACTIVE);
+      ->setDefaultValue(OgMembershipInterface::STATE_ACTIVE)
+      ->setSettings([
+        'allowed_values' => [
+          OgMembershipInterface::STATE_ACTIVE => new TranslatableMarkup('Active'),
+          OgMembershipInterface::STATE_PENDING => new TranslatableMarkup('Pending'),
+          OgMembershipInterface::STATE_BLOCKED => new TranslatableMarkup('Blocked'),
+        ],
+      ])
+      ->setDisplayOptions('form', [
+        'type' => 'options_buttons',
+        'weight' => 0,
+      ])
+      ->setDisplayConfigurable('view', TRUE)
+      ->setDisplayConfigurable('form', TRUE)
+      ->setRequired(TRUE);
 
     $fields['roles'] = BaseFieldDefinition::create('entity_reference')
       ->setLabel(new TranslatableMarkup('Roles'))
       ->setDescription(new TranslatableMarkup('The OG roles related to an OG membership entity.'))
       ->setCardinality(FieldStorageDefinitionInterface::CARDINALITY_UNLIMITED)
-      ->setDisplayOptions('view', [
-        'label' => 'hidden',
-        'type' => 'entity_reference_label',
+      ->setSetting('target_type', 'og_role')
+      ->setSetting('handler', 'og:og_role')
+      ->setConstraints(['ValidOgRole' => []])
+      ->setDisplayOptions('form', [
+        'type' => 'options_buttons',
         'weight' => 0,
       ])
-      ->setSetting('target_type', 'og_role');
+      ->setDisplayConfigurable('view', TRUE)
+      ->setDisplayConfigurable('form', TRUE);
 
     $fields['created'] = BaseFieldDefinition::create('created')
       ->setLabel(new TranslatableMarkup('Create'))
@@ -436,14 +503,14 @@ class OgMembership extends ContentEntityBase implements OgMembershipInterface {
   public function preSave(EntityStorageInterface $storage) {
     // Check the value directly rather than using the entity, if there is one.
     // This will watch actual empty values and '0'.
-    if (!$this->get('uid')->target_id) {
+    if (!$uid = $this->get('uid')->target_id) {
       // Throw a generic logic exception as this will likely get caught in
       // \Drupal\Core\Entity\Sql\SqlContentEntityStorage::save and turned into
       // an EntityStorageException anyway.
       throw new \LogicException('OG membership can not be created for an empty or anonymous user.');
     }
 
-    if (!$this->get('entity_id')->value) {
+    if (!$entity_id = $this->get('entity_id')->value) {
       // Group was not set.
       throw new \LogicException('Membership cannot be set for an empty or an unsaved group.');
     }
@@ -479,8 +546,8 @@ class OgMembership extends ContentEntityBase implements OgMembershipInterface {
     // Check for an existing membership.
     $query = \Drupal::entityQuery('og_membership');
     $query
-      ->condition('uid', $this->get('uid')->target_id)
-      ->condition('entity_id', $this->get('entity_id')->value)
+      ->condition('uid', $uid)
+      ->condition('entity_id', $entity_id)
       ->condition('entity_type', $this->get('entity_type')->value);
 
     if (!$this->isNew()) {
@@ -494,7 +561,7 @@ class OgMembership extends ContentEntityBase implements OgMembershipInterface {
       ->execute();
 
     if ($count) {
-      throw new \LogicException(sprintf('An OG membership already exists for uid %s in group of entity-type %s and ID: %s', $this->get('uid')->target_id, $entity_type_id, $this->getGroup()->id()));
+      throw new \LogicException(sprintf('An OG membership already exists for user ID %d and group of entity type %s and ID %s', $uid, $entity_type_id, $group->id()));
     }
 
     parent::preSave($storage);

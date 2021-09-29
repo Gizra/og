@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types = 1);
+
 namespace Drupal\og\Plugin\Action;
 
 use Drupal\og\Entity\OgMembership;
@@ -18,7 +20,7 @@ class RemoveSingleOgMembershipRole extends ChangeSingleOgMembershipRoleBase {
   /**
    * {@inheritdoc}
    */
-  public function execute(OgMembership $membership = NULL) {
+  public function execute(?OgMembership $membership = NULL) {
     if (!$membership) {
       return;
     }

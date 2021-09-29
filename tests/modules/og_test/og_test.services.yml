@@ -1,0 +1,6 @@
+services:
+  og_test.event_subscriber:
+    class: Drupal\og_test\EventSubscriber\OgTestEventSubscriber
+    arguments: ['@state']
+    tags:
+      - { name: 'event_subscriber' }

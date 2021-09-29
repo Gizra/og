@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types = 1);
+
 namespace Drupal\Tests\og\Kernel\Access;
 
 use Drupal\Core\Entity\EntityStorageException;
@@ -37,6 +39,7 @@ class AccessByOgMembershipTest extends KernelTestBase {
     'field',
     'node',
     'og',
+    'options',
     'system',
     'user',
   ];

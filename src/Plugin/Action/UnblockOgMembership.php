@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types = 1);
+
 namespace Drupal\og\Plugin\Action;
 
 use Drupal\Core\Access\AccessResult;
@@ -61,7 +63,7 @@ class UnblockOgMembership extends ActionBase implements ContainerFactoryPluginIn
   /**
    * {@inheritdoc}
    */
-  public function execute(OgMembership $membership = NULL) {
+  public function execute(?OgMembership $membership = NULL) {
     if (!$membership) {
       return;
     }
@@ -71,7 +73,7 @@ class UnblockOgMembership extends ActionBase implements ContainerFactoryPluginIn
   /**
    * {@inheritdoc}
    */
-  public function access($object, AccountInterface $account = NULL, $return_as_object = FALSE) {
+  public function access($object, ?AccountInterface $account = NULL, $return_as_object = FALSE) {
     /** @var \Drupal\og\Entity\OgMembership $object */
     // Deny access if the membership is not blocked.
     if ($object->getState() !== OgMembershipInterface::STATE_BLOCKED) {

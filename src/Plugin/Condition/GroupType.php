@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types = 1);
+
 namespace Drupal\og\Plugin\Condition;
 
 use Drupal\Core\Condition\ConditionPluginBase;
@@ -89,7 +91,7 @@ class GroupType extends ConditionPluginBase implements ContainerFactoryPluginInt
    */
   public function buildConfigurationForm(array $form, FormStateInterface $form_state) {
     $options = [];
-    $group_types = $this->groupTypeManager->getAllGroupBundles();
+    $group_types = $this->groupTypeManager->getGroupMap();
 
     // If no groups have been created yet, show only the error message and hide
     // the other elements.
@@ -137,7 +139,10 @@ class GroupType extends ConditionPluginBase implements ContainerFactoryPluginInt
       $group_types = $this->configuration['group_types'];
       $last_group = array_pop($group_types);
       $group_types = implode(', ', $group_types);
-      return $this->t('The group type is @group_types or @last_group', ['@group_types' => $group_types, '@last_group' => $last_group]);
+      return $this->t('The group type is @group_types or @last_group', [
+        '@group_types' => $group_types,
+        '@last_group' => $last_group,
+      ]);
     }
     $group_type = reset($this->configuration['group_types']);
     return $this->t('The group type is @group_type', ['@group_type' => $group_type]);

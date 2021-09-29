@@ -1,13 +1,15 @@
 <?php
 
+declare(strict_types = 1);
+
 namespace Drupal\Tests\og\Unit;
 
+use Drupal\Tests\UnitTestCase;
 use Drupal\og\Event\PermissionEvent;
 use Drupal\og\GroupContentOperationPermission;
 use Drupal\og\GroupPermission;
 use Drupal\og\OgAccess;
 use Drupal\og\OgRoleInterface;
-use Drupal\Tests\UnitTestCase;
 
 /**
  * Tests permission events.

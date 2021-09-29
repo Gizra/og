@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types = 1);
+
 namespace Drupal\og\Access;
 
 use Drupal\Core\Access\AccessResult;
@@ -101,8 +103,9 @@ class GroupCheck implements AccessInterface {
 
     // Iterate over the permissions.
     foreach (explode('|', $route->getRequirement('_og_user_access_group')) as $permission) {
-      if ($this->ogAccess->userAccess($group, $permission, $user)->isAllowed()) {
-        return AccessResult::allowed();
+      $access_result = $this->ogAccess->userAccess($group, $permission, $user);
+      if ($access_result->isAllowed()) {
+        return $access_result;
       }
     }
 

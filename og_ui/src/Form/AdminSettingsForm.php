@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types = 1);
+
 namespace Drupal\og_ui\Form;
 
 use Drupal\Component\Plugin\PluginManagerInterface;
@@ -81,7 +83,7 @@ class AdminSettingsForm extends ConfigFormBase {
       '#default_value' => $config_og->get('node_access_strict'),
     ];
 
-    // @todo: Port og_ui_admin_people_view.
+    // @todo Port og_ui_admin_people_view.
     $form['og_delete_orphans'] = [
       '#type' => 'checkbox',
       '#title' => $this->t('Delete orphans'),

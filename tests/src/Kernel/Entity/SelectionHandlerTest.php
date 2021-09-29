@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types = 1);
+
 namespace Drupal\Tests\og\Kernel\Entity;
 
 use Drupal\Core\Session\AccountInterface;
@@ -34,6 +36,7 @@ class SelectionHandlerTest extends KernelTestBase {
     'entity_reference',
     'node',
     'og',
+    'options',
   ];
 
   /**

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types = 1);
+
 namespace Drupal\og;
 
 /**
@@ -46,15 +48,6 @@ interface GroupTypeManagerInterface {
    *   Array of groups, or an empty array if none found
    */
   public function getGroupBundleIdsByEntityType($entity_type_id);
-
-  /**
-   * Get all group bundles keyed by entity type.
-   *
-   * @return string[][]
-   *   An associative array, keyed by entity type, each value an indexed array
-   *   of bundle IDs.
-   */
-  public function getAllGroupBundles($entity_type = NULL);
 
   /**
    * Returns a list of all group content bundles IDs keyed by entity type.
@@ -132,7 +125,7 @@ interface GroupTypeManagerInterface {
    *   The bundle ID of the bundle to declare as being a group.
    *
    * @throws \InvalidArgumentException
-   *   Thrown when the given bundle is already a group.
+   *   Thrown when the given bundle is already a group or is invalid.
    */
   public function addGroup($entity_type_id, $bundle_id);
 

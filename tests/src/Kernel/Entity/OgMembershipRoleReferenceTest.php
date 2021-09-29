@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types = 1);
+
 namespace Drupal\Tests\og\Kernel\Entity;
 
 use Drupal\KernelTests\KernelTestBase;
@@ -21,11 +23,12 @@ class OgMembershipRoleReferenceTest extends KernelTestBase {
    * {@inheritdoc}
    */
   public static $modules = [
-    'og',
     'field',
     'node',
-    'user',
+    'og',
+    'options',
     'system',
+    'user',
   ];
 
   /**

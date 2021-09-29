@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types = 1);
+
 namespace Drupal\Tests\og\Unit\Plugin\OgGroupResolver;
 
 use Drupal\Core\Entity\ContentEntityInterface;
@@ -91,7 +93,10 @@ abstract class OgRouteGroupResolverTestBase extends OgGroupResolverTestBase {
 
     // Add expectations for the groups that are added and removed by the plugin.
     $test_entities = $this->testEntities;
-    foreach ([&$expected_added_groups, &$expected_removed_groups] as &$expected_groups) {
+    foreach ([
+      &$expected_added_groups,
+      &$expected_removed_groups,
+    ] as &$expected_groups) {
       // Replace the entity IDs from the data provider with actual test
       // entities.
       $expected_groups = array_map(function ($item) use ($test_entities) {

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types = 1);
+
 namespace Drupal\og\Plugin\Field\FieldWidget;
 
 use Drupal\Component\Utility\Html;
@@ -30,7 +32,7 @@ class OgComplex extends EntityReferenceAutocompleteWidget {
    */
   public function formElement(FieldItemListInterface $items, $delta, array $element, array &$form, FormStateInterface $form_state) {
     $parent = parent::formElement($items, $delta, $element, $form, $form_state);
-    // todo: fix the definition in th UI level.
+    // @todo Fix the definition in the UI level.
     $parent['target_id']['#selection_handler'] = 'og:default';
     $parent['target_id']['#selection_settings']['field_mode'] = 'default';
 
@@ -108,7 +110,10 @@ class OgComplex extends EntityReferenceAutocompleteWidget {
       // table.
       if ($is_multiple) {
         $element = [
-          '#title' => $this->t('@title (value @number)', ['@title' => $title, '@number' => $delta + 1]),
+          '#title' => $this->t('@title (value @number)', [
+            '@title' => $title,
+            '@number' => $delta + 1,
+          ]),
           '#title_display' => 'invisible',
           '#description' => '',
         ];
@@ -286,7 +291,7 @@ class OgComplex extends EntityReferenceAutocompleteWidget {
    * @return array
    *   A single entity reference input.
    */
-  public function otherGroupsSingle($delta, EntityInterface $entity = NULL, $weight_delta = 10) {
+  public function otherGroupsSingle(int $delta, ?EntityInterface $entity = NULL, $weight_delta = 10) {
     $selection_settings = [
       'other_groups' => TRUE,
       'field_mode' => 'admin',

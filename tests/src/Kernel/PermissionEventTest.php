@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types = 1);
+
 namespace Drupal\Tests\og\Kernel;
 
 use Drupal\Component\Render\FormattableMarkup;
@@ -130,12 +132,13 @@ class PermissionEventTest extends KernelTestBase {
     $default_permissions = [
       'add user',
       OgAccess::ADMINISTER_GROUP_PERMISSION,
+      OgAccess::DELETE_GROUP_PERMISSION,
+      OgAccess::UPDATE_GROUP_PERMISSION,
       'approve and deny subscription',
       'manage members',
       'administer permissions',
       'subscribe without approval',
       'subscribe',
-      'update group',
     ];
     // Test permissions that should only be available for the test group that
     // has group content.

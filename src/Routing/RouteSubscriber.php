@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types = 1);
+
 namespace Drupal\og\Routing;
 
 use Drupal\Core\Entity\EntityTypeManagerInterface;
@@ -84,7 +86,10 @@ class RouteSubscriber extends RouteSubscriberBase {
           '_title' => 'Group management',
         ])
         ->addRequirements([
-          '_og_user_access_group' => OgAccess::ADMINISTER_GROUP_PERMISSION,
+          '_og_user_access_group' => implode('|', [
+            OgAccess::ADMINISTER_GROUP_PERMISSION,
+            'manage members',
+          ]),
         ])
         ->setOption('parameters', [
           $entity_type_id => ['type' => 'entity:' . $entity_type_id],

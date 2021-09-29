@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types = 1);
+
 namespace Drupal\Tests\og\Kernel;
 
 use Drupal\KernelTests\KernelTestBase;
@@ -22,6 +24,7 @@ class SelectionHandlerSettingsSchemaTest extends KernelTestBase {
     'og_ui',
     'system',
     'user',
+    'options',
   ];
 
   /**

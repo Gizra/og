@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types = 1);
+
 namespace Drupal\og\Plugin\Derivative;
 
 use Drupal\Component\Plugin\Derivative\DeriverBase;
@@ -75,7 +77,12 @@ class OgLocalTask extends DeriverBase implements ContainerDeriverInterface {
       ];
     }
 
+    // @todo Coder throws a false positive for this line. Remove this once the
+    //   issue is fixed in the Coder project.
+    // @see https://www.drupal.org/project/coder/issues/3065679
+    // @codingStandardsIgnoreLine
     foreach ($derivatives as &$entry) {
+      // @codingStandardsIgnoreLine
       $entry += $base_plugin_definition;
     }
 

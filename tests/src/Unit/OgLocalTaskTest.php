@@ -1,12 +1,14 @@
 <?php
 
+declare(strict_types = 1);
+
 namespace Drupal\Tests\og\Unit;
 
 use Drupal\Core\DependencyInjection\ContainerBuilder;
 use Drupal\Core\Routing\RouteProvider;
+use Drupal\Tests\UnitTestCase;
 use Drupal\og\GroupTypeManagerInterface;
 use Drupal\og\Plugin\Derivative\OgLocalTask;
-use Drupal\Tests\UnitTestCase;
 use Symfony\Component\Routing\Route;
 
 /**

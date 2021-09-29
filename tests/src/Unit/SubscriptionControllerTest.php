@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types = 1);
+
 namespace Drupal\Tests\og\Unit;
 
 use Drupal\Core\DependencyInjection\ContainerBuilder;
@@ -9,11 +11,11 @@ use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Messenger\MessengerInterface;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\Core\Url;
+use Drupal\Tests\UnitTestCase;
 use Drupal\og\Controller\SubscriptionController;
 use Drupal\og\MembershipManagerInterface;
 use Drupal\og\OgAccessInterface;
 use Drupal\og\OgMembershipInterface;
-use Drupal\Tests\UnitTestCase;
 use Drupal\user\EntityOwnerInterface;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 

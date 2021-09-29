@@ -10,10 +10,10 @@ use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\PrivateKey;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\Core\Site\Settings;
+use Drupal\Tests\og\Traits\OgRoleCacheContextTestTrait;
 use Drupal\og\Cache\Context\OgRoleCacheContext;
 use Drupal\og\MembershipManagerInterface;
 use Drupal\og\OgMembershipInterface;
-use Drupal\Tests\og\Traits\OgRoleCacheContextTestTrait;
 
 /**
  * Tests the OG role cache context.
@@ -208,7 +208,7 @@ class OgRoleCacheContextTest extends OgCacheContextTestBase {
   /**
    * {@inheritdoc}
    */
-  protected function getCacheContext(AccountInterface $user = NULL): CacheContextInterface {
+  protected function getCacheContext(?AccountInterface $user = NULL): CacheContextInterface {
     return new OgRoleCacheContext($user, $this->entityTypeManager->reveal(), $this->membershipManager->reveal(), $this->database->reveal(), $this->privateKey->reveal());
   }
 

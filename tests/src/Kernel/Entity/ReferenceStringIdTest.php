@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types = 1);
+
 namespace Drupal\Tests\og\Kernel\Entity;
 
 use Drupal\entity_test\Entity\EntityTestStringId;
@@ -17,7 +19,14 @@ class ReferenceStringIdTest extends KernelTestBase {
   /**
    * {@inheritdoc}
    */
-  public static $modules = ['user', 'entity_test', 'field', 'og', 'system'];
+  public static $modules = [
+    'user',
+    'entity_test',
+    'field',
+    'og',
+    'options',
+    'system',
+  ];
 
   /**
    * Array of test bundles. The first is a group, the second group content.

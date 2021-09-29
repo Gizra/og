@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types = 1);
+
 namespace Drupal\og\Plugin\Action;
 
 use Drupal\Core\Action\ActionBase;
@@ -86,7 +88,7 @@ abstract class ChangeMultipleOgMembershipRolesBase extends ActionBase implements
   /**
    * {@inheritdoc}
    */
-  public function access($object, AccountInterface $account = NULL, $return_as_object = FALSE) {
+  public function access($object, ?AccountInterface $account = NULL, $return_as_object = FALSE) {
     /** @var \Drupal\og\Entity\OgMembership $object */
     // Only grant access if the user has permission to manage members in this
     // group.

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types = 1);
+
 namespace Drupal\Tests\og\Unit;
 
 use Drupal\Core\Cache\CacheBackendInterface;
@@ -9,16 +11,16 @@ use Drupal\Core\Entity\EntityStorageInterface;
 use Drupal\Core\Entity\EntityTypeBundleInfoInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Routing\RouteBuilderInterface;
+use Drupal\Tests\UnitTestCase;
+use Drupal\og\Entity\OgRole;
 use Drupal\og\Event\GroupCreationEvent;
 use Drupal\og\Event\GroupCreationEventInterface;
+use Drupal\og\Event\PermissionEventInterface;
 use Drupal\og\GroupTypeManager;
 use Drupal\og\GroupTypeManagerInterface;
 use Drupal\og\OgGroupAudienceHelperInterface;
-use Drupal\og\PermissionManagerInterface;
 use Drupal\og\OgRoleManagerInterface;
-use Drupal\Tests\UnitTestCase;
-use Drupal\og\Entity\OgRole;
-use Drupal\og\Event\PermissionEventInterface;
+use Drupal\og\PermissionManagerInterface;
 use Prophecy\Argument;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
@@ -153,21 +155,6 @@ class GroupTypeManagerTest extends UnitTestCase {
   }
 
   /**
-   * Tests getting all the group bundles.
-   *
-   * @covers ::getAllGroupBundles
-   */
-  public function testGetAllGroupBundles() {
-    // It is expected that the group map will be retrieved from config.
-    $groups = ['test_entity' => ['a', 'b']];
-    $this->expectGroupMapRetrieval($groups);
-
-    $manager = $this->createGroupManager();
-
-    $this->assertSame($groups, $manager->getAllGroupBundles());
-  }
-
-  /**
    * Tests checking if an entity is a group.
    *
    * @covers ::isGroup
@@ -239,7 +226,10 @@ class GroupTypeManagerTest extends UnitTestCase {
     $this->expectException(\InvalidArgumentException::class);
     $manager->addGroup('test_entity', 'c');
 
-    $this->assertSame(['a', 'b', 'c'], $manager->getGroupBundleIdsByEntityType('test_entity'));
+    $this->assertSame(
+      ['a', 'b', 'c'],
+      $manager->getGroupBundleIdsByEntityType('test_entity')
+    );
     $this->assertTrue($manager->isGroup('test_entity', 'c'));
   }
 

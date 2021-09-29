@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types = 1);
+
 namespace Drupal\Tests\og\Kernel\Entity;
 
 use Drupal\KernelTests\KernelTestBase;
@@ -28,6 +30,7 @@ class GetMembershipsTest extends KernelTestBase {
     'field',
     'node',
     'og',
+    'options',
     'system',
     'user',
   ];
@@ -103,7 +106,10 @@ class GetMembershipsTest extends KernelTestBase {
 
       // A user which is a pending member of the first group and blocked in the
       // second group.
-      [OgMembershipInterface::STATE_PENDING, OgMembershipInterface::STATE_BLOCKED],
+      [
+        OgMembershipInterface::STATE_PENDING,
+        OgMembershipInterface::STATE_BLOCKED,
+      ],
 
       // A user which is not subscribed to either of the two groups.
       [NULL, NULL],
