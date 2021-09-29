@@ -61,7 +61,7 @@ class DeleteOgMembership extends ActionBase implements ContainerFactoryPluginInt
   /**
    * {@inheritdoc}
    */
-  public function execute(OgMembership $membership = NULL) {
+  public function execute(?OgMembership $membership = NULL) {
     if (!$membership) {
       return;
     }
@@ -71,7 +71,7 @@ class DeleteOgMembership extends ActionBase implements ContainerFactoryPluginInt
   /**
    * {@inheritdoc}
    */
-  public function access($object, AccountInterface $account = NULL, $return_as_object = FALSE) {
+  public function access($object, ?AccountInterface $account = NULL, $return_as_object = FALSE) {
     /** @var \Drupal\og\Entity\OgMembership $object */
     // Grant access if the user can manage members in this group.
     $access = $this->ogAccess->userAccess($object->getGroup(), 'manage members', $account);

@@ -113,13 +113,13 @@ provide a quick way to get started with Organic groups.
    'Subscribe' link. (Subscribing is the act of associating a user with a 
     group.)
    To show this subscribe link:
-   9.1 Make sure you have the Group UI module enabled
-   9.2 Go to admin/config/group/permissions and make sure that the "Subscribe 
+   1. Make sure you have the Group UI module enabled
+   2. Go to admin/config/group/permissions and make sure that the "Subscribe 
        user to group" permission is given to the appropriate user-roles.
-   9.3 Navigate to the "manage display" tab of your content type
+   3. Navigate to the "manage display" tab of your content type
       (admin/structure/types/manage/group/display)
        and choose the Group subscription format for the Group type field.
-   9.4 Back in the group view you will now notice a 'Subscribe' link (If you are 
+   4. Back in the group view you will now notice a 'Subscribe' link (If you are 
        the group administrator it will say "You are the group manager").
 10. In order to associate other entities with group or group content, navigate
     to Organic Groups field settings", in admin/config/group/fields.
@@ -172,6 +172,10 @@ Og::groupTypeManager()->addGroup('node', 'page');
 // Add OG audience field to the "News" node type, thus making it group content.
 Og::createField(OgGroupAudienceHelperInterface::DEFAULT_FIELD, 'node', 'news');
 ```
+
+## Access control
+
+See [Access control for groups and group content](docs/access.md).
 
 ## DRUPAL CONSOLE INTEGRATION
 The Drupal 8 branch integrates with Drupal Console to do actions which used by

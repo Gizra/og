@@ -39,9 +39,9 @@ class GroupSubscribeForm extends ContentEntityForm {
    *   The OG access service.
    * @param \Drupal\Core\Entity\EntityRepositoryInterface $entity_repository
    *   The entity repository service.
-   * @param \Drupal\Core\Entity\EntityTypeBundleInfoInterface $entity_type_bundle_info
+   * @param \Drupal\Core\Entity\EntityTypeBundleInfoInterface|null $entity_type_bundle_info
    *   The entity type bundle service.
-   * @param \Drupal\Component\Datetime\TimeInterface $time
+   * @param \Drupal\Component\Datetime\TimeInterface|null $time
    *   The time service.
    *
    * @todo Set the `EntityRepositoryInterface` type hint on the second argument
@@ -50,7 +50,7 @@ class GroupSubscribeForm extends ContentEntityForm {
    *
    * @see https://github.com/Gizra/og/issues/397
    */
-  public function __construct(OgAccessInterface $og_access, EntityRepositoryInterface $entity_repository, EntityTypeBundleInfoInterface $entity_type_bundle_info = NULL, TimeInterface $time = NULL) {
+  public function __construct(OgAccessInterface $og_access, EntityRepositoryInterface $entity_repository, ?EntityTypeBundleInfoInterface $entity_type_bundle_info = NULL, ?TimeInterface $time = NULL) {
     parent::__construct($entity_repository, $entity_type_bundle_info, $time);
     $this->ogAccess = $og_access;
   }
@@ -83,14 +83,15 @@ class GroupSubscribeForm extends ContentEntityForm {
   public function getQuestion() {
     /** @var \Drupal\og\OgMembershipInterface $membership */
     $membership = $this->entity;
-    /** @var EntityInterface $group */
     $group = $membership->getGroup();
 
     $label = $group->access('view') ? $group->label() : $this->t('Private group');
 
     $message = $this->isStateActive()
       ? $this->t('Are you sure you want to join the group %label?', ['%label' => $label])
-      : $this->t('Are you sure you want to request subscription the group %label?', ['%label' => $label]);
+      : $this->t('Are you sure you want to request a subscription to the group %label?', [
+        '%label' => $label,
+      ]);
 
     return $message;
   }
@@ -112,7 +113,6 @@ class GroupSubscribeForm extends ContentEntityForm {
    *   The URL object to redirect to.
    */
   public function getCancelUrl() {
-    /** @var EntityInterface $group */
     $group = $this->entity->getGroup();
 
     // User doesn't have access to the group entity, so redirect to front page,
@@ -194,7 +194,6 @@ class GroupSubscribeForm extends ContentEntityForm {
     /** @var \Drupal\og\OgMembershipInterface $membership */
     $membership = $this->getEntity();
 
-    /** @var EntityInterface $group */
     $group = $membership->getGroup();
     $user = $membership->getOwner();
 
@@ -222,7 +221,6 @@ class GroupSubscribeForm extends ContentEntityForm {
     /** @var \Drupal\og\OgMembershipInterface $membership */
     $membership = $this->getEntity();
 
-    /** @var EntityInterface $group */
     $group = $membership->getGroup();
 
     $message = $membership->isActive() ? $this->t('You are now subscribed to the group.') : $this->t('Your subscription request has been sent.');

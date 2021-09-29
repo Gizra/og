@@ -9,6 +9,7 @@ use Drupal\Core\Entity\ContentEntityInterface;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Messenger\MessengerInterface;
 use Drupal\Core\Url;
+use Drupal\og\Og;
 use Drupal\og\OgAccessInterface;
 use Drupal\og\OgMembershipInterface;
 use Drupal\og\OgMembershipTypeInterface;
@@ -17,7 +18,6 @@ use Drupal\user\UserInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
-use Drupal\og\Og;
 
 /**
  * Controller for OG subscription routes.
@@ -68,14 +68,14 @@ class SubscriptionController extends ControllerBase {
    *   The entity type of the group entity.
    * @param \Drupal\Core\Entity\EntityInterface $group
    *   The entity ID of the group entity.
-   * @param \Drupal\og\OgMembershipTypeInterface $membership_type
+   * @param \Drupal\og\OgMembershipTypeInterface $og_membership_type
    *   The membership type to be used for creating the membership.
    *
    * @return mixed
    *   Redirect user or show access denied if they are not allowed to subscribe,
    *   otherwise provide a subscribe confirmation form.
    */
-  public function subscribe($entity_type_id, EntityInterface $group, OgMembershipTypeInterface $membership_type) {
+  public function subscribe($entity_type_id, EntityInterface $group, OgMembershipTypeInterface $og_membership_type) {
     if (!$group instanceof ContentEntityInterface) {
       // Not a valid entity.
       throw new AccessDeniedHttpException();
@@ -100,7 +100,10 @@ class SubscriptionController extends ControllerBase {
       }
       else {
         $user_register_url = Url::fromRoute('user.register', [], $destination)->toString();
-        $params = [':register' => $user_register_url, ':login' => $user_login_url];
+        $params = [
+          ':register' => $user_register_url,
+          ':login' => $user_login_url,
+        ];
         $this->messenger->addMessage($this->t('In order to join any group, you must <a href=":login">login</a> or <a href=":register">register</a> a new account. After you have successfully done so, you will need to request membership again.', $params));
       }
 
@@ -136,11 +139,13 @@ class SubscriptionController extends ControllerBase {
       return new RedirectResponse($group->toUrl()->setAbsolute(TRUE)->toString());
     }
 
-    if (!$this->ogAccess->userAccess($group, 'subscribe', $user) && !$this->ogAccess->userAccess($group, 'subscribe without approval', $user)) {
+    $subscribe = $this->ogAccess->userAccess($group, 'subscribe');
+    $subscribe_without_approval = $this->ogAccess->userAccess($group, 'subscribe without approval');
+    if (!$subscribe->isAllowed() && !$subscribe_without_approval->isAllowed()) {
       throw new AccessDeniedHttpException();
     }
 
-    $membership = Og::createMembership($group, $user, $membership_type->id());
+    $membership = Og::createMembership($group, $user, $og_membership_type->id());
     $form = $this->entityFormBuilder()->getForm($membership, 'subscribe');
     return $form;
 

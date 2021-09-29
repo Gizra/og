@@ -149,7 +149,7 @@ class OgEventSubscriber implements EventSubscriberInterface {
       new GroupPermission([
         'name' => 'manage members',
         'title' => $this->t('Manage members'),
-        'description' => $this->t('Users may remove group members and alter member status and roles.'),
+        'description' => $this->t('Users may add and remove group members, and alter member status and roles.'),
         'default roles' => [OgRoleInterface::ADMINISTRATOR],
         'restrict access' => TRUE,
       ]),
@@ -372,9 +372,21 @@ class OgEventSubscriber implements EventSubscriberInterface {
       'description' => 'Manage members',
       'path' => 'members',
       'requirements' => [
-        '_og_user_access_group' => OgAccess::ADMINISTER_GROUP_PERMISSION,
+        '_og_user_access_group' => implode('|', [
+          OgAccess::ADMINISTER_GROUP_PERMISSION,
+          'manage members',
+        ]),
         // Views module must be enabled.
         '_module_dependencies' => 'views',
+      ],
+    ];
+
+    $routes_info['add_membership_page'] = [
+      'controller' => '\Drupal\og\Controller\OgAdminMembersController::addPage',
+      'title' => 'Add a member',
+      'path' => 'members/add',
+      'requirements' => [
+        '_og_membership_add_access' => 'TRUE',
       ],
     ];
 
@@ -416,16 +428,7 @@ class OgEventSubscriber implements EventSubscriberInterface {
 
     if ($permissions) {
       foreach ($permissions as $permission) {
-        // This currently does not handle access in the same way as Drupal core
-        // does - if any of the permissions grant access we will grant access.
-        // Once OgAccess::userAccess() is refactored to return a neutral result
-        // in case no access is determined we can just apply the result
-        // directly.
-        $access_result = $this->ogAccess->userAccess($group_entity, $permission->getName(), $user);
-        if ($access_result->isAllowed()) {
-          $event->grantAccess();
-          break;
-        }
+        $event->mergeAccessResult($this->ogAccess->userAccess($group_entity, $permission->getName(), $user));
       }
     }
   }

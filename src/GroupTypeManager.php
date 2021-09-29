@@ -4,11 +4,11 @@ declare(strict_types = 1);
 
 namespace Drupal\og;
 
+use Drupal\Core\Cache\CacheBackendInterface;
 use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Entity\EntityTypeBundleInfoInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Routing\RouteBuilderInterface;
-use Drupal\Core\Cache\CacheBackendInterface;
 use Drupal\og\Event\GroupCreationEvent;
 use Drupal\og\Event\GroupCreationEventInterface;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
@@ -186,6 +186,10 @@ class GroupTypeManager implements GroupTypeManagerInterface {
    * {@inheritdoc}
    */
   public function isGroupContent($entity_type_id, $bundle) {
+    // To avoid insanity, a group membership cannot be a group or group content.
+    if ($entity_type_id === 'og_membership') {
+      return FALSE;
+    }
     return $this->groupAudienceHelper->hasGroupAudienceField($entity_type_id, $bundle);
   }
 
@@ -260,6 +264,10 @@ class GroupTypeManager implements GroupTypeManagerInterface {
    * {@inheritdoc}
    */
   public function addGroup($entity_type_id, $bundle_id) {
+    // To avoid insanity, a group membership cannot be a group or group content.
+    if ($entity_type_id === 'og_membership') {
+      throw new \InvalidArgumentException("The '$entity_type_id' type cannot be a group.");
+    }
     // Throw an error if the entity type is already defined as a group.
     if ($this->isGroup($entity_type_id, $bundle_id)) {
       throw new \InvalidArgumentException("The '$entity_type_id' of type '$bundle_id' is already a group.");
@@ -268,7 +276,7 @@ class GroupTypeManager implements GroupTypeManagerInterface {
 
     $groups = $editable->get('groups');
     $groups[$entity_type_id][] = $bundle_id;
-    // @todo, just key by bundle ID instead?
+    // @todo Key by bundle ID instead?
     $groups[$entity_type_id] = array_unique($groups[$entity_type_id]);
 
     $editable->set('groups', $groups);
@@ -364,6 +372,10 @@ class GroupTypeManager implements GroupTypeManagerInterface {
    */
   protected function refreshGroupMap() {
     $group_map = $this->configFactory->get(static::SETTINGS_CONFIG_KEY)->get(static::GROUPS_CONFIG_KEY);
+    // To avoid insanity, a group membership cannot be a group or group content.
+    if (is_array($group_map)) {
+      unset($group_map['og_membership']);
+    }
     $this->groupMap = !empty($group_map) ? $group_map : [];
   }
 

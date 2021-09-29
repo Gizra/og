@@ -80,7 +80,7 @@ class Og {
       $field_definition = FieldConfig::create($field_config);
       $field_definition->save();
 
-      // @todo: Verify this is still needed here.
+      // @todo Verify this is still needed here.
       static::invalidateCache();
     }
 
@@ -168,6 +168,23 @@ class Og {
     /** @var \Drupal\og\MembershipManagerInterface $membership_manager */
     $membership_manager = \Drupal::service('og.membership_manager');
     return $membership_manager->getMembership($group, $user->id(), $states);
+  }
+
+  /**
+   * Returns the group memberships for a given group.
+   *
+   * @param \Drupal\Core\Entity\EntityInterface $group
+   *   The group to get the membership for.
+   * @param array $states
+   *   (optional) Array with the state to return. Defaults to active.
+   *
+   * @return \Drupal\og\OgMembershipInterface[]
+   *   An array of OgMembership entities, keyed by ID.
+   */
+  public static function getGroupMemberships(EntityInterface $group, array $states = [OgMembershipInterface::STATE_ACTIVE]) {
+    /** @var \Drupal\og\MembershipManagerInterface $membership_manager */
+    $membership_manager = \Drupal::service('og.membership_manager');
+    return $membership_manager->getGroupMemberships($group, $states);
   }
 
   /**
