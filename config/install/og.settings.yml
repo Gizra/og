@@ -9,3 +9,4 @@ group_resolvers:
   - route_group_content
   - request_query_argument
   - user_access
+auto_add_group_owner_membership: true
