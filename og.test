@@ -453,6 +453,9 @@ class OgGroupAndUngroup extends DrupalWebTestCase {
     // Add OG group field to the entity_test's "main" bundle.
     og_create_field(OG_GROUP_FIELD, 'entity_test', 'main');
 
+    // Add default access field to the entity_test's "main" bundle.
+    og_create_field(OG_DEFAULT_ACCESS_FIELD, 'entity_test', 'main');
+
     // Add OG audience field to the node's "article" bundle.
     $og_field = og_fields_info(OG_AUDIENCE_FIELD);
     $og_field['field']['settings']['target_type'] = 'entity_test';
@@ -641,6 +644,7 @@ class OgGroupAndUngroup extends DrupalWebTestCase {
     variable_set('og_group_manager_default_rids_entity_test_main', array_keys($og_roles));
     $user1 = $this->drupalCreateUser();
 
+    // Entity with default roles.
     $entity1 = entity_create('entity_test', array('name' => 'main', 'uid' => $user1->uid));
     $wrapper = entity_metadata_wrapper('entity_test', $entity1);
     $wrapper->{OG_GROUP_FIELD}->set(1);
@@ -648,6 +652,16 @@ class OgGroupAndUngroup extends DrupalWebTestCase {
 
     $user_roles = og_get_user_roles('entity_test', $entity1->pid, $user1->uid, FALSE);
     $this->assertEqual($og_roles, $user_roles, t('Group manager was granted default role.'));
+
+    // Entity with overridden roles.
+    $entity2 = entity_create('entity_test', array('name' => 'main', 'uid' => $user1->uid));
+    $wrapper2 = entity_metadata_wrapper('entity_test', $entity2);
+    $wrapper2->{OG_GROUP_FIELD}->set(1);
+    $wrapper2->{OG_DEFAULT_ACCESS_FIELD}->set(1);
+    $wrapper2->save();
+    $user_roles = og_get_user_roles('entity_test', $entity2->pid, $user1->uid, FALSE);
+    // Compare role names only as the role ids will be different.
+    $this->assertEqual(array_values($og_roles), array_values($user_roles), t('Group manager was granted default overridden role.'));
   }
 
   /**
