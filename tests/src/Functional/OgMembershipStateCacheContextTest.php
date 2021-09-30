@@ -20,7 +20,7 @@ class OgMembershipStateCacheContextTest extends BrowserTestBase {
   /**
    * {@inheritdoc}
    */
-  public static $modules = [
+  protected static $modules = [
     'node',
     'og',
     'og_test',
@@ -34,8 +34,9 @@ class OgMembershipStateCacheContextTest extends BrowserTestBase {
   /**
    * Test that group is resolved correctly from cache contexts.
    *
-   * When a node's render cache contexts includes og_membership_state, then a 500 error is thrown when viewing the
-   * node's revision page. This test is for verifying that regression has not happened.
+   * When a node's render cache contexts includes og_membership_state, then a
+   * 500 error is thrown when viewing the node's revision page. This test is for
+   * verifying that regression has not happened.
    */
   public function testResolvedGroupEntity() : void {
     // Create a node group type.
@@ -89,13 +90,21 @@ class OgMembershipStateCacheContextTest extends BrowserTestBase {
 
     $assert_session = $this->assertSession();
 
-    // Visit the group node's new revision page and verify we're getting a 200 response and not 500.
-    $url = Url::fromRoute('entity.node.revision', ['node' => $group->id(), 'node_revision' => $group->getLoadedRevisionId()]);
+    // Visit the group node's new revision page and verify we're getting a 200
+    // response and not 500.
+    $url = Url::fromRoute('entity.node.revision', [
+      'node' => $group->id(),
+      'node_revision' => $group->getLoadedRevisionId(),
+    ]);
     $this->drupalGet($url);
     $assert_session->statusCodeEquals(200);
 
-    // Visit the group content node's new revision page and verify we're getting a 200 response and not 500.
-    $url = Url::fromRoute('entity.node.revision', ['node' => $group_content->id(), 'node_revision' => $group_content->getLoadedRevisionId()]);
+    // Visit the group content node's new revision page and verify we're getting
+    // a 200 response and not 500.
+    $url = Url::fromRoute('entity.node.revision', [
+      'node' => $group_content->id(),
+      'node_revision' => $group_content->getLoadedRevisionId(),
+    ]);
     $this->drupalGet($url);
     $assert_session->statusCodeEquals(200);
   }

@@ -101,8 +101,9 @@ abstract class OgRouteGroupResolverBase extends OgGroupResolverBase implements C
       // Return the entity.
       $entity = $this->routeMatch->getParameter($paths[$path]);
       if ($this->routeMatch->getRouteName() === 'entity.node.revision' && is_string($entity)) {
-        // On the node revision route, the $entity will be a string ID of the node. Treat this case by loading the
-        // correct revision of the node instead from the node revision parameter.
+        // On the node revision route, the $entity will be a string ID of the
+        // node. Treat this case by loading the correct revision of the node
+        // instead from the node revision parameter.
         $revision_id = $this->routeMatch->getParameter('node_revision');
         $entity = $this->entityTypeManager->getStorage('node')->loadRevision($revision_id);
       }
