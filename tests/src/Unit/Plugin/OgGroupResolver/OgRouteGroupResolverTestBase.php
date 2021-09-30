@@ -256,10 +256,11 @@ abstract class OgRouteGroupResolverTestBase extends OgGroupResolverTestBase {
    *   in the test setup, e.g. 'group', 'group_content', 'non_group'.
    */
   protected function mightRetrieveRouteName(?string $route_object_id) {
-    // The route object should only be retrieved if we are on a content entity
+    // The route name should only be retrieved if we are on a content entity
     // path.
     if ($route_object_id) {
-      $this->routeMatch->getRouteName()
+      $this->routeMatch
+        ->getRouteName()
         ->willReturn("entity.{$this->getTestEntityProperties()[$route_object_id]['type']}.canonical");
     }
   }
