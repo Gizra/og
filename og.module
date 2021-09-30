@@ -35,6 +35,11 @@ function og_entity_insert(EntityInterface $entity) {
   // Invalidate cache tags if new group content is created.
   og_invalidate_group_content_cache_tags($entity);
 
+  if (!\Drupal::config('og.settings')->get('auto_add_group_owner_membership')) {
+    // Disabled automatically adding group creators to the group.
+    return;
+  }
+
   if (!Og::isGroup($entity->getEntityTypeId(), $entity->bundle())) {
     // Not a group entity.
     return;
