@@ -6,7 +6,7 @@ namespace Drupal\og\Plugin\Derivative;
 
 use Drupal\Component\Plugin\Derivative\DeriverBase;
 use Drupal\Core\Plugin\Discovery\ContainerDeriverInterface;
-use Drupal\Core\Routing\RouteProvider;
+use Drupal\Core\Routing\RouteProviderInterface;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
 use Drupal\og\GroupTypeManagerInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
@@ -28,7 +28,7 @@ class OgLocalTask extends DeriverBase implements ContainerDeriverInterface {
   /**
    * Route provider object.
    *
-   * @var \Drupal\Core\Routing\RouteProvider
+   * @var \Drupal\Core\Routing\RouteProviderInterface
    */
   protected $routProvider;
 
@@ -37,10 +37,10 @@ class OgLocalTask extends DeriverBase implements ContainerDeriverInterface {
    *
    * @param \Drupal\og\GroupTypeManagerInterface $group_type_manager
    *   The group type manager.
-   * @param \Drupal\Core\Routing\RouteProvider $route_provider
+   * @param \Drupal\Core\Routing\RouteProviderInterface $route_provider
    *   The route provider services.
    */
-  public function __construct(GroupTypeManagerInterface $group_type_manager, RouteProvider $route_provider) {
+  public function __construct(GroupTypeManagerInterface $group_type_manager, RouteProviderInterface $route_provider) {
     $this->groupTypeManager = $group_type_manager;
     $this->routProvider = $route_provider;
   }
