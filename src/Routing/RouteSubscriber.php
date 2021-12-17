@@ -28,21 +28,21 @@ class RouteSubscriber extends RouteSubscriberBase {
    *
    * @var \Drupal\Core\Entity\EntityTypeManagerInterface
    */
-  protected $entityTypeManager;
+  protected EntityTypeManagerInterface $entityTypeManager;
 
   /**
    * The route provider service.
    *
-   * @var \Drupal\Core\Routing\RouteProvider
+   * @var \Drupal\Core\Routing\RouteProviderInterface
    */
-  protected $routeProvider;
+  protected RouteProviderInterface $routeProvider;
 
   /**
    * The event dispatcher service.
    *
-   * @var \Symfony\Component\EventDispatcher\EventDispatcher
+   * @var \Symfony\Component\EventDispatcher\EventDispatcherInterface
    */
-  protected $eventDispatcher;
+  protected EventDispatcherInterface $eventDispatcher;
 
   /**
    * Constructs a new RouteSubscriber object.
@@ -63,7 +63,7 @@ class RouteSubscriber extends RouteSubscriberBase {
   /**
    * {@inheritdoc}
    */
-  protected function alterRoutes(RouteCollection $collection) {
+  protected function alterRoutes(RouteCollection $collection): void {
     foreach ($this->entityTypeManager->getDefinitions() as $entity_type_id => $entity_type) {
 
       if (!$entity_type->hasLinkTemplate('canonical')) {
@@ -100,9 +100,7 @@ class RouteSubscriber extends RouteSubscriberBase {
 
       // Add the routes defined in the event subscribers.
       $this->createRoutesFromEventSubscribers($og_admin_path, $entity_type_id, $collection);
-
     }
-
   }
 
   /**
@@ -115,9 +113,9 @@ class RouteSubscriber extends RouteSubscriberBase {
    * @param \Symfony\Component\Routing\RouteCollection $collection
    *   The route collection object.
    */
-  protected function createRoutesFromEventSubscribers($og_admin_path, $entity_type_id, RouteCollection $collection) {
+  protected function createRoutesFromEventSubscribers(string $og_admin_path, string $entity_type_id, RouteCollection $collection): void {
     $event = new OgAdminRoutesEvent();
-    $this->eventDispatcher->dispatch(OgAdminRoutesEventInterface::EVENT_NAME, $event);
+    $this->eventDispatcher->dispatch($event, OgAdminRoutesEventInterface::EVENT_NAME);
 
     foreach ($event->getRoutes($entity_type_id) as $name => $route_info) {
       // Add the parent route.
@@ -141,7 +139,7 @@ class RouteSubscriber extends RouteSubscriberBase {
    *   Array with the router definitions. Required keys are "defaults",
    *   "options", and "requirements".
    */
-  protected function addRoute(RouteCollection $collection, $route_name, $path, array $route_info) {
+  protected function addRoute(RouteCollection $collection, string $route_name, string $path, array $route_info): void {
     $route = new Route($path);
     $route
       ->addDefaults($route_info['defaults'])
@@ -162,7 +160,7 @@ class RouteSubscriber extends RouteSubscriberBase {
    * We have such a case with the "members" OG admin route, that requires Views
    * module to be enabled.
    */
-  public static function getSubscribedEvents() {
+  public static function getSubscribedEvents(): array {
     $events[RoutingEvents::ALTER] = ['onAlterRoutes', 100];
     return $events;
   }

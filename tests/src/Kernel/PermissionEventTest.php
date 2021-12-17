@@ -14,6 +14,7 @@ use Drupal\og\GroupPermission;
 use Drupal\og\OgAccess;
 use Drupal\og\OgRoleInterface;
 use Drupal\og\PermissionInterface;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
 /**
  * Tests the implementations of the PermissionEvent in 'og' and 'og_ui'.
@@ -36,16 +37,16 @@ class PermissionEventTest extends KernelTestBase {
   /**
    * The Symfony event dispatcher.
    *
-   * @var \Symfony\Component\EventDispatcher\EventDispatcherInterface
+   * @var \Symfony\Component\EventDispatcher\EventDispatcherInterface|null
    */
-  protected $eventDispatcher;
+  protected ?EventDispatcherInterface $eventDispatcher;
 
   /**
    * The bundle ID used for the test group.
    *
-   * @var string
+   * @var string|null
    */
-  protected $groupBundleId;
+  protected ?string $groupBundleId;
 
   /**
    * {@inheritdoc}
@@ -90,11 +91,11 @@ class PermissionEventTest extends KernelTestBase {
    *
    * @dataProvider permissionEventDataProvider
    */
-  public function testPermissionEventIntegration(array $group_content_bundle_ids, array $expected_permissions, array $expected_full_permissions) {
+  public function testPermissionEventIntegration(array $group_content_bundle_ids, array $expected_permissions, array $expected_full_permissions): void {
     // Retrieve the permissions from the listeners.
     /** @var \Drupal\og\Event\PermissionEvent $permission_event */
     $event = new PermissionEvent($this->randomMachineName(), $this->randomMachineName(), $group_content_bundle_ids);
-    $permission_event = $this->eventDispatcher->dispatch(PermissionEventInterface::EVENT_NAME, $event);
+    $permission_event = $this->eventDispatcher->dispatch($event, PermissionEventInterface::EVENT_NAME);
     $actual_permissions = array_keys($permission_event->getPermissions());
 
     // Sort the permission arrays so they can be compared.
@@ -127,7 +128,7 @@ class PermissionEventTest extends KernelTestBase {
    *     permission data for each entry, testing the data for only 1 or 2
    *     permissions is sufficient.
    */
-  public function permissionEventDataProvider() {
+  public function permissionEventDataProvider(): array {
     // Test permissions that should be available for both test groups.
     $default_permissions = [
       'add user',
@@ -211,7 +212,7 @@ class PermissionEventTest extends KernelTestBase {
    *
    * @see t()
    */
-  public function t($string, array $args = [], array $options = []) {
+  protected function t($string, array $args = [], array $options = []): FormattableMarkup {
     return new FormattableMarkup($string, $args);
   }
 
@@ -223,7 +224,7 @@ class PermissionEventTest extends KernelTestBase {
    * @param \Drupal\og\PermissionInterface $actual
    *   The actual permission.
    */
-  protected function assertPermission(PermissionInterface $expected, PermissionInterface $actual) {
+  protected function assertPermission(PermissionInterface $expected, PermissionInterface $actual): void {
     foreach ($this->getPermissionProperties($expected) as $property) {
       $this->assertEquals($expected->get($property), $actual->get($property), "The $property property is equal.");
     }
@@ -235,10 +236,10 @@ class PermissionEventTest extends KernelTestBase {
    * @param \Drupal\og\PermissionInterface $permission
    *   The Permission object for which to return the properties.
    *
-   * @return array
+   * @return string[]
    *   An array of property names.
    */
-  protected function getPermissionProperties(PermissionInterface $permission) {
+  protected function getPermissionProperties(PermissionInterface $permission): array {
     $shared_permissions = [
       'default roles',
       'description',

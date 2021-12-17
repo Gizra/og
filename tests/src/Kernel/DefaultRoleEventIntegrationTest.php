@@ -4,11 +4,13 @@ declare(strict_types = 1);
 
 namespace Drupal\Tests\og\Kernel;
 
+use Drupal\Core\Entity\EntityStorageInterface;
 use Drupal\KernelTests\KernelTestBase;
 use Drupal\og\Event\DefaultRoleEvent;
 use Drupal\og\Event\DefaultRoleEventInterface;
 use Drupal\og\Og;
 use Drupal\og\OgRoleInterface;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
 /**
  * Tests the implementation of the DefaultRoleEvent in the 'og' module.
@@ -25,23 +27,23 @@ class DefaultRoleEventIntegrationTest extends KernelTestBase {
   /**
    * The Symfony event dispatcher.
    *
-   * @var \Symfony\Component\EventDispatcher\EventDispatcherInterface
+   * @var \Symfony\Component\EventDispatcher\EventDispatcherInterface|null
    */
-  protected $eventDispatcher;
+  protected ?EventDispatcherInterface $eventDispatcher;
 
   /**
    * The group bundle ID of the test group.
    *
-   * @var string
+   * @var string|null
    */
-  protected $groupBundleId;
+  protected ?string $groupBundleId;
 
   /**
    * The OG role storage handler.
    *
-   * @var \Drupal\Core\Entity\EntityStorageInterface
+   * @var \Drupal\Core\Entity\EntityStorageInterface|null
    */
-  protected $ogRoleStorage;
+  protected ?EntityStorageInterface $ogRoleStorage;
 
   /**
    * {@inheritdoc}
@@ -62,13 +64,12 @@ class DefaultRoleEventIntegrationTest extends KernelTestBase {
   /**
    * Tests that OG correctly provides the group administrator default role.
    */
-  public function testPermissionEventIntegration() {
-    /** @var \Drupal\og\Event\DefaultRoleEvent $event */
+  public function testPermissionEventIntegration(): void {
     $event = new DefaultRoleEvent();
 
     // Query the event listener directly to see if the administrator role is
     // present.
-    $this->eventDispatcher->dispatch(DefaultRoleEventInterface::EVENT_NAME, $event);
+    $this->eventDispatcher->dispatch($event, DefaultRoleEventInterface::EVENT_NAME);
     $this->assertEquals([OgRoleInterface::ADMINISTRATOR], array_keys($event->getRoles()));
 
     // Check that the role was created with the correct values.

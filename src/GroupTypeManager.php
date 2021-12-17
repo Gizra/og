@@ -8,6 +8,7 @@ use Drupal\Core\Cache\CacheBackendInterface;
 use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Entity\EntityTypeBundleInfoInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
+use Drupal\Core\Extension\ModuleHandlerInterface;
 use Drupal\Core\Routing\RouteBuilderInterface;
 use Drupal\og\Event\GroupCreationEvent;
 use Drupal\og\Event\GroupCreationEventInterface;
@@ -42,35 +43,35 @@ class GroupTypeManager implements GroupTypeManagerInterface {
    *
    * @var \Drupal\Core\Config\ConfigFactoryInterface
    */
-  protected $configFactory;
+  protected ConfigFactoryInterface $configFactory;
 
   /**
    * The service providing information about bundles.
    *
    * @var \Drupal\Core\Entity\EntityTypeBundleInfoInterface
    */
-  protected $entityTypeBundleInfo;
+  protected EntityTypeBundleInfoInterface $entityTypeBundleInfo;
 
   /**
    * The event dispatcher.
    *
    * @var \Symfony\Component\EventDispatcher\EventDispatcherInterface
    */
-  protected $eventDispatcher;
+  protected EventDispatcherInterface $eventDispatcher;
 
   /**
    * The cache backend.
    *
    * @var \Drupal\Core\Cache\CacheBackendInterface
    */
-  protected $cache;
+  protected CacheBackendInterface $cache;
 
   /**
    * The OG permission manager.
    *
    * @var \Drupal\og\PermissionManagerInterface
    */
-  protected $permissionManager;
+  protected PermissionManagerInterface $permissionManager;
 
   /**
    * A map of entity types and bundles.
@@ -79,7 +80,7 @@ class GroupTypeManager implements GroupTypeManagerInterface {
    *
    * @var array
    */
-  protected $groupMap;
+  protected array $groupMap;
 
   /**
    * A map of group and group content relations.
@@ -103,42 +104,42 @@ class GroupTypeManager implements GroupTypeManagerInterface {
    *   ]
    * @endcode
    */
-  protected $groupRelationMap = [];
+  protected array $groupRelationMap = [];
 
   /**
    * The module handler.
    *
    * @var \Drupal\Core\Extension\ModuleHandlerInterface
    */
-  protected $moduleHandler;
+  protected ModuleHandlerInterface $moduleHandler;
 
   /**
    * The OG role manager.
    *
    * @var \Drupal\og\OgRoleManagerInterface
    */
-  protected $ogRoleManager;
+  protected OgRoleManagerInterface $ogRoleManager;
 
   /**
    * The route builder service.
    *
    * @var \Drupal\Core\Routing\RouteBuilderInterface
    */
-  protected $routeBuilder;
+  protected RouteBuilderInterface $routeBuilder;
 
   /**
    * The OG group audience helper.
    *
    * @var \Drupal\og\OgGroupAudienceHelperInterface
    */
-  protected $groupAudienceHelper;
+  protected OgGroupAudienceHelperInterface $groupAudienceHelper;
 
   /**
    * The Entity type manager service.
    *
    * @var \Drupal\Core\Entity\EntityTypeManagerInterface
    */
-  protected $entityTypeManager;
+  protected EntityTypeManagerInterface $entityTypeManager;
 
   /**
    * Constructs a GroupTypeManager object.
@@ -177,7 +178,7 @@ class GroupTypeManager implements GroupTypeManagerInterface {
   /**
    * {@inheritdoc}
    */
-  public function isGroup($entity_type_id, $bundle) {
+  public function isGroup(string $entity_type_id, string $bundle): bool {
     $group_map = $this->getGroupMap();
     return isset($group_map[$entity_type_id]) && in_array($bundle, $group_map[$entity_type_id]);
   }
@@ -185,22 +186,22 @@ class GroupTypeManager implements GroupTypeManagerInterface {
   /**
    * {@inheritdoc}
    */
-  public function isGroupContent($entity_type_id, $bundle) {
+  public function isGroupContent(string $entity_type_id, string $bundle): bool {
     return $this->groupAudienceHelper->hasGroupAudienceField($entity_type_id, $bundle);
   }
 
   /**
    * {@inheritdoc}
    */
-  public function getGroupBundleIdsByEntityType($entity_type_id) {
+  public function getGroupBundleIdsByEntityType(string $entity_type_id): array {
     $group_map = $this->getGroupMap();
-    return isset($group_map[$entity_type_id]) ? $group_map[$entity_type_id] : [];
+    return $group_map[$entity_type_id] ?? [];
   }
 
   /**
    * {@inheritdoc}
    */
-  public function getAllGroupContentBundleIds() {
+  public function getAllGroupContentBundleIds(): array {
     $bundles = [];
     foreach ($this->getGroupRelationMap() as $group_bundle_ids) {
       foreach ($group_bundle_ids as $group_content_entity_type_ids) {
@@ -215,7 +216,7 @@ class GroupTypeManager implements GroupTypeManagerInterface {
   /**
    * {@inheritdoc}
    */
-  public function getAllGroupContentBundlesByEntityType($entity_type_id) {
+  public function getAllGroupContentBundlesByEntityType(string $entity_type_id): array {
     $bundles = $this->getAllGroupContentBundleIds();
     if (!isset($bundles[$entity_type_id])) {
       throw new \InvalidArgumentException("The '$entity_type_id' entity type has no group content bundles.");
@@ -226,7 +227,7 @@ class GroupTypeManager implements GroupTypeManagerInterface {
   /**
    * {@inheritdoc}
    */
-  public function getGroupBundleIdsByGroupContentBundle($group_content_entity_type_id, $group_content_bundle_id) {
+  public function getGroupBundleIdsByGroupContentBundle(string $group_content_entity_type_id, string $group_content_bundle_id): array {
     $bundles = [];
 
     foreach ($this->groupAudienceHelper->getAllGroupAudienceFields($group_content_entity_type_id, $group_content_bundle_id) as $field) {
@@ -251,15 +252,15 @@ class GroupTypeManager implements GroupTypeManagerInterface {
   /**
    * {@inheritdoc}
    */
-  public function getGroupContentBundleIdsByGroupBundle($group_entity_type_id, $group_bundle_id) {
+  public function getGroupContentBundleIdsByGroupBundle(string $group_entity_type_id, string $group_bundle_id): array {
     $group_relation_map = $this->getGroupRelationMap();
-    return isset($group_relation_map[$group_entity_type_id][$group_bundle_id]) ? $group_relation_map[$group_entity_type_id][$group_bundle_id] : [];
+    return $group_relation_map[$group_entity_type_id][$group_bundle_id] ?? [];
   }
 
   /**
    * {@inheritdoc}
    */
-  public function addGroup($entity_type_id, $bundle_id) {
+  public function addGroup(string $entity_type_id, string $bundle_id): void {
     // Throw an error if the entity type is already defined as a group.
     if ($this->isGroup($entity_type_id, $bundle_id)) {
       throw new \InvalidArgumentException("The '$entity_type_id' of type '$bundle_id' is already a group.");
@@ -276,7 +277,7 @@ class GroupTypeManager implements GroupTypeManagerInterface {
 
     // Trigger an event upon the new group creation.
     $event = new GroupCreationEvent($entity_type_id, $bundle_id);
-    $this->eventDispatcher->dispatch(GroupCreationEventInterface::EVENT_NAME, $event);
+    $this->eventDispatcher->dispatch($event, GroupCreationEventInterface::EVENT_NAME);
 
     $this->ogRoleManager->createPerBundleRoles($entity_type_id, $bundle_id);
     $this->refreshGroupMap();
@@ -288,7 +289,7 @@ class GroupTypeManager implements GroupTypeManagerInterface {
   /**
    * {@inheritdoc}
    */
-  public function removeGroup($entity_type_id, $bundle_id) {
+  public function removeGroup(string $entity_type_id, string $bundle_id): void {
     $editable = $this->configFactory->getEditable('og.settings');
     $groups = $editable->get('groups');
 
@@ -316,7 +317,7 @@ class GroupTypeManager implements GroupTypeManagerInterface {
   /**
    * {@inheritdoc}
    */
-  public function reset() {
+  public function reset(): void {
     $this->resetGroupMap();
     $this->resetGroupRelationMap();
   }
@@ -324,14 +325,14 @@ class GroupTypeManager implements GroupTypeManagerInterface {
   /**
    * {@inheritdoc}
    */
-  public function resetGroupMap() {
+  public function resetGroupMap(): void {
     $this->groupMap = [];
   }
 
   /**
    * {@inheritdoc}
    */
-  public function resetGroupRelationMap() {
+  public function resetGroupRelationMap(): void {
     $this->groupRelationMap = [];
     $this->cache->delete(self::GROUP_RELATION_MAP_CACHE_KEY);
   }
@@ -339,7 +340,7 @@ class GroupTypeManager implements GroupTypeManagerInterface {
   /**
    * {@inheritdoc}
    */
-  public function getGroupMap() {
+  public function getGroupMap(): array {
     if (empty($this->groupMap)) {
       $this->refreshGroupMap();
     }
@@ -352,7 +353,7 @@ class GroupTypeManager implements GroupTypeManagerInterface {
    * @return array
    *   The group relation map.
    */
-  protected function getGroupRelationMap() {
+  protected function getGroupRelationMap(): array {
     if (empty($this->groupRelationMap)) {
       $this->populateGroupRelationMap();
     }

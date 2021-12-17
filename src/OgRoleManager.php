@@ -4,6 +4,7 @@ declare(strict_types = 1);
 
 namespace Drupal\og;
 
+use Drupal\Core\Entity\EntityStorageInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\og\Event\DefaultRoleEvent;
 use Drupal\og\Event\DefaultRoleEventInterface;
@@ -19,28 +20,28 @@ class OgRoleManager implements OgRoleManagerInterface {
    *
    * @var \Drupal\Core\Entity\EntityTypeManagerInterface
    */
-  protected $entityTypeManager;
+  protected EntityTypeManagerInterface $entityTypeManager;
 
   /**
    * The entity storage for OgRole entities.
    *
    * @var \Drupal\Core\Entity\EntityStorageInterface
    */
-  protected $ogRoleStorage;
+  protected EntityStorageInterface $ogRoleStorage;
 
   /**
    * The event dispatcher.
    *
    * @var \Symfony\Component\EventDispatcher\EventDispatcherInterface
    */
-  protected $eventDispatcher;
+  protected EventDispatcherInterface $eventDispatcher;
 
   /**
    * The OG permission manager.
    *
    * @var \Drupal\og\PermissionManagerInterface
    */
-  protected $permissionManager;
+  protected PermissionManagerInterface $permissionManager;
 
   /**
    * Constructs an OgRoleManager object.
@@ -61,7 +62,7 @@ class OgRoleManager implements OgRoleManagerInterface {
   /**
    * {@inheritdoc}
    */
-  public function createPerBundleRoles($entity_type_id, $bundle_id) {
+  public function createPerBundleRoles(string $entity_type_id, string $bundle_id): array {
     $roles = [];
     foreach ($this->getDefaultRoles() as $role) {
       $role->setGroupType($entity_type_id);
@@ -83,12 +84,12 @@ class OgRoleManager implements OgRoleManagerInterface {
   /**
    * {@inheritdoc}
    */
-  public function getDefaultRoles() {
+  public function getDefaultRoles(): array {
     // Provide the required default roles: 'member' and 'non-member'.
     $roles = $this->getRequiredDefaultRoles();
 
     $event = new DefaultRoleEvent();
-    $this->eventDispatcher->dispatch(DefaultRoleEventInterface::EVENT_NAME, $event);
+    $this->eventDispatcher->dispatch($event, DefaultRoleEventInterface::EVENT_NAME);
 
     // Use the array union operator '+=' to ensure the default roles cannot be
     // altered by event subscribers.
@@ -100,7 +101,7 @@ class OgRoleManager implements OgRoleManagerInterface {
   /**
    * {@inheritdoc}
    */
-  public function getRequiredDefaultRoles() {
+  public function getRequiredDefaultRoles(): array {
     $roles = [];
 
     $role_properties = [
@@ -126,7 +127,7 @@ class OgRoleManager implements OgRoleManagerInterface {
   /**
    * {@inheritdoc}
    */
-  public function getRolesByBundle($entity_type_id, $bundle) {
+  public function getRolesByBundle(string $entity_type_id, string $bundle): array {
     $properties = [
       'group_type' => $entity_type_id,
       'group_bundle' => $bundle,
@@ -137,7 +138,7 @@ class OgRoleManager implements OgRoleManagerInterface {
   /**
    * {@inheritdoc}
    */
-  public function getRolesByPermissions(array $permissions, $entity_type_id = NULL, $bundle = NULL, $require_all = TRUE): array {
+  public function getRolesByPermissions(array $permissions, ?string $entity_type_id = NULL, ?string $bundle = NULL, bool $require_all = TRUE): array {
     $role_storage = $this->ogRoleStorage();
     $query = $role_storage->getQuery();
     if ($require_all) {
@@ -166,7 +167,7 @@ class OgRoleManager implements OgRoleManagerInterface {
   /**
    * {@inheritdoc}
    */
-  public function removeRoles($entity_type_id, $bundle_id) {
+  public function removeRoles(string $entity_type_id, string $bundle_id): void {
     $properties = [
       'group_type' => $entity_type_id,
       'group_bundle' => $bundle_id,
@@ -182,8 +183,8 @@ class OgRoleManager implements OgRoleManagerInterface {
    * @return \Drupal\Core\Entity\EntityStorageInterface
    *   The OG Role storage
    */
-  protected function ogRoleStorage() {
-    if (!$this->ogRoleStorage) {
+  protected function ogRoleStorage(): EntityStorageInterface {
+    if (!isset($this->ogRoleStorage)) {
       $this->ogRoleStorage = $this->entityTypeManager->getStorage('og_role');
     }
 

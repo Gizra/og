@@ -23,14 +23,14 @@ class OgAdminRoutesController extends ControllerBase {
    *
    * @var \Drupal\Component\EventDispatcher\ContainerAwareEventDispatcher
    */
-  protected $eventDispatcher;
+  protected ContainerAwareEventDispatcher $eventDispatcher;
 
   /**
    * The access manager service.
    *
    * @var \Drupal\Core\Access\AccessManagerInterface
    */
-  protected $accessManager;
+  protected AccessManagerInterface $accessManager;
 
   /**
    * Constructs an OgAdminController object.
@@ -64,7 +64,7 @@ class OgAdminRoutesController extends ControllerBase {
    * @return array
    *   List of available admin routes for the current group.
    */
-  public function overview(RouteMatchInterface $route_match) {
+  public function overview(RouteMatchInterface $route_match): array {
     $parameter_name = $route_match->getRouteObject()->getOption('_og_entity_type_id');
 
     /** @var \Drupal\Core\Entity\EntityInterface $group */
@@ -76,7 +76,7 @@ class OgAdminRoutesController extends ControllerBase {
     $content = [];
 
     $event = new OgAdminRoutesEvent();
-    $event = $this->eventDispatcher->dispatch(OgAdminRoutesEventInterface::EVENT_NAME, $event);
+    $event = $this->eventDispatcher->dispatch($event, OgAdminRoutesEventInterface::EVENT_NAME);
 
     foreach ($event->getRoutes($entity_type_id) as $name => $info) {
       $route_name = "entity.$entity_type_id.og_admin_routes.$name";

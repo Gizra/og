@@ -159,7 +159,7 @@ class OgAdminRoutesControllerTest extends UnitTestCase {
 
     $this
       ->eventDispatcher
-      ->dispatch(OgAdminRoutesEventInterface::EVENT_NAME, Argument::type(OgAdminRoutesEvent::class))
+      ->dispatch(Argument::type(OgAdminRoutesEvent::class), OgAdminRoutesEventInterface::EVENT_NAME)
       ->willReturn($this->event->reveal())
       ->shouldBeCalled();
 
@@ -182,7 +182,7 @@ class OgAdminRoutesControllerTest extends UnitTestCase {
    *
    * @covers ::overview
    */
-  public function testRoutesWithNoAccess() {
+  public function testRoutesWithNoAccess(): void {
     $result = $this->getRenderElementResult(FALSE);
     $this->assertEquals('You do not have any administrative items.', $result['#markup']);
   }
@@ -192,14 +192,13 @@ class OgAdminRoutesControllerTest extends UnitTestCase {
    *
    * @covers ::overview
    */
-  public function testRoutesWithAccess() {
+  public function testRoutesWithAccess(): void {
     $result = $this->getRenderElementResult(TRUE);
 
     foreach ($result['og_admin_routes']['#content'] as $key => $value) {
       $this->assertEquals($this->routesInfo[$key]['title'], $value['title']);
       $this->assertEquals($this->routesInfo[$key]['description'], $value['description']);
     }
-
   }
 
   /**
@@ -211,7 +210,7 @@ class OgAdminRoutesControllerTest extends UnitTestCase {
    * @return array
    *   The render array.
    */
-  protected function getRenderElementResult($allow_access) {
+  protected function getRenderElementResult($allow_access): array {
     $parameters = [$this->entityTypeId => $this->entityId];
     foreach (array_keys($this->routesInfo) as $name) {
       $route_name = "entity.{$this->entityTypeId}.og_admin_routes.$name";

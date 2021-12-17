@@ -30,7 +30,7 @@ interface PermissionManagerInterface {
    * @return \Drupal\og\PermissionInterface[]
    *   The array of permissions.
    */
-  public function getDefaultPermissions($group_entity_type_id, $group_bundle_id, array $group_content_bundle_ids, $role_name = NULL);
+  public function getDefaultPermissions(string $group_entity_type_id, string $group_bundle_id, array $group_content_bundle_ids, ?string $role_name = NULL): array;
 
   /**
    * Returns permissions that are enabled by default for the given role.
@@ -58,7 +58,7 @@ interface PermissionManagerInterface {
    * @see \Drupal\og\Event\PermissionEventInterface
    * @see \Drupal\og\EventSubscriber\OgEventSubscriber::provideDefaultOgPermissions()
    */
-  public function getDefaultGroupPermissions($group_entity_type_id, $group_bundle_id, $role_name = NULL);
+  public function getDefaultGroupPermissions(string $group_entity_type_id, string $group_bundle_id, ?string $role_name = NULL): array;
 
   /**
    * Returns the list of entity operation permissions for a given group content.
@@ -89,6 +89,6 @@ interface PermissionManagerInterface {
    * @see \Drupal\og\EventSubscriber\OgEventSubscriber::provideDefaultNodePermissions()
    * @see \Drupal\og\EventSubscriber\OgEventSubscriber::getDefaultEntityOperationPermissions()
    */
-  public function getDefaultEntityOperationPermissions($group_entity_type_id, $group_bundle_id, array $group_content_bundle_ids, $role_name = NULL);
+  public function getDefaultEntityOperationPermissions(string $group_entity_type_id, string $group_bundle_id, array $group_content_bundle_ids, ?string $role_name = NULL): array;
 
 }

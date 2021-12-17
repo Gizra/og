@@ -255,7 +255,7 @@ class Og {
    * @return bool
    *   True or false if the given entity is group.
    */
-  public static function isGroup($entity_type_id, $bundle_id) {
+  public static function isGroup(string $entity_type_id, string $bundle_id): bool {
     return static::groupTypeManager()->isGroup($entity_type_id, $bundle_id);
   }
 
@@ -270,8 +270,8 @@ class Og {
    * @return bool
    *   True or false if the given entity is group content.
    */
-  public static function isGroupContent($entity_type_id, $bundle_id) {
-    return \Drupal::service('og.group_type_manager')->isGroupContent($entity_type_id, $bundle_id);
+  public static function isGroupContent(string $entity_type_id, string $bundle_id): bool {
+    return static::groupTypeManager()->isGroupContent($entity_type_id, $bundle_id);
   }
 
   /**
@@ -282,7 +282,7 @@ class Og {
    * @param string $bundle_id
    *   The bundle name.
    */
-  public static function addGroup($entity_type_id, $bundle_id) {
+  public static function addGroup(string $entity_type_id, string $bundle_id): void {
     static::groupTypeManager()->addGroup($entity_type_id, $bundle_id);
   }
 
@@ -293,12 +293,9 @@ class Og {
    *   The entity type.
    * @param string $bundle_id
    *   The bundle name.
-   *
-   * @return bool
-   *   True or false if the action succeeded.
    */
-  public static function removeGroup($entity_type_id, $bundle_id) {
-    return static::groupTypeManager()->removeGroup($entity_type_id, $bundle_id);
+  public static function removeGroup(string $entity_type_id, string $bundle_id): void {
+    static::groupTypeManager()->removeGroup($entity_type_id, $bundle_id);
   }
 
   /**
@@ -307,7 +304,7 @@ class Og {
    * @return \Drupal\og\GroupTypeManagerInterface
    *   Returns the group manager.
    */
-  public static function groupTypeManager() {
+  public static function groupTypeManager(): GroupTypeManagerInterface {
     // @todo store static reference for this?
     return \Drupal::service('og.group_type_manager');
   }
