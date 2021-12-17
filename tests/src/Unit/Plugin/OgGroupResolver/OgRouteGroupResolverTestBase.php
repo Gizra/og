@@ -89,9 +89,6 @@ abstract class OgRouteGroupResolverTestBase extends OgGroupResolverTestBase {
       // If a route object is returned the plugin will need to inspect it to
       // check if it is a group.
       $this->mightCheckIfRouteObjectIsGroup($route_object_id);
-      // If an entity path is being accessed, the plugin will need to inspect
-      // the route name, to check if a node revision route is being accessed.
-      $this->mightRetrieveRouteName($route_object_id);
     }
 
     // Add expectations for the groups that are added and removed by the plugin.
@@ -241,28 +238,6 @@ abstract class OgRouteGroupResolverTestBase extends OgGroupResolverTestBase {
     $bundle = $properties[$route_object_id]['bundle'];
     $this->groupTypeManager->isGroup($entity_type_id, $bundle)
       ->willReturn(!empty($properties[$route_object_id]['group']));
-  }
-
-  /**
-   * Adds an expectation that the plugin will retrieve the route name.
-   *
-   * If the current path is an entity path, the plugin should retrieve the
-   * route name from the route to check if the route is a node revision route.
-   * If we are not, then it should not attempt to retrieve it.
-   *
-   * @param string|null $route_object_id
-   *   The ID of the entity that is present on the current route, or NULL if we
-   *   are not on a content entity path. The ID may be any of the ones created
-   *   in the test setup, e.g. 'group', 'group_content', 'non_group'.
-   */
-  protected function mightRetrieveRouteName(?string $route_object_id) {
-    // The route name should only be retrieved if we are on a content entity
-    // path.
-    if ($route_object_id) {
-      $this->routeMatch
-        ->getRouteName()
-        ->willReturn("entity.{$this->getTestEntityProperties()[$route_object_id]['type']}.canonical");
-    }
   }
 
 }
