@@ -67,9 +67,9 @@ interface OgRoleManagerInterface {
    *
    * @param array $permissions
    *   An array of permissions that the roles must have.
-   * @param ?string $entity_type_id
+   * @param string|null $entity_type_id
    *   (optional) The entity type ID of the group.
-   * @param ?string $bundle
+   * @param string|null $bundle
    *   (optional) The bundle of the group.
    * @param bool $require_all
    *   (optional) Whether all given permissions are required. When set to FALSE
