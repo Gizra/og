@@ -107,11 +107,6 @@ function og_entity_delete(EntityInterface $entity) {
   // Invalidate cache tags after a group or group content entity is deleted.
   og_invalidate_group_content_cache_tags($entity);
 
-  // Clear static caches after a group or group content entity is deleted.
-  if (Og::isGroup($entity->getEntityTypeId(), $entity->bundle()) || Og::isGroupContent($entity->getEntityTypeId(), $entity->bundle())) {
-    Og::invalidateCache();
-  }
-
   // If a group content type is deleted, make sure to remove it from the list of
   // groups.
   if ($entity instanceof ConfigEntityBundleBase) {
