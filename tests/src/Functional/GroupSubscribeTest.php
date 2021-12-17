@@ -39,35 +39,35 @@ class GroupSubscribeTest extends BrowserTestBase {
    *
    * @var \Drupal\node\NodeInterface
    */
-  protected $group1;
+  protected $groupB1No1;
 
   /**
    * Test entity group.
    *
    * @var \Drupal\node\NodeInterface
    */
-  protected $group2;
+  protected $groupB2No1;
 
   /**
    * Test entity group.
    *
    * @var \Drupal\node\NodeInterface
    */
-  protected $group3;
+  protected $groupB1No2Unpublished;
 
   /**
    * Test entity group.
    *
    * @var \Drupal\node\NodeInterface
    */
-  protected $group4;
+  protected $nonGroup;
 
   /**
    * Test entity group.
    *
    * @var \Drupal\node\NodeInterface
    */
-  protected $group5;
+  protected $groupB3No1;
 
   /**
    * A group bundle name.
@@ -137,49 +137,49 @@ class GroupSubscribeTest extends BrowserTestBase {
     // Create node author user.
     $user = $this->createUser();
 
-    // Create test groups. The first group has the 'subscribe without approval'
-    // permission.
-    $this->group1 = Node::create([
+    // Create test groups. The first group bundle has the
+    // 'subscribe without approval' permission.
+    $this->groupB1No1 = Node::create([
       'type' => $this->groupBundle1,
       'title' => $this->randomString(),
       'uid' => $user->id(),
     ]);
-    $this->group1->save();
-
-    // A group which is using default permissions; it grants the 'subscribe'
-    // permission to non-members.
-    $this->group2 = Node::create([
-      'type' => $this->groupBundle2,
-      'title' => $this->randomString(),
-      'uid' => $user->id(),
-    ]);
-    $this->group2->save();
+    $this->groupB1No1->save();
 
     // An unpublished group.
-    $this->group3 = Node::create([
+    $this->groupB1No2Unpublished = Node::create([
       'type' => $this->groupBundle1,
       'title' => $this->randomString(),
       'uid' => $user->id(),
       'status' => NodeInterface::NOT_PUBLISHED,
     ]);
-    $this->group3->save();
+    $this->groupB1No2Unpublished->save();
+
+    // A group which is using default permissions; it grants the 'subscribe'
+    // permission to non-members.
+    $this->groupB2No1 = Node::create([
+      'type' => $this->groupBundle2,
+      'title' => $this->randomString(),
+      'uid' => $user->id(),
+    ]);
+    $this->groupB2No1->save();
 
     // Create non-group.
-    $this->group4 = Node::create([
+    $this->nonGroup = Node::create([
       'type' => $this->nonGroupBundle,
       'title' => $this->randomString(),
       'uid' => $user->id(),
     ]);
-    $this->group4->save();
+    $this->nonGroup->save();
 
     // A group which is closed for subscription. It grants neither 'subscribe'
     // nor 'subscribe without approval'.
-    $this->group5 = Node::create([
+    $this->groupB3No1 = Node::create([
       'type' => $this->groupBundle3,
       'title' => $this->randomString(),
       'uid' => $user->id(),
     ]);
-    $this->group5->save();
+    $this->groupB3No1->save();
 
     // Grant the permission to 'subscribe without approval' to the first group
     // type.
@@ -206,13 +206,12 @@ class GroupSubscribeTest extends BrowserTestBase {
    * Tests access to subscribe page.
    */
   public function testSubscribeAccess() {
-    $this->drupalLogin($this->normalUser);
 
     // We don't use a provider function, as it makes the test run much slower.
     $scenarios = [
       // Group with active membership.
       [
-        'entity' => $this->group1,
+        'entity' => $this->groupB1No1,
         // Don't set the membership type. "Default" will be used.
         'membership_type' => '',
         'code' => 200,
@@ -220,7 +219,7 @@ class GroupSubscribeTest extends BrowserTestBase {
         'private' => FALSE,
       ],
       [
-        'entity' => $this->group1,
+        'entity' => $this->groupB1No1,
         // Explicitly set the membership type.
         'membership_type' => OgMembershipInterface::TYPE_DEFAULT,
         'code' => 200,
@@ -228,14 +227,14 @@ class GroupSubscribeTest extends BrowserTestBase {
         'private' => FALSE,
       ],
       [
-        'entity' => $this->group1,
+        'entity' => $this->groupB1No1,
         // Set invalid membership type.
         'membership_type' => mb_strtolower($this->randomMachineName()),
         'code' => 404,
       ],
       // Group with pending membership.
       [
-        'entity' => $this->group2,
+        'entity' => $this->groupB2No1,
         'code' => 200,
         'skip_approval' => FALSE,
         'private' => FALSE,
@@ -245,7 +244,7 @@ class GroupSubscribeTest extends BrowserTestBase {
       // it. Since it's "private" the default membership will be pending,
       // even though the permission is "subscribe without approval".
       [
-        'entity' => $this->group3,
+        'entity' => $this->groupB1No2Unpublished,
         'code' => 200,
         'skip_approval' => FALSE,
         'private' => TRUE,
@@ -253,13 +252,13 @@ class GroupSubscribeTest extends BrowserTestBase {
 
       // A non-group entity.
       [
-        'entity' => $this->group4,
+        'entity' => $this->nonGroup,
         'code' => 403,
       ],
 
       // A group which doesn't allow new subscriptions.
       [
-        'entity' => $this->group5,
+        'entity' => $this->groupB3No1,
         'code' => 403,
       ],
 
@@ -282,6 +281,11 @@ class GroupSubscribeTest extends BrowserTestBase {
     ];
 
     foreach ($scenarios as $scenario) {
+      // Use a different user for each scenario so they have no existing
+      // memberships.
+      $new_user = $this->drupalCreateUser();
+      $this->drupalLogin($new_user);
+      $entity = NULL;
       /** @var \Drupal\Core\Entity\EntityInterface $entity */
       if (!empty($scenario['entity'])) {
         $entity = $scenario['entity'];
@@ -303,17 +307,32 @@ class GroupSubscribeTest extends BrowserTestBase {
       $this->drupalGet($path);
       $this->assertSession()->statusCodeEquals($scenario['code']);
 
-      if ($scenario['code'] != 200) {
+      if ($scenario['code'] !== 200) {
         continue;
       }
 
-      // Assert request membership field.
       if ($scenario['skip_approval']) {
-        $this->assertSession()->elementNotExists('xpath', '//*[@id="edit-og-membership-request-0-value"]');
+        $this->assertSession()->elementNotExists('css', '#edit-og-membership-request-0-value');
+        $text = 'Are you sure you want to join the group';
+        $expected_state = [OgMembershipInterface::STATE_ACTIVE];
       }
       else {
-        $this->assertSession()->elementExists('xpath', '//*[@id="edit-og-membership-request-0-value"]');
+        // The text area to explain the request to join.
+        $this->assertSession()->elementExists('css', '#edit-og-membership-request-0-value');
+        $text = 'Are you sure you want to request a subscription to the group';
+        $expected_state = [OgMembershipInterface::STATE_PENDING];
       }
+      $this->assertSession()->pageTextContains($text);
+      // The user should not be able to change their role or state, due to
+      // field permissions in
+      // \Drupal\og\OgMembershipAccessControlHandler::checkFieldAccess().
+      $this->assertSession()->elementNotExists('css', '#edit-roles');
+      $this->assertSession()->elementNotExists('css', '#edit-state');
+      $this->click('#edit-submit');
+      $this->assertSession()->statusCodeEquals(200);
+      /** @var \Drupal\og\MembershipManager $membership_manager */
+      $membership_manager = $this->container->get('og.membership_manager');
+      $this->assertTrue($membership_manager->isMember($entity, $new_user->id(), $expected_state));
 
       // Assert title appears only for accessible groups.
       if ($scenario['private']) {
@@ -330,13 +349,13 @@ class GroupSubscribeTest extends BrowserTestBase {
    * Tests access to un-subscribe page.
    */
   public function testUnSubscribeAccess() {
-    $this->createOgMembership($this->group1, $this->normalUser);
+    $this->createOgMembership($this->groupB1No1, $this->normalUser);
 
     $this->drupalLogin($this->normalUser);
 
     $scenarios = [
-      $this->group1->id() => 200,
-      $this->group2->id() => 403,
+      $this->groupB1No1->id() => 200,
+      $this->groupB2No1->id() => 403,
     ];
 
     foreach ($scenarios as $entity_id => $code) {

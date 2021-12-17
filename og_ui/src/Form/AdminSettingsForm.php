@@ -58,7 +58,6 @@ class AdminSettingsForm extends ConfigFormBase {
   protected function getEditableConfigNames() {
     return [
       'og.settings',
-      'og_ui.settings',
     ];
   }
 
@@ -133,6 +132,13 @@ class AdminSettingsForm extends ConfigFormBase {
       }
     }
 
+    $form['auto_add_group_owner_membership'] = [
+      '#type' => 'checkbox',
+      '#title' => $this->t('Automatically add creators to the group'),
+      '#description' => $this->t('When a user creates a group, they automatically become a member of the group.'),
+      '#default_value' => $config_og->get('auto_add_group_owner_membership'),
+    ];
+
     $form['#attached']['library'][] = 'og_ui/form';
 
     return $form;
@@ -149,6 +155,7 @@ class AdminSettingsForm extends ConfigFormBase {
       ->set('node_access_strict', $form_state->getValue('og_node_access_strict'))
       ->set('delete_orphans', $form_state->getValue('og_delete_orphans'))
       ->set('delete_orphans_plugin_id', $form_state->getValue('og_delete_orphans_plugin_id'))
+      ->set('auto_add_group_owner_membership', $form_state->getValue('auto_add_group_owner_membership'))
       ->save();
   }
 

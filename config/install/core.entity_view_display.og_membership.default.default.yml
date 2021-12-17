@@ -14,7 +14,21 @@ content:
   og_membership_request:
     label: above
     type: basic_string
-    weight: 0
+    weight: 2
     settings: {  }
+    third_party_settings: {  }
+  roles:
+    type: entity_reference_label
+    weight: 1
+    label: above
+    settings:
+      link: false
+    third_party_settings: {  }
+  uid:
+    type: entity_reference_label
+    weight: 0
+    label: above
+    settings:
+      link: true
     third_party_settings: {  }
 hidden: {  }
