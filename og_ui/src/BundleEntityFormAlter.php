@@ -7,6 +7,7 @@ namespace Drupal\og_ui;
 use Drupal\Component\Utility\Unicode;
 use Drupal\Core\Entity\BundleEntityFormBase;
 use Drupal\Core\Entity\EntityInterface;
+use Drupal\Core\Entity\RevisionableEntityBundleInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\field\Entity\FieldConfig;
@@ -76,7 +77,7 @@ class BundleEntityFormAlter {
       throw new \InvalidArgumentException('Passed in form is not a bundle entity form.');
     }
     $this->prepare($form, $form_state);
-    $this->addGroupType($form, $form_state);
+    static::addGroupType($form, $form_state);
     $this->addGroupContent($form, $form_state);
   }
 
@@ -114,21 +115,24 @@ class BundleEntityFormAlter {
   }
 
   /**
-   * Adds the "is group?" checkbox.
+   * Adds the section to mark the entity type as a group type.
    */
-  protected function addGroupType(array &$form, FormStateInterface $form_state) {
-    if ($this->entity->isNew()) {
+  protected static function addGroupType(array &$form, FormStateInterface $form_state) {
+    $bundle = static::getEntityBundle($form_state);
+    if ($bundle->isNew()) {
       $description = new TranslatableMarkup('Every entity in this bundle is a group which can contain entities and can have members.');
+      $default_value = FALSE;
     }
     else {
       $description = new TranslatableMarkup('Every "%bundle" is a group which can contain entities and can have members.', [
-        '%bundle' => Unicode::lcfirst($this->bundleLabel),
+        '%bundle' => $bundle->label(),
       ]);
+      $default_value = Og::isGroup($bundle->getEntityType()->getBundleOf(), $bundle->id());
     }
     $form['og']['og_is_group'] = [
       '#type' => 'checkbox',
       '#title' => new TranslatableMarkup('Group'),
-      '#default_value' => Og::isGroup($this->entityTypeId, $this->bundle),
+      '#default_value' => $default_value,
       '#description' => $description,
     ];
   }
@@ -224,4 +228,16 @@ class BundleEntityFormAlter {
     }
   }
 
+  /**
+   * Retrieves the entity type bundle object from the given form state.
+   *
+   * @param \Drupal\Core\Form\FormStateInterface $form_state
+   *   A bundle entity form.
+   *
+   * @return \Drupal\Core\Entity\RevisionableEntityBundleInterface
+   *   The bundle.
+   */
+  protected static function getEntityBundle(FormStateInterface $form_state): RevisionableEntityBundleInterface {
+    return $form_state->getFormObject()->getEntity();
+  }
 }
