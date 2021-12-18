@@ -9,14 +9,14 @@ use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\Tests\BrowserTestBase;
 use Drupal\node\Entity\NodeType;
 use Drupal\og\Og;
-use Drupal\og_ui\BundleFormAlter;
+use Drupal\og_ui\BundleEntityFormAlter;
 
 /**
  * Test making a bundle a group and a group content.
  *
  * @group og
  */
-class BundleFormAlterTest extends BrowserTestBase {
+class BundleEntityFormAlterTest extends BrowserTestBase {
 
   /**
    * {@inheritdoc}
@@ -130,7 +130,7 @@ class BundleFormAlterTest extends BrowserTestBase {
     // Set the form state as if the 'entity_test' option was chosen with AJAX.
     $form_state->setValue('og_target_type', 'entity_test');
     $entity = $this->entityTypeManager->getStorage('node_type')->create([]);
-    (new BundleFormAlter($entity))->formAlter($form, $form_state);
+    (new BundleEntityFormAlter($entity))->formAlter($form, $form_state);
 
     // Check that the target bundles are set to the test entity bundle.
     $this->assertEquals(['entity_test' => 'Entity Test Bundle'], $form['og']['og_target_bundles']['#options']);

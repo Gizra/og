@@ -5,6 +5,7 @@ declare(strict_types = 1);
 namespace Drupal\og_ui;
 
 use Drupal\Component\Utility\Unicode;
+use Drupal\Core\Entity\BundleEntityFormBase;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
@@ -15,7 +16,7 @@ use Drupal\og\OgGroupAudienceHelperInterface;
 /**
  * Helper for og_ui_form_alter().
  */
-class BundleFormAlter {
+class BundleEntityFormAlter {
 
   /**
    * Entity type definition.
@@ -53,7 +54,7 @@ class BundleFormAlter {
   protected $entity;
 
   /**
-   * Construct a BundleFormAlter object.
+   * Construct a BundleEntityFormAlter object.
    *
    * @param \Drupal\Core\Entity\EntityInterface $entity
    *   The entity object.

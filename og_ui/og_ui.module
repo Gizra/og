@@ -15,7 +15,7 @@ use Drupal\field\Entity\FieldConfig;
 use Drupal\field\Entity\FieldStorageConfig;
 use Drupal\og\Og;
 use Drupal\og\OgGroupAudienceHelperInterface;
-use Drupal\og_ui\BundleFormAlter;
+use Drupal\og_ui\BundleEntityFormAlter;
 
 /**
  * Implements hook_form_alter().
@@ -31,7 +31,7 @@ function og_ui_form_alter(array &$form, FormStateInterface $form_state, $form_id
     return;
   }
 
-  (new BundleFormAlter($entity_type))->formAlter($form, $form_state);
+  (new BundleEntityFormAlter($entity_type))->formAlter($form, $form_state);
 }
 
 /**
