@@ -114,29 +114,6 @@ class BundleEntityFormAlterTest extends BrowserTestBase {
   }
 
   /**
-   * Tests AJAX behavior for selecting group content entity types and bundles.
-   */
-  public function testGroupContentAjax() {
-    // Create two group bundles of different entity types.
-    NodeType::create(['name' => 'group node', 'type' => 'group'])->save();
-    Og::groupTypeManager()->addGroup('node', 'group');
-    Og::groupTypeManager()->addGroup('entity_test', 'entity_test');
-
-    // BrowserTestBase doesn't support JavaScript yet. Replace the following
-    // unit test with a functional test once JavaScript support is added.
-    // @see https://www.drupal.org/node/2469713
-    $form = [];
-    $form_state = new FormState();
-    // Set the form state as if the 'entity_test' option was chosen with AJAX.
-    $form_state->setValue('og_target_type', 'entity_test');
-    $entity = $this->entityTypeManager->getStorage('node_type')->create([]);
-    (new BundleEntityFormAlter($entity))->formAlter($form, $form_state);
-
-    // Check that the target bundles are set to the test entity bundle.
-    $this->assertEquals(['entity_test' => 'Entity Test Bundle'], $form['og']['og_target_bundles']['#options']);
-  }
-
-  /**
    * Checks whether the target bundles in the group content are as expected.
    *
    * @param array|null $expected
