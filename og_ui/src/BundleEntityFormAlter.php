@@ -72,6 +72,9 @@ class BundleEntityFormAlter {
    *   The form state object.
    */
   public function formAlter(array &$form, FormStateInterface $form_state) {
+    if (!$form_state->getFormObject() instanceof BundleEntityFormBase) {
+      throw new \InvalidArgumentException('Passed in form is not a bundle entity form.');
+    }
     $this->prepare($form, $form_state);
     $this->addGroupType($form, $form_state);
     $this->addGroupContent($form, $form_state);
