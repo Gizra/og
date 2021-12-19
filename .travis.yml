@@ -28,6 +28,9 @@ mysql:
 services:
   - mysql
 
+addons:
+  chrome: stable
+
 cache:
   directories:
     - $HOME/.composer/cache/files
@@ -77,5 +80,8 @@ before_script:
 
   # Export database variable for kernel tests.
   - export SIMPLETEST_DB=mysql://root:@127.0.0.1/og
+
+  # Start chromedriver for JS tests.
+  - chromedriver --port=4444 &
 
 script: DRUPAL_DIR=$DRUPAL_DIR MODULE_DIR=$MODULE_DIR $MODULE_DIR/scripts/travis-ci/run-test.sh $TEST_SUITE
