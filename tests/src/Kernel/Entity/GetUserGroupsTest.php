@@ -166,10 +166,6 @@ class GetUserGroupsTest extends KernelTestBase {
     $this->assertFalse(Og::isMember($this->group1, $this->user3));
     $this->assertFalse(Og::isMember($this->group2, $this->user3));
 
-    // Invalidate the caches so the static cache is cleared and group data is
-    // fetched again for the user.
-    Og::invalidateCache();
-
     // Add user to group 1 should now return that group only.
     $this->createOgMembership($this->group1, $this->user3);
 
@@ -180,8 +176,6 @@ class GetUserGroupsTest extends KernelTestBase {
 
     $this->assertTrue(Og::isMember($this->group1, $this->user3));
     $this->assertFalse(Og::isMember($this->group2, $this->user3));
-
-    Og::invalidateCache();
 
     // Add to group 2 should also return that.
     $this->createOgMembership($this->group2, $this->user3);
@@ -220,8 +214,6 @@ class GetUserGroupsTest extends KernelTestBase {
     // Change the membership state to PENDING.
     $membership->setState(OgMembershipInterface::STATE_PENDING)->save();
 
-    Og::invalidateCache();
-
     $this->assertTrue(Og::isMember($this->group1, $this->user3, [OgMembershipInterface::STATE_PENDING]));
     $this->assertTrue(Og::isMemberPending($this->group1, $this->user3));
     $this->assertTrue(Og::isMember($this->group1, $this->user3, [
@@ -235,8 +227,6 @@ class GetUserGroupsTest extends KernelTestBase {
 
     // Change the membership state to BLOCKED.
     $membership->setState(OgMembershipInterface::STATE_BLOCKED)->save();
-
-    Og::invalidateCache();
 
     $this->assertTrue(Og::isMember($this->group1, $this->user3, [OgMembershipInterface::STATE_BLOCKED]));
     $this->assertTrue(Og::isMemberBlocked($this->group1, $this->user3));
