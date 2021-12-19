@@ -78,13 +78,13 @@ class BundleEntityFormAlter {
     }
     $this->prepare($form, $form_state);
     static::addGroupType($form, $form_state);
-    $this->addGroupContent($form, $form_state);
+    static::addGroupContent($form, $form_state);
   }
 
   /**
    * AJAX callback displaying the target bundles select box.
    */
-  public function ajaxCallback(array $form, FormStateInterface $form_state) {
+  public static function ajaxCallback(array $form, FormStateInterface $form_state) {
     return $form['og']['og_target_bundles'];
   }
 
@@ -140,26 +140,29 @@ class BundleEntityFormAlter {
   /**
    * Adds the "is group content?" checkbox and target settings elements.
    */
-  protected function addGroupContent(array &$form, FormStateInterface $form_state) {
+  protected static function addGroupContent(array &$form, FormStateInterface $form_state) {
+    $bundle = static::getEntityBundle($form_state);
+    $entity_type_id = $bundle->getEntityType()->getBundleOf();
+
     // Get the stored config from the default group audience field if it exists.
-    $field = FieldConfig::loadByName($this->entityTypeId, $this->bundle, OgGroupAudienceHelperInterface::DEFAULT_FIELD);
+    $field = FieldConfig::loadByName($entity_type_id, $bundle->id(), OgGroupAudienceHelperInterface::DEFAULT_FIELD);
     $handler_settings = $field ? $field->getSetting('handler_settings') : [];
 
     // Compile a list of group entity types and bundles.
     $target_types = [];
     $target_bundles = [];
-    foreach (Og::groupTypeManager()->getGroupMap() as $entity_type => $bundles) {
+    foreach (Og::groupTypeManager()->getGroupMap() as $entity_type => $bundle_ids) {
       $target_types[$entity_type] = \Drupal::entityTypeManager()->getDefinition($entity_type)->getLabel();
       $bundle_info = \Drupal::service('entity_type.bundle.info')->getBundleInfo($entity_type);
-      foreach ($bundles as $bundle) {
-        $target_bundles[$entity_type][$bundle] = $bundle_info[$bundle]['label'];
+      foreach ($bundle_ids as $bundle_id) {
+        $target_bundles[$entity_type][$bundle_id] = $bundle_info[$bundle_id]['label'];
       }
     }
 
     $form['og']['og_group_content_bundle'] = [
       '#type' => 'checkbox',
       '#title' => new TranslatableMarkup('Group content'),
-      '#default_value' => $this->bundle ? Og::isGroupContent($this->entityTypeId, $this->bundle) : FALSE,
+      '#default_value' => !$bundle->isNew() && Og::isGroupContent($entity_type_id, $bundle->id()),
       '#description' => empty($target_bundles) ? new TranslatableMarkup('There are no group bundles defined.') : '',
     ];
 
@@ -180,7 +183,7 @@ class BundleEntityFormAlter {
         '#default_value' => $target_type_default,
         '#description' => new TranslatableMarkup('The entity type that can be referenced through this field.'),
         '#ajax' => [
-          'callback' => [$this, 'ajaxCallback'],
+          'callback' => [static::class, 'ajaxCallback'],
           'wrapper' => 'og-settings-wrapper',
         ],
         '#states' => [
@@ -206,7 +209,7 @@ class BundleEntityFormAlter {
           ],
         ],
       ];
-      $form['#validate'][] = [get_class($this), 'validateTargetBundleElement'];
+      $form['#validate'][] = [static::class, 'validateTargetBundleElement'];
     }
     else {
       // Don't show the settings, as there might be multiple OG audience fields
