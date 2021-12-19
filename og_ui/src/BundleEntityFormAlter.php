@@ -5,17 +5,56 @@ declare(strict_types = 1);
 namespace Drupal\og_ui;
 
 use Drupal\Core\Entity\BundleEntityFormBase;
+use Drupal\Core\Entity\EntityTypeBundleInfoInterface;
+use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Entity\RevisionableEntityBundleInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\field\Entity\FieldConfig;
-use Drupal\og\Og;
+use Drupal\og\GroupTypeManagerInterface;
 use Drupal\og\OgGroupAudienceHelperInterface;
 
 /**
  * Helper for og_ui_form_alter().
  */
 class BundleEntityFormAlter {
+
+  /**
+   * The entity type manager.
+   *
+   * @var \Drupal\Core\Entity\EntityTypeManagerInterface
+   */
+  protected EntityTypeManagerInterface $entityTypeManager;
+
+  /**
+   * The entity type bundle info service.
+   *
+   * @var \Drupal\Core\Entity\EntityTypeBundleInfoInterface
+   */
+  protected EntityTypeBundleInfoInterface $entityTypeBundleInfo;
+
+  /**
+   * The group type manager.
+   *
+   * @var \Drupal\og\GroupTypeManagerInterface
+   */
+  protected GroupTypeManagerInterface $groupTypeManager;
+
+  /**
+   * Constructs a new BundleEntityFormAlter service.
+   *
+   * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entityTypeManager
+   *   The entity type manager.
+   * @param \Drupal\Core\Entity\EntityTypeBundleInfoInterface $entityTypeBundleInfo
+   *   The entity type bundle info service.
+   * @param \Drupal\og\GroupTypeManagerInterface $groupTypeManager
+   *   The group type manager.
+   */
+  public function __construct(EntityTypeManagerInterface $entityTypeManager, EntityTypeBundleInfoInterface $entityTypeBundleInfo, GroupTypeManagerInterface $groupTypeManager) {
+    $this->entityTypeManager = $entityTypeManager;
+    $this->entityTypeBundleInfo = $entityTypeBundleInfo;
+    $this->groupTypeManager = $groupTypeManager;
+  }
 
   /**
    * Alters bundle entity forms.
@@ -32,8 +71,8 @@ class BundleEntityFormAlter {
       throw new \InvalidArgumentException('Passed in form is not a bundle entity form.');
     }
     static::prepare($form);
-    static::addGroupType($form, $form_state);
-    static::addGroupContent($form, $form_state);
+    $this->addGroupType($form, $form_state);
+    $this->addGroupContent($form, $form_state);
   }
 
   /**
@@ -62,7 +101,7 @@ class BundleEntityFormAlter {
   /**
    * Adds the section to mark the entity type as a group type.
    */
-  protected static function addGroupType(array &$form, FormStateInterface $form_state): void {
+  protected function addGroupType(array &$form, FormStateInterface $form_state): void {
     $bundle = static::getEntityBundle($form_state);
     if ($bundle->isNew()) {
       $description = new TranslatableMarkup('Every entity in this bundle is a group which can contain entities and can have members.');
@@ -72,7 +111,7 @@ class BundleEntityFormAlter {
       $description = new TranslatableMarkup('Every "%bundle" is a group which can contain entities and can have members.', [
         '%bundle' => $bundle->label(),
       ]);
-      $default_value = Og::isGroup($bundle->getEntityType()->getBundleOf(), $bundle->id());
+      $default_value = $this->groupTypeManager->isGroup($bundle->getEntityType()->getBundleOf(), $bundle->id());
     }
     $form['og']['og_is_group'] = [
       '#type' => 'checkbox',
@@ -85,7 +124,7 @@ class BundleEntityFormAlter {
   /**
    * Adds the section to configure the entity type as group content.
    */
-  protected static function addGroupContent(array &$form, FormStateInterface $form_state): void {
+  protected function addGroupContent(array &$form, FormStateInterface $form_state): void {
     $bundle = static::getEntityBundle($form_state);
     $entity_type_id = $bundle->getEntityType()->getBundleOf();
 
@@ -96,9 +135,9 @@ class BundleEntityFormAlter {
     // Compile a list of group entity types and bundles.
     $target_types = [];
     $target_bundles = [];
-    foreach (Og::groupTypeManager()->getGroupMap() as $entity_type => $bundle_ids) {
-      $target_types[$entity_type] = \Drupal::entityTypeManager()->getDefinition($entity_type)->getLabel();
-      $bundle_info = \Drupal::service('entity_type.bundle.info')->getBundleInfo($entity_type);
+    foreach ($this->groupTypeManager->getGroupMap() as $entity_type => $bundle_ids) {
+      $target_types[$entity_type] = $this->entityTypeManager->getDefinition($entity_type)->getLabel();
+      $bundle_info = $this->entityTypeBundleInfo->getBundleInfo($entity_type);
       foreach ($bundle_ids as $bundle_id) {
         $target_bundles[$entity_type][$bundle_id] = $bundle_info[$bundle_id]['label'];
       }
@@ -107,7 +146,7 @@ class BundleEntityFormAlter {
     $form['og']['og_group_content_bundle'] = [
       '#type' => 'checkbox',
       '#title' => new TranslatableMarkup('Group content'),
-      '#default_value' => !$bundle->isNew() && Og::isGroupContent($entity_type_id, $bundle->id()),
+      '#default_value' => !$bundle->isNew() && $this->groupTypeManager->isGroupContent($entity_type_id, $bundle->id()),
       '#description' => empty($target_bundles) ? new TranslatableMarkup('There are no group bundles defined.') : '',
     ];
 
@@ -188,4 +227,5 @@ class BundleEntityFormAlter {
   protected static function getEntityBundle(FormStateInterface $form_state): RevisionableEntityBundleInterface {
     return $form_state->getFormObject()->getEntity();
   }
+
 }
