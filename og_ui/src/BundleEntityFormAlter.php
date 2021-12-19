@@ -4,9 +4,7 @@ declare(strict_types = 1);
 
 namespace Drupal\og_ui;
 
-use Drupal\Component\Utility\Unicode;
 use Drupal\Core\Entity\BundleEntityFormBase;
-use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Entity\RevisionableEntityBundleInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
@@ -20,63 +18,20 @@ use Drupal\og\OgGroupAudienceHelperInterface;
 class BundleEntityFormAlter {
 
   /**
-   * Entity type definition.
-   *
-   * @var \Drupal\Core\Entity\ContentEntityTypeInterface
-   */
-  protected $definition;
-
-  /**
-   * The entity bundle.
-   *
-   * @var string
-   */
-  protected $bundle;
-
-  /**
-   * The bundle label.
-   *
-   * @var string
-   */
-  protected $bundleLabel;
-
-  /**
-   * The entity type ID.
-   *
-   * @var string
-   */
-  protected $entityTypeId;
-
-  /**
-   * The form entity which has been used for populating form element defaults.
-   *
-   * @var \Drupal\Core\Entity\EntityInterface
-   */
-  protected $entity;
-
-  /**
-   * Construct a BundleEntityFormAlter object.
-   *
-   * @param \Drupal\Core\Entity\EntityInterface $entity
-   *   The entity object.
-   */
-  public function __construct(EntityInterface $entity) {
-    $this->entity = $entity;
-  }
-
-  /**
-   * This is a helper for og_ui_form_alter().
+   * Alters bundle entity forms.
    *
    * @param array $form
    *   The form variable.
    * @param \Drupal\Core\Form\FormStateInterface $form_state
    *   The form state object.
+   *
+   * @see og_ui_form_alter()
    */
   public function formAlter(array &$form, FormStateInterface $form_state) {
     if (!$form_state->getFormObject() instanceof BundleEntityFormBase) {
       throw new \InvalidArgumentException('Passed in form is not a bundle entity form.');
     }
-    $this->prepare($form, $form_state);
+    static::prepare($form);
     static::addGroupType($form, $form_state);
     static::addGroupContent($form, $form_state);
   }
@@ -96,15 +51,7 @@ class BundleEntityFormAlter {
    * @param \Drupal\Core\Form\FormStateInterface $form_state
    *   The form state object.
    */
-  protected function prepare(array &$form, FormStateInterface $form_state) {
-    // Example: article.
-    $this->bundle = $this->entity->id();
-    // Example: Article.
-    $this->bundleLabel = Unicode::lcfirst($this->entity->label());
-    $this->definition = $this->entity->getEntityType();
-    // Example: node.
-    $this->entityTypeId = $this->definition->getBundleOf();
-
+  protected static function prepare(array &$form) {
     $form['og'] = [
       '#type' => 'details',
       '#title' => new TranslatableMarkup('Organic groups'),
