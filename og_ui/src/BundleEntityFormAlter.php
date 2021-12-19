@@ -27,7 +27,7 @@ class BundleEntityFormAlter {
    *
    * @see og_ui_form_alter()
    */
-  public function formAlter(array &$form, FormStateInterface $form_state) {
+  public function formAlter(array &$form, FormStateInterface $form_state): void {
     if (!$form_state->getFormObject() instanceof BundleEntityFormBase) {
       throw new \InvalidArgumentException('Passed in form is not a bundle entity form.');
     }
@@ -39,7 +39,7 @@ class BundleEntityFormAlter {
   /**
    * AJAX callback displaying the target bundles select box.
    */
-  public static function ajaxCallback(array $form, FormStateInterface $form_state) {
+  public static function ajaxCallback(array $form, FormStateInterface $form_state): array {
     return $form['og']['og_target_bundles'];
   }
 
@@ -48,10 +48,8 @@ class BundleEntityFormAlter {
    *
    * @param array $form
    *   The form variable.
-   * @param \Drupal\Core\Form\FormStateInterface $form_state
-   *   The form state object.
    */
-  protected static function prepare(array &$form) {
+  protected static function prepare(array &$form): void {
     $form['og'] = [
       '#type' => 'details',
       '#title' => new TranslatableMarkup('Organic groups'),
@@ -64,7 +62,7 @@ class BundleEntityFormAlter {
   /**
    * Adds the section to mark the entity type as a group type.
    */
-  protected static function addGroupType(array &$form, FormStateInterface $form_state) {
+  protected static function addGroupType(array &$form, FormStateInterface $form_state): void {
     $bundle = static::getEntityBundle($form_state);
     if ($bundle->isNew()) {
       $description = new TranslatableMarkup('Every entity in this bundle is a group which can contain entities and can have members.');
@@ -85,9 +83,9 @@ class BundleEntityFormAlter {
   }
 
   /**
-   * Adds the "is group content?" checkbox and target settings elements.
+   * Adds the section to configure the entity type as group content.
    */
-  protected static function addGroupContent(array &$form, FormStateInterface $form_state) {
+  protected static function addGroupContent(array &$form, FormStateInterface $form_state): void {
     $bundle = static::getEntityBundle($form_state);
     $entity_type_id = $bundle->getEntityType()->getBundleOf();
 
@@ -168,7 +166,7 @@ class BundleEntityFormAlter {
   /**
    * Form validate handler.
    */
-  public static function validateTargetBundleElement(array &$form, FormStateInterface $form_state) {
+  public static function validateTargetBundleElement(array &$form, FormStateInterface $form_state): void {
     // If no checkboxes were checked for 'og_target_bundles', store NULL ("all
     // bundles are referenceable") rather than empty array ("no bundle is
     // referenceable" - typically happens when all referenceable bundles have
