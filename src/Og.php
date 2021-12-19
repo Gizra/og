@@ -272,7 +272,7 @@ class Og {
    * @return bool
    *   True or false if the given entity is group.
    */
-  public static function isGroup(string $entity_type_id, string $bundle_id): bool {
+  public static function isGroup($entity_type_id, $bundle_id) {
     return static::groupTypeManager()->isGroup($entity_type_id, $bundle_id);
   }
 
