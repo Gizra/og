@@ -57,12 +57,18 @@ class BundleEntityFormAlterAjaxTest extends WebDriverTestBase {
     $this->groupTypeManager = $this->container->get('og.group_type_manager');
 
     // Create two group bundles of different entity types.
-    $this->groupType = NodeType::create(['name' => 'group node', 'type' => 'group']);
+    $this->groupType = NodeType::create([
+      'name' => 'group node',
+      'type' => 'group',
+    ]);
     $this->groupType->save();
     Og::groupTypeManager()->addGroup('node', 'group');
     Og::groupTypeManager()->addGroup('entity_test', 'entity_test');
 
-    $this->groupContentType = NodeType::create(['name' => 'group content', 'type' => 'group_content']);
+    $this->groupContentType = NodeType::create([
+      'name' => 'group content',
+      'type' => 'group_content',
+    ]);
     $this->groupContentType->save();
 
     // Log in as an administrator that can manage blocks and content types.
