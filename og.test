@@ -1969,7 +1969,7 @@ class OgBehaviorHandlerTestCase  extends DrupalWebTestCase {
     $gids = og_get_entity_groups('node', 1);
     $id = key($gids['entity_test']);
     $og_membership = og_membership_load($id);
-    $this->assertEqual($og_membership->state, OG_STATE_ACTIVE, 'Memebership status is Active');
+    $this->assertEqual($og_membership->state, OG_STATE_ACTIVE, 'Membership status is Active');
 
 
     // Post a node, state should be pending.
@@ -1979,7 +1979,7 @@ class OgBehaviorHandlerTestCase  extends DrupalWebTestCase {
     $gids = og_get_entity_groups('node', 2, array(OG_STATE_PENDING));
     $id = key($gids['entity_test']);
     $og_membership = og_membership_load($id);
-    $this->assertEqual($og_membership->state, OG_STATE_PENDING, 'Memebership status is Active');
+    $this->assertEqual($og_membership->state, OG_STATE_PENDING, 'Membership status is Active');
   }
 }
 
