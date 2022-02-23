@@ -3,9 +3,9 @@ dist: bionic
 language: php
 
 php:
-  - 7.4
-  - 8.0
-  - 8.1
+  - '7.4'
+  - '8.0'
+  - nightly
 
 env:
   global:
