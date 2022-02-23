@@ -41,7 +41,7 @@
             "drupal/coder": {
                 "https://www.drupal.org/project/coder/issues/3250986": "https://patch-diff.githubusercontent.com/raw/pfrenssen/coder/pull/157.diff"
             }
-        },
+        }
      },
     "minimum-stability": "RC"
 }
