@@ -81,7 +81,7 @@ class OgUiController extends ControllerBase {
     $rows = [];
     $build = [];
 
-    foreach ($this->groupTypeManager->getAllGroupBundles() as $entity_type => $bundles) {
+    foreach ($this->groupTypeManager->getGroupMap() as $entity_type => $bundles) {
       try {
         $definition = $this->entityTypeManager->getDefinition($entity_type);
       }
