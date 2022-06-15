@@ -32,7 +32,7 @@ function og_perm_ctools_access_settings($form, &$form_state, $conf) {
   foreach (og_get_permissions() as $perm => $value) {
     // By keeping them keyed by module we can use optgroups with the
     // 'select' type.
-    $perms[$value['module']][$perm] = $value['title'];
+    $perms[$value['module']][$perm] = strip_tags($value['title']);
   }
 
   $form['settings']['perm'] = array(
@@ -75,6 +75,6 @@ function og_perm_ctools_access_summary($conf, $context) {
   list($user_context, $node_context) = $context;
 
   $permissions = og_get_permissions();
-  return t('@identifier has "@perm in @group group"', array('@identifier' => $user_context->identifier, '@perm' => $permissions[$conf['perm']]['title'], '@group' => $node_context->identifier));
+  return t('@identifier has "@perm in @group group"', array('@identifier' => $user_context->identifier, '@perm' => strip_tags($permissions[$conf['perm']]['title']), '@group' => $node_context->identifier));
 }
 
