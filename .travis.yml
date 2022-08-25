@@ -3,8 +3,9 @@ dist: bionic
 language: php
 
 php:
-  - 7.4
-  - 8.0
+  - '7.4'
+  - '8.0'
+  - nightly
 
 env:
   global:
@@ -18,6 +19,8 @@ env:
 matrix:
   exclude:
     - php: 7.4
+      env: TEST_SUITE=PHP_CodeSniffer
+    - php: 8.0
       env: TEST_SUITE=PHP_CodeSniffer
 
 mysql:
@@ -40,9 +43,6 @@ before_script:
 
   # Make sure Composer is up to date.
   - composer self-update
-
-  # Downgrade to composer version 1 to support Drupal 8.8.
-  - test ${TEST_SUITE} != "8.8.x" || composer self-update --1
 
   # Remember the current directory for later use in the Drupal installation.
   - MODULE_DIR=$(pwd)
