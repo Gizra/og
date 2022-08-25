@@ -79,9 +79,6 @@ class Og {
 
       $field_definition = FieldConfig::create($field_config);
       $field_definition->save();
-
-      // @todo Verify this is still needed here.
-      static::invalidateCache();
     }
 
     // Make the field visible in the default form display.
@@ -327,41 +324,6 @@ class Og {
   public static function groupTypeManager() {
     // @todo store static reference for this?
     return \Drupal::service('og.group_type_manager');
-  }
-
-  /**
-   * Invalidate cache.
-   */
-  public static function invalidateCache() {
-    // @todo We should not be using drupal_static() review and remove.
-    // Reset static cache.
-    $caches = [
-      'og_user_access',
-      'og_user_access_alter',
-      'og_role_permissions',
-      'og_get_user_roles',
-      'og_get_permissions',
-      'og_get_entity_groups',
-      'og_get_membership',
-      'og_get_field_og_membership_properties',
-      'og_get_user_roles',
-    ];
-
-    foreach ($caches as $cache) {
-      drupal_static_reset($cache);
-    }
-
-    // @todo Consider using a reset() method.
-    static::$cache = [];
-
-    // Invalidate the entity property cache.
-    // @todo We should not clear the entity type and field definition caches.
-    // @see https://github.com/Gizra/og/issues/219
-    \Drupal::entityTypeManager()->clearCachedDefinitions();
-    \Drupal::service('entity_field.manager')->clearCachedFieldDefinitions();
-
-    // Let other OG modules know we invalidate cache.
-    \Drupal::moduleHandler()->invokeAll('og_invalidate_cache');
   }
 
   /**
