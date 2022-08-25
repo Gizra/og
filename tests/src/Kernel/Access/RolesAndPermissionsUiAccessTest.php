@@ -36,6 +36,7 @@ class RolesAndPermissionsUiAccessTest extends KernelTestBase {
     'block_content',
     'og',
     'og_ui',
+    'options',
     'system',
     'user',
   ];
