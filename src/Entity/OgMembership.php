@@ -108,7 +108,7 @@ class OgMembership extends ContentEntityBase implements OgMembershipInterface {
    * {@inheritdoc}
    */
   public function getCreatedTime(): int {
-    return $this->getFieldValue('created', 'value') ?: 0;
+    return (int) $this->getFieldValue('created', 'value') ?: 0;
   }
 
   /**
