@@ -35,6 +35,7 @@ class RolesAndPermissionsUiAccessTest extends KernelTestBase {
   public static $modules = [
     'block_content',
     'og',
+    'og_ui',
     'options',
     'system',
     'user',
