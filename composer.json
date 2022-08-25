@@ -26,6 +26,7 @@
     ],
     "require": {
         "php": "^7.4 || ^8",
+        "cweagans/composer-patches": "^1.7",
         "drupal/core": "^9.2"
     },
     "require-dev": {
@@ -33,5 +34,14 @@
         "phpunit/phpunit": "^7 || ^8",
         "slevomat/coding-standard": "~6.0"
     },
+     "extra": {
+        "composer-exit-on-patch-failure": true,
+        "enable-patching": true,
+        "patches": {
+            "drupal/coder": {
+                "https://www.drupal.org/project/coder/issues/3250986": "https://patch-diff.githubusercontent.com/raw/pfrenssen/coder/pull/157.diff"
+            }
+        }
+     },
     "minimum-stability": "RC"
 }
