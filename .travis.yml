@@ -11,8 +11,8 @@ env:
   global:
     - COMPOSER_MEMORY_LIMIT=2G
   matrix:
-    - TEST_SUITE=9.2.x
     - TEST_SUITE=9.3.x
+    - TEST_SUITE=9.4.x
     - TEST_SUITE=PHP_CodeSniffer
 
 # Only run the coding standards check once.
