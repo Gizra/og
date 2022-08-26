@@ -32,5 +32,10 @@
         "drupal/coder": "^8.3.16",
         "phpunit/phpunit": "^7 || ^8"
     },
-    "minimum-stability": "RC"
+    "minimum-stability": "RC",
+    "config": {
+        "allow-plugins": {
+            "dealerdirect/phpcodesniffer-composer-installer": true
+        }
+    }
 }
