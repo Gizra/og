@@ -179,7 +179,7 @@ class RolesAndPermissionsUiAccessTest extends KernelTestBase {
    */
   public function testRouteAccess(array $routes, array $access_matrix): void {
     foreach ($routes as $route_info) {
-      list($route, $parameters) = $route_info;
+      [$route, $parameters] = $route_info;
       foreach ($access_matrix as $user_key => $should_have_access) {
         $has_access = $this->container->get('access_manager')->checkNamedRoute($route, $parameters, $this->users[$user_key], FALSE);
         $message = "The '$user_key' user is " . ($should_have_access ? '' : 'not ') . "expected to have access to the '$route' route.";
