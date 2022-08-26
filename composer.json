@@ -30,8 +30,7 @@
     },
     "require-dev": {
         "drupal/coder": "^8.3.16",
-        "phpunit/phpunit": "^7 || ^8",
-        "slevomat/coding-standard": "~6.0"
+        "phpunit/phpunit": "^7 || ^8"
     },
     "minimum-stability": "RC"
 }
