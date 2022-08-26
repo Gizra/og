@@ -116,6 +116,7 @@ class OgMultipleSelectionWidgetAutoCompleteTest extends BrowserTestBase {
         'edit own group_content content',
         'edit any group_content content',
       ],
+      'label' => 'Dummy role',
     ])->save();
   }
 
