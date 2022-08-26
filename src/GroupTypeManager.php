@@ -198,7 +198,7 @@ class GroupTypeManager implements GroupTypeManagerInterface {
    */
   public function getGroupBundleIdsByEntityType($entity_type_id) {
     $group_map = $this->getGroupMap();
-    return isset($group_map[$entity_type_id]) ? $group_map[$entity_type_id] : [];
+    return $group_map[$entity_type_id] ?? [];
   }
 
   /**
@@ -209,7 +209,7 @@ class GroupTypeManager implements GroupTypeManagerInterface {
     foreach ($this->getGroupRelationMap() as $group_bundle_ids) {
       foreach ($group_bundle_ids as $group_content_entity_type_ids) {
         foreach ($group_content_entity_type_ids as $group_content_entity_type_id => $group_content_bundle_ids) {
-          $bundles[$group_content_entity_type_id] = array_merge(isset($bundles[$group_content_entity_type_id]) ? $bundles[$group_content_entity_type_id] : [], $group_content_bundle_ids);
+          $bundles[$group_content_entity_type_id] = array_merge($bundles[$group_content_entity_type_id] ?? [], $group_content_bundle_ids);
         }
       }
     }
@@ -257,7 +257,7 @@ class GroupTypeManager implements GroupTypeManagerInterface {
    */
   public function getGroupContentBundleIdsByGroupBundle($group_entity_type_id, $group_bundle_id) {
     $group_relation_map = $this->getGroupRelationMap();
-    return isset($group_relation_map[$group_entity_type_id][$group_bundle_id]) ? $group_relation_map[$group_entity_type_id][$group_bundle_id] : [];
+    return $group_relation_map[$group_entity_type_id][$group_bundle_id] ?? [];
   }
 
   /**

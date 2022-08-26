@@ -212,6 +212,7 @@ class PermissionEvent extends Event implements PermissionEventInterface {
   /**
    * {@inheritdoc}
    */
+  #[\ReturnTypeWillChange]
   public function offsetGet($key) {
     return $this->getPermission($key);
   }
@@ -219,7 +220,7 @@ class PermissionEvent extends Event implements PermissionEventInterface {
   /**
    * {@inheritdoc}
    */
-  public function offsetSet($key, $value) {
+  public function offsetSet($key, $value): void {
     if (!$value instanceof PermissionInterface) {
       throw new \InvalidArgumentException('The value must be an object of type PermissionInterface.');
     }
@@ -232,7 +233,7 @@ class PermissionEvent extends Event implements PermissionEventInterface {
   /**
    * {@inheritdoc}
    */
-  public function offsetUnset($key) {
+  public function offsetUnset($key): void {
     if ($this->hasPermission($key)) {
       $this->deletePermission($key);
     }
@@ -241,14 +242,14 @@ class PermissionEvent extends Event implements PermissionEventInterface {
   /**
    * {@inheritdoc}
    */
-  public function offsetExists($key) {
+  public function offsetExists($key): bool {
     return $this->hasPermission($key);
   }
 
   /**
    * {@inheritdoc}
    */
-  public function getIterator() {
+  public function getIterator(): \Traversable {
     return new \ArrayIterator($this->permissions);
   }
 
