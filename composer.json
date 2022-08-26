@@ -26,7 +26,7 @@
     ],
     "require": {
         "php": "^7.4 || ^8",
-        "drupal/core": "^9.2"
+        "drupal/core": "^9.3"
     },
     "require-dev": {
         "drupal/coder": "^8.3.16",
