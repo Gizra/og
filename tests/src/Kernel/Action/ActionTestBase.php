@@ -218,7 +218,7 @@ abstract class ActionTestBase extends KernelTestBase {
     // single test, so that the expensive setup is not executed over and over.
     $test_cases = $this->accessProvider();
     foreach ($test_cases as $test_case) {
-      list($user, $membership) = $test_case;
+      [$user, $membership] = $test_case;
 
       // When testing the group owner, configure whether or not they have full
       // access.
@@ -245,7 +245,7 @@ abstract class ActionTestBase extends KernelTestBase {
     // single test, so that the expensive setup is not executed over and over.
     $test_cases = $this->noAccessProvider();
     foreach ($test_cases as $test_case) {
-      list($user, $membership) = $test_case;
+      [$user, $membership] = $test_case;
 
       // When testing the group owner, configure whether or not they have full
       // access.
