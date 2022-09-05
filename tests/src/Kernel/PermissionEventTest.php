@@ -204,7 +204,7 @@ class PermissionEventTest extends KernelTestBase {
           $group_content_operation_permission,
         ],
       ],
-      // Test a combination of bundles comming from different entity types.
+      // Test a combination of bundles coming from different entity types.
       [
         [
           'node' => ['test_group_content'],
