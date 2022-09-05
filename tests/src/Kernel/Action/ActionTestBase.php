@@ -33,7 +33,7 @@ abstract class ActionTestBase extends KernelTestBase {
   /**
    * {@inheritdoc}
    */
-  public static $modules = ['node', 'og', 'system', 'user'];
+  public static $modules = ['node', 'og', 'system', 'user', 'options'];
 
   /**
    * An array of test users.
@@ -105,6 +105,13 @@ abstract class ActionTestBase extends KernelTestBase {
       'name' => $this->randomString(),
     ])->save();
     $this->groupTypeManager->addGroup('node', $group_bundle);
+
+    // Set OG to automatically create memberships for group owners. This is done
+    // because we're not installing OG config in this Kernel test.
+    $config = $this->container->get('config.factory')->getEditable('og.settings');
+    $config->set('auto_add_group_owner_membership', TRUE);
+    $config->save(TRUE);
+    $this->assertTrue($config->get('auto_add_group_owner_membership'));
 
     // Create a test group.
     $this->group = Node::create([
@@ -211,7 +218,7 @@ abstract class ActionTestBase extends KernelTestBase {
     // single test, so that the expensive setup is not executed over and over.
     $test_cases = $this->accessProvider();
     foreach ($test_cases as $test_case) {
-      list($user, $membership) = $test_case;
+      [$user, $membership] = $test_case;
 
       // When testing the group owner, configure whether or not they have full
       // access.
@@ -238,7 +245,7 @@ abstract class ActionTestBase extends KernelTestBase {
     // single test, so that the expensive setup is not executed over and over.
     $test_cases = $this->noAccessProvider();
     foreach ($test_cases as $test_case) {
-      list($user, $membership) = $test_case;
+      [$user, $membership] = $test_case;
 
       // When testing the group owner, configure whether or not they have full
       // access.

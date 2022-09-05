@@ -10,14 +10,32 @@
         "slack": "https://drupal.slack.com/messages/CELR48EA0",
         "source": "https://git.drupalcode.org/project/og"
     },
+    "authors": [
+        {
+            "name": "amitaibu",
+            "homepage": "https://www.drupal.org/u/amitaibu"
+        },
+        {
+            "name": "mpp",
+            "homepage": "https://www.drupal.org/u/mpp"
+        },
+        {
+            "name": "pfrenssen",
+            "homepage": "https://www.drupal.org/u/pfrenssen"
+        }
+    ],
     "require": {
-        "php": "^7.2",
-        "drupal/core": "^8.8 || ^9.0"
+        "php": "^7.4 || ^8",
+        "drupal/core": "^9.3"
     },
     "require-dev": {
-        "drupal/coder": "^8.2",
-        "phpunit/phpunit": "^7 || ^8",
-        "slevomat/coding-standard": "~6.0"
+        "drupal/coder": "^8.3.16",
+        "phpunit/phpunit": "^7 || ^8"
     },
-    "minimum-stability": "RC"
+    "minimum-stability": "RC",
+    "config": {
+        "allow-plugins": {
+            "dealerdirect/phpcodesniffer-composer-installer": true
+        }
+    }
 }

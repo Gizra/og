@@ -17,7 +17,7 @@ use Drupal\og\Og;
 /**
  * Implements hook_module_implements_alter().
  */
-function og_test_module_implements_alter(&$implementations, $hook) {
+function og_test_module_implements_alter(&$implementations, $hook): void {
   if ($hook == 'entity_insert') {
     // Move our implementation of hook_entity_insert() to the top of the list so
     // that it will run before og_entity_insert().
@@ -30,7 +30,7 @@ function og_test_module_implements_alter(&$implementations, $hook) {
 /**
  * Implements hook_entity_insert().
  */
-function og_test_entity_insert(EntityInterface $entity) {
+function og_test_entity_insert(EntityInterface $entity): void {
   // In order to test if it is possible to use an hook_entity_insert()
   // implementation to override the user membership that is automatically
   // created in og_entity_insert() we will create our own membership here, if

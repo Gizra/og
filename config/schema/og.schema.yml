@@ -39,6 +39,9 @@ og.settings:
       sequence:
         type: string
         label: 'OgGroupResolver plugin ID.'
+    auto_add_group_owner_membership:
+      type: boolean
+      label: 'Automatically add creators to the group'
 
 og.settings.group.*:
   type: sequence
@@ -103,15 +106,6 @@ og.og_role.*:
 field.widget.settings.og_complex:
   type: field.widget.settings.entity_reference_autocomplete
   label: 'OG Group Audience field widget'
-  mapping:
-    # This already exists in field.widget.settings.entity_reference_autocomplete
-    # in Drupal 8.8.x and is added here just to ensure backwards compatibility
-    # with Drupal 8.7.x.
-    # @todo Remove this entry in https://github.com/Gizra/og/issues/581
-    # @see https://github.com/Gizra/og/issues/581
-    match_limit:
-      type: integer
-      label: 'Maximum number of autocomplete suggestions.'
 
 views.field.og_membership_bulk_form:
   type: views_field_bulk_form
@@ -167,3 +161,7 @@ block.settings.og_member_count:
     count_pending_users:
       type: boolean
       label: 'Count pending users'
+
+field.widget.settings.og_autocomplete:
+  type: field.widget.settings.entity_reference_autocomplete
+  label: 'OG context based entity reference autocomplete with display format settings'
