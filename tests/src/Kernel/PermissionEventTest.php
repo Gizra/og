@@ -211,19 +211,19 @@ class PermissionEventTest extends KernelTestBase {
           'entity_test' => ['a_bundle', 'other_bundle'],
         ],
         array_merge($default_permissions, [
-          // node:test_group_content
+          // node:test_group_content.
           'create test_group_content content',
           'delete any test_group_content content',
           'delete own test_group_content content',
           'edit any test_group_content content',
           'edit own test_group_content content',
-          // entity_test:a_bundle
+          // entity_test:a_bundle.
           'create a_bundle entity_test',
           'delete any a_bundle entity_test',
           'delete own a_bundle entity_test',
           'update any a_bundle entity_test',
           'update own a_bundle entity_test',
-          // entity_test:other_bundle
+          // entity_test:other_bundle.
           'create other_bundle entity_test',
           'delete any other_bundle entity_test',
           'delete own other_bundle entity_test',
