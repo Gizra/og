@@ -336,7 +336,7 @@ class OgAccessTestCase extends DrupalWebTestCase {
 
     // Add another user to group.
     og_group('node', $group_node1->nid, array('entity' => $user2));
-
+    drupal_static_reset('node_access');
     $this->assertTrue(node_access('view', $node, $user2), 'Group member can view published node.');
 
     $node->status = NODE_NOT_PUBLISHED;
