@@ -93,7 +93,16 @@ class OgChangeMultipleRolesFormBase extends FormBase {
       '#value' => $this->t('Submit'),
     ];
 
-    $form_state->setTemporaryValue('memberships', $this->getMemberships());
+    // Set selected memberships & group in form state. This can be used by
+    // developers to alter the roles form.
+    $memberships = $this->getMemberships();
+    if (empty($memberships)) {
+      return $form;
+    }
+    $membership = current($memberships);
+    $group = $membership->getGroup();
+    $form_state->setTemporaryValue('selected_memberships', $memberships);
+    $form_state->setTemporaryValue('current_group', $group);
 
     return $form;
   }
