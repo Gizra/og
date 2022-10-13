@@ -93,6 +93,8 @@ class OgChangeMultipleRolesFormBase extends FormBase {
       '#value' => $this->t('Submit'),
     ];
 
+    $form_state->setTemporaryValue('memberships', $this->getMemberships());
+
     return $form;
   }
 
