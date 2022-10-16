@@ -505,6 +505,7 @@ function og_node_access($node, $op, $account) {
     // there is no group context. However, we can check if there are any groups
     // the user will be able to select, and if not, we don't allow access.
     // @see OgSelectionHandler::getReferencableEntities()
+    $accesses = array();
     $required = FALSE;
     foreach (og_get_group_audience_fields('node', $type) as $field_name => $label) {
       $field = field_info_field($field_name);
@@ -512,8 +513,20 @@ function og_node_access($node, $op, $account) {
       // Set the "field mode" to default, before passing it to the
       // selection handler.
       $instance['field_mode'] = 'default';
-      if (entityreference_get_selection_handler($field, $instance)->countReferencableEntities()) {
-        return NODE_ACCESS_ALLOW;
+      if (is_object($node) && isset($node->{$field_name})) {
+        if (!empty($node->{$field_name}) && !empty($node->{$field_name}[LANGUAGE_NONE])) {
+          foreach ($node->{$field_name}[LANGUAGE_NONE] as $target_id) {
+            if (og_user_access('node', $target_id['target_id'], 'create ' . $type . ' content')) {
+              $accesses[] = NODE_ACCESS_ALLOW;
+            }
+            else {
+              $accesses[] = NODE_ACCESS_DENY;
+            }
+          }
+        }
+      }
+      elseif (entityreference_get_selection_handler($field, $instance)->countReferencableEntities()) {
+        $accesses[] = NODE_ACCESS_ALLOW;
       }
 
       // Allow users to create content outside of groups, if none of the
@@ -522,6 +535,16 @@ function og_node_access($node, $op, $account) {
         $required = TRUE;
       }
     }
+
+    if (!empty($accesses)) {
+      foreach ($accesses as $access) {
+        if ($access == NODE_ACCESS_DENY) {
+          return NODE_ACCESS_DENY;
+        }
+      }
+      return NODE_ACCESS_ALLOW;
+    }
+
     // If no group audience field is required, we ignore.
     if (!$required) {
       return NODE_ACCESS_IGNORE;
@@ -532,7 +555,6 @@ function og_node_access($node, $op, $account) {
   }
   elseif (in_array($op, array('update', 'delete'))) {
     $access = og_user_access_entity('administer group', 'node', $node, $account);
-
     if (is_null($access)) {
       // The node isn't in an OG context, so no need to keep testing.
       return NODE_ACCESS_IGNORE;
@@ -544,20 +566,16 @@ function og_node_access($node, $op, $account) {
         // Own content.
         ($account->uid == $node->uid && og_user_access_entity("$op own $type content", 'node', $node, $account));
     }
-
     if (!$access && $op == 'update' && og_is_group('node', $node)) {
       // The node is a group, so check "update group" permission.
       $access = og_user_access_entity('update group', 'node', $node, $account);
     }
-
     if ($access) {
       return NODE_ACCESS_ALLOW;
     }
-
     // Check if OG should explicitly deny access or not.
     return variable_get('og_node_access_strict', TRUE) ? NODE_ACCESS_DENY : NODE_ACCESS_IGNORE;
   }
-
   return NODE_ACCESS_IGNORE;
 }
 
