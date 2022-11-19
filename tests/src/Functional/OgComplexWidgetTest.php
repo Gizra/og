@@ -78,6 +78,7 @@ class OgComplexWidgetTest extends BrowserTestBase {
     $values = [
       'type' => 'group',
       'uid' => $group_owner->id(),
+      'info' => $this->randomString(),
     ];
     $group = BlockContent::create($values);
     $group->save();
