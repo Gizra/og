@@ -6,13 +6,11 @@ php:
   - '7.4'
   - '8.0'
   - '8.1'
-  - nightly
 
 env:
   global:
     - COMPOSER_MEMORY_LIMIT=2G
   matrix:
-    - TEST_SUITE=9.3.x
     - TEST_SUITE=9.4.x
     - TEST_SUITE=10.0.x
     - TEST_SUITE=PHP_CodeSniffer
