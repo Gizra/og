@@ -106,7 +106,9 @@ class ReferenceStringIdTest extends KernelTestBase {
     $entity->save();
 
     // Check that the group content entity is referenced.
-    $references = $this->container->get('entity_type.manager')->getStorage('entity_test_string_id')->getQuery()
+    $references = $this->container->get('entity_type.manager')->getStorage('entity_test_string_id')
+      ->getQuery()
+      ->accessCheck()
       ->condition($this->fieldName, $this->group->id())
       ->execute();
     $this->assertEquals([$entity->id()], array_keys($references), 'The correct group is referenced.');

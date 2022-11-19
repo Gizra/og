@@ -33,7 +33,6 @@ class SelectionHandlerTest extends KernelTestBase {
     'system',
     'user',
     'field',
-    'entity_reference',
     'node',
     'og',
     'options',

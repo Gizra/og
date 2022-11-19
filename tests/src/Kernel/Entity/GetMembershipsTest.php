@@ -278,6 +278,7 @@ class GetMembershipsTest extends KernelTestBase {
       $memberships = $this->entityTypeManager
         ->getStorage('og_membership')
         ->getQuery()
+        ->accessCheck()
         ->condition('uid', $user_id)
         ->execute();
 

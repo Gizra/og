@@ -120,6 +120,7 @@ abstract class OgDeleteOrphansBase extends PluginBase implements OgDeleteOrphans
     // Register orphaned user memberships.
     $membership_ids = $this->entityTypeManager->getStorage('og_membership')
       ->getQuery()
+      ->accessCheck()
       ->condition('entity_type', $entity->getEntityTypeId())
       ->condition('entity_id', $entity->id())
       ->execute();

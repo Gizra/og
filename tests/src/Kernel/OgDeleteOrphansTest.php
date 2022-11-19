@@ -25,7 +25,6 @@ class OgDeleteOrphansTest extends KernelTestBase {
     'system',
     'user',
     'field',
-    'entity_reference',
     'node',
     'og',
     'options',
@@ -256,7 +255,7 @@ class OgDeleteOrphansTest extends KernelTestBase {
    *   The expected number of user memberships.
    */
   protected function assertUserMembershipCount($expected) {
-    $count = \Drupal::entityQuery('og_membership')->count()->execute();
+    $count = \Drupal::entityQuery('og_membership')->accessCheck()->count()->execute();
     $this->assertEquals($expected, $count);
   }
 

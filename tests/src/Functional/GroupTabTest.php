@@ -220,12 +220,14 @@ class GroupTabTest extends BrowserTestBase {
         $value = $exiting_member->getDisplayName() . ' (' . $exiting_member->id() . ')';
         $this->submitForm(['Username' => $value], 'Save');
         $this->assertSession()->pageTextMatches('/The user .+ is already a member in this group/');
-        // Test entity query match.
-        $query = $entity_type_manger->getStorage('user')->getQuery();
-        $query->condition('uid', 0, '<>');
         $match = 'adminz';
-        $query->condition('name', $match, 'CONTAINS');
-        $found = $query->execute();
+        // Test entity query match.
+        $found = $entity_type_manger->getStorage('user')
+          ->getQuery()
+          ->accessCheck()
+          ->condition('uid', 0, '<>')
+          ->condition('name', $match, 'CONTAINS')
+          ->execute();
         $this->assertCount(3, $found, print_r($found, TRUE));
         // Two of the three possible matches are already members.
         $this->assertAutoCompleteMatches($group, $match, 1);

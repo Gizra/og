@@ -6,11 +6,14 @@ namespace Drupal\Tests\og\Unit;
 
 use Drupal\Core\Entity\EntityStorageInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
+use Drupal\og\Event\DefaultRoleEvent;
+use Drupal\og\Event\DefaultRoleEventInterface;
 use Drupal\Tests\UnitTestCase;
 use Drupal\og\Entity\OgRole;
 use Drupal\og\OgRoleInterface;
 use Drupal\og\OgRoleManager;
 use Drupal\og\PermissionManagerInterface;
+use Prophecy\Argument;
 use Prophecy\PhpUnit\ProphecyTrait;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
@@ -231,6 +234,11 @@ class OgRoleManagerTest extends UnitTestCase {
    *   The initialized OG role manager.
    */
   protected function getOgRoleManager() {
+    $this->eventDispatcher
+      ->dispatch(
+        Argument::type(DefaultRoleEvent::class),
+        DefaultRoleEventInterface::EVENT_NAME,
+      )->willReturnArgument();
     return new OgRoleManager(
       $this->entityTypeManager->reveal(),
       $this->eventDispatcher->reveal(),
