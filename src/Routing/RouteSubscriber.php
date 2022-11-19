@@ -165,7 +165,7 @@ class RouteSubscriber extends RouteSubscriberBase {
    * We have such a case with the "members" OG admin route, that requires Views
    * module to be enabled.
    */
-  public static function getSubscribedEvents() {
+  public static function getSubscribedEvents(): array {
     $events[RoutingEvents::ALTER] = ['onAlterRoutes', 100];
     return $events;
   }
