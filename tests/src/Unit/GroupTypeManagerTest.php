@@ -267,7 +267,7 @@ class GroupTypeManagerTest extends UnitTestCase {
 
     $this->ogRoleManager->createPerBundleRoles('test_entity_new', 'a');
 
-    $this->eventDispatcher->dispatch(GroupCreationEventInterface::EVENT_NAME, Argument::type(GroupCreationEvent::class))
+    $this->eventDispatcher->dispatch(Argument::type(GroupCreationEvent::class), GroupCreationEventInterface::EVENT_NAME)
       ->shouldBeCalled();
 
     // Add a new entity type.

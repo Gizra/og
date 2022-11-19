@@ -161,7 +161,7 @@ class OgAdminRoutesControllerTest extends UnitTestCase {
 
     $this
       ->eventDispatcher
-      ->dispatch(OgAdminRoutesEventInterface::EVENT_NAME, Argument::type(OgAdminRoutesEvent::class))
+      ->dispatch(Argument::type(OgAdminRoutesEvent::class), OgAdminRoutesEventInterface::EVENT_NAME)
       ->willReturn($this->event->reveal())
       ->shouldBeCalled();
 
