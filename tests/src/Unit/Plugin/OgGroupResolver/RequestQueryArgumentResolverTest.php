@@ -7,6 +7,7 @@ namespace Drupal\Tests\og\Unit\Plugin\OgGroupResolver;
 use Drupal\Core\Entity\EntityStorageInterface;
 use Drupal\og\OgResolvedGroupCollectionInterface;
 use Drupal\og\Plugin\OgGroupResolver\RequestQueryArgumentResolver;
+use Prophecy\PhpUnit\ProphecyTrait;
 use Symfony\Component\HttpFoundation\ParameterBag;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;
@@ -19,7 +20,7 @@ use Symfony\Component\HttpFoundation\RequestStack;
  */
 class RequestQueryArgumentResolverTest extends OgGroupResolverTestBase {
 
-  use \Prophecy\PhpUnit\ProphecyTrait;
+  use ProphecyTrait;
 
   /**
    * {@inheritdoc}

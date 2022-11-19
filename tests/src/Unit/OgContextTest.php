@@ -16,6 +16,7 @@ use Drupal\og\ContextProvider\OgContext;
 use Drupal\og\OgGroupResolverInterface;
 use Drupal\og\OgResolvedGroupCollectionInterface;
 use Prophecy\Argument;
+use Prophecy\PhpUnit\ProphecyTrait;
 use Symfony\Component\DependencyInjection\Container;
 
 /**
@@ -26,7 +27,7 @@ use Symfony\Component\DependencyInjection\Container;
  */
 class OgContextTest extends UnitTestCase {
 
-  use \Prophecy\PhpUnit\ProphecyTrait;
+  use ProphecyTrait;
 
   /**
    * A mocked plugin manager.

@@ -6,6 +6,7 @@ namespace Drupal\Tests\og\Unit\Cache\Context;
 
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\og\OgContextInterface;
+use Prophecy\PhpUnit\ProphecyTrait;
 
 /**
  * Base class for testing cache contexts that rely on OgContext.
@@ -17,7 +18,7 @@ use Drupal\og\OgContextInterface;
  */
 abstract class OgContextCacheContextTestBase extends OgCacheContextTestBase {
 
-  use \Prophecy\PhpUnit\ProphecyTrait;
+  use ProphecyTrait;
 
   /**
    * The mocked OG context service.

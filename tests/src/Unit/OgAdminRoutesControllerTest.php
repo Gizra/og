@@ -15,6 +15,7 @@ use Drupal\og\Controller\OgAdminRoutesController;
 use Drupal\og\Event\OgAdminRoutesEvent;
 use Drupal\og\Event\OgAdminRoutesEventInterface;
 use Prophecy\Argument;
+use Prophecy\PhpUnit\ProphecyTrait;
 use Symfony\Component\Routing\Route;
 
 /**
@@ -25,7 +26,7 @@ use Symfony\Component\Routing\Route;
  */
 class OgAdminRoutesControllerTest extends UnitTestCase {
 
-  use \Prophecy\PhpUnit\ProphecyTrait;
+  use ProphecyTrait;
 
   /**
    * The access manager service.

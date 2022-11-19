@@ -10,6 +10,7 @@ use Drupal\Tests\UnitTestCase;
 use Drupal\og\Entity\OgRole;
 use Drupal\og\Event\DefaultRoleEvent;
 use Drupal\og\OgRoleInterface;
+use Prophecy\PhpUnit\ProphecyTrait;
 
 /**
  * Tests default role events.
@@ -19,7 +20,7 @@ use Drupal\og\OgRoleInterface;
  */
 class DefaultRoleEventTest extends UnitTestCase {
 
-  use \Prophecy\PhpUnit\ProphecyTrait;
+  use ProphecyTrait;
 
   /**
    * The DefaultRoleEvent class, which is the system under test.

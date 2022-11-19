@@ -11,6 +11,7 @@ use Drupal\og\Entity\OgRole;
 use Drupal\og\OgRoleInterface;
 use Drupal\og\OgRoleManager;
 use Drupal\og\PermissionManagerInterface;
+use Prophecy\PhpUnit\ProphecyTrait;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
 /**
@@ -21,7 +22,7 @@ use Symfony\Component\EventDispatcher\EventDispatcherInterface;
  */
 class OgRoleManagerTest extends UnitTestCase {
 
-  use \Prophecy\PhpUnit\ProphecyTrait;
+  use ProphecyTrait;
 
   /**
    * The entity type ID of the test group.

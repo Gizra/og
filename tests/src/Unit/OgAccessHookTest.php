@@ -5,6 +5,7 @@ declare(strict_types = 1);
 namespace Drupal\Tests\og\Unit;
 
 use Drupal\Core\Entity\EntityInterface;
+use Prophecy\PhpUnit\ProphecyTrait;
 
 /**
  * Tests hook implementation of OG related access.
@@ -13,7 +14,8 @@ use Drupal\Core\Entity\EntityInterface;
  */
 class OgAccessHookTest extends OgAccessEntityTestBase {
 
-  use \Prophecy\PhpUnit\ProphecyTrait;
+  use ProphecyTrait;
+
   /**
    * {@inheritdoc}
    */

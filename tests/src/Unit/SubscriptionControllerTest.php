@@ -17,6 +17,7 @@ use Drupal\og\MembershipManagerInterface;
 use Drupal\og\OgAccessInterface;
 use Drupal\og\OgMembershipInterface;
 use Drupal\user\EntityOwnerInterface;
+use Prophecy\PhpUnit\ProphecyTrait;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 
 /**
@@ -27,7 +28,7 @@ use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
  */
 class SubscriptionControllerTest extends UnitTestCase {
 
-  use \Prophecy\PhpUnit\ProphecyTrait;
+  use ProphecyTrait;
 
   /**
    * The entity for builder object.

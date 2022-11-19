@@ -13,13 +13,14 @@ use Drupal\Core\Entity\FieldableEntityInterface;
 use Drupal\Core\Field\FieldDefinitionInterface;
 use Drupal\Core\Field\FieldStorageDefinitionInterface;
 use Drupal\og\OgGroupAudienceHelperInterface;
+use Prophecy\PhpUnit\ProphecyTrait;
 
 /**
  * OG access entity base class.
  */
 abstract class OgAccessEntityTestBase extends OgAccessTestBase {
 
-  use \Prophecy\PhpUnit\ProphecyTrait;
+  use ProphecyTrait;
 
   /**
    * A test group content entity.

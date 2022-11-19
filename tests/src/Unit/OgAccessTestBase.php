@@ -23,6 +23,7 @@ use Drupal\og\PermissionManager;
 use Drupal\user\EntityOwnerInterface;
 use Drupal\user\RoleInterface;
 use Prophecy\Argument;
+use Prophecy\PhpUnit\ProphecyTrait;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
 /**
@@ -30,7 +31,7 @@ use Symfony\Component\EventDispatcher\EventDispatcherInterface;
  */
 class OgAccessTestBase extends UnitTestCase {
 
-  use \Prophecy\PhpUnit\ProphecyTrait;
+  use ProphecyTrait;
 
   /**
    * The mocked config handler.

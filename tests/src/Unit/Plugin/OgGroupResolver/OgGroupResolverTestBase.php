@@ -10,6 +10,7 @@ use Drupal\Tests\UnitTestCase;
 use Drupal\og\GroupTypeManagerInterface;
 use Drupal\og\MembershipManagerInterface;
 use Drupal\og\OgGroupAudienceHelperInterface;
+use Prophecy\PhpUnit\ProphecyTrait;
 
 /**
  * Base class for testing OgGroupResolver plugins.
@@ -18,7 +19,7 @@ use Drupal\og\OgGroupAudienceHelperInterface;
  */
 abstract class OgGroupResolverTestBase extends UnitTestCase {
 
-  use \Prophecy\PhpUnit\ProphecyTrait;
+  use ProphecyTrait;
 
   /**
    * The fully qualified class name of the plugin under test.

@@ -14,6 +14,7 @@ use Drupal\Tests\og\Traits\OgRoleCacheContextTestTrait;
 use Drupal\og\Cache\Context\OgRoleCacheContext;
 use Drupal\og\MembershipManagerInterface;
 use Drupal\og\OgMembershipInterface;
+use Prophecy\PhpUnit\ProphecyTrait;
 
 /**
  * Tests the OG role cache context.
@@ -23,9 +24,8 @@ use Drupal\og\OgMembershipInterface;
  */
 class OgRoleCacheContextTest extends OgCacheContextTestBase {
 
-  use \Prophecy\PhpUnit\ProphecyTrait;
-
   use OgRoleCacheContextTestTrait;
+  use ProphecyTrait;
 
   /**
    * The mocked entity type manager.

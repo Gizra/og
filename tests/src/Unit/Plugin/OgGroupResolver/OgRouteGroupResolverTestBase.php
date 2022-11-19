@@ -8,6 +8,7 @@ use Drupal\Core\Entity\ContentEntityInterface;
 use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Routing\RouteMatchInterface;
 use Drupal\og\OgResolvedGroupCollectionInterface;
+use Prophecy\PhpUnit\ProphecyTrait;
 use Symfony\Component\Routing\Route;
 
 /**
@@ -15,7 +16,7 @@ use Symfony\Component\Routing\Route;
  */
 abstract class OgRouteGroupResolverTestBase extends OgGroupResolverTestBase {
 
-  use \Prophecy\PhpUnit\ProphecyTrait;
+  use ProphecyTrait;
 
   /**
    * A list of link templates that belong to entity types used in the tests.
