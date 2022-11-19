@@ -29,7 +29,7 @@ class EntityCreateAccessTest extends KernelTestBase {
   /**
    * {@inheritdoc}
    */
-  public static $modules = [
+  protected static $modules = [
     'field',
     'node',
     'og',

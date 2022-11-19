@@ -21,7 +21,7 @@ class FieldCreateTest extends KernelTestBase {
   /**
    * {@inheritdoc}
    */
-  public static $modules = [
+  protected static $modules = [
     'user',
     'field',
     'node',

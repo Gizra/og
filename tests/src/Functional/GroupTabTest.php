@@ -29,7 +29,7 @@ class GroupTabTest extends BrowserTestBase {
   /**
    * {@inheritdoc}
    */
-  public static $modules = ['node', 'og', 'views', 'entity_test'];
+  protected static $modules = ['node', 'og', 'views', 'entity_test'];
 
   /**
    * {@inheritdoc}

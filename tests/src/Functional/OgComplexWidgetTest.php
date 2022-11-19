@@ -26,7 +26,7 @@ class OgComplexWidgetTest extends BrowserTestBase {
   /**
    * {@inheritdoc}
    */
-  public static $modules = ['block_content', 'node', 'og'];
+  protected static $modules = ['block_content', 'node', 'og'];
 
   /**
    * {@inheritdoc}

@@ -38,7 +38,7 @@ class OgStandardReferenceRelationshipTest extends ViewsKernelTestBase {
    *
    * @var array
    */
-  public static $modules = [
+  protected static $modules = [
     'user',
     'field',
     'entity_test',
