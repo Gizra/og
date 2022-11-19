@@ -16,6 +16,8 @@ use Drupal\og\OgResolvedGroupCollection;
  */
 class OgResolvedGroupCollectionTest extends UnitTestCase {
 
+  use \Prophecy\PhpUnit\ProphecyTrait;
+
   /**
    * An array of mocked test groups, keyed by entity type ID and entity ID.
    *

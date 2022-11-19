@@ -32,6 +32,8 @@ use Symfony\Component\EventDispatcher\EventDispatcherInterface;
  */
 class GroupTypeManagerTest extends UnitTestCase {
 
+  use \Prophecy\PhpUnit\ProphecyTrait;
+
   /**
    * The config prophecy used in the test.
    *

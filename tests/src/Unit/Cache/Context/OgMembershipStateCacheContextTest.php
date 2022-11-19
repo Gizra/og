@@ -17,6 +17,8 @@ use Drupal\og\OgMembershipInterface;
  */
 class OgMembershipStateCacheContextTest extends OgContextCacheContextTestBase {
 
+  use \Prophecy\PhpUnit\ProphecyTrait;
+
   /**
    * The OG membership entity.
    *

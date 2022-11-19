@@ -26,6 +26,8 @@ use Symfony\Component\DependencyInjection\Container;
  */
 class OgContextTest extends UnitTestCase {
 
+  use \Prophecy\PhpUnit\ProphecyTrait;
+
   /**
    * A mocked plugin manager.
    *

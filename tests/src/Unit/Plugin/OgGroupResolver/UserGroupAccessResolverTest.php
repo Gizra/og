@@ -15,6 +15,8 @@ use Drupal\og\Plugin\OgGroupResolver\UserGroupAccessResolver;
  */
 class UserGroupAccessResolverTest extends OgGroupResolverTestBase {
 
+  use \Prophecy\PhpUnit\ProphecyTrait;
+
   /**
    * {@inheritdoc}
    */

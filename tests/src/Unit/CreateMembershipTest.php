@@ -25,6 +25,8 @@ use Prophecy\Argument;
  */
 class CreateMembershipTest extends UnitTestCase {
 
+  use \Prophecy\PhpUnit\ProphecyTrait;
+
   /**
    * The entity type manager.
    *

@@ -21,6 +21,8 @@ use Symfony\Component\EventDispatcher\EventDispatcherInterface;
  */
 class OgRoleManagerTest extends UnitTestCase {
 
+  use \Prophecy\PhpUnit\ProphecyTrait;
+
   /**
    * The entity type ID of the test group.
    *

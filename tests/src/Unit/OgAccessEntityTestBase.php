@@ -19,6 +19,8 @@ use Drupal\og\OgGroupAudienceHelperInterface;
  */
 abstract class OgAccessEntityTestBase extends OgAccessTestBase {
 
+  use \Prophecy\PhpUnit\ProphecyTrait;
+
   /**
    * A test group content entity.
    *

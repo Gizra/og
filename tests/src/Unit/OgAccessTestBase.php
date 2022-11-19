@@ -30,6 +30,8 @@ use Symfony\Component\EventDispatcher\EventDispatcherInterface;
  */
 class OgAccessTestBase extends UnitTestCase {
 
+  use \Prophecy\PhpUnit\ProphecyTrait;
+
   /**
    * The mocked config handler.
    *

@@ -6,7 +6,7 @@ namespace Drupal\og\Event;
 
 use Drupal\Component\Utility\NestedArray;
 use Drupal\og\OgAccess;
-use Symfony\Component\EventDispatcher\Event;
+use Symfony\Contracts\EventDispatcher\Event;
 
 /**
  * Event that is fired when OG admin routes are being compiled.

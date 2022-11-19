@@ -18,6 +18,8 @@ use Drupal\og\OgGroupAudienceHelperInterface;
  */
 abstract class OgGroupResolverTestBase extends UnitTestCase {
 
+  use \Prophecy\PhpUnit\ProphecyTrait;
+
   /**
    * The fully qualified class name of the plugin under test.
    *
@@ -118,6 +120,7 @@ abstract class OgGroupResolverTestBase extends UnitTestCase {
    *
    * @dataProvider resolveProvider
    * @covers ::resolve()
+   * @doesNotPerformAssertions
    */
   abstract public function testResolve();
 

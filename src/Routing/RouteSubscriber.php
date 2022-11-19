@@ -120,7 +120,7 @@ class RouteSubscriber extends RouteSubscriberBase {
    */
   protected function createRoutesFromEventSubscribers($og_admin_path, $entity_type_id, RouteCollection $collection) {
     $event = new OgAdminRoutesEvent();
-    $this->eventDispatcher->dispatch(OgAdminRoutesEventInterface::EVENT_NAME, $event);
+    $this->eventDispatcher->dispatch($event, OgAdminRoutesEventInterface::EVENT_NAME);
 
     foreach ($event->getRoutes($entity_type_id) as $name => $route_info) {
       // Add the parent route.

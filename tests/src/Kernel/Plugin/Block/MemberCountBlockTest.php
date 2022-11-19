@@ -21,6 +21,7 @@ use Prophecy\Promise\CallbackPromise;
  */
 class MemberCountBlockTest extends KernelTestBase {
 
+  use \Prophecy\PhpUnit\ProphecyTrait;
   use OgMembershipCreationTrait;
   use StringTranslationTrait;
   use UserCreationTrait;

@@ -5,7 +5,7 @@ declare(strict_types = 1);
 namespace Drupal\og\Event;
 
 use Drupal\og\Entity\OgRole;
-use Symfony\Component\EventDispatcher\Event;
+use Symfony\Contracts\EventDispatcher\Event;
 
 /**
  * Event that is fired when default roles are compiled.

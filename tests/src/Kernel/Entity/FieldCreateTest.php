@@ -97,6 +97,8 @@ class FieldCreateTest extends KernelTestBase {
 
   /**
    * Testing invalid field creation.
+   *
+   * @doesNotPerformAssertions
    */
   public function testInvalidFields() {
     // Unknown plugin.

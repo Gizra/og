@@ -205,6 +205,7 @@ abstract class ActionTestBase extends KernelTestBase {
    *
    * @covers ::execute
    * @dataProvider executeProvider
+   * @doesNotPerformAssertions
    */
   abstract public function testExecute($membership);
 

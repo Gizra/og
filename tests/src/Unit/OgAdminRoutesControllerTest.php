@@ -25,6 +25,8 @@ use Symfony\Component\Routing\Route;
  */
 class OgAdminRoutesControllerTest extends UnitTestCase {
 
+  use \Prophecy\PhpUnit\ProphecyTrait;
+
   /**
    * The access manager service.
    *

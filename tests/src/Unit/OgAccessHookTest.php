@@ -13,6 +13,7 @@ use Drupal\Core\Entity\EntityInterface;
  */
 class OgAccessHookTest extends OgAccessEntityTestBase {
 
+  use \Prophecy\PhpUnit\ProphecyTrait;
   /**
    * {@inheritdoc}
    */

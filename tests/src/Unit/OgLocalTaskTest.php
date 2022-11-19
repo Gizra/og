@@ -21,6 +21,8 @@ use Symfony\Component\Routing\Route;
  */
 class OgLocalTaskTest extends UnitTestCase {
 
+  use \Prophecy\PhpUnit\ProphecyTrait;
+
   /**
    * The group type manager.
    *

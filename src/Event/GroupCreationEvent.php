@@ -4,7 +4,7 @@ declare(strict_types = 1);
 
 namespace Drupal\og\Event;
 
-use Symfony\Component\EventDispatcher\Event;
+use Symfony\Contracts\EventDispatcher\Event;
 
 /**
  * The group creation event.

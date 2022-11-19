@@ -19,6 +19,8 @@ use Drupal\og\OgRoleInterface;
  */
 class DefaultRoleEventTest extends UnitTestCase {
 
+  use \Prophecy\PhpUnit\ProphecyTrait;
+
   /**
    * The DefaultRoleEvent class, which is the system under test.
    *

@@ -15,6 +15,8 @@ use Symfony\Component\Routing\Route;
  */
 abstract class OgRouteGroupResolverTestBase extends OgGroupResolverTestBase {
 
+  use \Prophecy\PhpUnit\ProphecyTrait;
+
   /**
    * A list of link templates that belong to entity types used in the tests.
    *

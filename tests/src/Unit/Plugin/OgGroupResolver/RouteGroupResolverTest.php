@@ -15,6 +15,8 @@ use Drupal\og\Plugin\OgGroupResolver\RouteGroupResolver;
  */
 class RouteGroupResolverTest extends OgRouteGroupResolverTestBase {
 
+  use \Prophecy\PhpUnit\ProphecyTrait;
+
   /**
    * {@inheritdoc}
    */

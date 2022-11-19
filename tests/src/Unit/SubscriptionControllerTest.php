@@ -27,6 +27,8 @@ use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
  */
 class SubscriptionControllerTest extends UnitTestCase {
 
+  use \Prophecy\PhpUnit\ProphecyTrait;
+
   /**
    * The entity for builder object.
    *

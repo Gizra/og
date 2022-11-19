@@ -200,6 +200,7 @@ class GroupMembershipManagerTest extends KernelTestBase {
    *
    * @covers ::getGroupIds
    * @dataProvider groupContentProvider
+   * @doesNotPerformAssertions
    */
   public function testGetGroupIdsInvalidArguments() {
     /** @var \Drupal\og\MembershipManagerInterface $membership_manager */
@@ -381,6 +382,7 @@ class GroupMembershipManagerTest extends KernelTestBase {
    * Tests retrieval of group membership IDs filtered by role names.
    *
    * @covers ::getGroupMembershipIdsByRoleNames
+   * @doesNotPerformAssertions
    */
   public function testGetGroupMembershipIdsByRoleNames() {
     $membership_storage = $this->container->get('entity_type.manager')->getStorage('og_membership');

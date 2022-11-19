@@ -23,6 +23,8 @@ use Drupal\og\OgMembershipInterface;
  */
 class OgRoleCacheContextTest extends OgCacheContextTestBase {
 
+  use \Prophecy\PhpUnit\ProphecyTrait;
+
   use OgRoleCacheContextTestTrait;
 
   /**

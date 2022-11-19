@@ -19,6 +19,8 @@ use Symfony\Component\HttpFoundation\RequestStack;
  */
 class RequestQueryArgumentResolverTest extends OgGroupResolverTestBase {
 
+  use \Prophecy\PhpUnit\ProphecyTrait;
+
   /**
    * {@inheritdoc}
    */

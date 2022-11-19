@@ -25,6 +25,8 @@ use Symfony\Component\Routing\Route;
  */
 class GroupCheckTest extends UnitTestCase {
 
+  use \Prophecy\PhpUnit\ProphecyTrait;
+
   /**
    * The entity type manager prophecy used in the test.
    *
