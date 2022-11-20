@@ -175,7 +175,7 @@ class GroupTabTest extends BrowserTestBase {
     $this->anotherNodeMembership = $this->createOgMembership($this->groupNode, $another_user);
 
     $this->groupTestEntity = EntityTest::create([
-      'title' => $this->randomString(),
+      'name' => $this->randomString(),
       'user_id' => $this->authorUser->id(),
     ]);
     $this->groupTestEntity->save();
