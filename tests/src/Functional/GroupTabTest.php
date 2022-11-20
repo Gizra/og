@@ -364,6 +364,10 @@ class GroupTabTest extends BrowserTestBase {
     $page = $this->getSession()->getPage();
     $input = $page->findField('edit-uid-0-target-id');
     $path = $input->getAttribute('data-autocomplete-path');
+    // Remove potential base path when the site is  under a subdirectory.
+    if (str_starts_with($path, base_path())) {
+      $path = str_replace(base_path(), '', $path);
+    }
     $this->drupalGet($path, ['query' => ['q' => $match]]);
     $header = $this->getSession()->getResponseHeader('content-type');
     $this->assertSame('application/json', $header);
