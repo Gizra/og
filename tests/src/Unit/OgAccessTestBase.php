@@ -23,12 +23,15 @@ use Drupal\og\PermissionManager;
 use Drupal\user\EntityOwnerInterface;
 use Drupal\user\RoleInterface;
 use Prophecy\Argument;
+use Prophecy\PhpUnit\ProphecyTrait;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
 /**
  * Base class for tests of the OgAccess class.
  */
 class OgAccessTestBase extends UnitTestCase {
+
+  use ProphecyTrait;
 
   /**
    * The mocked config handler.

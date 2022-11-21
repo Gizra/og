@@ -8,6 +8,7 @@ use Drupal\Core\Session\AccountInterface;
 use Drupal\og\Cache\Context\OgMembershipStateCacheContext;
 use Drupal\og\MembershipManagerInterface;
 use Drupal\og\OgMembershipInterface;
+use Prophecy\PhpUnit\ProphecyTrait;
 
 /**
  * Tests OG membership state cache context.
@@ -16,6 +17,8 @@ use Drupal\og\OgMembershipInterface;
  * @coversDefaultClass \Drupal\og\Cache\Context\OgMembershipStateCacheContext
  */
 class OgMembershipStateCacheContextTest extends OgContextCacheContextTestBase {
+
+  use ProphecyTrait;
 
   /**
    * The OG membership entity.

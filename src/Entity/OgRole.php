@@ -323,7 +323,16 @@ class OgRole extends Role implements OgRoleInterface {
    * {@inheritdoc}
    */
   public function calculateDependencies() {
+    // The parent method is checking for the existence of each role-assigned
+    // permission. But in OG this isn't mandatory. Backup the permissions before
+    // calling the parent method and avoid performing the check.
+    // @see https://www.drupal.org/node/3193348
+    // @todo Consider decoupling 'og_role' from 'role' entity config and
+    //   implementing the missing methods in 'og_role'.
+    $permissions = $this->permissions;
+    $this->permissions = [];
     parent::calculateDependencies();
+    $this->permissions = $permissions;
 
     // Create a dependency on the group bundle.
     $bundle_config_dependency = \Drupal::entityTypeManager()->getDefinition($this->getGroupType())->getBundleConfigDependency($this->getGroupBundle());

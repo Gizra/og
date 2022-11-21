@@ -25,7 +25,7 @@ class PermissionEventTest extends KernelTestBase {
   /**
    * {@inheritdoc}
    */
-  public static $modules = [
+  protected static $modules = [
     'entity_test',
     'field',
     'node',
@@ -98,7 +98,7 @@ class PermissionEventTest extends KernelTestBase {
     // Retrieve the permissions from the listeners.
     /** @var \Drupal\og\Event\PermissionEvent $permission_event */
     $event = new PermissionEvent($this->randomMachineName(), $this->randomMachineName(), $group_content_bundle_ids);
-    $permission_event = $this->eventDispatcher->dispatch(PermissionEventInterface::EVENT_NAME, $event);
+    $permission_event = $this->eventDispatcher->dispatch($event, PermissionEventInterface::EVENT_NAME);
     $actual_permissions = array_keys($permission_event->getPermissions());
 
     // Sort the permission arrays so they can be compared.

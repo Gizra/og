@@ -95,7 +95,7 @@ class BundleFormAlter {
     // Example: article.
     $this->bundle = $this->entity->id();
     // Example: Article.
-    $this->bundleLabel = Unicode::lcfirst($this->entity->label());
+    $this->bundleLabel = Unicode::lcfirst((string) $this->entity->label());
     $this->definition = $this->entity->getEntityType();
     // Example: node.
     $this->entityTypeId = $this->definition->getBundleOf();

@@ -35,7 +35,7 @@ class PermissionManager implements PermissionManagerInterface {
    */
   public function getDefaultPermissions($group_entity_type_id, $group_bundle_id, array $group_content_bundle_ids, $role_name = NULL) {
     $event = new PermissionEvent($group_entity_type_id, $group_bundle_id, $group_content_bundle_ids);
-    $this->eventDispatcher->dispatch(PermissionEventInterface::EVENT_NAME, $event);
+    $this->eventDispatcher->dispatch($event, PermissionEventInterface::EVENT_NAME);
     return $event->getPermissions();
   }
 

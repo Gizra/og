@@ -33,7 +33,7 @@ abstract class ActionTestBase extends KernelTestBase {
   /**
    * {@inheritdoc}
    */
-  public static $modules = ['node', 'og', 'system', 'user', 'options'];
+  protected static $modules = ['node', 'og', 'system', 'user', 'options'];
 
   /**
    * An array of test users.
@@ -205,6 +205,7 @@ abstract class ActionTestBase extends KernelTestBase {
    *
    * @covers ::execute
    * @dataProvider executeProvider
+   * @doesNotPerformAssertions
    */
   abstract public function testExecute($membership);
 
