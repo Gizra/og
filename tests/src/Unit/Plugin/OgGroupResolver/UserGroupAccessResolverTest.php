@@ -6,6 +6,7 @@ namespace Drupal\Tests\og\Unit\Plugin\OgGroupResolver;
 
 use Drupal\og\OgResolvedGroupCollectionInterface;
 use Drupal\og\Plugin\OgGroupResolver\UserGroupAccessResolver;
+use Prophecy\PhpUnit\ProphecyTrait;
 
 /**
  * Tests the UserGroupAccessResolver plugin.
@@ -14,6 +15,8 @@ use Drupal\og\Plugin\OgGroupResolver\UserGroupAccessResolver;
  * @coversDefaultClass \Drupal\og\Plugin\OgGroupResolver\UserGroupAccessResolver
  */
 class UserGroupAccessResolverTest extends OgGroupResolverTestBase {
+
+  use ProphecyTrait;
 
   /**
    * {@inheritdoc}

@@ -6,6 +6,7 @@ namespace Drupal\Tests\og\Unit\Plugin\OgGroupResolver;
 
 use Drupal\Core\Entity\ContentEntityInterface;
 use Drupal\og\Plugin\OgGroupResolver\RouteGroupResolver;
+use Prophecy\PhpUnit\ProphecyTrait;
 
 /**
  * Tests the RouteGroupResolver plugin.
@@ -14,6 +15,8 @@ use Drupal\og\Plugin\OgGroupResolver\RouteGroupResolver;
  * @coversDefaultClass \Drupal\og\Plugin\OgGroupResolver\RouteGroupResolver
  */
 class RouteGroupResolverTest extends OgRouteGroupResolverTestBase {
+
+  use ProphecyTrait;
 
   /**
    * {@inheritdoc}

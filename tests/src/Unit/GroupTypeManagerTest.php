@@ -22,6 +22,7 @@ use Drupal\og\OgGroupAudienceHelperInterface;
 use Drupal\og\OgRoleManagerInterface;
 use Drupal\og\PermissionManagerInterface;
 use Prophecy\Argument;
+use Prophecy\PhpUnit\ProphecyTrait;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
 /**
@@ -31,6 +32,8 @@ use Symfony\Component\EventDispatcher\EventDispatcherInterface;
  * @coversDefaultClass \Drupal\og\GroupTypeManager
  */
 class GroupTypeManagerTest extends UnitTestCase {
+
+  use ProphecyTrait;
 
   /**
    * The config prophecy used in the test.

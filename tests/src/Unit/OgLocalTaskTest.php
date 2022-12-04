@@ -9,6 +9,7 @@ use Drupal\Core\Routing\RouteProvider;
 use Drupal\Tests\UnitTestCase;
 use Drupal\og\GroupTypeManagerInterface;
 use Drupal\og\Plugin\Derivative\OgLocalTask;
+use Prophecy\PhpUnit\ProphecyTrait;
 use Symfony\Component\Routing\Route;
 
 /**
@@ -20,6 +21,8 @@ use Symfony\Component\Routing\Route;
  * @coversDefaultClass \Drupal\og\Plugin\Derivative\OgLocalTask
  */
 class OgLocalTaskTest extends UnitTestCase {
+
+  use ProphecyTrait;
 
   /**
    * The group type manager.

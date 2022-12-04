@@ -16,6 +16,7 @@ use Drupal\og\OgGroupAudienceHelperInterface;
 use Drupal\og\OgMembershipInterface;
 use Drupal\user\UserInterface;
 use Prophecy\Argument;
+use Prophecy\PhpUnit\ProphecyTrait;
 
 /**
  * Tests create membership helper function.
@@ -24,6 +25,8 @@ use Prophecy\Argument;
  * @coversDefaultClass \Drupal\og\Og
  */
 class CreateMembershipTest extends UnitTestCase {
+
+  use ProphecyTrait;
 
   /**
    * The entity type manager.

@@ -33,7 +33,7 @@ abstract class ActionTestBase extends KernelTestBase {
   /**
    * {@inheritdoc}
    */
-  public static $modules = ['node', 'og', 'system', 'user', 'options'];
+  protected static $modules = ['node', 'og', 'system', 'user', 'options'];
 
   /**
    * An array of test users.
@@ -205,6 +205,7 @@ abstract class ActionTestBase extends KernelTestBase {
    *
    * @covers ::execute
    * @dataProvider executeProvider
+   * @doesNotPerformAssertions
    */
   abstract public function testExecute($membership);
 
@@ -218,7 +219,7 @@ abstract class ActionTestBase extends KernelTestBase {
     // single test, so that the expensive setup is not executed over and over.
     $test_cases = $this->accessProvider();
     foreach ($test_cases as $test_case) {
-      list($user, $membership) = $test_case;
+      [$user, $membership] = $test_case;
 
       // When testing the group owner, configure whether or not they have full
       // access.
@@ -245,7 +246,7 @@ abstract class ActionTestBase extends KernelTestBase {
     // single test, so that the expensive setup is not executed over and over.
     $test_cases = $this->noAccessProvider();
     foreach ($test_cases as $test_case) {
-      list($user, $membership) = $test_case;
+      [$user, $membership] = $test_case;
 
       // When testing the group owner, configure whether or not they have full
       // access.

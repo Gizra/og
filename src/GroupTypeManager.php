@@ -211,7 +211,7 @@ class GroupTypeManager implements GroupTypeManagerInterface {
     foreach ($this->getGroupRelationMap() as $group_bundle_ids) {
       foreach ($group_bundle_ids as $group_content_entity_type_ids) {
         foreach ($group_content_entity_type_ids as $group_content_entity_type_id => $group_content_bundle_ids) {
-          $bundles[$group_content_entity_type_id] = array_merge(isset($bundles[$group_content_entity_type_id]) ? $bundles[$group_content_entity_type_id] : [], $group_content_bundle_ids);
+          $bundles[$group_content_entity_type_id] = array_merge($bundles[$group_content_entity_type_id] ?? [], $group_content_bundle_ids);
         }
       }
     }
