@@ -544,8 +544,8 @@ class OgMembership extends ContentEntityBase implements OgMembershipInterface {
     }
 
     // Check for an existing membership.
-    $query = \Drupal::entityQuery('og_membership');
-    $query
+    $query = \Drupal::entityQuery('og_membership')
+      ->accessCheck()
       ->condition('uid', $uid)
       ->condition('entity_id', $entity_id)
       ->condition('entity_type', $this->get('entity_type')->value);

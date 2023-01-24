@@ -113,6 +113,7 @@ class MembershipManager implements MembershipManagerInterface {
       $query = $this->entityTypeManager
         ->getStorage('og_membership')
         ->getQuery()
+        ->accessCheck()
         ->condition('uid', $user_id)
         ->condition('state', $states, 'IN');
 
@@ -185,6 +186,7 @@ class MembershipManager implements MembershipManagerInterface {
     $query = $this->entityTypeManager
       ->getStorage('og_membership')
       ->getQuery()
+      ->accessCheck()
       ->condition('entity_id', $group->id());
 
     if ($states) {
@@ -231,6 +233,7 @@ class MembershipManager implements MembershipManagerInterface {
       $query = $this->entityTypeManager
         ->getStorage('og_membership')
         ->getQuery()
+        ->accessCheck()
         ->condition('entity_type', $entity_type_id)
         ->condition('entity_id', $group->id())
         ->condition('state', $states, 'IN');
@@ -418,6 +421,7 @@ class MembershipManager implements MembershipManagerInterface {
       $results = $this->entityTypeManager
         ->getStorage($group_content_entity_type)
         ->getQuery()
+        ->accessCheck()
         ->condition($field->getName() . '.target_id', $entity->id())
         ->execute();
 
