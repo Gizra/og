@@ -2,7 +2,7 @@ type: module
 name: Organic Groups migrate
 description: 'Provides migration helper code for previous versions.'
 package: Organic Groups (Experimental)
-core_version_requirement: ^8.8 || ^9
+core_version_requirement: ^9.5 || ^10
 dependencies:
   - drupal:migrate
   - og:og
