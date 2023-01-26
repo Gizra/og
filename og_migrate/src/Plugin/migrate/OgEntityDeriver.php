@@ -147,7 +147,7 @@ class OgEntityDeriver extends DeriverBase implements ContainerDeriverInterface {
    * @return array
    *   The "process" definition.
    */
-  protected function getEntityProcessDefinition($group_type_migration, $entity_type_migration) {
+  protected function getEntityProcessDefinition(string $group_type_migration, string $entity_type_migration): array {
     return [
       'target_id' => [
         [
@@ -218,7 +218,7 @@ class OgEntityDeriver extends DeriverBase implements ContainerDeriverInterface {
    * @return array
    *   The "process" definition.
    */
-  protected function getUserProcessDefinition($group_type_migration) {
+  protected function getUserProcessDefinition(string $group_type_migration): array {
     return [
       'id' => 'id',
       'type' => [
