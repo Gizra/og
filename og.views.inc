@@ -23,6 +23,27 @@ function og_views_data_alter(array &$data) {
     'title' => new TranslatableMarkup('OG Membership'),
     'id' => 'standard',
   ];
+
+  $groupTypeManager = \Drupal::service('og.group_type_manager');
+  foreach(array_keys($groupTypeManager->getGroupMap()) as $entity_type_id){
+    $data[$entity_type_id]['og_membership_group']['relationship'] = [
+      'real field' => \Drupal::entityTypeManager()->getDefinition($entity_type_id)->getKey('id'),
+      'base' => 'og_membership',
+      'base field' => 'entity_id',
+      'group' => new TranslatableMarkup('OG membership'),
+      'label' => new TranslatableMarkup('OG Memberships'),
+      'title' => new TranslatableMarkup('OG Memberships'),
+      'id' => 'standard',
+      'help' => new TranslatableMarkup('Reference the og_membership entities tied to this '. $entity_type_id . ' group.'),
+      'join_extra' => [
+        [
+          // join on the entity type.
+          'field' => 'entity_type',
+          'value' => $entity_type_id,
+        ],
+      ],
+    ];
+  }
 }
 
 /**
