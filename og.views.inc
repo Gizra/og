@@ -23,6 +23,15 @@ function og_views_data_alter(array &$data) {
     'title' => new TranslatableMarkup('OG Membership'),
     'id' => 'standard',
   ];
+  // Add relationship to og_membership from node.
+  $data['node']['og_membership']['relationship'] = [
+    'real field' => 'nid',
+    'base' => 'og_membership',
+    'base field' => 'entity_id',
+    'label' => new TranslatableMarkup('Content OG Membership'),
+    'title' => new TranslatableMarkup('Content OG Membership'),
+    'id' => 'standard',
+  ];
 }
 
 /**
