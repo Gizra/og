@@ -34,7 +34,7 @@ function og_views_data_alter(array &$data) {
       'label' => new TranslatableMarkup('OG Memberships'),
       'title' => new TranslatableMarkup('OG Memberships'),
       'id' => 'standard',
-      'help' => new TranslatableMarkup('Reference og_membership entities tied to this @entity_type group.', array('@entity_type' => $entity_type_id)),
+      'help' => new TranslatableMarkup('Reference og_membership entities tied to this @entity_type group.', ['@entity_type' => $entity_type_id]),
       'join_extra' => [
         [
           // Join on the entity type.
