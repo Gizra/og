@@ -25,7 +25,7 @@ function og_views_data_alter(array &$data) {
   ];
 
   $groupTypeManager = \Drupal::service('og.group_type_manager');
-  foreach(array_keys($groupTypeManager->getGroupMap()) as $entity_type_id){
+  foreach (array_keys($groupTypeManager->getGroupMap()) as $entity_type_id) {
     $data[$entity_type_id]['og_membership_group']['relationship'] = [
       'real field' => \Drupal::entityTypeManager()->getDefinition($entity_type_id)->getKey('id'),
       'base' => 'og_membership',
@@ -34,10 +34,10 @@ function og_views_data_alter(array &$data) {
       'label' => new TranslatableMarkup('OG Memberships'),
       'title' => new TranslatableMarkup('OG Memberships'),
       'id' => 'standard',
-      'help' => new TranslatableMarkup('Reference the og_membership entities tied to this '. $entity_type_id . ' group.'),
+      'help' => new TranslatableMarkup('Reference og_membership entities tied to this @entity_type group.', array('@entity_type' => $entity_type_id)),
       'join_extra' => [
         [
-          // join on the entity type.
+          // Join on the entity type.
           'field' => 'entity_type',
           'value' => $entity_type_id,
         ],
