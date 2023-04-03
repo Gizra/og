@@ -77,7 +77,7 @@ class OgSelectionWidgetAutoCompleteTest extends BrowserTestBase {
   /**
    * {@inheritdoc}
    */
-  public function setUp() {
+  public function setUp(): void {
     parent::setUp();
 
     // Create group node types.
