@@ -26,8 +26,7 @@ class GroupAudienceTest extends KernelTestBase {
   /**
    * {@inheritdoc}
    */
-  public static $modules = [
-    'entity_reference',
+  protected static $modules = [
     'entity_test',
     'field',
     'og',

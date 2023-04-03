@@ -26,7 +26,7 @@ class OgSelectionWidgetTest extends BrowserTestBase {
   /**
    * {@inheritdoc}
    */
-  public static $modules = ['block_content', 'node', 'og', 'entity_test'];
+  protected static $modules = ['block_content', 'node', 'og', 'entity_test'];
 
   /**
    * {@inheritdoc}
@@ -72,6 +72,7 @@ class OgSelectionWidgetTest extends BrowserTestBase {
     $group = EntityTestWithBundle::create([
       'type' => 'group_type',
       'name' => $this->randomMachineName(),
+      'info' => $this->randomString(),
     ]);
     $group->save();
 
@@ -89,9 +90,9 @@ class OgSelectionWidgetTest extends BrowserTestBase {
     $this->assertSession()->statusCodeEquals(200);
 
     // Retrieve the post that was created from the database.
-    /** @var \Drupal\Core\Entity\Query\QueryInterface $query */
-    $query = $this->container->get('entity_type.manager')->getStorage('node')->getQuery();
-    $result = $query
+    $result = $this->container->get('entity_type.manager')->getStorage('node')
+      ->getQuery()
+      ->accessCheck()
       ->condition('type', 'post')
       ->range(0, 1)
       ->sort('nid', 'DESC')

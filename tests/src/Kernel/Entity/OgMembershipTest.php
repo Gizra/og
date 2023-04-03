@@ -29,7 +29,7 @@ class OgMembershipTest extends KernelTestBase {
   /**
    * {@inheritdoc}
    */
-  public static $modules = [
+  protected static $modules = [
     'entity_test',
     'field',
     'node',
@@ -258,6 +258,8 @@ class OgMembershipTest extends KernelTestBase {
    *
    * @todo This test is not related to the OgMembership entity. It should be
    *   moved to a more appropriate test class.
+   *
+   * @doesNotPerformAssertions
    */
   public function testNoOwnerException() {
     // Create a bundle and add as a group.
@@ -591,6 +593,7 @@ class OgMembershipTest extends KernelTestBase {
    * Tests re-saving a membership.
    *
    * @covers ::preSave
+   * @doesNotPerformAssertions
    */
   public function testSaveSameMembershipTwice() {
     $group = EntityTest::create([

@@ -32,11 +32,10 @@ class OgSelectionTest extends KernelTestBase {
   /**
    * {@inheritdoc}
    */
-  public static $modules = [
+  protected static $modules = [
     'system',
     'user',
     'field',
-    'entity_reference',
     'node',
     'og',
     'options',

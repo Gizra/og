@@ -6,7 +6,7 @@ namespace Drupal\og\Event;
 
 use Drupal\og\GroupContentOperationPermission;
 use Drupal\og\PermissionInterface;
-use Symfony\Component\EventDispatcher\Event;
+use Symfony\Contracts\EventDispatcher\Event;
 
 /**
  * Event that is fired when OG permissions are compiled.

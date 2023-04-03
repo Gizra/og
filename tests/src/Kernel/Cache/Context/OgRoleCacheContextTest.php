@@ -32,7 +32,7 @@ class OgRoleCacheContextTest extends KernelTestBase {
   /**
    * {@inheritdoc}
    */
-  public static $modules = [
+  protected static $modules = [
     'entity_test',
     'node',
     'og',

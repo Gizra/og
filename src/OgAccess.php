@@ -323,7 +323,7 @@ class OgAccess implements OgAccessInterface {
       $event->addCacheContexts(['user']);
     }
 
-    $this->dispatcher->dispatch(GroupContentEntityOperationAccessEvent::EVENT_NAME, $event);
+    $this->dispatcher->dispatch($event, GroupContentEntityOperationAccessEvent::EVENT_NAME);
 
     return $event->getAccessResult();
   }

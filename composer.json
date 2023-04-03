@@ -24,13 +24,9 @@
             "homepage": "https://www.drupal.org/u/pfrenssen"
         }
     ],
-    "require": {
-        "php": "^7.4 || ^8",
-        "drupal/core": "^9.3"
-    },
     "require-dev": {
         "drupal/coder": "^8.3.16",
-        "phpunit/phpunit": "^7 || ^8"
+        "phpunit/phpunit": "^7 || ^8 || ^9"
     },
     "minimum-stability": "RC",
     "config": {

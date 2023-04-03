@@ -12,6 +12,7 @@ use Drupal\og\OgContextInterface;
 use Drupal\og\OgMembershipInterface;
 use Drupal\Tests\og\Traits\OgMembershipCreationTrait;
 use Drupal\Tests\user\Traits\UserCreationTrait;
+use Prophecy\PhpUnit\ProphecyTrait;
 use Prophecy\Promise\CallbackPromise;
 
 /**
@@ -22,6 +23,7 @@ use Prophecy\Promise\CallbackPromise;
 class MemberCountBlockTest extends KernelTestBase {
 
   use OgMembershipCreationTrait;
+  use ProphecyTrait;
   use StringTranslationTrait;
   use UserCreationTrait;
 

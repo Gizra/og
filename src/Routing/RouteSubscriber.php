@@ -120,7 +120,7 @@ class RouteSubscriber extends RouteSubscriberBase {
    */
   protected function createRoutesFromEventSubscribers($og_admin_path, $entity_type_id, RouteCollection $collection) {
     $event = new OgAdminRoutesEvent();
-    $this->eventDispatcher->dispatch(OgAdminRoutesEventInterface::EVENT_NAME, $event);
+    $this->eventDispatcher->dispatch($event, OgAdminRoutesEventInterface::EVENT_NAME);
 
     foreach ($event->getRoutes($entity_type_id) as $name => $route_info) {
       // Add the parent route.
@@ -165,7 +165,7 @@ class RouteSubscriber extends RouteSubscriberBase {
    * We have such a case with the "members" OG admin route, that requires Views
    * module to be enabled.
    */
-  public static function getSubscribedEvents() {
+  public static function getSubscribedEvents(): array {
     $events[RoutingEvents::ALTER] = ['onAlterRoutes', 100];
     return $events;
   }
