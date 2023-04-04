@@ -22,7 +22,7 @@ class OgSelectionConfigurationFormTest extends KernelTestBase {
   /**
    * {@inheritdoc}
    */
-  public static $modules = [
+  protected static $modules = [
     'field',
     'field_ui',
     'entity_test',
