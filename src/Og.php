@@ -356,8 +356,6 @@ class Og {
    *
    * @param \Drupal\Core\Field\FieldDefinitionInterface $field_definition
    *   The field definition.
-   * @param array $options
-   *   Overriding the default options of the selection handler.
    *
    * @return \Drupal\og\Plugin\EntityReferenceSelection\OgSelection
    *   Returns the OG selection handler.
@@ -374,7 +372,7 @@ class Og {
    * @see https://github.com/Gizra/og/issues/580
    * @codingStandardsIgnoreEnd
    */
-  public static function getSelectionHandler(FieldDefinitionInterface $field_definition, array $options = []) {
+  public static function getSelectionHandler(FieldDefinitionInterface $field_definition) {
     // @codingStandardsIgnoreStart
     @trigger_error('Og:getSelectionHandler() is deprecated in og:8.x-1.0-alpha4
       and is removed from og:8.x-1.0-alpha5.
@@ -384,17 +382,24 @@ class Og {
     // @codingStandardsIgnoreEnd
     if (!\Drupal::service('og.group_audience_helper')->isGroupAudienceField($field_definition)) {
       $field_name = $field_definition->getName();
-      throw new \Exception("The field $field_name is not an audience field.");
+      throw new \Exception("The field $field_name is not a group audience field.");
     }
 
-    $default_options = [
+    $entity_type_id = $field_definition->getTargetEntityTypeId();
+    $definition = \Drupal::entityTypeManager()->getDefinition($entity_type_id);
+
+    $values = [];
+    if ($bundle_key = $definition->getKey('bundle')) {
+      $values[$bundle_key] = $field_definition->getTargetBundle();
+    }
+
+    $entity = \Drupal::entityTypeManager()->getStorage($entity_type_id)->create($values);
+
+    $options = [
       'target_type' => $field_definition->getFieldStorageDefinition()->getSetting('target_type'),
       'handler' => $field_definition->getSetting('handler'),
-      'field_mode' => 'default',
+      'entity' => $entity,
     ] + $field_definition->getSetting('handler_settings');
-
-    // Override with passed $options.
-    $options = NestedArray::mergeDeep($default_options, $options);
 
     return \Drupal::service('plugin.manager.entity_reference_selection')->createInstance('og:default', $options);
   }
