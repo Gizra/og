@@ -1,4 +1,4 @@
-dist: bionic
+dist: focal
 
 language: php
 
@@ -22,6 +22,10 @@ matrix:
       env: TEST_SUITE=PHP_CodeSniffer
     - php: 8.0
       env: TEST_SUITE=10.0.x
+    - php: 8.2
+      env: TEST_SUITE=9.5.x
+    - php: 8.2
+      env: TEST_SUITE=PHP_CodeSniffer
 
 mysql:
   database: og
