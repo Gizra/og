@@ -1,6 +1,10 @@
-dist: focal
+dist: jammy
 
 language: php
+
+services:
+  - mysql
+  - redis
 
 php:
   - '8.0'
