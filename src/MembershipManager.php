@@ -151,6 +151,7 @@ class MembershipManager implements MembershipManagerInterface {
       $query = $this->entityTypeManager
         ->getStorage('og_membership')
         ->getQuery()
+        ->accessCheck()
         ->condition('entity_type', $group->getEntityTypeId())
         ->condition('entity_id', $group->id())
         ->condition('uid', $user_id)
