@@ -133,10 +133,34 @@ class MembershipManager implements MembershipManagerInterface {
       $user_id = $user_id->id();
     }
 
-    foreach ($this->getMemberships($user_id, $states) as $membership) {
-      if ($membership->getGroupEntityType() === $group->getEntityTypeId() && $membership->getGroupId() === $group->id()) {
-        return $membership;
-      }
+    // When an empty array is passed, retrieve memberships with all possible
+    // states.
+    $states = $this->prepareConditionArray($states, OgMembership::ALL_STATES);
+
+    $cid = [
+      __METHOD__,
+      $group->getEntityTypeId(),
+      $group->id(),
+      $user_id,
+      implode('|', $states),
+    ];
+    $cid = implode(':', $cid);
+
+    // Use cached result if it exists.
+    if (!$membership_ids = $this->staticCache->get($cid)->data ?? []) {
+      $query = $this->entityTypeManager
+        ->getStorage('og_membership')
+        ->getQuery()
+        ->condition('entity_type', $group->getEntityTypeId())
+        ->condition('entity_id', $group->id())
+        ->condition('uid', $user_id)
+        ->condition('state', $states, 'IN');
+
+      $membership_ids = $query->execute();
+      $this->cacheMembershipIds($cid, $membership_ids);
+    }
+    if($memberships = $this->loadMemberships($membership_ids)) {
+      return reset($memberships);
     }
 
     // No membership matches the request.
