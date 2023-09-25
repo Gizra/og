@@ -21,7 +21,7 @@ class FieldCreateTest extends KernelTestBase {
   /**
    * {@inheritdoc}
    */
-  public static $modules = [
+  protected static $modules = [
     'user',
     'field',
     'node',
@@ -97,6 +97,8 @@ class FieldCreateTest extends KernelTestBase {
 
   /**
    * Testing invalid field creation.
+   *
+   * @doesNotPerformAssertions
    */
   public function testInvalidFields() {
     // Unknown plugin.

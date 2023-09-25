@@ -26,7 +26,7 @@ class GroupContentOperationAccessAlterTest extends KernelTestBase {
   /**
    * {@inheritdoc}
    */
-  public static $modules = [
+  protected static $modules = [
     'comment',
     'entity_test',
     'field',

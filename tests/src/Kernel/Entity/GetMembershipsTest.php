@@ -25,7 +25,7 @@ class GetMembershipsTest extends KernelTestBase {
   /**
    * {@inheritdoc}
    */
-  public static $modules = [
+  protected static $modules = [
     'entity_test',
     'field',
     'node',
@@ -278,6 +278,7 @@ class GetMembershipsTest extends KernelTestBase {
       $memberships = $this->entityTypeManager
         ->getStorage('og_membership')
         ->getQuery()
+        ->accessCheck()
         ->condition('uid', $user_id)
         ->execute();
 

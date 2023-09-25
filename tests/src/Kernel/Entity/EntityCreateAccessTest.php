@@ -4,6 +4,8 @@ declare(strict_types = 1);
 
 namespace Drupal\Tests\og\Kernel\Entity;
 
+use Drupal\Core\Access\AccessResultAllowed;
+use Drupal\Core\Url;
 use Drupal\KernelTests\KernelTestBase;
 use Drupal\Tests\node\Traits\ContentTypeCreationTrait;
 use Drupal\Tests\node\Traits\NodeCreationTrait;
@@ -29,7 +31,7 @@ class EntityCreateAccessTest extends KernelTestBase {
   /**
    * {@inheritdoc}
    */
-  public static $modules = [
+  protected static $modules = [
     'field',
     'node',
     'og',
@@ -115,18 +117,15 @@ class EntityCreateAccessTest extends KernelTestBase {
 
     // Verify that the user does not have access to the entity create form of
     // the group content type.
-    /** @var \Drupal\node\Access\NodeAddAccessCheck $node_access_check */
-    $node_access_check = $this->container->get('access_check.node.add');
-    $result = $node_access_check->access(User::getAnonymousUser(), $this->groupContentType);
-    $this->assertNotInstanceOf('\Drupal\Core\Access\AccessResultAllowed', $result);
+    $url = Url::fromRoute('node.add_page');
+    $this->assertNotInstanceOf(AccessResultAllowed::class, $url->access(User::getAnonymousUser(), TRUE));
 
     // Test that the user can access the entity create form when the permission
     // to create group content is granted. Note that node access control is
     // cached, so we need to reset it when we change permissions.
     $this->container->get('entity_type.manager')->getAccessControlHandler('node')->resetCache();
     $role->grantPermission('create post content')->trustData()->save();
-    $result = $node_access_check->access(User::getAnonymousUser(), $this->groupContentType);
-    $this->assertInstanceOf('\Drupal\Core\Access\AccessResultAllowed', $result);
+    $this->assertInstanceOf('\Drupal\Core\Access\AccessResultAllowed', $url->access(User::getAnonymousUser(), TRUE));
   }
 
 }

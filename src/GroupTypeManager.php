@@ -284,7 +284,7 @@ class GroupTypeManager implements GroupTypeManagerInterface {
 
     // Trigger an event upon the new group creation.
     $event = new GroupCreationEvent($entity_type_id, $bundle_id);
-    $this->eventDispatcher->dispatch(GroupCreationEventInterface::EVENT_NAME, $event);
+    $this->eventDispatcher->dispatch($event, GroupCreationEventInterface::EVENT_NAME);
 
     $this->ogRoleManager->createPerBundleRoles($entity_type_id, $bundle_id);
     $this->refreshGroupMap();

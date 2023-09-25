@@ -15,6 +15,7 @@ use Drupal\Tests\UnitTestCase;
 use Drupal\og\Access\GroupCheck;
 use Drupal\og\GroupTypeManagerInterface;
 use Drupal\og\OgAccessInterface;
+use Prophecy\PhpUnit\ProphecyTrait;
 use Symfony\Component\Routing\Route;
 
 /**
@@ -24,6 +25,8 @@ use Symfony\Component\Routing\Route;
  * @coversDefaultClass \Drupal\og\Access\GroupCheck
  */
 class GroupCheckTest extends UnitTestCase {
+
+  use ProphecyTrait;
 
   /**
    * The entity type manager prophecy used in the test.
