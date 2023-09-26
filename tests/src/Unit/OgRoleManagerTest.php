@@ -6,13 +6,13 @@ namespace Drupal\Tests\og\Unit;
 
 use Drupal\Core\Entity\EntityStorageInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
+use Drupal\og\Entity\OgRole;
 use Drupal\og\Event\DefaultRoleEvent;
 use Drupal\og\Event\DefaultRoleEventInterface;
-use Drupal\Tests\UnitTestCase;
-use Drupal\og\Entity\OgRole;
 use Drupal\og\OgRoleInterface;
 use Drupal\og\OgRoleManager;
 use Drupal\og\PermissionManagerInterface;
+use Drupal\Tests\UnitTestCase;
 use Prophecy\Argument;
 use Prophecy\PhpUnit\ProphecyTrait;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;

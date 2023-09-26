@@ -5,9 +5,9 @@ declare(strict_types = 1);
 namespace Drupal\Tests\og\Kernel\Entity;
 
 use Drupal\Core\Session\AccountInterface;
+use Drupal\KernelTests\KernelTestBase;
 use Drupal\node\Entity\Node;
 use Drupal\node\Entity\NodeType;
-use Drupal\KernelTests\KernelTestBase;
 use Drupal\og\Og;
 use Drupal\og\OgGroupAudienceHelperInterface;
 use Drupal\user\Entity\User;
