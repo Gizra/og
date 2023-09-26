@@ -93,8 +93,8 @@ class OgChangeMultipleRolesFormBase extends FormBase {
       '#value' => $this->t('Submit'),
     ];
 
-    // Set selected memberships & group in form state. This can be used by
-    // developers to alter the roles form.
+    // Set selected memberships in the form state. This can be used by
+    // to alter the roles form.
     $memberships = $this->getMemberships();
     if (empty($memberships)) {
       return $form;
