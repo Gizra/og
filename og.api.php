@@ -59,7 +59,7 @@ function hook_og_user_access_alter(array &$permissions, CacheableMetadata $cache
  * Implements hook_form_FORM_ID_alter().
  */
 function hook_form_og_membership_remove_multiple_roles_action_form_alter(array &$form, FormStateInterface $form_state, string $form_id) {
-  // Get access to current group and selected memberships when on role remove
+  // Get access to current group and selected memberships when we're on role remove
   // form.
   $memberships = $form_state->getTemporaryValue('selected_memberships');
   $group = $form_state->getTemporaryValue('current_group');
