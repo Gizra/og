@@ -99,10 +99,8 @@ class OgChangeMultipleRolesFormBase extends FormBase {
     if (empty($memberships)) {
       return $form;
     }
-    $membership = current($memberships);
-    $group = $membership->getGroup();
+
     $form_state->setTemporaryValue('selected_memberships', $memberships);
-    $form_state->setTemporaryValue('current_group', $group);
 
     return $form;
   }
