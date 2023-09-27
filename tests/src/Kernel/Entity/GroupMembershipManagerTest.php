@@ -4,12 +4,11 @@ declare(strict_types = 1);
 
 namespace Drupal\Tests\og\Kernel\Entity;
 
-use Drupal\KernelTests\KernelTestBase;
-use Drupal\Tests\og\Traits\OgMembershipCreationTrait;
+use Drupal\entity_test\Entity\EntityTest;
 use Drupal\entity_test\Entity\EntityTestBundle;
 use Drupal\entity_test\Entity\EntityTestRev;
 use Drupal\entity_test\Entity\EntityTestWithBundle;
-use Drupal\entity_test\Entity\EntityTest;
+use Drupal\KernelTests\KernelTestBase;
 use Drupal\node\Entity\Node;
 use Drupal\node\Entity\NodeType;
 use Drupal\og\Entity\OgRole;
@@ -17,6 +16,7 @@ use Drupal\og\Og;
 use Drupal\og\OgGroupAudienceHelperInterface;
 use Drupal\og\OgMembershipInterface;
 use Drupal\og\OgRoleInterface;
+use Drupal\Tests\og\Traits\OgMembershipCreationTrait;
 use Drupal\user\Entity\User;
 
 /**

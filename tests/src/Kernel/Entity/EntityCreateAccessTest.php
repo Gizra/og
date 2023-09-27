@@ -7,12 +7,12 @@ namespace Drupal\Tests\og\Kernel\Entity;
 use Drupal\Core\Access\AccessResultAllowed;
 use Drupal\Core\Url;
 use Drupal\KernelTests\KernelTestBase;
-use Drupal\Tests\node\Traits\ContentTypeCreationTrait;
-use Drupal\Tests\node\Traits\NodeCreationTrait;
 use Drupal\node\Entity\Node;
 use Drupal\node\Entity\NodeType;
 use Drupal\og\Og;
 use Drupal\og\OgGroupAudienceHelperInterface;
+use Drupal\Tests\node\Traits\ContentTypeCreationTrait;
+use Drupal\Tests\node\Traits\NodeCreationTrait;
 use Drupal\user\Entity\Role;
 use Drupal\user\Entity\User;
 

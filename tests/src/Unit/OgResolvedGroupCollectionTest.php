@@ -5,8 +5,8 @@ declare(strict_types = 1);
 namespace Drupal\Tests\og\Unit;
 
 use Drupal\Core\Entity\ContentEntityInterface;
-use Drupal\Tests\UnitTestCase;
 use Drupal\og\OgResolvedGroupCollection;
+use Drupal\Tests\UnitTestCase;
 use Prophecy\PhpUnit\ProphecyTrait;
 
 /**

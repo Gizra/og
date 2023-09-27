@@ -7,13 +7,13 @@ namespace Drupal\Tests\og\Functional;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Url;
 use Drupal\entity_test\Entity\EntityTest;
+use Drupal\node\Entity\Node;
+use Drupal\node\Entity\NodeType;
 use Drupal\og\Entity\OgRole;
+use Drupal\og\Og;
 use Drupal\og\OgMembershipInterface;
 use Drupal\og\OgRoleInterface;
 use Drupal\Tests\BrowserTestBase;
-use Drupal\node\Entity\Node;
-use Drupal\node\Entity\NodeType;
-use Drupal\og\Og;
 use Drupal\Tests\og\Traits\OgMembershipCreationTrait;
 use Drupal\user\Entity\User;
 
