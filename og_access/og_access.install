@@ -1,0 +1,16 @@
+<?php
+
+/**
+ * @file
+ * Install/update/uninstall hook implementations.
+ */
+
+declare(strict_types = 1);
+
+/**
+ * Implements hook_install().
+ */
+function og_access_install() {
+  // Mark node access permissions for rebuild.
+  node_access_needs_rebuild(TRUE);
+}
