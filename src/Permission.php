@@ -38,6 +38,16 @@ abstract class Permission implements PermissionInterface {
   protected $defaultRoles = [];
 
   /**
+   * Permission provider.
+   *
+   * Defaults to 'Group' for GroupPermission and
+   * 'Group content' for GroupContentOperationPermission.
+   *
+   * @var string
+   */
+  protected $provider = '';
+
+  /**
    * If the permission is security sensitive and should be limited to admins.
    *
    * @var bool
@@ -148,6 +158,21 @@ abstract class Permission implements PermissionInterface {
    */
   public function setRestrictAccess($access) {
     $this->set('restrict access', $access);
+    return $this;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getProvider() {
+    return $this->get('provider');
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function setProvider($provider) {
+    $this->set('provider', $provider);
     return $this;
   }
 

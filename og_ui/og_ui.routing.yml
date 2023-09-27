@@ -25,18 +25,18 @@ og_ui.roles_permissions_overview:
     _permission: 'administer organic groups'
     type: '^(roles|permissions)$'
 
-og_ui.roles_form:
-  path: 'admin/config/group/roles/{entity_type}/{bundle}'
+og_ui.permissions_overview:
+  path: 'admin/config/group/permissions/{entity_type_id}/{bundle_id}'
   defaults:
-    _form: '\Drupal\og_ui\Form\OgRolesForm'
-    _title: '@todo - create title callback'
+    _form: '\Drupal\og_ui\Form\OgPermissionsForm'
+    _title_callback: '\Drupal\og_ui\Form\OgPermissionsForm::titleCallback'
   requirements:
     _permission: 'administer organic groups'
 
-og_ui.permissions_form:
-  path: 'admin/config/group/permissions/{entity_type}/{bundle}'
+og_ui.permissions_edit_form:
+  path: 'admin/config/group/permissions/{entity_type_id}/{bundle_id}/{role_name}'
   defaults:
-    _form: '\Drupal\og_ui\Form\OgPermissionsForm'
-    _title: '@todo - create title callback'
+    _form: '\Drupal\og_ui\Form\OgRolePermissionsForm'
+    _title_callback: '\Drupal\og_ui\Form\OgRolePermissionsForm::rolePermissionTitleCallback'
   requirements:
     _permission: 'administer organic groups'
