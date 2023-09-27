@@ -30,7 +30,7 @@ members:
 
 ```php
 <?php
-
+// phpcs:ignoreFile
 namespace Drupal\my_module\EventSubscriber;
 
 use Drupal\Core\StringTranslation\StringTranslationTrait;

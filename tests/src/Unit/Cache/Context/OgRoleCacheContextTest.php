@@ -10,10 +10,10 @@ use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\PrivateKey;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\Core\Site\Settings;
-use Drupal\Tests\og\Traits\OgRoleCacheContextTestTrait;
 use Drupal\og\Cache\Context\OgRoleCacheContext;
 use Drupal\og\MembershipManagerInterface;
 use Drupal\og\OgMembershipInterface;
+use Drupal\Tests\og\Traits\OgRoleCacheContextTestTrait;
 use Prophecy\PhpUnit\ProphecyTrait;
 
 /**
