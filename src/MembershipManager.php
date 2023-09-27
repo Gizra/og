@@ -160,7 +160,7 @@ class MembershipManager implements MembershipManagerInterface {
       $membership_ids = $query->execute();
       $this->cacheMembershipIds($cid, $membership_ids);
     }
-    if($memberships = $this->loadMemberships($membership_ids)) {
+    if ($memberships = $this->loadMemberships($membership_ids)) {
       return reset($memberships);
     }
 
