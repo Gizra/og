@@ -147,7 +147,8 @@ class MembershipManager implements MembershipManagerInterface {
     $cid = implode(':', $cid);
 
     // Use cached result if it exists.
-    if (!$membership_ids = $this->staticCache->get($cid)->data ?? []) {
+    $membership_ids = $this->staticCache->get($cid)->data ?? [];
+    if (!$membership_ids) {
       $query = $this->entityTypeManager
         ->getStorage('og_membership')
         ->getQuery()
