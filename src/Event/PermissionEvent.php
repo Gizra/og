@@ -242,7 +242,7 @@ class PermissionEvent extends Event implements PermissionEventInterface {
   /**
    * {@inheritdoc}
    */
-  public function offsetExists($key): bool {
+  public function offsetExists(mixed $key): bool {
     return $this->hasPermission($key);
   }
 
