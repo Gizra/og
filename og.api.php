@@ -9,6 +9,7 @@ declare(strict_types = 1);
 
 use Drupal\Core\Cache\CacheableMetadata;
 use Drupal\Core\Entity\EntityPublishedInterface;
+use Drupal\Core\Form\FormStateInterface;
 use Drupal\og\OgAccess;
 
 /**
@@ -52,6 +53,44 @@ function hook_og_user_access_alter(array &$permissions, CacheableMetadata $cache
   // Since our access result depends on our custom module configuration, we need
   // to add it to the cache metadata.
   $cacheable_metadata->addCacheableDependency($config);
+}
+
+/**
+ * Implements hook_form_FORM_ID_alter().
+ */
+function hook_form_og_membership_remove_multiple_roles_action_form_alter(array &$form, FormStateInterface $form_state, string $form_id) {
+  // Get access to current group and selected memberships when we're on the role
+  // remove form.
+  /** @var \Drupal\og\OgMembershipInterface[] $memberships */
+  $memberships = $form_state->getTemporaryValue('selected_memberships');
+
+  $form['roles']['#options'] = array_filter($form['roles']['#options'], function ($key) use (&$form, $memberships) {
+    // Code to filter out options based on data from memberships and group.
+    $membership = reset($memberships);
+    $group = $membership->getGroup();
+    if ($group->id() != 9999) {
+      unset($form['roles']['#options'][$key]);
+    }
+  }, ARRAY_FILTER_USE_KEY);
+}
+
+/**
+ * Implements hook_form_FORM_ID_alter().
+ */
+function hook_form_og_membership_add_multiple_roles_action_form_alter(array &$form, FormStateInterface $form_state, string $form_id) {
+  // Get access to current group and selected memberships when we're on the role
+  // add form.
+  /** @var \Drupal\og\OgMembershipInterface[] $memberships */
+  $memberships = $form_state->getTemporaryValue('selected_memberships');
+
+  $form['roles']['#options'] = array_filter($form['roles']['#options'], function ($key) use (&$form, $memberships) {
+    // Code to filter out options based on data from memberships and group.
+    $membership = reset($memberships);
+    $group = $membership->getGroup();
+    if ($group->id() != 9999) {
+      unset($form['roles']['#options'][$key]);
+    }
+  }, ARRAY_FILTER_USE_KEY);
 }
 
 /**
