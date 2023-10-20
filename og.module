@@ -253,10 +253,10 @@ function og_entity_create_access(AccountInterface $account, array $context, $bun
  *
  * Add a read only property to group entities as a group flag.
  */
-function og_entity_bundle_field_info(EntityTypeInterface $entity_type, $bundle, array $base_field_definitions) {
+function og_entity_bundle_field_info(EntityTypeInterface $entity_type, string $bundle, array $base_field_definitions): array {
   if (!Og::isGroup($entity_type->id(), $bundle)) {
     // Not a group type.
-    return NULL;
+    return [];
   }
 
   $fields = [];

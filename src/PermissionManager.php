@@ -18,7 +18,7 @@ class PermissionManager implements PermissionManagerInterface {
    *
    * @var \Symfony\Component\EventDispatcher\EventDispatcherInterface
    */
-  protected $eventDispatcher;
+  protected EventDispatcherInterface $eventDispatcher;
 
   /**
    * Constructs a PermissionManager object.
@@ -33,7 +33,7 @@ class PermissionManager implements PermissionManagerInterface {
   /**
    * {@inheritdoc}
    */
-  public function getDefaultPermissions($group_entity_type_id, $group_bundle_id, array $group_content_bundle_ids, $role_name = NULL) {
+  public function getDefaultPermissions(string $group_entity_type_id, string $group_bundle_id, array $group_content_bundle_ids, ?string $role_name = NULL): array {
     $event = new PermissionEvent($group_entity_type_id, $group_bundle_id, $group_content_bundle_ids);
     $this->eventDispatcher->dispatch($event, PermissionEventInterface::EVENT_NAME);
     return $event->getPermissions();
@@ -42,7 +42,7 @@ class PermissionManager implements PermissionManagerInterface {
   /**
    * {@inheritdoc}
    */
-  public function getDefaultGroupPermissions($group_entity_type_id, $group_bundle_id, $role_name = NULL) {
+  public function getDefaultGroupPermissions(string $group_entity_type_id, string $group_bundle_id, ?string $role_name = NULL): array {
     $permissions = $this->getDefaultPermissions($group_entity_type_id, $group_bundle_id, [], $role_name);
 
     $permissions = array_filter($permissions, function (PermissionInterface $permission) use ($role_name) {
@@ -62,7 +62,7 @@ class PermissionManager implements PermissionManagerInterface {
   /**
    * {@inheritdoc}
    */
-  public function getDefaultEntityOperationPermissions($group_entity_type_id, $group_bundle_id, array $group_content_bundle_ids, $role_name = NULL) {
+  public function getDefaultEntityOperationPermissions(string $group_entity_type_id, string $group_bundle_id, array $group_content_bundle_ids, ?string $role_name = NULL): array {
     $permissions = $this->getDefaultPermissions($group_entity_type_id, $group_bundle_id, $group_content_bundle_ids, $role_name);
 
     $permissions = array_filter($permissions, function (PermissionInterface $permission) use ($role_name) {

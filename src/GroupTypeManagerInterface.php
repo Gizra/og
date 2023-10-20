@@ -20,7 +20,7 @@ interface GroupTypeManagerInterface {
    * @return bool
    *   TRUE if a bundle is a group.
    */
-  public function isGroup($entity_type_id, $bundle);
+  public function isGroup(string $entity_type_id, string $bundle): bool;
 
   /**
    * Checks if the given entity bundle is group content.
@@ -36,7 +36,7 @@ interface GroupTypeManagerInterface {
    * @return bool
    *   TRUE if the entity bundle is group content.
    */
-  public function isGroupContent($entity_type_id, $bundle);
+  public function isGroupContent(string $entity_type_id, string $bundle): bool;
 
   /**
    * Returns the group of an entity type.
@@ -47,7 +47,7 @@ interface GroupTypeManagerInterface {
    * @return \Drupal\Core\Entity\EntityInterface[]
    *   Array of groups, or an empty array if none found
    */
-  public function getGroupBundleIdsByEntityType($entity_type_id);
+  public function getGroupBundleIdsByEntityType(string $entity_type_id): array;
 
   /**
    * Returns a list of all group content bundles IDs keyed by entity type.
@@ -62,7 +62,7 @@ interface GroupTypeManagerInterface {
    *
    * @see \Drupal\og\GroupTypeManagerInterface::getGroupRelationMap()
    */
-  public function getAllGroupContentBundleIds();
+  public function getAllGroupContentBundleIds(): array;
 
   /**
    * Returns a list of all group content bundles filtered by entity type.
@@ -83,7 +83,7 @@ interface GroupTypeManagerInterface {
    *
    * @see \Drupal\og\GroupTypeManagerInterface::getGroupRelationMap()
    */
-  public function getAllGroupContentBundlesByEntityType($entity_type_id);
+  public function getAllGroupContentBundlesByEntityType(string $entity_type_id): array;
 
   /**
    * Returns all group bundles that are referenced by the given group content.
@@ -98,7 +98,7 @@ interface GroupTypeManagerInterface {
    * @return string[][]
    *   An array of group bundle IDs, keyed by group entity type ID.
    */
-  public function getGroupBundleIdsByGroupContentBundle($group_content_entity_type_id, $group_content_bundle_id);
+  public function getGroupBundleIdsByGroupContentBundle(string $group_content_entity_type_id, string $group_content_bundle_id): array;
 
   /**
    * Returns group content bundles that are referencing the given group content.
@@ -114,7 +114,7 @@ interface GroupTypeManagerInterface {
    *   An array of group content bundle IDs, keyed by group content entity type
    *   ID.
    */
-  public function getGroupContentBundleIdsByGroupBundle($group_entity_type_id, $group_bundle_id);
+  public function getGroupContentBundleIdsByGroupBundle(string $group_entity_type_id, string $group_bundle_id): array;
 
   /**
    * Declares a bundle of an entity type as being an OG group.
@@ -127,24 +127,24 @@ interface GroupTypeManagerInterface {
    * @throws \InvalidArgumentException
    *   Thrown when the given bundle is already a group or is invalid.
    */
-  public function addGroup($entity_type_id, $bundle_id);
+  public function addGroup(string $entity_type_id, string $bundle_id): void;
 
   /**
    * Removes an entity type instance as being an OG group.
    */
-  public function removeGroup($entity_type_id, $bundle_id);
+  public function removeGroup(string $entity_type_id, string $bundle_id): void;
 
   /**
    * Resets all locally stored data.
    */
-  public function reset();
+  public function reset(): void;
 
   /**
    * Resets the cached group map.
    *
    * Call this after adding or removing a group type.
    */
-  public function resetGroupMap();
+  public function resetGroupMap(): void;
 
   /**
    * Resets the cached group relation map.
@@ -152,7 +152,7 @@ interface GroupTypeManagerInterface {
    * Call this after making a change to the relationship between a group type
    * and a group content type.
    */
-  public function resetGroupRelationMap();
+  public function resetGroupRelationMap(): void;
 
   /**
    * Returns the group map.
@@ -160,6 +160,6 @@ interface GroupTypeManagerInterface {
    * @return string[][]
    *   The group map.
    */
-  public function getGroupMap();
+  public function getGroupMap(): array;
 
 }

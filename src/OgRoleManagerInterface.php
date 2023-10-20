@@ -22,7 +22,7 @@ interface OgRoleManagerInterface {
    * @return \Drupal\og\Entity\OgRole[]
    *   Array with the saved OG roles that were created
    */
-  public function createPerBundleRoles($entity_type_id, $bundle_id);
+  public function createPerBundleRoles(string $entity_type_id, string $bundle_id): array;
 
   /**
    * Returns the default roles.
@@ -32,7 +32,7 @@ interface OgRoleManagerInterface {
    *   These are populated with the basic properties: name, label, role_type and
    *   is_admin.
    */
-  public function getDefaultRoles();
+  public function getDefaultRoles(): array;
 
   /**
    * Returns the roles which every group type requires.
@@ -45,7 +45,7 @@ interface OgRoleManagerInterface {
    *   name. These are populated with the basic properties: name, label and
    *   role_type.
    */
-  public function getRequiredDefaultRoles();
+  public function getRequiredDefaultRoles(): array;
 
   /**
    * Returns all the roles of a provided group.
@@ -58,7 +58,7 @@ interface OgRoleManagerInterface {
    * @return \Drupal\og\OgRoleInterface[]
    *   An array of roles indexed by their IDs.
    */
-  public function getRolesByBundle($entity_type_id, $bundle);
+  public function getRolesByBundle(string $entity_type_id, string $bundle): array;
 
   /**
    * Returns all the roles that have a specific permission.
@@ -67,9 +67,9 @@ interface OgRoleManagerInterface {
    *
    * @param array $permissions
    *   An array of permissions that the roles must have.
-   * @param string $entity_type_id
+   * @param string|null $entity_type_id
    *   (optional) The entity type ID of the group.
-   * @param string $bundle
+   * @param string|null $bundle
    *   (optional) The bundle of the group.
    * @param bool $require_all
    *   (optional) Whether all given permissions are required. When set to FALSE
@@ -79,7 +79,7 @@ interface OgRoleManagerInterface {
    * @return \Drupal\og\OgRoleInterface[]
    *   An array of roles indexed by their IDs.
    */
-  public function getRolesByPermissions(array $permissions, $entity_type_id = NULL, $bundle = NULL, $require_all = TRUE): array;
+  public function getRolesByPermissions(array $permissions, ?string $entity_type_id = NULL, ?string $bundle = NULL, bool $require_all = TRUE): array;
 
   /**
    * Deletes the roles associated with a group type.
@@ -89,6 +89,6 @@ interface OgRoleManagerInterface {
    * @param string $bundle_id
    *   The bundle ID of the group for which to delete the roles.
    */
-  public function removeRoles($entity_type_id, $bundle_id);
+  public function removeRoles(string $entity_type_id, string $bundle_id): void;
 
 }

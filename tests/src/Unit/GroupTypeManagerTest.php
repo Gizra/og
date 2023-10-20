@@ -164,7 +164,7 @@ class GroupTypeManagerTest extends UnitTestCase {
    *
    * @dataProvider providerTestIsGroup
    */
-  public function testIsGroup($entity_type_id, $bundle_id, $expected_result) {
+  public function testIsGroup($entity_type_id, $bundle_id, $expected_result): void {
     // It is expected that the group map will be retrieved from config.
     $groups = ['test_entity' => ['a', 'b']];
     $this->expectGroupMapRetrieval($groups);
@@ -181,7 +181,7 @@ class GroupTypeManagerTest extends UnitTestCase {
    *   array with the entity type ID, bundle ID and boolean indicating the
    *   expected result.
    */
-  public function providerTestIsGroup() {
+  public function providerTestIsGroup(): array {
     return [
       ['test_entity', 'a', TRUE],
       ['test_entity', 'b', TRUE],
@@ -196,7 +196,7 @@ class GroupTypeManagerTest extends UnitTestCase {
    *
    * @covers ::getGroupBundleIdsByEntityType
    */
-  public function testGetGroupBundleIdsByEntityType() {
+  public function testGetGroupBundleIdsByEntityType(): void {
     // It is expected that the group map will be retrieved from config.
     $groups = ['test_entity' => ['a', 'b']];
     $this->expectGroupMapRetrieval($groups);
@@ -212,7 +212,7 @@ class GroupTypeManagerTest extends UnitTestCase {
    *
    * @covers ::addGroup
    */
-  public function testAddGroupExisting() {
+  public function testAddGroupExisting(): void {
     // It is expected that the group map will be retrieved from config.
     $groups_before = ['test_entity' => ['a', 'b']];
     $this->expectGroupMapRetrieval($groups_before);
@@ -241,7 +241,7 @@ class GroupTypeManagerTest extends UnitTestCase {
    *
    * @covers ::addGroup
    */
-  public function testAddGroupNew() {
+  public function testAddGroupNew(): void {
     $this->configFactory->getEditable('og.settings')
       ->willReturn($this->config->reveal())
       ->shouldBeCalled();
@@ -282,7 +282,7 @@ class GroupTypeManagerTest extends UnitTestCase {
    *
    * @covers ::addGroup
    */
-  public function testRemoveGroup() {
+  public function testRemoveGroup(): void {
     $this->configFactory->getEditable('og.settings')
       ->willReturn($this->config->reveal())
       ->shouldBeCalled();
@@ -318,7 +318,7 @@ class GroupTypeManagerTest extends UnitTestCase {
    * @return \Drupal\og\GroupTypeManagerInterface
    *   Returns the group manager.
    */
-  protected function createGroupManager() {
+  protected function createGroupManager(): GroupTypeManagerInterface {
     return new GroupTypeManager(
       $this->configFactory->reveal(),
       $this->entityTypeManager->reveal(),
@@ -338,7 +338,7 @@ class GroupTypeManagerTest extends UnitTestCase {
    * @param array $groups
    *   The expected group map that will be returned by the mocked config.
    */
-  protected function expectGroupMapRetrieval(array $groups = []) {
+  protected function expectGroupMapRetrieval(array $groups = []): void {
     $this->configFactory->get('og.settings')
       ->willReturn($this->config->reveal())
       ->shouldBeCalled();

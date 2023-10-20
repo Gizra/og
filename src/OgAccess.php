@@ -54,49 +54,49 @@ class OgAccess implements OgAccessInterface {
    *
    * @var \Drupal\Core\Config\ConfigFactoryInterface
    */
-  protected $configFactory;
+  protected ConfigFactoryInterface $configFactory;
 
   /**
    * The service that contains the current active user.
    *
    * @var \Drupal\Core\Session\AccountProxyInterface
    */
-  protected $accountProxy;
+  protected AccountProxyInterface $accountProxy;
 
   /**
    * The module handler.
    *
    * @var \Drupal\Core\Extension\ModuleHandlerInterface
    */
-  protected $moduleHandler;
+  protected ModuleHandlerInterface $moduleHandler;
 
   /**
    * The group manager.
    *
    * @var \Drupal\og\GroupTypeManagerInterface
    */
-  protected $groupTypeManager;
+  protected GroupTypeManagerInterface $groupTypeManager;
 
   /**
    * The OG permission manager.
    *
    * @var \Drupal\og\PermissionManagerInterface
    */
-  protected $permissionManager;
+  protected PermissionManagerInterface $permissionManager;
 
   /**
    * The group membership manager.
    *
    * @var \Drupal\og\MembershipManagerInterface
    */
-  protected $membershipManager;
+  protected MembershipManagerInterface $membershipManager;
 
   /**
    * The event dispatcher.
    *
    * @var \Symfony\Component\EventDispatcher\EventDispatcherInterface
    */
-  protected $dispatcher;
+  protected EventDispatcherInterface $dispatcher;
 
   /**
    * Constructs the OgAccess service.
