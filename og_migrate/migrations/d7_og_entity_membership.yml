@@ -1,0 +1,21 @@
+id: d7_og_entity_membership
+label: Group entity memberships
+migration_tags:
+  - Drupal 7
+# For contrib or custom group entity types and contrib or custom entity types,
+# create similar migration templates based on this file. Write a similar deriver
+# to populate migration lookups for both target_id and entity_id.
+deriver: Drupal\og_migrate\Plugin\migrate\OgEntityDeriver
+source:
+  plugin: d7_og_membership
+process:
+  # Process plugins are set in the deriver class.
+  gid: gid
+  etid: etid
+destination:
+  plugin: og_entity_membership
+migration_dependencies:
+  required:
+    - d7_user
+    - d7_og_role
+    - d7_og_group

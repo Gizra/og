@@ -1,0 +1,59 @@
+id: d6_og_user_membership
+label: Og user memberships
+migration_tags:
+- Drupal 6
+source:
+  plugin: d6_og_uid
+  constants:
+    entity_type: node
+    membership_type: default
+process:
+  uid:
+    -
+      plugin: migration_lookup
+      migration: d6_user
+      source: uid
+    -
+      plugin: skip_on_empty
+      method: row
+      message: 'Missing user'
+  type: constants/membership_type
+  entity_id:
+    -
+      plugin: migration_lookup
+      migration: d6_node
+      source: nid
+    -
+      plugin: skip_on_empty
+      method: row
+      message: 'Missing node'
+  entity_type: constants/entity_type
+  entity_bundle:
+    -
+      plugin: migration_lookup
+      migration: d6_node_type
+      source: type
+    -
+      plugin: skip_on_empty
+      method: row
+      message: 'Missing content type'
+  state:
+    plugin: static_map
+    source: is_active
+    map:
+      0: pending
+      1: active
+  roles: roles
+  created: created
+  language:
+    plugin: default_value
+    source: og_language
+    default_value: und
+destination:
+  plugin: entity:og_membership
+migration_dependencies:
+  required:
+    - d6_node
+    - d6_user
+    - d6_og_group_type
+    - d6_og_admin_role
