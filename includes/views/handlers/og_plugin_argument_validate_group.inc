@@ -39,13 +39,39 @@ class og_plugin_argument_validate_group extends views_plugin_argument_validate {
       return;
     }
     $group_type = $this->options['group_type'];
-    $entity = entity_load_single($group_type, $argument);
-    if (!$entity || !og_is_group($group_type, $entity)) {
+    // Check if the $argument is a multiple arguments string.
+
+    $ids = views_break_phrase($argument, $this);
+    if ($ids->value == array(-1)) {
+      // Malformed argument syntax. Invalidate.
       return FALSE;
     }
+    $ids = $ids->value;
 
-    $this->argument->argument = $argument;
-    $this->argument->validated_title = entity_label($group_type, $entity);
-    return TRUE;
+    if (!is_numeric($argument) && $ids) {
+      $groups = entity_load($group_type, $ids);
+      foreach ($groups as $entity) {
+        if (!$entity || !og_is_group($group_type, $entity)) {
+          return FALSE;
+        }
+        $entity_labels[] = entity_label($group_type, $entity);
+      }
+
+      // Resetting variables as strings once validated to be passed to views.
+      $entity_labels = implode(' + ', $entity_labels);
+      $this->argument->argument = $argument;
+      $this->argument->validated_title = $entity_labels;
+      return TRUE;
+    }
+    else {
+      $entity = entity_load_single($group_type, $argument);
+      if (!$entity || !og_is_group($group_type, $entity)) {
+        return FALSE;
+      }
+
+      $this->argument->argument = $argument;
+      $this->argument->validated_title = entity_label($group_type, $entity);
+      return TRUE;
+    }
   }
 }
