@@ -20,7 +20,7 @@ og.settings:
         type: og.settings.group.[%key]
     group_manager_full_access:
       type: boolean
-      label: 'Full access for group managers'
+      label: 'Full access for group administrators'
     node_access_strict:
       type: boolean
       label: 'Strict node access permissions'

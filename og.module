@@ -29,7 +29,7 @@ use Drupal\user\UserInterface;
 /**
  * Implements hook_entity_insert().
  *
- * Subscribe the group manager.
+ * Subscribe the group administrator.
  */
 function og_entity_insert(EntityInterface $entity) {
   // Invalidate cache tags if new group content is created.
