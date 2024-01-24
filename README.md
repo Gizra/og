@@ -120,7 +120,7 @@ provide a quick way to get started with Organic groups.
       (admin/structure/types/manage/group/display)
        and choose the Group subscription format for the Group type field.
    4. Back in the group view you will now notice a 'Subscribe' link (If you are 
-       the group administrator it will say "You are the group manager").
+       the group administrator it will say "You are the group administrator").
 10. In order to associate other entities with group or group content, navigate
     to Organic Groups field settings", in admin/config/group/fields.
 11. In order to define default permissions for groups that are newly created or

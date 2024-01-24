@@ -12,7 +12,7 @@ use Drupal\og\OgMembershipInterface;
 use Drupal\user\Entity\User;
 
 /**
- * Tests if the group manager is subscribed automatically upon group creation.
+ * Tests if the group administrator is subscribed automatically upon group creation.
  *
  * @group og
  */
@@ -91,7 +91,7 @@ class GroupManagerSubscriptionTest extends KernelTestBase {
   }
 
   /**
-   * Tests whether a group manager is subscribed when creating a group.
+   * Tests whether a group administrator is subscribed when creating a group.
    *
    * @dataProvider groupManagerSubscriptionProvider
    */
@@ -166,16 +166,16 @@ class GroupManagerSubscriptionTest extends KernelTestBase {
    * @return array
    *   An array of test data arrays, each test data array having the following
    *   three values:
-   *   - A boolean indicating whether or not the group manager will be marked as
+   *   - A boolean indicating whether or not the group administrator will be marked as
    *     the author of the group when the entity is created.
    *   - A boolean indicating whether or not another hook_entity_insert() will
    *     fire first and will override the membership.
    */
   public static function groupManagerSubscriptionProvider() {
     return [
-      // Test a group created by the group manager.
+      // Test a group created by the group administrator.
       [
-        // Whether or not to set the group manager as author of the group
+        // Whether or not to set the group administrator as author of the group
         // entity.
         TRUE,
         // Whether or not another hook_entity_insert() implementation will fire
@@ -187,7 +187,7 @@ class GroupManagerSubscriptionTest extends KernelTestBase {
         FALSE,
         FALSE,
       ],
-      // Test a group created by the group manager, but the subscription will be
+      // Test a group created by the group administrator, but the subscription will be
       // already be created by another hook_entity_insert() implementation. This
       // allows us to test whether developers can override the automatic
       // creation of the membership.

@@ -80,7 +80,7 @@ class GroupSubscribeFormatterTest extends EntityKernelTestBase {
   public function testGroupOwner() {
     $this->drupalSetCurrentUser($this->user);
     $elements = $this->getElements();
-    $this->assertEquals('You are the group manager', $elements[0]['#value']);
+    $this->assertEquals('You are the group administrator', $elements[0]['#value']);
   }
 
   /**

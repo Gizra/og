@@ -128,15 +128,15 @@ class GroupSubscribeFormatter extends FormatterBase implements ContainerFactoryP
 
     $user = $this->entityTypeManager->getStorage('user')->load(($this->currentUser->id()));
     if (($group instanceof EntityOwnerInterface) && ($group->getOwnerId() == $user->id())) {
-      // User is the group manager.
+      // User is the group administrator.
       $elements[0] = [
         '#type' => 'html_tag',
         '#tag' => 'span',
         '#attributes' => [
-          'title' => $this->t('You are the group manager'),
+          'title' => $this->t('You are the group administrator'),
           'class' => ['group', 'manager'],
         ],
-        '#value' => $this->t('You are the group manager'),
+        '#value' => $this->t('You are the group administrator'),
       ];
 
       return $elements;

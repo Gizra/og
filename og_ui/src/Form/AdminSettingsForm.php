@@ -70,8 +70,8 @@ class AdminSettingsForm extends ConfigFormBase {
 
     $form['og_group_manager_full_access'] = [
       '#type' => 'checkbox',
-      '#title' => $this->t('Group manager has full permissions'),
-      '#description' => $this->t('When enabled the group manager will have all the permissions in the group.'),
+      '#title' => $this->t('Group administrator has full permissions'),
+      '#description' => $this->t('When enabled the group administrator will have all the permissions in the group.'),
       '#default_value' => $config_og->get('group_manager_full_access'),
     ];
 
