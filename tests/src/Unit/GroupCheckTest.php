@@ -11,10 +11,11 @@ use Drupal\Core\Entity\EntityStorageInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Routing\RouteMatchInterface;
 use Drupal\Core\Session\AccountInterface;
-use Drupal\Tests\UnitTestCase;
 use Drupal\og\Access\GroupCheck;
 use Drupal\og\GroupTypeManagerInterface;
 use Drupal\og\OgAccessInterface;
+use Drupal\Tests\UnitTestCase;
+use Prophecy\PhpUnit\ProphecyTrait;
 use Symfony\Component\Routing\Route;
 
 /**
@@ -24,6 +25,8 @@ use Symfony\Component\Routing\Route;
  * @coversDefaultClass \Drupal\og\Access\GroupCheck
  */
 class GroupCheckTest extends UnitTestCase {
+
+  use ProphecyTrait;
 
   /**
    * The entity type manager prophecy used in the test.

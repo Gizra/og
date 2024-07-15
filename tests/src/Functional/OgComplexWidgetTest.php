@@ -4,14 +4,14 @@ declare(strict_types = 1);
 
 namespace Drupal\Tests\og\Functional;
 
-use Drupal\Tests\BrowserTestBase;
-use Drupal\Tests\node\Traits\ContentTypeCreationTrait;
-use Drupal\Tests\node\Traits\NodeCreationTrait;
 use Drupal\block_content\Entity\BlockContent;
 use Drupal\block_content\Entity\BlockContentType;
 use Drupal\node\Entity\Node;
 use Drupal\og\Og;
 use Drupal\og\OgGroupAudienceHelperInterface;
+use Drupal\Tests\BrowserTestBase;
+use Drupal\Tests\node\Traits\ContentTypeCreationTrait;
+use Drupal\Tests\node\Traits\NodeCreationTrait;
 
 /**
  * Tests the complex widget.
@@ -26,7 +26,7 @@ class OgComplexWidgetTest extends BrowserTestBase {
   /**
    * {@inheritdoc}
    */
-  public static $modules = ['block_content', 'node', 'og'];
+  protected static $modules = ['block_content', 'node', 'og'];
 
   /**
    * {@inheritdoc}
@@ -78,6 +78,7 @@ class OgComplexWidgetTest extends BrowserTestBase {
     $values = [
       'type' => 'group',
       'uid' => $group_owner->id(),
+      'info' => $this->randomString(),
     ];
     $group = BlockContent::create($values);
     $group->save();
@@ -95,8 +96,9 @@ class OgComplexWidgetTest extends BrowserTestBase {
     $this->assertSession()->statusCodeEquals(200);
 
     // Retrieve the post that was created from the database.
-    $query = $this->container->get('entity_type.manager')->getStorage('node')->getQuery();
-    $result = $query
+    $result = $this->container->get('entity_type.manager')->getStorage('node')
+      ->getQuery()
+      ->accessCheck()
       ->condition('type', 'post')
       ->range(0, 1)
       ->sort('nid', 'DESC')

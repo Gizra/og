@@ -40,7 +40,7 @@ class OgResolvedGroupCollection implements OgResolvedGroupCollectionInterface {
     }
     $key = $this->generateKey($group);
     $this->groupInfo[$key]['entity'] = $group;
-    $this->groupInfo[$key]['votes'][] = $weight !== NULL ? $weight : $this->getVoteWeight();
+    $this->groupInfo[$key]['votes'][] = $weight ?? $this->getVoteWeight();
     foreach ($cache_contexts as $cache_context) {
       $this->groupInfo[$key]['cache_contexts'][$cache_context] = $cache_context;
     }

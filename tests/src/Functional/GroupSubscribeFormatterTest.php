@@ -4,12 +4,12 @@ declare(strict_types = 1);
 
 namespace Drupal\Tests\og\Functional;
 
-use Drupal\Tests\BrowserTestBase;
 use Drupal\node\Entity\Node;
 use Drupal\node\Entity\NodeType;
 use Drupal\og\Entity\OgRole;
 use Drupal\og\Og;
 use Drupal\og\OgRoleInterface;
+use Drupal\Tests\BrowserTestBase;
 
 /**
  * Tests subscribe and un-subscribe formatter.
@@ -21,7 +21,7 @@ class GroupSubscribeFormatterTest extends BrowserTestBase {
   /**
    * {@inheritdoc}
    */
-  public static $modules = ['node', 'og', 'options'];
+  protected static $modules = ['node', 'og', 'options'];
 
   /**
    * {@inheritdoc}

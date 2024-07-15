@@ -5,8 +5,8 @@ declare(strict_types = 1);
 namespace Drupal\Tests\og\Kernel\Access;
 
 use Drupal\Core\Access\AccessResult;
-use Drupal\KernelTests\KernelTestBase;
 use Drupal\entity_test\Entity\EntityTest;
+use Drupal\KernelTests\KernelTestBase;
 use Drupal\og\Entity\OgRole;
 use Drupal\og\Og;
 use Drupal\og\OgAccess;
@@ -25,7 +25,7 @@ class GroupLevelAccessTest extends KernelTestBase {
   /**
    * {@inheritdoc}
    */
-  public static $modules = [
+  protected static $modules = [
     'system',
     'user',
     'field',

@@ -20,7 +20,7 @@ class DefaultRoleEventIntegrationTest extends KernelTestBase {
   /**
    * {@inheritdoc}
    */
-  public static $modules = ['entity_test', 'og', 'system', 'user', 'field'];
+  protected static $modules = ['entity_test', 'og', 'system', 'user', 'field'];
 
   /**
    * The Symfony event dispatcher.
@@ -68,7 +68,7 @@ class DefaultRoleEventIntegrationTest extends KernelTestBase {
 
     // Query the event listener directly to see if the administrator role is
     // present.
-    $this->eventDispatcher->dispatch(DefaultRoleEventInterface::EVENT_NAME, $event);
+    $this->eventDispatcher->dispatch($event, DefaultRoleEventInterface::EVENT_NAME);
     $this->assertEquals([OgRoleInterface::ADMINISTRATOR], array_keys($event->getRoles()));
 
     // Check that the role was created with the correct values.

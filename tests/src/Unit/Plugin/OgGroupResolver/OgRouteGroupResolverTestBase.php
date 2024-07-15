@@ -8,12 +8,15 @@ use Drupal\Core\Entity\ContentEntityInterface;
 use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Routing\RouteMatchInterface;
 use Drupal\og\OgResolvedGroupCollectionInterface;
+use Prophecy\PhpUnit\ProphecyTrait;
 use Symfony\Component\Routing\Route;
 
 /**
  * Base class for testing OgGroupResolver plugins that depend on the route.
  */
 abstract class OgRouteGroupResolverTestBase extends OgGroupResolverTestBase {
+
+  use ProphecyTrait;
 
   /**
    * A list of link templates that belong to entity types used in the tests.

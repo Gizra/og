@@ -113,6 +113,7 @@ class MembershipManager implements MembershipManagerInterface {
       $query = $this->entityTypeManager
         ->getStorage('og_membership')
         ->getQuery()
+        ->accessCheck()
         ->condition('uid', $user_id)
         ->condition('state', $states, 'IN');
 
@@ -132,10 +133,36 @@ class MembershipManager implements MembershipManagerInterface {
       $user_id = $user_id->id();
     }
 
-    foreach ($this->getMemberships($user_id, $states) as $membership) {
-      if ($membership->getGroupEntityType() === $group->getEntityTypeId() && $membership->getGroupId() === $group->id()) {
-        return $membership;
-      }
+    // When an empty array is passed, retrieve memberships with all possible
+    // states.
+    $states = $this->prepareConditionArray($states, OgMembership::ALL_STATES);
+
+    $cid = [
+      __METHOD__,
+      $group->getEntityTypeId(),
+      $group->id(),
+      $user_id,
+      implode('|', $states),
+    ];
+    $cid = implode(':', $cid);
+
+    // Use cached result if it exists.
+    $membership_ids = $this->staticCache->get($cid)->data ?? [];
+    if (!$membership_ids) {
+      $query = $this->entityTypeManager
+        ->getStorage('og_membership')
+        ->getQuery()
+        ->accessCheck()
+        ->condition('entity_type', $group->getEntityTypeId())
+        ->condition('entity_id', $group->id())
+        ->condition('uid', $user_id)
+        ->condition('state', $states, 'IN');
+
+      $membership_ids = $query->execute();
+      $this->cacheMembershipIds($cid, $membership_ids);
+    }
+    if ($memberships = $this->loadMemberships($membership_ids)) {
+      return reset($memberships);
     }
 
     // No membership matches the request.
@@ -185,6 +212,7 @@ class MembershipManager implements MembershipManagerInterface {
     $query = $this->entityTypeManager
       ->getStorage('og_membership')
       ->getQuery()
+      ->accessCheck()
       ->condition('entity_id', $group->id());
 
     if ($states) {
@@ -231,6 +259,7 @@ class MembershipManager implements MembershipManagerInterface {
       $query = $this->entityTypeManager
         ->getStorage('og_membership')
         ->getQuery()
+        ->accessCheck()
         ->condition('entity_type', $entity_type_id)
         ->condition('entity_id', $group->id())
         ->condition('state', $states, 'IN');
@@ -418,6 +447,7 @@ class MembershipManager implements MembershipManagerInterface {
       $results = $this->entityTypeManager
         ->getStorage($group_content_entity_type)
         ->getQuery()
+        ->accessCheck()
         ->condition($field->getName() . '.target_id', $entity->id())
         ->execute();
 

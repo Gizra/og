@@ -17,7 +17,7 @@ class AudienceFieldFormatterTest extends KernelTestBase {
   /**
    * {@inheritdoc}
    */
-  public static $modules = ['field', 'og'];
+  protected static $modules = ['field', 'og'];
 
   /**
    * Testing og_field_formatter_info_alter().

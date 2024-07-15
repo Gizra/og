@@ -76,6 +76,7 @@ class UniqueOgMembershipConstraintValidator extends ConstraintValidator implemen
     $query = $this->entityTypeManager
       ->getStorage('og_membership')
       ->getQuery()
+      ->accessCheck()
       ->condition('entity_type', $entity->getGroupEntityType())
       ->condition('entity_id', $entity->getGroupId())
       ->condition('uid', $new_member_uid);

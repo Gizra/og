@@ -11,11 +11,12 @@ use Drupal\Core\Entity\ContentEntityInterface;
 use Drupal\Core\Entity\TypedData\EntityDataDefinition;
 use Drupal\Core\TypedData\TypedDataInterface;
 use Drupal\Core\TypedData\TypedDataManagerInterface;
-use Drupal\Tests\UnitTestCase;
 use Drupal\og\ContextProvider\OgContext;
 use Drupal\og\OgGroupResolverInterface;
 use Drupal\og\OgResolvedGroupCollectionInterface;
+use Drupal\Tests\UnitTestCase;
 use Prophecy\Argument;
+use Prophecy\PhpUnit\ProphecyTrait;
 use Symfony\Component\DependencyInjection\Container;
 
 /**
@@ -25,6 +26,8 @@ use Symfony\Component\DependencyInjection\Container;
  * @coversDefaultClass \Drupal\og\ContextProvider\OgContext
  */
 class OgContextTest extends UnitTestCase {
+
+  use ProphecyTrait;
 
   /**
    * A mocked plugin manager.

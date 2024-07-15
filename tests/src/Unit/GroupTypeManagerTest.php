@@ -11,7 +11,6 @@ use Drupal\Core\Entity\EntityStorageInterface;
 use Drupal\Core\Entity\EntityTypeBundleInfoInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Routing\RouteBuilderInterface;
-use Drupal\Tests\UnitTestCase;
 use Drupal\og\Entity\OgRole;
 use Drupal\og\Event\GroupCreationEvent;
 use Drupal\og\Event\GroupCreationEventInterface;
@@ -21,7 +20,9 @@ use Drupal\og\GroupTypeManagerInterface;
 use Drupal\og\OgGroupAudienceHelperInterface;
 use Drupal\og\OgRoleManagerInterface;
 use Drupal\og\PermissionManagerInterface;
+use Drupal\Tests\UnitTestCase;
 use Prophecy\Argument;
+use Prophecy\PhpUnit\ProphecyTrait;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
 /**
@@ -31,6 +32,8 @@ use Symfony\Component\EventDispatcher\EventDispatcherInterface;
  * @coversDefaultClass \Drupal\og\GroupTypeManager
  */
 class GroupTypeManagerTest extends UnitTestCase {
+
+  use ProphecyTrait;
 
   /**
    * The config prophecy used in the test.
@@ -265,7 +268,7 @@ class GroupTypeManagerTest extends UnitTestCase {
 
     $this->ogRoleManager->createPerBundleRoles('test_entity_new', 'a');
 
-    $this->eventDispatcher->dispatch(GroupCreationEventInterface::EVENT_NAME, Argument::type(GroupCreationEvent::class))
+    $this->eventDispatcher->dispatch(Argument::type(GroupCreationEvent::class), GroupCreationEventInterface::EVENT_NAME)
       ->shouldBeCalled();
 
     // Add a new entity type.

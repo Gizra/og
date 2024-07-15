@@ -46,8 +46,8 @@ use Drupal\og\OgMembershipTypeInterface;
  *     "description"
  *   },
  *   links = {
- *     "edit-form" = "/admin/structure/membership-types/manage/{membership_type}",
- *     "delete-form" = "/admin/structure/membership-types/manage/{membership_type}/delete",
+ *     "edit-form" = "/admin/structure/membership-types/manage/{og_membership_type}",
+ *     "delete-form" = "/admin/structure/membership-types/manage/{og_membership_type}/delete",
  *     "collection" = "/admin/structure/membership-types",
  *   }
  * )

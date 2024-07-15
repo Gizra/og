@@ -7,15 +7,15 @@ namespace Drupal\Tests\og\Kernel\Cache\Context;
 use Drupal\Core\Cache\Context\CacheContextInterface;
 use Drupal\Core\Entity\ContentEntityInterface;
 use Drupal\Core\Session\AccountInterface;
-use Drupal\KernelTests\KernelTestBase;
-use Drupal\Tests\og\Traits\OgRoleCacheContextTestTrait;
-use Drupal\Tests\user\Traits\UserCreationTrait;
 use Drupal\entity_test\Entity\EntityTest;
+use Drupal\KernelTests\KernelTestBase;
 use Drupal\node\Entity\Node;
 use Drupal\node\Entity\NodeType;
 use Drupal\og\Cache\Context\OgRoleCacheContext;
 use Drupal\og\Entity\OgMembership;
 use Drupal\og\Entity\OgRole;
+use Drupal\Tests\og\Traits\OgRoleCacheContextTestTrait;
+use Drupal\Tests\user\Traits\UserCreationTrait;
 use Drupal\user\Entity\User;
 
 /**
@@ -32,7 +32,7 @@ class OgRoleCacheContextTest extends KernelTestBase {
   /**
    * {@inheritdoc}
    */
-  public static $modules = [
+  protected static $modules = [
     'entity_test',
     'node',
     'og',

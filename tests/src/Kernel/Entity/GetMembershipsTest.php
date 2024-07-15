@@ -5,11 +5,11 @@ declare(strict_types = 1);
 namespace Drupal\Tests\og\Kernel\Entity;
 
 use Drupal\KernelTests\KernelTestBase;
-use Drupal\Tests\og\Traits\OgMembershipCreationTrait;
 use Drupal\node\Entity\Node;
 use Drupal\node\Entity\NodeType;
 use Drupal\og\Og;
 use Drupal\og\OgMembershipInterface;
+use Drupal\Tests\og\Traits\OgMembershipCreationTrait;
 use Drupal\user\Entity\User;
 
 /**
@@ -25,7 +25,7 @@ class GetMembershipsTest extends KernelTestBase {
   /**
    * {@inheritdoc}
    */
-  public static $modules = [
+  protected static $modules = [
     'entity_test',
     'field',
     'node',
@@ -278,6 +278,7 @@ class GetMembershipsTest extends KernelTestBase {
       $memberships = $this->entityTypeManager
         ->getStorage('og_membership')
         ->getQuery()
+        ->accessCheck()
         ->condition('uid', $user_id)
         ->execute();
 

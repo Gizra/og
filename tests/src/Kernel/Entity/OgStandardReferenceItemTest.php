@@ -20,7 +20,7 @@ class OgStandardReferenceItemTest extends KernelTestBase {
   /**
    * {@inheritdoc}
    */
-  public static $modules = [
+  protected static $modules = [
     'user',
     'entity_test',
     'field',
@@ -90,7 +90,9 @@ class OgStandardReferenceItemTest extends KernelTestBase {
    */
   public function testStandardReference() {
     $groups_query = function ($gid) {
-      return $this->container->get('entity_type.manager')->getStorage('entity_test')->getQuery()
+      return $this->container->get('entity_type.manager')->getStorage('entity_test')
+        ->getQuery()
+        ->accessCheck()
         ->condition($this->fieldName, $gid)
         ->execute();
     };

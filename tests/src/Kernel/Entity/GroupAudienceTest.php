@@ -4,8 +4,8 @@ declare(strict_types = 1);
 
 namespace Drupal\Tests\og\Kernel\Entity;
 
-use Drupal\KernelTests\KernelTestBase;
 use Drupal\entity_test\Entity\EntityTest;
+use Drupal\KernelTests\KernelTestBase;
 use Drupal\og\Og;
 use Drupal\og\OgGroupAudienceHelperInterface;
 
@@ -26,8 +26,7 @@ class GroupAudienceTest extends KernelTestBase {
   /**
    * {@inheritdoc}
    */
-  public static $modules = [
-    'entity_reference',
+  protected static $modules = [
     'entity_test',
     'field',
     'og',

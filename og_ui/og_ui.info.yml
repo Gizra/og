@@ -3,9 +3,9 @@ description: User interface for Organic Groups.
 package: Organic Groups
 
 type: module
-core_version_requirement: ^9
+core_version_requirement: ^9 || ^10
 
 dependencies:
-  - og
+  - og:og
 
 configure: og_ui.admin_index

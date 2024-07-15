@@ -4,13 +4,13 @@ declare(strict_types = 1);
 
 namespace Drupal\Tests\og\Kernel\Entity;
 
-use Drupal\KernelTests\KernelTestBase;
-use Drupal\Tests\og\Traits\OgMembershipCreationTrait;
 use Drupal\entity_test\Entity\EntityTest;
+use Drupal\KernelTests\KernelTestBase;
 use Drupal\og\Entity\OgRole;
 use Drupal\og\Og;
 use Drupal\og\OgMembershipInterface;
 use Drupal\og\OgRoleInterface;
+use Drupal\Tests\og\Traits\OgMembershipCreationTrait;
 use Drupal\user\Entity\User;
 
 /**
@@ -26,7 +26,7 @@ class GetUserGroupsTest extends KernelTestBase {
   /**
    * {@inheritdoc}
    */
-  public static $modules = [
+  protected static $modules = [
     'system',
     'user',
     'field',

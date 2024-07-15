@@ -25,7 +25,8 @@ class PermissionEventTest extends KernelTestBase {
   /**
    * {@inheritdoc}
    */
-  public static $modules = [
+  protected static $modules = [
+    'entity_test',
     'field',
     'node',
     'og',
@@ -61,6 +62,9 @@ class PermissionEventTest extends KernelTestBase {
       'type' => 'test_group_content',
       'name' => 'Test Group Content',
     ])->save();
+    // Create two entity_test bundles to test a mixed entity type case.
+    entity_test_create_bundle('a_bundle', 'A bundle');
+    entity_test_create_bundle('other_bundle', 'Other bundle');
   }
 
   /**
@@ -94,7 +98,7 @@ class PermissionEventTest extends KernelTestBase {
     // Retrieve the permissions from the listeners.
     /** @var \Drupal\og\Event\PermissionEvent $permission_event */
     $event = new PermissionEvent($this->randomMachineName(), $this->randomMachineName(), $group_content_bundle_ids);
-    $permission_event = $this->eventDispatcher->dispatch(PermissionEventInterface::EVENT_NAME, $event);
+    $permission_event = $this->eventDispatcher->dispatch($event, PermissionEventInterface::EVENT_NAME);
     $actual_permissions = array_keys($permission_event->getPermissions());
 
     // Sort the permission arrays so they can be compared.
@@ -195,6 +199,37 @@ class PermissionEventTest extends KernelTestBase {
         // The list of permissions should contain both the group level
         // permission ('administer group') and the group content permission
         // ('create test_group_content node').
+        [
+          $group_level_permission,
+          $group_content_operation_permission,
+        ],
+      ],
+      // Test a combination of bundles coming from different entity types.
+      [
+        [
+          'node' => ['test_group_content'],
+          'entity_test' => ['a_bundle', 'other_bundle'],
+        ],
+        array_merge($default_permissions, [
+          // node:test_group_content.
+          'create test_group_content content',
+          'delete any test_group_content content',
+          'delete own test_group_content content',
+          'edit any test_group_content content',
+          'edit own test_group_content content',
+          // entity_test:a_bundle.
+          'create a_bundle entity_test',
+          'delete any a_bundle entity_test',
+          'delete own a_bundle entity_test',
+          'update any a_bundle entity_test',
+          'update own a_bundle entity_test',
+          // entity_test:other_bundle.
+          'create other_bundle entity_test',
+          'delete any other_bundle entity_test',
+          'delete own other_bundle entity_test',
+          'update any other_bundle entity_test',
+          'update own other_bundle entity_test',
+        ]),
         [
           $group_level_permission,
           $group_content_operation_permission,

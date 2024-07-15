@@ -4,10 +4,10 @@ declare(strict_types = 1);
 
 namespace Drupal\og\Plugin\Field\FieldWidget;
 
-use Symfony\Component\Validator\ConstraintViolationInterface;
 use Drupal\Core\Field\FieldItemListInterface;
 use Drupal\Core\Field\Plugin\Field\FieldWidget\EntityReferenceAutocompleteWidget;
 use Drupal\Core\Form\FormStateInterface;
+use Symfony\Component\Validator\ConstraintViolationInterface;
 
 /**
  * Plugin implementation of the 'og_autocomplete' widget.

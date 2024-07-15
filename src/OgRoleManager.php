@@ -88,7 +88,7 @@ class OgRoleManager implements OgRoleManagerInterface {
     $roles = $this->getRequiredDefaultRoles();
 
     $event = new DefaultRoleEvent();
-    $this->eventDispatcher->dispatch(DefaultRoleEventInterface::EVENT_NAME, $event);
+    $this->eventDispatcher->dispatch($event, DefaultRoleEventInterface::EVENT_NAME);
 
     // Use the array union operator '+=' to ensure the default roles cannot be
     // altered by event subscribers.

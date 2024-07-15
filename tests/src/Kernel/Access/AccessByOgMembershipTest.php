@@ -4,12 +4,10 @@ declare(strict_types = 1);
 
 namespace Drupal\Tests\og\Kernel\Access;
 
-use Drupal\Core\Entity\EntityStorageException;
-use Drupal\KernelTests\KernelTestBase;
-use Drupal\Tests\node\Traits\ContentTypeCreationTrait;
-use Drupal\Tests\og\Traits\OgMembershipCreationTrait;
 use Drupal\block_content\Entity\BlockContent;
 use Drupal\block_content\Entity\BlockContentType;
+use Drupal\Core\Entity\EntityStorageException;
+use Drupal\KernelTests\KernelTestBase;
 use Drupal\node\Entity\Node;
 use Drupal\node\Entity\NodeType;
 use Drupal\og\Entity\OgMembership;
@@ -18,6 +16,8 @@ use Drupal\og\Og;
 use Drupal\og\OgGroupAudienceHelperInterface;
 use Drupal\og\OgMembershipInterface;
 use Drupal\og\OgRoleInterface;
+use Drupal\Tests\node\Traits\ContentTypeCreationTrait;
+use Drupal\Tests\og\Traits\OgMembershipCreationTrait;
 use Drupal\user\Entity\Role;
 use Drupal\user\Entity\User;
 
@@ -34,7 +34,7 @@ class AccessByOgMembershipTest extends KernelTestBase {
   /**
    * {@inheritdoc}
    */
-  public static $modules = [
+  protected static $modules = [
     'block_content',
     'field',
     'node',

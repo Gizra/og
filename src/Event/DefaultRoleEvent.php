@@ -5,7 +5,7 @@ declare(strict_types = 1);
 namespace Drupal\og\Event;
 
 use Drupal\og\Entity\OgRole;
-use Symfony\Component\EventDispatcher\Event;
+use Symfony\Contracts\EventDispatcher\Event;
 
 /**
  * Event that is fired when default roles are compiled.
@@ -97,6 +97,7 @@ class DefaultRoleEvent extends Event implements DefaultRoleEventInterface {
   /**
    * {@inheritdoc}
    */
+  #[\ReturnTypeWillChange]
   public function offsetGet($key) {
     return $this->getRole($key);
   }
@@ -104,7 +105,7 @@ class DefaultRoleEvent extends Event implements DefaultRoleEventInterface {
   /**
    * {@inheritdoc}
    */
-  public function offsetSet($key, $role) {
+  public function offsetSet($key, $role): void {
     $this->validate($role);
     if ($role->getName() !== $key) {
       throw new \InvalidArgumentException('The key and the "name" property of the role should be identical.');
@@ -115,21 +116,21 @@ class DefaultRoleEvent extends Event implements DefaultRoleEventInterface {
   /**
    * {@inheritdoc}
    */
-  public function offsetUnset($key) {
+  public function offsetUnset($key): void {
     $this->deleteRole($key);
   }
 
   /**
    * {@inheritdoc}
    */
-  public function offsetExists($key) {
+  public function offsetExists($key): bool {
     return $this->hasRole($key);
   }
 
   /**
    * {@inheritdoc}
    */
-  public function getIterator() {
+  public function getIterator(): \Traversable {
     return new \ArrayIterator($this->roles);
   }
 

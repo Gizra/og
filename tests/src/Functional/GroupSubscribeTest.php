@@ -27,7 +27,7 @@ class GroupSubscribeTest extends BrowserTestBase {
   /**
    * {@inheritdoc}
    */
-  public static $modules = ['node', 'og'];
+  protected static $modules = ['node', 'og'];
 
   /**
    * {@inheritdoc}

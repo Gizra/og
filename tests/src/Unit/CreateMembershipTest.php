@@ -10,12 +10,13 @@ use Drupal\Core\Entity\ContentEntityInterface;
 use Drupal\Core\Entity\EntityStorageInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Entity\EntityTypeRepositoryInterface;
-use Drupal\Tests\UnitTestCase;
 use Drupal\og\MembershipManager;
 use Drupal\og\OgGroupAudienceHelperInterface;
 use Drupal\og\OgMembershipInterface;
+use Drupal\Tests\UnitTestCase;
 use Drupal\user\UserInterface;
 use Prophecy\Argument;
+use Prophecy\PhpUnit\ProphecyTrait;
 
 /**
  * Tests create membership helper function.
@@ -24,6 +25,8 @@ use Prophecy\Argument;
  * @coversDefaultClass \Drupal\og\Og
  */
 class CreateMembershipTest extends UnitTestCase {
+
+  use ProphecyTrait;
 
   /**
    * The entity type manager.

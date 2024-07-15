@@ -5,8 +5,9 @@ declare(strict_types = 1);
 namespace Drupal\Tests\og\Unit;
 
 use Drupal\Core\Entity\ContentEntityInterface;
-use Drupal\Tests\UnitTestCase;
 use Drupal\og\OgResolvedGroupCollection;
+use Drupal\Tests\UnitTestCase;
+use Prophecy\PhpUnit\ProphecyTrait;
 
 /**
  * Tests the collecting of resolved groups to pass as a route context.
@@ -15,6 +16,8 @@ use Drupal\og\OgResolvedGroupCollection;
  * @coversDefaultClass \Drupal\og\OgResolvedGroupCollection
  */
 class OgResolvedGroupCollectionTest extends UnitTestCase {
+
+  use ProphecyTrait;
 
   /**
    * An array of mocked test groups, keyed by entity type ID and entity ID.

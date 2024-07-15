@@ -11,12 +11,13 @@ use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Messenger\MessengerInterface;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\Core\Url;
-use Drupal\Tests\UnitTestCase;
 use Drupal\og\Controller\SubscriptionController;
 use Drupal\og\MembershipManagerInterface;
 use Drupal\og\OgAccessInterface;
 use Drupal\og\OgMembershipInterface;
+use Drupal\Tests\UnitTestCase;
 use Drupal\user\EntityOwnerInterface;
+use Prophecy\PhpUnit\ProphecyTrait;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 
 /**
@@ -26,6 +27,8 @@ use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
  * @coversDefaultClass \Drupal\og\Controller\SubscriptionController
  */
 class SubscriptionControllerTest extends UnitTestCase {
+
+  use ProphecyTrait;
 
   /**
    * The entity for builder object.

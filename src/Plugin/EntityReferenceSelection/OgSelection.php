@@ -127,7 +127,7 @@ class OgSelection extends DefaultSelection {
     /** @var \Drupal\og\MembershipManagerInterface $membership_manager */
     $membership_manager = \Drupal::service('og.membership_manager');
     $other_groups = $membership_manager->getUserGroups($this->currentUser->id());
-    return isset($other_groups[$this->configuration['target_type']]) ? $other_groups[$this->configuration['target_type']] : [];
+    return $other_groups[$this->configuration['target_type']] ?? [];
   }
 
 }

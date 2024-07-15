@@ -4,8 +4,8 @@ declare(strict_types = 1);
 
 namespace Drupal\Tests\og\Kernel\Entity;
 
-use Drupal\KernelTests\KernelTestBase;
 use Drupal\block_content\Entity\BlockContentType;
+use Drupal\KernelTests\KernelTestBase;
 use Drupal\node\Entity\NodeType;
 use Drupal\og\GroupTypeManager;
 use Drupal\og\Og;
@@ -22,7 +22,7 @@ class GetBundleByBundleTest extends KernelTestBase {
   /**
    * {@inheritdoc}
    */
-  public static $modules = [
+  protected static $modules = [
     'block_content',
     'field',
     'node',
