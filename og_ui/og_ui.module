@@ -5,7 +5,7 @@
  * Main functions and hook implementations of the Organic Groups UI module.
  */
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
 use Drupal\Core\Config\Entity\ConfigEntityBundleBase;
 use Drupal\Core\Entity\BundleEntityFormBase;
@@ -15,7 +15,6 @@ use Drupal\field\Entity\FieldConfig;
 use Drupal\field\Entity\FieldStorageConfig;
 use Drupal\og\Og;
 use Drupal\og\OgGroupAudienceHelperInterface;
-use Drupal\og_ui\BundleFormAlter;
 
 /**
  * Implements hook_form_alter().
@@ -31,7 +30,7 @@ function og_ui_form_alter(array &$form, FormStateInterface $form_state, $form_id
     return;
   }
 
-  (new BundleFormAlter($entity_type))->formAlter($form, $form_state);
+  \Drupal::service('og_ui.bundle_entity_form_alter')->formAlter($form, $form_state);
 }
 
 /**

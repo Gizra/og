@@ -27,7 +27,7 @@
     <config name="installed_paths" value="../../slevomat/coding-standard" />
     <rule ref="SlevomatCodingStandard.TypeHints.DeclareStrictTypes">
         <properties>
-            <property name="newlinesCountBetweenOpenTagAndDeclare" value="2" />
+            <property name="linesCountBeforeDeclare" value="1" />
         </properties>
     </rule>
 </ruleset>

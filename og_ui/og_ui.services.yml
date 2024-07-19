@@ -1,0 +1,4 @@
+services:
+  og_ui.bundle_entity_form_alter:
+    class: Drupal\og_ui\BundleEntityFormAlter
+    arguments: ['@entity_type.manager', '@entity_type.bundle.info', '@og.group_type_manager']

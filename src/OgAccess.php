@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
 namespace Drupal\og;
 
@@ -332,7 +332,7 @@ class OgAccess implements OgAccessInterface {
    * {@inheritdoc}
    */
   public function reset(): void {
-    trigger_error('OgAccessInterface::reset() is deprecated in og:8.1.0-alpha6 and is removed from og:8.1.0-beta1. The static cache has been removed and this method no longer serves any purpose. Any calls to this method can safely be removed. See https://github.com/Gizra/og/issues/654', E_USER_DEPRECATED);
+    @trigger_error('OgAccessInterface::reset() is deprecated in og:8.1.0-alpha6 and is removed from og:8.1.0-beta1. The static cache has been removed and this method no longer serves any purpose. Any calls to this method can safely be removed. See https://github.com/Gizra/og/issues/654', E_USER_DEPRECATED);
   }
 
 }

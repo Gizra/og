@@ -5,7 +5,7 @@
  * Enable users to create and manage groups with roles and permissions.
  */
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
 use Drupal\Core\Access\AccessResult;
 use Drupal\Core\Cache\Cache;
