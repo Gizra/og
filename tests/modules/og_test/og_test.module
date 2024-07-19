@@ -5,7 +5,7 @@
  * Main functions and hook implementations of the OG Test module.
  */
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
 use Drupal\Core\Access\AccessResultAllowed;
 use Drupal\Core\Access\AccessResultInterface;

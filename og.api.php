@@ -5,7 +5,7 @@
  * Hooks provided by the Organic Groups module.
  */
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
 use Drupal\Core\Cache\CacheableMetadata;
 use Drupal\Core\Entity\EntityPublishedInterface;
