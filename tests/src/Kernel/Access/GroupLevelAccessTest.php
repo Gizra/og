@@ -58,7 +58,7 @@ class GroupLevelAccessTest extends KernelTestBase {
   /**
    * An admin user.
    *
-   * @var \Drupal\user\Entity\User
+   * @var \Drupal\user\UserInterface
    */
   protected $adminUser;
 

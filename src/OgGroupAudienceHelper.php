@@ -11,6 +11,8 @@ use Drupal\Core\Field\FieldDefinitionInterface;
 
 /**
  * OG audience field helper methods.
+ *
+ * @phpstan-consistent-constructor
  */
 class OgGroupAudienceHelper implements OgGroupAudienceHelperInterface {
 

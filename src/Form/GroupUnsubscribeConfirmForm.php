@@ -24,9 +24,9 @@ class GroupUnsubscribeConfirmForm extends ContentEntityDeleteForm {
    * {@inheritdoc}
    */
   public function getQuestion() {
-    /** @var OgMembershipInterface $membership */
+    /** @var \Drupal\og\OgMembershipInterface $membership */
     $membership = $this->getEntity();
-    /** @var EntityInterface $group */
+    /** @var \Drupal\Core\Entity\EntityInterface $group */
     $group = $membership->getGroup();
 
     return $this->t('Are you sure you want to unsubscribe from the group %label?', ['%label' => $group->label()]);
@@ -43,7 +43,7 @@ class GroupUnsubscribeConfirmForm extends ContentEntityDeleteForm {
    * {@inheritdoc}
    */
   public function getCancelUrl() {
-    /** @var EntityInterface $group */
+    /** @var \Drupal\Core\Entity\EntityInterface $group */
     $group = $this->entity->getGroup();
 
     // User doesn't have access to the group entity, so redirect to front page,
@@ -55,9 +55,9 @@ class GroupUnsubscribeConfirmForm extends ContentEntityDeleteForm {
    * {@inheritdoc}
    */
   public function submitForm(array &$form, FormStateInterface $form_state) {
-    /** @var OgMembershipInterface $membership */
+    /** @var \Drupal\pg\OgMembershipInterface $membership */
     $membership = $this->getEntity();
-    /** @var EntityInterface $group */
+    /** @var \Drupal\Core\Entity\EntityInterface $group */
     $group = $membership->getGroup();
 
     $redirect = $group->access('view') ? $group->toUrl() : Url::fromRoute('<front>');

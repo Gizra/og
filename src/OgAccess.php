@@ -20,6 +20,8 @@ use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
 /**
  * The service that determines if users have access to groups and group content.
+ *
+ * @phpstan-consistent-constructor
  */
 class OgAccess implements OgAccessInterface {
 

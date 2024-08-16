@@ -13,6 +13,8 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * The OG UI controller.
+ *
+ * @phpstan-consistent-constructor
  */
 class OgUiController extends ControllerBase {
 

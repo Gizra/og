@@ -36,6 +36,7 @@ use Drupal\user\Entity\Role;
  *     "role_type"
  *   }
  * )
+ * @phpstan-consistent-constructor
  */
 class OgRole extends Role implements OgRoleInterface {
 

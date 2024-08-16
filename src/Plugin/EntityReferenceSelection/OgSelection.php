@@ -23,6 +23,8 @@ use Drupal\og\Og;
  *   group = "og",
  *   weight = 1,
  * )
+ *
+ * @phpstan-consistent-constructor
  */
 class OgSelection extends DefaultSelection {
 

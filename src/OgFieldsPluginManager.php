@@ -10,6 +10,8 @@ use Drupal\Core\Plugin\DefaultPluginManager;
 
 /**
  * Manages OG fields plugins.
+ *
+ * @phpstan-consistent-constructor
  */
 class OgFieldsPluginManager extends DefaultPluginManager {
 

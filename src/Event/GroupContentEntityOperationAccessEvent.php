@@ -9,6 +9,8 @@ use Drupal\Core\Session\AccountInterface;
 
 /**
  * Event that determines access to group content entity operations.
+ *
+ * @phpstan-consistent-constructor
  */
 class GroupContentEntityOperationAccessEvent extends AccessEventBase implements GroupContentEntityOperationAccessEventInterface {
 

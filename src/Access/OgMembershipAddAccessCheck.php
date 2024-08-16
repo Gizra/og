@@ -16,6 +16,8 @@ use Drupal\og\OgMembershipTypeInterface;
 
 /**
  * Check if a user has access to the group's membership pages.
+ *
+ * @phpstan-consistent-constructor
  */
 class OgMembershipAddAccessCheck implements AccessInterface {
 

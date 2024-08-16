@@ -10,6 +10,8 @@ use Drupal\Core\Plugin\DefaultPluginManager;
 
 /**
  * Plugin type manager for OgDeleteOrphans plugins.
+ *
+ * @phpstan-consistent-constructor
  */
 class OgDeleteOrphansPluginManager extends DefaultPluginManager {
 

@@ -17,6 +17,8 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Displays the members administration page.
+ *
+ * @phpstan-consistent-constructor
  */
 class OgAdminMembersController extends ControllerBase {
 

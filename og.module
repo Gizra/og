@@ -50,7 +50,7 @@ function og_entity_insert(EntityInterface $entity) {
   }
 
   $owner = $entity->getOwner();
-  if (empty($owner) || $owner->isAnonymous()) {
+  if ($owner->isAnonymous()) {
     // User is anonymous, se we cannot set a membership for them.
     return;
   }
@@ -121,7 +121,7 @@ function og_entity_delete(EntityInterface $entity) {
 /**
  * Implements hook_entity_access().
  */
-function og_entity_access(EntityInterface $entity, $operation, AccountInterface $account) {
+function og_entity_access(EntityInterface $entity, string $operation, AccountInterface $account) {
   // Grant access to view roles, so that they can be shown in listings.
   if ($entity instanceof OgRoleInterface && $operation === 'view') {
     return AccessResult::allowed();
@@ -176,7 +176,7 @@ function og_entity_access(EntityInterface $entity, $operation, AccountInterface 
 /**
  * Implements hook_ENTITY_TYPE_access().
  */
-function og_og_membership_type_access(OgMembershipTypeInterface $entity, $operation, AccountInterface $account) {
+function og_og_membership_type_access(OgMembershipTypeInterface $entity, string $operation, AccountInterface $account) {
   // Do not allow deleting the default membership type.
   if ($operation === 'delete' && $entity->id() === OgMembershipInterface::TYPE_DEFAULT) {
     return AccessResult::forbidden();
@@ -193,7 +193,7 @@ function og_og_membership_type_access(OgMembershipTypeInterface $entity, $operat
 /**
  * Implements hook_entity_create_access().
  */
-function og_entity_create_access(AccountInterface $account, array $context, $bundle) {
+function og_entity_create_access(AccountInterface $account, array $context, string $bundle) {
   $entity_type_id = $context['entity_type_id'];
 
   if (!Og::isGroupContent($entity_type_id, $bundle)) {
@@ -253,7 +253,7 @@ function og_entity_create_access(AccountInterface $account, array $context, $bun
  *
  * Add a read only property to group entities as a group flag.
  */
-function og_entity_bundle_field_info(EntityTypeInterface $entity_type, $bundle, array $base_field_definitions) {
+function og_entity_bundle_field_info(EntityTypeInterface $entity_type, string $bundle, array $base_field_definitions) {
   if (!Og::isGroup($entity_type->id(), $bundle)) {
     // Not a group type.
     return NULL;
@@ -275,7 +275,7 @@ function og_entity_bundle_field_info(EntityTypeInterface $entity_type, $bundle, 
  *
  * Set the default field formatter of fields of type OG group.
  */
-function og_entity_bundle_field_info_alter(&$fields, EntityTypeInterface $entity_type, $bundle) {
+function og_entity_bundle_field_info_alter(array &$fields, EntityTypeInterface $entity_type, string $bundle) {
   if (!isset($fields['og_group'])) {
     // No OG group fields.
     return;
@@ -329,7 +329,7 @@ function og_entity_type_alter(array &$entity_types) {
 /**
  * Implements hook_theme().
  */
-function og_theme($existing, $type, $theme, $path) {
+function og_theme() {
   return [
     'og_member_count' => [
       'variables' => [
@@ -350,6 +350,9 @@ function og_theme($existing, $type, $theme, $path) {
  *   the direct cause for the need to invalidate cached group content.
  */
 function og_invalidate_group_content_cache_tags(EntityInterface $entity) {
+  if (!$entity instanceof ContentEntityInterface) {
+    return;
+  }
   // If group content is created or updated, invalidate the group content cache
   // tags for each of the groups this group content belongs to. This allows
   // group listings to be cached effectively. The cache tag format is
@@ -364,12 +367,11 @@ function og_invalidate_group_content_cache_tags(EntityInterface $entity) {
     // update, check if any of the OG audience fields have been changed. This
     // means the group(s) of the entity changed and we should also invalidate
     // the tags of the old group(s).
-    /** @var \Drupal\Core\Entity\FieldableEntityInterface $entity */
+    /** @var \Drupal\Core\Entity\FieldableEntityInterface|NULL $original */
     $original = !empty($entity->original) ? $entity->original : NULL;
     if ($original) {
       /** @var \Drupal\og\OgGroupAudienceHelperInterface $group_audience_helper */
       $group_audience_helper = \Drupal::service('og.group_audience_helper');
-      /** @var \Drupal\Core\Entity\FieldableEntityInterface $original */
       foreach ($group_audience_helper->getAllGroupAudienceFields($entity->getEntityTypeId(), $entity->bundle()) as $field) {
         $field_name = $field->getName();
         /** @var \Drupal\Core\Field\EntityReferenceFieldItemListInterface $original_field_item_list */

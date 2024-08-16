@@ -19,6 +19,7 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
  *   label = @Translation("Delete the selected membership(s)"),
  *   type = "og_membership"
  * )
+ * @phpstan-consistent-constructor
  */
 class DeleteOgMembership extends ActionBase implements ContainerFactoryPluginInterface {
 

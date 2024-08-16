@@ -19,13 +19,15 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Defines the OG membership implementation for entity access control handler.
+ *
+ * @phpstan-consistent-constructor
  */
 class OgMembershipAccessControlHandler extends EntityAccessControlHandler implements EntityHandlerInterface {
 
   /**
    * The OG access service.
    *
-   * @var \Drupal\og\OgAccess
+   * @var \Drupal\og\OgAccessInterface
    */
   protected $ogAccess;
 
@@ -39,7 +41,7 @@ class OgMembershipAccessControlHandler extends EntityAccessControlHandler implem
   /**
    * Instance of the OgContext service.
    *
-   * @var \Drupal\og\ContextProvider\OgContext
+   * @var \Drupal\og\OgContextInterface
    */
   protected $ogContext;
 

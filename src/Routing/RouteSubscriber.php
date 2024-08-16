@@ -18,6 +18,8 @@ use Symfony\Component\Routing\RouteCollection;
 
 /**
  * Route subscriber for OG related routes.
+ *
+ * @phpstan-consistent-constructor
  */
 class RouteSubscriber extends RouteSubscriberBase {
 

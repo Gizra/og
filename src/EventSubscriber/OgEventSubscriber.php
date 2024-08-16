@@ -22,6 +22,8 @@ use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
 /**
  * Event subscribers for Organic Groups.
+ *
+ * @phpstan-consistent-constructor
  */
 class OgEventSubscriber implements EventSubscriberInterface {
 

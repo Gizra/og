@@ -11,6 +11,8 @@ use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
 /**
  * Defines a manager of an OG role.
+ *
+ * @phpstan-consistent-constructor
  */
 class OgRoleManager implements OgRoleManagerInterface {
 

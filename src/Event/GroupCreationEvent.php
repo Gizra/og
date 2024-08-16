@@ -8,6 +8,8 @@ use Symfony\Contracts\EventDispatcher\Event;
 
 /**
  * The group creation event.
+ *
+ * @phpstan-consistent-constructor
  */
 class GroupCreationEvent extends Event implements GroupCreationEventInterface {
 

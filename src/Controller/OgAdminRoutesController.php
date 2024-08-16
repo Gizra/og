@@ -15,6 +15,8 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * The OG admin routes controller.
+ *
+ * @phpstan-consistent-constructor
  */
 class OgAdminRoutesController extends ControllerBase {
 

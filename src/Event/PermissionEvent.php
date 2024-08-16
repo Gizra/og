@@ -16,6 +16,8 @@ use Symfony\Contracts\EventDispatcher\Event;
  *
  * The entity types and bundles of both the group and the related group content
  * are available and can be used to determine the applicable permissions.
+ *
+ * @phpstan-consistent-constructor
  */
 class PermissionEvent extends Event implements PermissionEventInterface {
 
@@ -163,7 +165,7 @@ class PermissionEvent extends Event implements PermissionEventInterface {
   /**
    * {@inheritdoc}
    */
-  public function deleteGroupContentOperationPermission($entity_type_id, $bundle_id, $operation, $owner = 'any') {
+  public function deleteGroupContentOperationPermission($entity_type_id, $bundle_id, $operation, $owner = FALSE) {
     $permission = $this->getGroupContentOperationPermission($entity_type_id, $bundle_id, $operation, $owner);
     $this->deletePermission($permission->getName());
   }

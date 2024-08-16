@@ -24,6 +24,8 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
  *   label = "Groups from the group content entity on the current route",
  *   description = @Translation("Checks if the current route is an entity path for a group content entity and returns the group(s) that it belongs to.")
  * )
+ *
+ * @phpstan-consistent-constructor
  */
 class RouteGroupContentResolver extends OgRouteGroupResolverBase {
 

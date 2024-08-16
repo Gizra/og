@@ -29,6 +29,8 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
  *     "og_group"
  *   }
  * )
+ *
+ * @phpstan-consistent-constructor
  */
 class GroupSubscribeFormatter extends FormatterBase implements ContainerFactoryPluginInterface {
 

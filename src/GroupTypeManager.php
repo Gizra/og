@@ -15,6 +15,8 @@ use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
 /**
  * A manager to keep track of which entity type/bundles are OG group enabled.
+ *
+ * @phpstan-consistent-constructor
  */
 class GroupTypeManager implements GroupTypeManagerInterface {
 

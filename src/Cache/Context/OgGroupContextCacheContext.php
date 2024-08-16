@@ -17,6 +17,8 @@ use Drupal\og\OgContextInterface;
  * for example a group header, or a block showing recent group content.
  *
  * Cache context ID: 'og_group_context'
+ *
+ * @phpstan-consistent-constructor
  */
 class OgGroupContextCacheContext implements CacheContextInterface {
 

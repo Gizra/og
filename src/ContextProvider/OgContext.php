@@ -37,6 +37,8 @@ use Drupal\og\OgResolvedGroupCollection;
  *
  * Developers can customize the group context result by providing their own
  * plugins and by activating, disabling or reordering the default ones.
+ *
+ * @phpstan-consistent-constructor
  */
 class OgContext implements OgContextInterface, ContextProviderInterface {
 

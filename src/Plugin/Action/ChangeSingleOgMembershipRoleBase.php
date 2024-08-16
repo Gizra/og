@@ -16,6 +16,8 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Provides a base class for operations to change a user's group membership.
+ *
+ * @phpstan-consistent-constructor
  */
 abstract class ChangeSingleOgMembershipRoleBase extends ConfigurableActionBase implements ContainerFactoryPluginInterface {
 

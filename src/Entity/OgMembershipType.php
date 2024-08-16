@@ -79,7 +79,7 @@ class OgMembershipType extends ConfigEntityBase implements OgMembershipTypeInter
 
     if ($this->isSyncing()) {
       // Do not create config while config import is in progress.
-      return;
+      return 0;
     }
 
     if ($status === SAVED_NEW) {

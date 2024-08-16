@@ -15,6 +15,8 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Base implementation for OgDeleteOrphans plugins.
+ *
+ * @phpstan-consistent-constructor
  */
 abstract class OgDeleteOrphansBase extends PluginBase implements OgDeleteOrphansInterface, ContainerFactoryPluginInterface {
 

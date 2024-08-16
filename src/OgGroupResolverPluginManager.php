@@ -10,6 +10,8 @@ use Drupal\Core\Plugin\DefaultPluginManager;
 
 /**
  * Plugin manager for OgGroupResolver plugins.
+ *
+ * @phpstan-consistent-constructor
  */
 class OgGroupResolverPluginManager extends DefaultPluginManager {
 

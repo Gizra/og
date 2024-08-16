@@ -10,6 +10,8 @@ use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
 /**
  * Manager for OG permissions.
+ *
+ * @phpstan-consistent-constructor
  */
 class PermissionManager implements PermissionManagerInterface {
 

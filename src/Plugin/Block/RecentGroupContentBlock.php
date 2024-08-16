@@ -23,6 +23,8 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
  *   id = "og_recent_group_content",
  *   admin_label = @Translation("Recent group content")
  * )
+ *
+ * @phpstan-consistent-constructor
  */
 class RecentGroupContentBlock extends BlockBase implements ContainerFactoryPluginInterface {
 

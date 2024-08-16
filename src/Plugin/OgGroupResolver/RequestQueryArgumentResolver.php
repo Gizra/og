@@ -24,6 +24,8 @@ use Symfony\Component\HttpFoundation\RequestStack;
  *   label = "Group entity from query arguments",
  *   description = @Translation("Checks if the current request has query arguments that indicate the group context.")
  * )
+ *
+ * @phpstan-consistent-constructor
  */
 class RequestQueryArgumentResolver extends OgGroupResolverBase implements ContainerFactoryPluginInterface {
 

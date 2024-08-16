@@ -22,6 +22,7 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
  *     "og" = @ContextDefinition("entity", label = @Translation("Group"))
  *   }
  * )
+ * @phpstan-consistent-constructor
  */
 class GroupType extends ConditionPluginBase implements ContainerFactoryPluginInterface {
 

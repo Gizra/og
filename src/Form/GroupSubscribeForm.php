@@ -22,6 +22,8 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
  * However we mimic the functionality of
  * Drupal\Core\Entity\EntityConfirmFormBase, so it will be presented as a
  * confirmation page.
+ *
+ * @phpstan-consistent-constructor
  */
 class GroupSubscribeForm extends ContentEntityForm {
 
@@ -77,7 +79,7 @@ class GroupSubscribeForm extends ContentEntityForm {
   /**
    * Get the question to present to the user according to the membership state.
    *
-   * @return string
+   * @return \Drupal\Core\StringTranslation\TranslatableMarkup
    *   The confirmation question.
    */
   public function getQuestion() {
@@ -99,7 +101,7 @@ class GroupSubscribeForm extends ContentEntityForm {
   /**
    * Get confirmation text, according to the membership state.
    *
-   * @return string
+   * @return \Drupal\Core\StringTranslation\TranslatableMarkup
    *   The text.
    */
   public function getConfirmText() {

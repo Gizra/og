@@ -12,6 +12,8 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Base class for OgGroupResolver plugins that inspect the route.
+ *
+ * @phpstan-consistent-constructor
  */
 abstract class OgRouteGroupResolverBase extends OgGroupResolverBase implements ContainerFactoryPluginInterface {
 

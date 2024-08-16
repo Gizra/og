@@ -13,6 +13,8 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Provides local task definitions for all entity bundles.
+ *
+ * @phpstan-consistent-constructor
  */
 class OgLocalTask extends DeriverBase implements ContainerDeriverInterface {
 

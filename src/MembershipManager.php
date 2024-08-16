@@ -16,6 +16,8 @@ use Drupal\user\UserInterface;
 
 /**
  * Service for managing memberships and group content.
+ *
+ * @phpstan-consistent-constructor
  */
 class MembershipManager implements MembershipManagerInterface {
 

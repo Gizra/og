@@ -14,6 +14,8 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Provides a base class for actions that change multiple roles at once.
+ *
+ * @phpstan-consistent-constructor
  */
 abstract class ChangeMultipleOgMembershipRolesBase extends ActionBase implements ContainerFactoryPluginInterface {
 

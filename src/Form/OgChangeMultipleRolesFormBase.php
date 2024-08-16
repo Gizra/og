@@ -16,6 +16,8 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Base class for forms that act on multiple roles.
+ *
+ * @phpstan-consistent-constructor
  */
 class OgChangeMultipleRolesFormBase extends FormBase {
 

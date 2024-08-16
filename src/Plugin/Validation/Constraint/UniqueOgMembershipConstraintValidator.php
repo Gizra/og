@@ -19,6 +19,8 @@ use Symfony\Component\Validator\ConstraintValidator;
  * plugin. In our case, that is
  * \Drupal\og\Plugin\EntityReferenceSelection\OgUserSelection, which already
  * checks an existing member cannot be added to the group again.
+ *
+ * @phpstan-consistent-constructor
  */
 class UniqueOgMembershipConstraintValidator extends ConstraintValidator implements ContainerInjectionInterface {
 

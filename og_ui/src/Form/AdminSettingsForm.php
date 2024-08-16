@@ -12,6 +12,8 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Provides the main administration settings form for Organic groups.
+ *
+ * @phpstan-consistent-constructor
  */
 class AdminSettingsForm extends ConfigFormBase {
 

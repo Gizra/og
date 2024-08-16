@@ -13,6 +13,8 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Provides action link definitions for all entity bundles.
+ *
+ * @phpstan-consistent-constructor
  */
 class OgActionLink extends DeriverBase implements ContainerDeriverInterface {
 

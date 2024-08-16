@@ -25,6 +25,7 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
  *   id = "og_member_count",
  *   admin_label = @Translation("Group member count")
  * )
+ * @phpstan-consistent-constructor
  */
 class MemberCountBlock extends BlockBase implements ContainerFactoryPluginInterface {
 

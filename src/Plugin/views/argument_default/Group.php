@@ -19,13 +19,15 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
  *   id = "og_group_context",
  *   title = @Translation("Group ID from OG context")
  * )
+ *
+ * @phpstan-consistent-constructor
  */
 class Group extends ArgumentDefaultPluginBase implements CacheableDependencyInterface {
 
   /**
    * The OG context provider.
    *
-   * @var \Drupal\Core\Plugin\Context\ContextProviderInterface
+   * @var \Drupal\og\ContextProvider\OgContextInterface
    */
   protected $ogContext;
 

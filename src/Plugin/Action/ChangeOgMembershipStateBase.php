@@ -14,6 +14,8 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Base class for actions that change the state of a membership.
+ *
+ * @phpstan-consistent-constructor
  */
 abstract class ChangeOgMembershipStateBase extends ActionBase implements ContainerFactoryPluginInterface {
 

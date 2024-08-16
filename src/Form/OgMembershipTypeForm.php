@@ -12,6 +12,8 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Form handler for OG membership type forms.
+ *
+ * @phpstan-consistent-constructor
  */
 class OgMembershipTypeForm extends BundleEntityFormBase {
 

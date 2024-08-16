@@ -19,7 +19,7 @@ use Drupal\og\OgGroupAudienceHelperInterface;
 /**
  * Implements hook_form_alter().
  */
-function og_ui_form_alter(array &$form, FormStateInterface $form_state, $form_id) {
+function og_ui_form_alter(array &$form, FormStateInterface $form_state, string $form_id) {
   if (!$form_state->getFormObject() instanceof BundleEntityFormBase) {
     return;
   }
@@ -79,6 +79,7 @@ function og_ui_entity_type_save(EntityInterface $entity) {
     if ($entity->og_group_content_bundle) {
       Og::createField(OgGroupAudienceHelperInterface::DEFAULT_FIELD, $entity_type_id, $bundle);
     }
+    /** @var \Drupal\Core\Field\FieldConfigInterface|null $field */
     elseif ($field = FieldConfig::loadByName($entity_type_id, $bundle, OgGroupAudienceHelperInterface::DEFAULT_FIELD)) {
       $field->delete();
       return;

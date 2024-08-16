@@ -19,6 +19,8 @@ use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 
 /**
  * Defines a route controller for OG autocomplete form elements.
+ *
+ * @phpstan-consistent-constructor
  */
 class OgAutocompleteController extends ControllerBase {
 

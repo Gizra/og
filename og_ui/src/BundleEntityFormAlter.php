@@ -225,7 +225,9 @@ class BundleEntityFormAlter {
    *   The bundle.
    */
   protected static function getEntityBundle(FormStateInterface $form_state): RevisionableEntityBundleInterface {
-    return $form_state->getFormObject()->getEntity();
+    /** @var \Drupal\Core\Entity\EntityFormInterface $form_object */
+    $form_object = $form_state->getFormObject();
+    return $form_object->getEntity();
   }
 
 }

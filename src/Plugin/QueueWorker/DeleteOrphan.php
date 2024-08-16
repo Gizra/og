@@ -17,6 +17,8 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
  *   title = @Translation("Delete orphaned group content"),
  *   cron = {"time" = 60}
  * )
+ *
+ * @phpstan-consistent-constructor
  */
 class DeleteOrphan extends QueueWorkerBase implements ContainerFactoryPluginInterface {
 

@@ -16,6 +16,8 @@ use Drupal\og\OgMembershipInterface;
  * Defines a cache context service, for "membership state" caching.
  *
  * Cache context ID: 'og_membership_state'
+ *
+ * @phpstan-consistent-constructor
  */
 class OgMembershipStateCacheContext implements CacheContextInterface {
 

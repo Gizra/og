@@ -21,6 +21,8 @@ use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 
 /**
  * Controller for OG subscription routes.
+ *
+ * @phpstan-consistent-constructor
  */
 class SubscriptionController extends ControllerBase {
 

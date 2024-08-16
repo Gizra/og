@@ -15,6 +15,8 @@ use Drupal\Core\Entity\Plugin\EntityReferenceSelection\DefaultSelection;
  *   group = "og",
  *   weight = 0
  * )
+ *
+ * @phpstan-consistent-constructor
  */
 class OgRoleSelection extends DefaultSelection {
 

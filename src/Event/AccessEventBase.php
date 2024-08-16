@@ -14,6 +14,8 @@ use Symfony\Contracts\EventDispatcher\Event;
 
 /**
  * Base class for OG access events.
+ *
+ * @phpstan-consistent-constructor
  */
 class AccessEventBase extends Event implements AccessEventInterface {
 

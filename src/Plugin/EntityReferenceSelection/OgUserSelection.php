@@ -26,6 +26,8 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
  *   entity_types = {"user"},
  *   weight = 0
  * )
+ *
+ * @phpstan-consistent-constructor
  */
 class OgUserSelection extends DefaultSelection {
 

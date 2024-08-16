@@ -14,7 +14,7 @@ use Drupal\og\OgMembershipInterface;
 /**
  * Apply schema updates on the 'state' field of 'og_membership' entity.
  */
-function og_post_update_og_membership_state_field(&$sandbox) {
+function og_post_update_og_membership_state_field(array &$sandbox) {
   // The 'state' base field of the 'og_membership' entity was changed from a
   // 'string' field to a 'list_string' type field. This implementation of
   // hook_post_update_NAME() follows the guidance in docs, linked below,
@@ -35,6 +35,7 @@ function og_post_update_og_membership_state_field(&$sandbox) {
   $entity_type_manager = \Drupal::service('entity_type.manager');
   $bundle_of = 'og_membership';
 
+  /** @var \Drupal\Core\Entity\Sql\SqlContentEntityStorage $storage */
   $storage = $entity_type_manager->getStorage($bundle_of);
   $bundle_definition = $entity_type_manager->getDefinition($bundle_of);
   // Set the key fields.

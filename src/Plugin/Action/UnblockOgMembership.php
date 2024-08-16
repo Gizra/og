@@ -21,6 +21,7 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
  *   label = @Translation("Unblock the selected membership(s)"),
  *   type = "og_membership"
  * )
+ * @phpstan-consistent-constructor
  */
 class UnblockOgMembership extends ActionBase implements ContainerFactoryPluginInterface {
 

@@ -21,7 +21,7 @@ function og_uninstall() {
 /**
  * Add a base field to store the group bundle in memberships.
  */
-function og_update_8001(&$sandbox) {
+function og_update_8001(array &$sandbox) {
   $storage = \Drupal::entityTypeManager()->getStorage('og_membership');
 
   if (!isset($sandbox['total'])) {
@@ -97,7 +97,7 @@ function og_update_8002() {
 /**
  * Add auto_add_group_owner_membership configuration to og.settings config.
  */
-function og_update_8003(&$sandbox) {
+function og_update_8003(array &$sandbox) {
   $config = \Drupal::configFactory()->getEditable('og.settings');
   // This setting defaults to TRUE for backwards compatibility.
   $config->set('auto_add_group_owner_membership', TRUE);

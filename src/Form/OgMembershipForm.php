@@ -17,13 +17,14 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
  * Form controller for the group content edit forms.
  *
  * @ingroup group
+ * @phpstan-consistent-constructor
  */
 class OgMembershipForm extends ContentEntityForm {
 
   /**
    * The OG access service.
    *
-   * @var \Drupal\og\OgAccess
+   * @var \Drupal\og\OgAccessInterface
    */
   protected $ogAccess;
 

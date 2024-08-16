@@ -27,7 +27,7 @@ class BundleEntityFormAlterTest extends BrowserTestBase {
   /**
    * An administrator user.
    *
-   * @var \Drupal\user\Entity\User
+   * @var \Drupal\user\UserInterface
    */
   protected $adminUser;
 

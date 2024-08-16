@@ -18,6 +18,8 @@ use Symfony\Component\Routing\Route;
  *
  * This is a general service that can be used to determine if a user has access
  * to a certain route.
+ *
+ * @phpstan-consistent-constructor
  */
 class GroupCheck implements AccessInterface {
 
@@ -31,7 +33,7 @@ class GroupCheck implements AccessInterface {
   /**
    * The OG access service.
    *
-   * @var \Drupal\og\OgAccess
+   * @var \Drupal\og\OgAccessInterface
    */
   protected $ogAccess;
 

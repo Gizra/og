@@ -33,6 +33,8 @@ use Drupal\og\OgRoleInterface;
  * context key is presented as a hashed value.
  *
  * Cache context ID: 'og_role'
+ *
+ * @phpstan-consistent-constructor
  */
 class OgRoleCacheContext extends UserCacheContextBase implements CacheContextInterface {
 
