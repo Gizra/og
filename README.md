@@ -1,3 +1,5 @@
+This repository is now archived. Active development has moved to https://www.drupal.org/project/og
+
 ![Status](https://travis-ci.org/Gizra/og.svg?branch=8.x-1.x)
 
 ## DESCRIPTION
